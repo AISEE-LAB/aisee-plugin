@@ -1,0 +1,16 @@
+[project]
+name = "aisee-plugin"
+version = "0.1.0"
+description = "AI-Enhanced Software Engineering plugin for OpenSpec-driven workflows."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Fengliang" }
+]
+
+[project.scripts]
+aisee = "aisee_cli.__main__:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

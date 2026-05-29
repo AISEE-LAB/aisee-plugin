@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:design-assets"
+  short_description: "通用参考图、设计规范、图片编辑与项目素材生成工作流"
+  default_prompt: "Use $aisee:design-assets to generate reference images, extract a StyleSpec, and create local design assets."

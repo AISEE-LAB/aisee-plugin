@@ -1,0 +1,7 @@
+interface:
+  display_name: "aisee-init"
+  short_description: "初始化并审计 OpenSpec AI 配置"
+  default_prompt: "使用 $aisee-init 检查当前项目的 AGENTS.md、OpenSpec 和 Codex hooks 配置。"
+
+policy:
+  allow_implicit_invocation: true

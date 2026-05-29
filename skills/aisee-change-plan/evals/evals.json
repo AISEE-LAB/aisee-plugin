@@ -1,0 +1,19 @@
+{
+  "skill_name": "aisee:change-plan",
+  "evals": [
+    {
+      "id": 1,
+      "name": "uses-new-not-propose-for-stepwise-change",
+      "prompt": "基于 SRS、UI 内容规格和 tech-context 规划团队成员管理功能的 OpenSpec change 边界。需求包括创建团队、邀请成员、设置成员角色、移除成员。tech-context 标注鉴权和 RBAC 已存在，邀请链接过期规则需要本 change 设计确认。请输出可执行的 OpenSpec change 边界规划结果。",
+      "expected_output": "输出 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。所有命令必须使用 /opsx:new \"<change>\" --schema <schema>，不得输出 /opsx:propose。应保留 tech-context 中的 RBAC 复用事实和邀请链接规则待确认项，并说明后续通过 /opsx:continue 按 schema 补齐 artifacts；仅当 schema 包含 design.md 时才建议使用 aisee:change-design。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "small-requirement-single-new-command",
+      "prompt": "需求很小：后台优惠券列表增加一个按状态筛选的下拉筛选项。已有项目、权限和列表页都存在。请判断是否需要规划多个 change。",
+      "expected_output": "判断这是单个小 change，不为了流程而规划多个 change。输出一个 change 详情块和单条 /opsx:new 命令，不得输出 /opsx:propose，也不得新增未确认的后端、数据库或 UI 需求。",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "",
+  "target": "frontend-development",
+  "platforms": [],
+  "sources": {
+    "uiContent": "",
+    "references": [],
+    "styleSpecs": [],
+    "assetManifest": ""
+  },
+  "visualTone": {
+    "keywords": [],
+    "density": "",
+    "avoid": []
+  },
+  "tokenCandidates": {
+    "colors": {},
+    "typography": {},
+    "spacing": {},
+    "radius": {},
+    "shadow": {}
+  },
+  "assets": [],
+  "responsiveVisualRules": {
+    "pc": [],
+    "tablet": [],
+    "mobile": []
+  },
+  "developmentNotes": [
+    "reuse_existing_project_components_and_tokens",
+    "do_not_replace_ui_content_spec_with_visual_assets",
+    "keep_business_logic_api_permissions_out_of_this_brief"
+  ],
+  "openQuestions": []
+}

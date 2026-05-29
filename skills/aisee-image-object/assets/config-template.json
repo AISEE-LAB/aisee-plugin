@@ -1,0 +1,7 @@
+{
+  "lama_backend": {
+    "enabled": true,
+    "iopaint_bin": "/path/to/python310-or-python311-env/bin/iopaint",
+    "device": "cpu"
+  }
+}

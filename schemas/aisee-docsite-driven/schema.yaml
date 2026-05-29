@@ -1,0 +1,64 @@
+name: aisee-docsite-driven
+version: 1
+description: |
+  适用场景：文档站、知识库、教程、团队 Wiki、内容导航和信息架构维护。
+  与 aisee-app-spec-driven 的区别：不强制生成 specs、UI contract、service contract 或 data model，
+  而是围绕文档内容差异、站点结构影响和归档回写组织 artifacts。
+  本 schema 仍遵循 OpenSpec change 状态机：propose -> doc-change -> tasks -> apply -> verify -> archive。
+  其中 doc-change.md 承担文档站内容差异与结构影响确认阶段。
+  附带 baseline-templates/project-docs.md，可初始化为项目级 openspec/project-docs.md。
+  创建时间：2026-05-24
+  维护人：@aisee
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: "文档变更提案：为什么改、改哪些内容、不改什么、成功标准"
+    template: proposal.md
+    requires: []
+    instruction: |
+      proposal.md 必须明确：
+      - 本次文档变更的背景、目标、范围和非目标
+      - 涉及的栏目、页面、导航、侧边栏、路由或站点配置
+      - 成功标准必须可验证，例如页面可访问、导航入口正确、构建通过、关键内容补齐
+      - 不要写全站页面清单；长期基线进入 openspec/project-docs.md
+
+  - id: doc-change
+    generates: doc-change.md
+    description: "文档差异合同：本次新增、修改、迁移、归档或删除哪些内容"
+    template: doc-change.md
+    requires: [proposal]
+    instruction: |
+      doc-change.md 只描述本 change 的局部差异，必须：
+      - 引用 openspec/project-docs.md 作为文档站长期基线；若文件不存在，标注需要创建
+      - 可使用 baseline-templates/project-docs.md 初始化 openspec/project-docs.md
+      - 摘录与本次 change 直接相关的现状和缺口，不复制全站 inventory
+      - 列出本次新增、修改、迁移、归档、删除的页面或站点结构对象
+      - 明确导航、侧边栏、路由、frontmatter、标签、搜索、多语言或构建配置影响
+      - 包含 Archive Updates 小节，约束归档前回写 openspec/project-docs.md 或写明无需回写原因
+
+  - id: tasks
+    generates: tasks.md
+    description: "执行清单：写作、结构调整、站点配置、验证和归档门禁"
+    template: tasks.md
+    requires: [doc-change]
+    instruction: |
+      tasks.md 必须把 doc-change.md 转为可执行清单：
+      - 任务按内容、站点结构、验证、归档门禁顺序排列
+      - 涉及导航、侧边栏、路由或配置时必须有对应任务
+      - 验证任务必须覆盖链接、页面访问、构建或人工预览
+      - 最后必须包含 Archive Gate，确认 doc-change.md 的 Archive Updates 已处理
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    实施时必须按 tasks.md 执行并逐项打勾。
+    对 aisee-docsite-driven change，archive 前必须确认：
+    - tasks.md 的 Archive Gate 已完成；
+    - doc-change.md 的 Archive Updates 已处理；
+    - openspec/project-docs.md 已回写，或 doc-change.md 已写明无需回写的原因。
+    发现文档事实、站点结构或构建配置与 doc-change.md 冲突时：
+    - 暂停实施
+    - 更新 doc-change.md 或 proposal.md
+    - 再继续执行 tasks.md

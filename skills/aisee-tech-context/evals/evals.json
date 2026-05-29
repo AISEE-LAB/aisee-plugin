@@ -1,0 +1,26 @@
+{
+  "skill_name": "aisee:tech-context",
+  "evals": [
+    {
+      "id": 1,
+      "name": "missing-stack-context-before-change-plan",
+      "prompt": "根据下面 SRS 和 UI 内容规格生成 change-plan 前技术上下文。项目还没有 openspec/project.md，也没有明确技术栈。需求：用户可以创建团队、邀请成员、设置成员角色、移除成员。UI 包含团队列表、团队详情、邀请弹窗、成员管理页面。",
+      "expected_output": "输出技术上下文摘要，标注项目级技术栈未确定或缺失为 [STACK-CONTEXT-MISSING]，不得替用户选择框架、数据库、ORM、队列或部署环境。可以提取概念层面的共享技术前置和技术耦合点，但不能输出 change 边界规划方案、change 名称、phase 或 /opsx 命令。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "existing-project-tech-context",
+      "prompt": "基于现有项目和优惠券管理 SRS/UI 内容规格生成技术上下文。需求包括优惠券列表、新建优惠券、停用优惠券、导出优惠券报表。已有项目使用统一认证、RBAC 权限和审计日志，导出能力是否已有不确定。",
+      "expected_output": "输出技术栈状态、来源可信度、现有架构边界、可复用认证/RBAC/审计能力、优惠券数据模型耦合点、导出能力的 [STACK-GAP] 或 Open Question，以及给 aisee:change-plan 的技术提示。不得输出具体 change 边界规划结果。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "multi-platform-technical-constraints",
+      "prompt": "为 App 和微信小程序的门店预约功能生成 tech-context，供 aisee:change-plan 使用。需求包括门店详情、服务预约、预约详情、取消预约、预约提醒。小程序需要微信手机号授权，App 需要推送提醒。",
+      "expected_output": "输出多端能力限制、平台差异、通知/授权相关技术前置、预约状态与取消操作的耦合点，以及给 change-plan 的技术提示。不得生成页面规格、change 名称或 design.md。",
+      "files": []
+    }
+  ]
+}

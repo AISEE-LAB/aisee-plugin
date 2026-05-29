@@ -1,0 +1,50 @@
+name: quick-research
+version: 1
+description: |
+  适用场景：不需要完整实现的技术调研、可行性分析、技术选型对比。
+  与 spec-driven 的区别：没有 apply block，调研不产生代码实现，
+  只产出结论文档供团队决策使用。轻于 opsx-collab-pr-loop，适合独立发起的调研。
+  创建时间：2026-04-20
+  维护人：@team-lead
+
+artifacts:
+  - id: question
+    generates: question.md
+    description: "明确调研问题：背景、要回答的核心问题、决策者和截止时间"
+    template: question.md
+    requires: []
+    instruction: |
+      填写调研问题时：
+      - 每个调研问题必须是可以被"是/否/数据/选项"明确回答的
+      - 写明调研结果将用于支撑什么决策（谁会基于这个结论做什么）
+      - 写明不在本次调研范围内的相关问题（防止范围蔓延）
+      - 如果有多个问题，标明优先级
+
+  - id: findings
+    generates: findings.md
+    description: "调研发现：逐一回答 question.md 中的问题，附上依据"
+    template: findings.md
+    requires: [question]
+    instruction: |
+      填写调研发现时：
+      - 按 question.md 的问题列表顺序逐一作答
+      - 每条结论必须有依据（官方文档链接 / 测试数据 / 代码分析 / benchmark 数据）
+      - 区分"已验证的事实"和"基于经验的推断"
+      - 如果调研过程中发现了 question.md 未预见的重要信息，在"额外发现"中写明
+      - 不能遗漏任何一个 question.md 中的问题
+
+  - id: recommendation
+    generates: recommendation.md
+    description: "建议与下一步：基于 findings 给出明确的结论和行动建议"
+    template: recommendation.md
+    requires: [findings]
+    instruction: |
+      填写建议时：
+      - 先给出明确结论（支持 / 不支持 / 有条件支持），不能含糊
+      - 如果是技术选型，给出明确的推荐选项和理由
+      - 下一步行动项必须具体（谁、做什么、什么时间）
+      - 如果有遗留的开放问题，写明谁负责跟进
+      - 结论必须直接对应 question.md 中的原始问题
+
+# 注意：此 schema 没有 apply block
+# 调研不产生代码实现，findings + recommendation 即为最终产出

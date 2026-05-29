@@ -1,0 +1,65 @@
+{
+  "id": "",
+  "target": "figma-mcp",
+  "platforms": [],
+  "sources": {
+    "uiContent": "",
+    "references": [],
+    "styleSpecs": [],
+    "assetManifest": ""
+  },
+  "frames": [],
+  "sections": [],
+  "visualSpecMapping": {
+    "colors": [],
+    "typography": [],
+    "spacing": [],
+    "radius": [],
+    "shadows": [],
+    "backgrounds": [],
+    "icons": [],
+    "illustrations": []
+  },
+  "figmaReusePolicy": {
+    "priority": [
+      "variables",
+      "textStyles",
+      "colorStyles",
+      "components",
+      "componentVariants",
+      "icons",
+      "layoutPatterns"
+    ],
+    "rules": [
+      "search_design_system_first",
+      "reuse_existing_components_before_creating_new_layers",
+      "prefer_component_instances_with_overrides",
+      "document_reason_when_new_component_is_required",
+      "do_not_trace_bitmap_reference_as_unmaintainable_layers"
+    ],
+    "searchTargets": [
+      "colorVariables",
+      "textStyles",
+      "spacingVariables",
+      "buttons",
+      "forms",
+      "cards",
+      "navigation",
+      "tabs",
+      "modals",
+      "toasts",
+      "emptyStates",
+      "icons",
+      "layoutPatterns"
+    ],
+    "newComponentAllowedWhen": [
+      "no_matching_component_exists",
+      "existing_component_semantics_do_not_match",
+      "business_specific_visual_layer_required",
+      "user_explicitly_requests_new_component"
+    ]
+  },
+  "assets": [],
+  "figmaMcpInstructions": [],
+  "openQuestions": []
+}

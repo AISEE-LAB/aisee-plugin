@@ -1,0 +1,125 @@
+name: aisee-app-spec-driven
+version: 1
+description: |
+  适用场景：需要把 SRS、UI 内容规格、技术上下文与 OpenSpec change 强绑定的功能开发。
+  与官方 spec-driven 的区别：在 proposal 之后增加 source-map.md 作为上游证据索引，
+  并将工程设计拆成 design.md、ui-contract.md、data-model.md、service-contract.md。
+  不适用的 contract artifact 必须写 N/A 原因，避免前端-only 或后端-only change 被无效流程拖慢。
+  创建时间：2026-05-24
+  维护人：@aisee
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: "变更提案：为什么做、做什么、不做什么、成功标准"
+    template: proposal.md
+    requires: []
+    instruction: |
+      proposal.md 必须明确：
+      - 背景、问题、目标和非目标
+      - 本 change 的需求、页面、接口、数据范围
+      - 成功标准必须可验证
+      - 不要写实现细节、接口字段或数据库字段；这些分别进入 contract artifacts
+
+  - id: source-map
+    generates: source-map.md
+    description: "来源映射：绑定 SRS、UI 内容规格、技术上下文、change-plan 结果与本 change 范围"
+    template: source-map.md
+    requires: [proposal]
+    instruction: |
+      source-map.md 是本 schema 的追踪核心，必须：
+      - 列出上游来源：SRS、UI Content、Tech Context、Change Plan、Issue 或用户输入
+      - 映射本 change 覆盖的 FR / PAGE / FLOW / API / DATA
+      - 明确不在范围内的上游条目
+      - 声明 ui-contract.md、data-model.md、service-contract.md 是否适用
+      - 保留 [ASSUMPTION]、[SPEC-GAP]、[STACK-DECISION-REQUIRED]、[STACK-CONFLICT] 等阻塞标签
+
+  - id: specs
+    generates: specs/**/*.md
+    description: "用户可观察行为与验收场景"
+    template: spec.md
+    requires: [source-map]
+    instruction: |
+      specs 必须只描述用户可观察行为和验收条件：
+      - 使用 SHALL/MUST 或 Given/When/Then 场景表达行为
+      - 覆盖 source-map.md 中本 change 的 FR
+      - 可以引用 PAGE / API / DATA ID 作为追踪信息，但不要写布局、接口字段或数据库字段
+      - 发现需求缺口时标注 [SPEC-GAP]，不要自行新增业务需求
+
+  - id: design
+    generates: design.md
+    description: "总体技术方案：架构边界、职责划分、状态机、权限模型和关键决策"
+    template: design.md
+    requires: [specs]
+    instruction: |
+      design.md 必须先于各 contract 生成，负责总体技术设计：
+      - 读取 proposal.md、source-map.md 和 specs
+      - 明确前后端职责、数据归属、同步/异步策略、权限模型、状态机归属
+      - 记录关键技术决策、风险、取舍和约束来源
+      - 不要展开完整页面字段、接口请求响应或表字段；这些进入对应 contract
+
+  - id: ui-contract
+    generates: ui-contract.md
+    description: "前端合同：页面内容、粗布局、交互状态、前端数据需求"
+    template: ui-contract.md
+    requires: [design]
+    instruction: |
+      ui-contract.md 仅在涉及页面、弹窗、交互、表单、权限可见性或前端数据需求时适用。
+      如果不适用，必须写 N/A 原因。
+      适用时必须覆盖：
+      - 页面 / 弹窗 / 全局入口清单
+      - 页面内容、粗布局、操作、状态反馈和权限可见性
+      - 前端需要的数据与来源能力
+      - FR / PAGE / FLOW / API 的追踪关系
+
+  - id: data-model
+    generates: data-model.md
+    description: "数据模型合同：实体、表、字段、关系、约束、索引、迁移"
+    template: data-model.md
+    requires: [design]
+    instruction: |
+      data-model.md 仅在新增或修改持久化数据、字段、表、关系、索引、迁移时适用。
+      如果不适用，必须写 N/A 原因。
+      适用时必须覆盖：
+      - 核心实体与表
+      - 字段、类型、必填、默认值、约束和说明
+      - 关系、唯一约束、索引、数据迁移、回滚和兼容策略
+      - 数据所有权、删除/归档、审计字段和敏感数据处理
+
+  - id: service-contract
+    generates: service-contract.md
+    description: "服务合同：接口能力、请求响应、权限、错误、幂等、业务逻辑"
+    template: service-contract.md
+    requires: [ui-contract, data-model]
+    instruction: |
+      service-contract.md 仅在涉及接口、后端能力、服务边界、异步任务或外部集成时适用。
+      如果不适用，必须写 N/A 原因。
+      适用时必须同时读取 ui-contract.md 和 data-model.md：
+      - 接口能力必须满足前端数据需求
+      - 请求响应、权限、错误、幂等、分页、排序、过滤必须明确
+      - 业务逻辑、状态流转、校验规则、异步任务和通知必须可测试
+      - 不要脱离 data-model.md 自造字段或状态
+
+  - id: tasks
+    generates: tasks.md
+    description: "实现清单：从 specs、design 和 contract artifacts 生成可执行任务"
+    template: tasks.md
+    requires: [specs, design, ui-contract, data-model, service-contract]
+    instruction: |
+      tasks.md 必须先做一致性检查，再列实现任务：
+      - 每个 FR 必须能追踪到 specs
+      - 涉及页面的 FR 必须追踪到 ui-contract.md
+      - 涉及接口的 FR 必须追踪到 service-contract.md
+      - 涉及持久化的 FR 必须追踪到 data-model.md
+      - 不适用 artifact 必须已有 N/A 原因
+      - 任务按实现和验证顺序排列，最后必须包含验收场景验证
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    实现时必须按 tasks.md 执行并逐项打勾。
+    发现 specs、design 或 contract 与代码事实冲突时：
+    - 暂停实现
+    - 更新对应 artifact
+    - 保持 source-map.md 的追踪关系闭合

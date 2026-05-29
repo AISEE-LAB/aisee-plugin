@@ -1,0 +1,11 @@
+pillow
+numpy
+opencv-python
+PySide6
+rembg
+onnxruntime
+scikit-image
+torch
+torchvision
+sam2
+iopaint

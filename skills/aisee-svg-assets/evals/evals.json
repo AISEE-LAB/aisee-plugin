@@ -1,0 +1,33 @@
+{
+  "skill_name": "aisee:svg-assets",
+  "evals": [
+    {
+      "id": 1,
+      "name": "generate-inline-icon-with-validation-and-index",
+      "prompt": "帮我生成一个用于前端 inline 的搜索空状态 SVG 图标，保存到 docs/svg-assets/generated/search-empty.svg，并更新 SVG 索引。",
+      "expected_output": "应选择 generate 模式，生成包含 viewBox 的安全 SVG，优先使用 currentColor 或少量明确颜色；运行 validate_svg.py 并输出 reports/search-empty.validate.json；更新 docs/svg-assets/index.md 和 index.json；最终说明是否适合 inline SVG、Figma 导入或图标库复用。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "logo-request-asks-minimum-brief-before-writing",
+      "prompt": "给我的新产品做一个 SVG logo。",
+      "expected_output": "应进入 logo 模式但不得直接写文件；先最多提出 3 个关键问题，至少确认品牌/产品名称、风格方向和主要使用场景；不得声称已完成商标法律审查。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "bitmap-trace-uses-vtracer-and-reports-method",
+      "prompt": "把 assets/app-mark.png 转成 SVG，适合当图标用。",
+      "expected_output": "应选择 trace 模式，先检查 vtracer 依赖；使用 scripts/trace_bitmap.py 输出到 docs/svg-assets/traced/，保存 trace report 和 validate report；交付时说明实际使用 python-vtracer 还是 vtracer-cli，并提醒复杂位图不承诺照片级精确还原。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "unsafe-svg-validation-blocks-inline-claim",
+      "prompt": "检查并优化这个 SVG：里面有 onload 和外链图片，想直接放到网页 inline。",
+      "expected_output": "应选择 validate/optimize 模式，明确检测脚本、事件属性、外链、foreignObject 等风险；优化脚本默认不得把不安全输入标记为可 inline；如果输出报告为 failed，应说明不能直接用于 inline SVG，并给出清理或隔离处理建议。",
+      "files": []
+    }
+  ]
+}

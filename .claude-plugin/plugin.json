@@ -1,0 +1,17 @@
+{
+  "name": "aisee-plugin",
+  "version": "0.1.0",
+  "description": "AI-Enhanced Software Engineering plugin for OpenSpec-driven workflows.",
+  "author": {
+    "name": "Fengliang"
+  },
+  "license": "MIT",
+  "keywords": [
+    "aisee",
+    "ai-enhanced-software-engineering",
+    "openspec",
+    "spec-driven-development",
+    "workflow",
+    "compound-engineering"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "skill_name": "aisee:spec-migrate",
+  "evals": [
+    {
+      "id": 1,
+      "name": "existing-admin-project-baseline",
+      "prompt": "基于一个已有后台管理系统迁移 OpenSpec specs。项目已有用户登录、RBAC 权限、优惠券管理和导出报表。代码里有 routes、controllers、tests 和 README。请整理 baseline specs。",
+      "expected_output": "先扫描证据并生成能力地图，按 auth/rbac/coupons/reports 等业务能力规划 openspec/specs/，生成 migration index 和 baseline spec 草案。不得输出新需求、/opsx:new、proposal.md、design.md、tasks.md 或实现计划。不得使用 skill 内置 spec 正文模板；应读取当前 OpenSpec 环境并用 openspec validate <capability> 校验 baseline spec。每条正式 Requirement 必须满足当前 OpenSpec 校验器对 SHALL/MUST 和 Scenario 的要求，并标注证据可信度到迁移索引。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "conflicting-docs-and-code",
+      "prompt": "现有项目 README 写订单可以取消，测试显示已支付订单不可取消，controller 代码显示待支付订单 15 分钟后自动关闭。请迁移订单模块 baseline spec。",
+      "expected_output": "识别 README、测试和代码之间的行为边界，使用 [BEHAVIOR-CONFLICT] 或 [EVIDENCE-GAP] 标注不一致项。只把有可信证据的当前行为写入 baseline spec；争议行为进入 Open Questions。不得把理想行为或未来需求写入 openspec/specs/。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "large-monorepo-batched-migration",
+      "prompt": "为一个大型 monorepo 建立 OpenSpec baseline。包含 web、admin、api、worker、mobile 多个 package，模块超过 30 个。请快速迁移到 OpenSpec 管理。",
+      "expected_output": "判断范围过大，输出分批迁移策略和 docs/spec-migration/ 索引。目标 specs 按业务域和 package 边界组合规划，单批最多生成少量 spec，不生成巨型 everything/spec.md，不按 frontend/backend/database 技术层机械拆分。",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "aisee-image-object source.json",
+  "type": "object",
+  "required": ["schema_version", "source", "regions", "masks", "objects", "exports", "operations"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "workspace": { "type": "string" },
+    "source": {
+      "type": "object",
+      "required": ["path", "width", "height"],
+      "properties": {
+        "path": { "type": "string" },
+        "original_path": { "type": "string" },
+        "width": { "type": "integer", "minimum": 0 },
+        "height": { "type": "integer", "minimum": 0 },
+        "mode": { "type": "string" },
+        "format": { "type": "string" }
+      }
+    },
+    "regions": { "type": "array", "items": { "type": "object" } },
+    "models": { "type": "array", "items": { "type": "object" } },
+    "masks": { "type": "array", "items": { "type": "object" } },
+    "objects": { "type": "array", "items": { "type": "object" } },
+    "backgrounds": { "type": "array", "items": { "type": "object" } },
+    "exports": { "type": "array", "items": { "type": "object" } },
+    "enhanced": { "type": "array", "items": { "type": "object" } },
+    "operations": { "type": "array", "items": { "type": "object" } }
+  }
+}

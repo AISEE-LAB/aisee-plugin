@@ -1,0 +1,26 @@
+{
+  "skill_name": "aisee-init",
+  "evals": [
+    {
+      "id": 1,
+      "name": "init-template-uses-codex-stepwise-openspec-flow",
+      "prompt": "初始化一个新的 OpenSpec 项目 Codex 配置。项目还没有明确完整技术栈，但要使用 aisee:srs、aisee:ui-content、aisee:tech-context、aisee:change-plan 和 aisee:change-design 的规划链路。",
+      "expected_output": "生成或建议的 AGENTS.md / openspec/project.md 应使用 aisee:srs -> aisee:ui-content / aisee:tech-context -> aisee:change-plan -> /opsx:new --schema aisee-app-spec-driven -> /opsx:continue 按 schema 生成 artifacts -> apply 的逐步流程，不得生成旧版非 Codex 规则文件，不得把 /opsx:propose 作为默认主流程。openspec/project.md 应允许技术栈未确认并明确标注，不能让 AGENTS.md 承载项目级技术选型。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "audit-detects-outdated-propose-workflow",
+      "prompt": "审计一个项目的 AGENTS.md。文件中写着 aisee:srs -> aisee:change-plan -> propose -> design -> tasks -> apply，并且没有提到 docs/ui-content 或 docs/tech-context。",
+      "expected_output": "报告旧状态机与当前 aisee 链路不一致，建议改为 /opsx:new --schema aisee-app-spec-driven + /opsx:continue 的逐步创建流程，并补充 docs/requirements、docs/ui-content、docs/tech-context、docs/change-plan 的职责说明。不得把 docs/tech-context 说成 design.md 或 openspec/project.md 的替代品。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "init-templates-avoid-non-codex-artifacts",
+      "prompt": "检查 aisee-init 是否还会生成非 Codex 规则文件或非 Codex hook 配置，并审计 AGENTS.md 是否完整包含 OpenSpec artifacts 加载顺序。",
+      "expected_output": "应明确 aisee-init 只生成 AGENTS.md、openspec/project.md、.memory 和 Codex hooks，不生成非 Codex 规则文件或非 Codex hook 配置。AGENTS.md 必须要求先读取 .openspec.yaml / openspec/config.yaml 判断当前 schema，再按 schema 的 artifact 依赖顺序读取文件；aisee-app-spec-driven 的 artifact 清单只能作为默认 schema 示例。",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+# 图像生成与脚本约定
+
+## 决策
+
+先检查当前会话工具列表是否存在内置 `image_gen` / `image_gen.imagegen`。这是会话工具检测，不是 shell 检测；不能用 `which image_gen` 或查找本地脚本判断。
+
+优先使用内置 `image_gen`：
+
+- 普通参考图、视觉草图、背景、插画和素材探索
+- 基于已有图片生成视觉变体
+- 已有 UI 效果图的保结构重绘
+- 简单透明素材：生成纯色绿幕图，再本地去背景
+
+使用 CLI fallback：
+
+- 内置 `image_gen` 不可用
+- 用户明确要求脚本、API、模型、base_url 或本地 CLI
+- 需要固定模型、精确尺寸、输出格式、本地图片路径编辑、mask 或批量
+- 需要原生透明 PNG
+
+不要仅因为要保存到固定路径或常规尺寸就放弃内置工具；内置工具生成后把选中结果复制或移动到项目本地即可。不要把 CLI 结果描述成内置 `image_gen` 结果。
+
+## 脚本边界
+
+`scripts/image_gen.py` 是生成和编辑 API 入口，保留用于：
+
+- 文生图参考图
+- 图生图和保结构重绘
+- 有 mask 输入时的局部编辑
+- 固定模型、尺寸、格式或批量生成
+
+它不负责：
+
+- 去背景
+- 生成或管理 mask
+- SAM / SAM 2 分割
+- mask 后处理
+- 对象透明 PNG 提取
+- 本地背景修补
+- 图层包或单图对象状态文件
+
+遇到对象分离、抠图、对象图层、背景修补或交互式框选/点选时，转给专用对象处理 skill/工具；本 skill 只接收结果并登记到设计资产目录。
+
+## UI 效果图编辑
+
+已有 App、小程序、H5、PC 页面效果图要求“再生成一版”“更高保真”“更符合手机端”“不要变结构”时，按 `references/workflow.md` 的 `structure-locked redraw` 执行。
+
+如果 CLI text-to-image 或 CLI edit 出现明显业务结构漂移，不继续堆 prompt，改用内置 `image_gen`、Figma MCP、确定性图像处理或页面重绘。
+
+## 图生图和局部编辑
+
+图生图或局部编辑默认是受控修改，不是重新设计。除非用户明确要求重设风格，否则：
+
+- 保护 Logo、品牌色、品牌字体、品牌图形、吉祥物、IP 形象等品牌元素。
+- 保持导航、卡片、按钮、模块位置、留白节奏和信息层级。
+- 保持线条粗细、圆角、阴影、材质、插画风格、摄影风格、色彩系统和图标风格。
+- 未遮罩区域默认保持不变，尤其是文字、Logo、产品名和关键数据。
+
+只在编辑任务中加入最小保留约束：
+
+```text
+Preserve the original brand identity, layout structure, visual style, color system, typography hierarchy, and icon style. Only modify the requested area or elements. Keep unmasked areas unchanged.
+```
+
+涉及 Logo、品牌标识、真实产品图或文字密集 UI 时，不要求模型重画这些细节；优先保留原像素、确定性贴图、Figma 或前端实现。
+
+## API 配置
+
+真实 API 调用必须显式配置 `api_key` 和 `base_url`，不依赖 SDK 默认地址。配置来源：
+
+```text
+OPENAI_API_KEY
+OPENAI_BASE_URL
+AISEE_IMAGEGEN_CONFIG
+.aisee/design-assets/openai.local.json
+```
+
+默认配置文件格式见 `assets/openai-config-template.json`。
+
+优先级：
+
+```text
+--base-url > OPENAI_BASE_URL > config.base_url
+OPENAI_API_KEY > config.api_key
+--config > AISEE_IMAGEGEN_CONFIG > .aisee/design-assets/openai.local.json
+```
+
+约束：
+
+- 不提供 `--api-key` 参数，避免进入 shell history。
+- 配置文件必须加入项目 `.gitignore`，不要提交。
+- 不把 API Key 写入文件、日志、截图或交付说明。
+- 运行时图片、索引和临时文件都写入目标项目目录，不写入 skill 目录。
+
+## 模型与尺寸
+
+模型：
+
+- 常规生成和编辑：`gpt-image-2`
+- 原生透明 PNG：`gpt-image-1.5 --background transparent --output-format png`
+- `gpt-image-2` 不支持 `background=transparent`
+
+常用 CLI 示例尺寸：
+
+| 用途 | 建议尺寸 |
+|------|----------|
+| 移动端 / 小程序参考图 | `1024x1536` |
+| 移动端 Hero / Banner | `1248x624` |
+| PC Web 页面参考图 | `1536x1024` |
+| PC / Web Hero 背景 | `2048x1152` |
+| 大屏 / 展示页 | `3840x2160` |
+| 方形插画或复杂素材 | `1024x1024` |
+
+`gpt-image-2` 尺寸约束：宽高都是 16 的倍数，最大边不超过 3840px，长短边比例不超过 3:1，总像素在 655,360 到 8,294,400 之间。
+
+不同端的推荐尺寸、安全区和素材尺寸按 `references/output-specs.md` 选择。不要把图标和小 UI 素材统一生成到 `1024x1024` 以上；尺寸应按最终展示面积反推。真实设备尺寸不满足模型或脚本约束时，先生成接近比例的合规尺寸，再裁切或缩放。
+
+## CLI 最小用法
+
+生成：
+
+```bash
+python <skill-dir>/scripts/image_gen.py generate \
+  --model gpt-image-2 \
+  --prompt "<prompt>" \
+  --size 1536x1024 \
+  --quality high \
+  --output-format png \
+  --out docs/design-assets/references/reference-001.png
+```
+
+编辑：
+
+```bash
+python <skill-dir>/scripts/image_gen.py edit \
+  --model gpt-image-2 \
+  --image docs/design-assets/references/reference-001.png \
+  --prompt "<只描述要改的内容，同时写清保留项>" \
+  --out docs/design-assets/edits/reference-001-edit-001.png
+```
+
+局部编辑：
+
+```bash
+python <skill-dir>/scripts/image_gen.py edit \
+  --model gpt-image-2 \
+  --image input.png \
+  --mask mask.png \
+  --prompt "只修改 mask 区域，其他区域保持不变。" \
+  --out output.png
+```
+
+脚本只保留 Images API 的 `generate`、`edit` 和 `generate-batch` 子命令；多轮意图、版本关系和追溯信息由本 skill 的索引、manifest 或 brief 记录。
+
+## 透明素材
+
+简单、边缘清晰的素材优先走内置 `image_gen` 绿幕方案，再用本地脚本去背景：
+
+```bash
+python <skill-dir>/scripts/remove_chroma_key.py \
+  --input tmp/imagegen/input-green.png \
+  --out docs/design-assets/assets/transparent/output-transparent.png \
+  --auto-key border \
+  --soft-matte \
+  --transparent-threshold 12 \
+  --opaque-threshold 220 \
+  --despill
+```
+
+绿幕提示词追加：
+
+```text
+Create the requested subject on a perfectly flat solid #00ff00 chroma-key background for background removal.
+The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation.
+Keep the subject fully separated from the background with crisp edges and generous padding.
+Do not use #00ff00 anywhere in the subject.
+No cast shadow, no contact shadow, no reflection, no watermark, and no text unless explicitly requested.
+```
+
+复杂边缘、半透明、发光、玻璃、烟雾、液体或用户明确要求原生透明时，使用 CLI：
+
+```bash
+python <skill-dir>/scripts/image_gen.py generate \
+  --model gpt-image-1.5 \
+  --prompt "<独立主体，无文字、水印或背景>" \
+  --background transparent \
+  --output-format png \
+  --quality high \
+  --out docs/design-assets/assets/transparent/asset-001.png
+```
+
+通用 UI 图标不走透明素材生图流程，优先使用 SVG 图标库。小型透明 UI 素材通常使用 `256x256` 或 `512x512`；只有复杂插画、角色、营销视觉或大面积背景装饰才使用 `1024+`。
+
+## Prompt 基本结构
+
+脚本默认启用 `--augment`，会把用户 prompt 和提示字段组织成结构化 prompt。需要完全原样传递时使用 `--no-augment`。
+
+```text
+目标平台：
+页面/素材用途：
+视觉定位：
+构图：
+主体：
+背景：
+色彩：
+参考依据：
+必须保留：
+必须避免：
+输出要求：
+```
+
+生成参考图时避免在图中放置真实业务文字，除非用户明确要求。生成素材时避免文字、Logo、水印和无关 UI 控件。
+
+涉及通用图标时，不把完整图标库列表写入 prompt。只说明使用标准图标占位，并在 manifest 或 brief 中记录最终推荐库和图标语义。
