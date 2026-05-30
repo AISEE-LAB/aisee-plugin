@@ -15,3 +15,268 @@
 - `derived`：根据 source-map、ID registry、文件关系和校验规则推导。
 
 AI 生成摘要必须显式启用，并在 JSON 中标记为 `generated`。
+
+## Command
+
+```bash
+aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for aisee-verify --json
+aisee context pack --change <change> --for ce-doc-review --json
+aisee context pack --change <change> --for ce-code-review --json
+```
+
+`--change` 是必需入口。context pack 不应从全项目自由搜索后推导范围。
+
+## Top-level Envelope
+
+所有 target 共用以下顶层结构：
+
+```json
+{
+  "schema_version": "1.0",
+  "target": "ce-work",
+  "change": {
+    "id": "add-auth-login",
+    "path": "openspec/changes/add-auth-login",
+    "schema": "aisee-app-spec-driven",
+    "status": "authored"
+  },
+  "facts": {
+    "parsed": {},
+    "derived": {}
+  },
+  "generated": null,
+  "gaps": [],
+  "guardrails": [],
+  "evidence": {},
+  "meta": {}
+}
+```
+
+Field rules:
+
+- `schema_version`：context pack 契约版本，不等同于 OpenSpec schema 版本。
+- `target`：只能是明确目标，如 `ce-work`、`aisee-verify`、`ce-doc-review`、`ce-code-review`。
+- `change`：当前 change 是唯一入口。
+- `facts.parsed`：只放从文件和模板直接解析出的事实。
+- `facts.derived`：只放由 `source-map.md`、ID registry、schema DAG、artifact 关系推导出的事实。
+- `generated`：默认 `null`。只有显式 `--with-summary` 才允许出现 AI 生成摘要。
+- `gaps`：缺口和断链，不是自动补齐结果。
+- `guardrails`：执行限制和禁止越界项。
+- `evidence`：validate、review、test、verification 的记录入口。
+- `meta`：命令、时间、工具版本、解析置信度和错误。
+
+## Parsed Facts
+
+`facts.parsed` 至少包含：
+
+```json
+{
+  "project_rules": {
+    "primary": "AGENTS.md",
+    "legacy_fallback": "CLAUDE.md"
+  },
+  "schema": {
+    "name": "aisee-app-spec-driven",
+    "version": 2,
+    "artifacts": [
+      {
+        "id": "tasks",
+        "path": "openspec/changes/add-auth-login/tasks.md",
+        "required": true,
+        "status": "present"
+      }
+    ],
+    "apply_requires": ["tasks"],
+    "archive_tracks": ["tasks.md", "source-map.md", "specs/**/*.md"]
+  },
+  "artifacts": {
+    "proposal": {},
+    "source_map": {},
+    "specs": [],
+    "contracts": {},
+    "tasks": {}
+  },
+  "sources": [],
+  "id_registry": {
+    "available": true,
+    "checked": true
+  }
+}
+```
+
+Rules:
+
+- `project_rules.primary` 优先为 `AGENTS.md`。
+- `CLAUDE.md` 只能作为 legacy fallback。
+- `schema.artifacts` 来自当前 change schema，不得硬编码 app/device artifact。
+- `artifacts.contracts` 按 schema 填充。例如 app 可包含 `ui-contract.md`、`service-contract.md`、`data-model.md`、`change-context.md`；device 可包含 `design.md`、`hardware-contract.md`、`firmware-contract.md`、`runtime-contract.md`、`verification-contract.md`。
+- `sources` 只包含 `.aisee/sources.json` 和 `source-map.md` 明确引用的上游来源。
+- `id_registry` 只报告当前状态，不分配新 ID。
+
+## Derived Facts
+
+`facts.derived` 至少包含：
+
+```json
+{
+  "read_order": [],
+  "scope": {
+    "in": [],
+    "out": [],
+    "follow_up_candidates": []
+  },
+  "traceability": {
+    "upstream_ids": [],
+    "produced_ids": [],
+    "id_links": []
+  },
+  "artifact_applicability": [],
+  "code_paths": [],
+  "test_paths": [],
+  "task_state": {
+    "total": 0,
+    "done": 0,
+    "open": 0,
+    "blocked": 0
+  },
+  "verification_requirements": [],
+  "open_questions": []
+}
+```
+
+Rules:
+
+- `read_order` 只能来自当前 change、schema artifact DAG、`source-map.md` 和 project rules。
+- `scope.in/out` 来自 proposal、source-map 和 tasks。
+- `follow_up_candidates` 可记录实现中发现但未纳入当前 change 的问题。
+- `code_paths` 和 `test_paths` 必须来自 `source-map.md`、tasks、contracts 或明确的 implementation evidence；不得自由全项目搜索后加入。
+- 缺路径时写入 `gaps`，不要猜测。
+
+## Gap Object
+
+所有 target 使用统一 gap 结构：
+
+```json
+{
+  "code": "SOURCE_MAP_GAP",
+  "severity": "blocker",
+  "message": "tasks references auth:API-001 but source-map has no code path",
+  "owner_artifact": "source-map.md",
+  "related_ids": ["auth:API-001"],
+  "suggested_fix": "Update source-map.md with code and test paths before ce-work"
+}
+```
+
+Severity:
+
+- `blocker`：不能进入下一阶段。
+- `risk`：可以继续，但必须记录接受理由或验证要求。
+- `info`：提示，不阻断。
+
+Common codes:
+
+- `MISSING_ARTIFACT`
+- `SOURCE_MAP_GAP`
+- `ID_REGISTRY_GAP`
+- `TRACE_GAP`
+- `TASK_GAP`
+- `CONTRACT_GAP`
+- `SPEC_DRIFT`
+- `VALIDATE_FAILED`
+- `REVIEW_BLOCKER`
+- `TEST_EVIDENCE_MISSING`
+
+## ce-work Pack
+
+`--for ce-work` 面向实现阶段，只输出当前 change 的可执行上下文。
+
+Required additions:
+
+```json
+{
+  "facts": {
+    "derived": {
+      "execution": {
+        "start_from": [],
+        "suggested_order": [],
+        "allowed_paths": [],
+        "forbidden_scope": [],
+        "requires_ce_plan": false,
+        "ce_plan_reason": null
+      }
+    }
+  },
+  "guardrails": [
+    "follow tasks.md",
+    "do not create a parallel durable plan",
+    "report out-of-scope findings as follow-up candidates"
+  ]
+}
+```
+
+Rules:
+
+- `allowed_paths` 来自 `source-map.md`、tasks 或 contracts。
+- 如果 `tasks.md` 太粗、路径缺失或 contract 冲突，`requires_ce_plan` 可以为 `true`，但 `ce-plan` 结论必须回写 `tasks.md` / `source-map.md`。
+- 不包含完整 SRS / UI Content / Architecture 正文，只包含当前 change 追踪到的 ID、路径和必要摘录。
+- 未纳入当前 change 的问题可以放入 `follow_up_candidates`，不能进入 `suggested_order`。
+
+## aisee-verify Pack
+
+`--for aisee-verify` 面向一致性诊断，范围比 `ce-work` 更宽，但仍以当前 change 为入口。
+
+Required additions:
+
+```json
+{
+  "facts": {
+    "derived": {
+      "checks": {
+        "schema_artifacts": [],
+        "traceability": [],
+        "tasks": [],
+        "contracts": [],
+        "implementation": [],
+        "review_and_tests": []
+      },
+      "drift_candidates": []
+    }
+  },
+  "evidence": {
+    "openspec_validate": null,
+    "ce_doc_review": [],
+    "ce_code_review": [],
+    "tests": [],
+    "manual_verification": []
+  }
+}
+```
+
+Rules:
+
+- `aisee-verify` 可以检查实现后代码/test evidence 是否偏离 specs/contracts。
+- 发现未被当前 change 纳入范围的问题，应输出为 gap 或 follow-up，不直接扩大当前 change。
+- `aisee-verify` 不做 archive 放行审批；archive 结论属于 `aisee:archive-guard`。
+
+## Generated Summary
+
+默认禁止生成摘要。显式启用时：
+
+```json
+{
+  "generated": {
+    "summary": {
+      "mode": "generated",
+      "target": "ce-work",
+      "text": "...",
+      "source_fields": [
+        "facts.parsed.artifacts",
+        "facts.derived.traceability"
+      ]
+    }
+  }
+}
+```
+
+Generated content is never authoritative. If generated summary conflicts with `facts.parsed` or `facts.derived`, the facts win.

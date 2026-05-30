@@ -860,6 +860,15 @@ aisee context pack --change <change> --for aisee-verify --json
 
 这让 Aisee skill 和 CE skill 都消费同一个结构化上下文，减少复制、遗漏和误读。
 
+字段级契约见 `references/context-pack-contract.md`。核心约束：
+
+- `--change` 是唯一入口。
+- `facts.parsed` 来自当前文件和模板直接解析。
+- `facts.derived` 来自 source-map、ID registry、schema DAG 和文件关系推导。
+- `generated` 默认为空；显式 `--with-summary` 才允许出现。
+- `ce-work` 只消费当前 change 的实现上下文，不能自由扩大范围。
+- `aisee-verify` 可诊断 drift 和 evidence 缺口，但不做 archive 放行审批。
+
 ## 推荐端到端流程
 
 ### App/Web

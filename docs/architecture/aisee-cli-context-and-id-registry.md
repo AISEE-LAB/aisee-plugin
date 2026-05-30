@@ -385,6 +385,14 @@ aisee-verify:
   全部 artifact 摘要 / ID 关系 / gaps / validate 结果 / review 结果
 ```
 
+字段级 JSON 契约维护在 `references/context-pack-contract.md`。关键约定：
+
+- 所有 target 共享 `schema_version`、`target`、`change`、`facts.parsed`、`facts.derived`、`gaps`、`guardrails`、`evidence`。
+- `ce-work` 必须包含 `read_order`、`scope`、`traceability`、`code_paths`、`test_paths`、`task_state`、`execution.allowed_paths`、`execution.requires_ce_plan`。
+- `aisee-verify` 必须包含 schema artifact 检查、traceability 检查、task 检查、contract 检查、implementation drift 候选和 review/test evidence。
+- 默认不生成 AI 摘要；`--with-summary` 才允许输出 `generated.summary`。
+- 任何字段都不能替代 Markdown / OpenSpec artifacts / ID registry / sources registry 的事实源地位。
+
 ### gaps
 
 检查断链、缺口和不一致。
