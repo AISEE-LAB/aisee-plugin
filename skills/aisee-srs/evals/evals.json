@@ -1,0 +1,20 @@
+{
+  "skill_name": "aisee:srs",
+  "evals": [
+    {
+      "name": "ui-heavy-admin-feature",
+      "prompt": "帮我整理一个优惠券管理后台的 SRS。运营管理员需要查看优惠券列表，按状态、券类型、有效期筛选；可以新建优惠券，填写名称、类型、面额、门槛、有效期和发放数量；可以停用未过期优惠券，停用后用户不能继续领取。目标端是 PC 管理后台。",
+      "expected_output": "应先做业务需求澄清，确认用户、业务目标、MVP、规则、权限和异常；生成的 SRS 应包含 FR、业务对象与状态、变更候选清单和后续交接提示；不得输出 API path、数据库表字段、前端组件或实现任务。"
+    },
+    {
+      "name": "backend-no-ui-feature",
+      "prompt": "生成一个后端会员等级自动升级能力的 SRS。系统每天根据用户近 12 个月消费金额自动调整会员等级，并发送站内通知。没有页面，本期只做后台规则和通知。",
+      "expected_output": "应识别为非 UI 型需求，SRS 应覆盖业务对象、等级规则、定时触发、通知、异常和验收方向；Section 8 应标注 UI Content 不需要、Tech Context 需要，change-plan 可能需要 job/service contract；不得硬造页面。"
+    },
+    {
+      "name": "baseline-aware-refactor",
+      "prompt": "基于现有订单系统整理 SRS：现在订单取消规则太乱，要改成待支付订单 30 分钟未支付自动取消，已支付订单只能由客服退款，用户手动取消只允许在待支付状态。需要兼容已有订单状态展示。",
+      "expected_output": "应启用 baseline-aware 思路，追问或记录现有状态、兼容行为、用户可见变化和冲突；生成的 SRS 应标注变更类型、影响基线、业务状态流转和 Open Questions；不得输出迁移脚本、表结构或接口设计。"
+    }
+  ]
+}
