@@ -275,7 +275,7 @@ openspec templates --schema <schema> --json
 - 涉及框架/API/ORM/SDK/云服务细节时，必须使用 Context7 查当前官方文档。
 - 不要把需求缺口包装成技术假设；标注 `[SPEC-GAP]`。
 - 不要在 design.md 中新增业务需求；需要变更需求时标注 `[SPEC-CHANGE-REQUIRED]`。
-- 不要输出大段代码或逐文件实现计划；执行细节留给 tasks 或 `/opsx:apply`。
+- 不要输出大段代码或逐文件实现计划；执行细节留给 `tasks.md`、`aisee:implementation-bridge` 和后续工程实现阶段。
 - 每个页面相关 change 必须说明页面承载、数据流、加载/错误/提交反馈。
 - 每个接口能力必须说明鉴权、错误、幂等或为什么不需要。
 - 每个写入数据模型都必须说明唯一性、数据所有权、删除/归档、迁移或兼容影响。
@@ -297,9 +297,12 @@ aisee:srs
             └─ aisee:change-design        ← 仅当 schema 包含 design.md 时生成 / 补齐 design.md
             └─ 补 specs/
             └─ 补 tasks.md
-            └─ /opsx:apply
-            └─ /ce:review
-            └─ /opsx:archive
+            └─ openspec validate
+            └─ aisee:implementation-bridge
+            └─ compound plan / work / review / test
+            └─ aisee:verify
+            └─ aisee:apply-guard
+            └─ openspec apply
 ```
 
 大 Epic 推荐先用 `aisee:change-plan` 规划为独立 change，再逐个运行 `aisee:change-design`。不要对整个 Epic 直接生成一份过大的 design。

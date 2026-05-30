@@ -239,6 +239,11 @@ aisee:srs
   ├─ aisee:architecture       ← 本技能：change-plan 前技术架构事实、决策与约束
   └─ aisee:change-plan              ← 基于 SRS + UI content + design-spec + architecture 拆 change
        └─ /opsx:new <change>
-            └─ change artifact authoring
-            └─ /opsx:apply
+            └─ aisee:change-author
+            └─ openspec validate
+            └─ aisee:implementation-bridge
+            └─ compound plan / work / review / test
+            └─ aisee:verify
+            └─ aisee:apply-guard
+            └─ openspec apply
 ```

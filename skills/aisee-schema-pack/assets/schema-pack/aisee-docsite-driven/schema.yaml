@@ -4,7 +4,7 @@ description: |
   适用场景：文档站、知识库、教程、团队 Wiki、内容导航和信息架构维护。
   与 aisee-app-spec-driven 的区别：不强制生成 specs、UI contract、service contract 或 data model，
   而是围绕文档内容差异、站点结构影响和归档回写组织 artifacts。
-  本 schema 仍遵循 OpenSpec change 状态机：propose -> doc-change -> tasks -> apply -> verify -> archive。
+  本 schema 仍遵循 Aisee/OpenSpec 主流程：proposal -> doc-change -> tasks -> openspec validate -> aisee:verify -> aisee:apply-guard -> openspec apply。
   其中 doc-change.md 承担文档站内容差异与结构影响确认阶段。
   附带 baseline-templates/project-docs.md，可初始化为项目级 openspec/project-docs.md。
   创建时间：2026-05-24

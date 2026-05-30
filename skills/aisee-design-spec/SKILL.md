@@ -212,8 +212,13 @@ aisee:srs
   ├─ aisee:architecture
   └─ aisee:change-plan        ← 基于 SRS + UI content + design-spec + architecture 拆 change
        └─ /opsx:new <change>
-            └─ change artifact authoring
-            └─ /opsx:apply
+            └─ aisee:change-author
+            └─ openspec validate
+            └─ aisee:implementation-bridge
+            └─ compound plan / work / review / test
+            └─ aisee:verify
+            └─ aisee:apply-guard
+            └─ openspec apply
 ```
 
 `design-assets` 与 `design-spec` 不要求固定先后：有视觉证据时先登记/引用资产再沉淀规范；已有规范时也可以反向指导资产生成。

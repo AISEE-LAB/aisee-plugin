@@ -70,10 +70,13 @@ aisee:srs
   ├─ aisee:architecture         # 可选：技术架构事实、决策、项目约束、共享前置
   └─ aisee:change-plan          # 规划 OpenSpec change 边界
        └─ /opsx:new <change> --schema aisee-app-spec-driven
-            └─ /opsx:continue   # 按 schema 依赖顺序生成 artifacts
-            └─ /opsx:apply
-            └─ /opsx:verify
-            └─ /opsx:archive
+            └─ aisee:change-author
+            └─ openspec validate
+            └─ aisee:implementation-bridge
+            └─ compound plan / work / review / test
+            └─ aisee:verify
+            └─ aisee:apply-guard
+            └─ openspec apply
 ```
 
 约束：

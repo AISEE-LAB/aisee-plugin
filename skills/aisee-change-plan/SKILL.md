@@ -213,7 +213,7 @@ Out of Scope:
 
 ### 规则 7 — 明确 Out-of-Scope
 
-每个 change 必须有非空 Out-of-Scope。它用于防止 `/opsx:apply` 阶段范围膨胀。“显然不包含”的事项也要写明。
+每个 change 必须有非空 Out-of-Scope。它用于防止实现阶段范围膨胀。“显然不包含”的事项也要写明。
 
 ### 规则 8 — 依赖纪律
 
@@ -389,7 +389,7 @@ mkdir -p docs/change-plan
 >
 > **{N} 个 changes** · **{M} 个 phases** · {Y} 个可并行
 >
-> 先运行 Phase 1 的 `/opsx:new` 命令创建 change folders，然后使用 `/opsx:continue` 或对应 change artifact authoring workflow 逐步补齐 artifacts。
+> 先运行 Phase 1 的 `/opsx:new` 命令创建 change folders，然后使用 `aisee:change-author`（必要时配合 `/opsx:continue`）按 schema 逐步补齐 artifacts。
 
 ---
 
@@ -410,15 +410,17 @@ aisee:srs                        ← 需求发现，输出 SRS 文档（docs/req
   ├─ aisee:architecture          ← 技术架构事实、决策与约束（可选但推荐）
   └─ aisee:change-plan <inputs>        ← 本 skill：规划独立 OpenSpec Change 边界
        └─ /opsx:new <change>     ← 创建 Change Folder
-            └─ /opsx:continue    ← 创建 / 补 proposal.md
-            └─ change artifact authoring ← 按 schema 创建 / 补 specs、contracts、tasks
-            └─ /opsx:apply       ← 实现
-            └─ /ce:review        ← 代码审查
-            └─ /opsx:archive     ← 归档
+            └─ aisee:change-author ← 按 schema 创建 / 补 proposal、specs、contracts、tasks、source-map
+            └─ openspec validate
+            └─ aisee:implementation-bridge ← 生成给 Compound 的实现上下文
+            └─ compound plan / work / review / test ← 工程实现与验证
+            └─ aisee:verify       ← 验证 specs / source-map / tasks / 实现一致性
+            └─ aisee:apply-guard  ← apply 前门禁
+            └─ openspec apply     ← 已验证 change 合入 baseline
 ```
 
 当多个 changes 同时进行时，必须显式指定 change 名：
 
 ```bash
-/opsx:apply change-name-3     ← 避免歧义
+openspec apply change-name-3     # 避免歧义
 ```

@@ -35,5 +35,5 @@
 ## Phase 5：上线
 
 - [ ] 5.1 部署到 staging，执行安全验证场景
-- [ ] 5.2 /opsx:verify 通过
+- [ ] 5.2 `aisee:verify` 通过
 - [ ] 5.3 部署到生产环境

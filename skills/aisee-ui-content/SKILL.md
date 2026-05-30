@@ -335,11 +335,13 @@ aisee:srs                         ← 需求发现 → SRS
   ├─ aisee:architecture            ← 技术架构事实、决策、项目约束、共享前置
   └─ aisee:change-plan <inputs>          ← 基于 SRS + UI content + architecture 规划 Change 边界
        └─ /opsx:new <change>
-            └─ /opsx:continue      ← 创建 / 补 proposal.md
-            └─ change artifact authoring ← 按 schema 创建 / 补 specs、contracts、tasks
-            └─ /opsx:apply
-            └─ /ce:review
-            └─ /opsx:archive
+            └─ aisee:change-author ← 按 schema 创建 / 补 proposal、specs、contracts、tasks、source-map
+            └─ openspec validate
+            └─ aisee:implementation-bridge
+            └─ compound plan / work / review / test
+            └─ aisee:verify
+            └─ aisee:apply-guard
+            └─ openspec apply
 ```
 
 大 Epic 推荐：

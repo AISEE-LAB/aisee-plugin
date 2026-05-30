@@ -322,7 +322,10 @@ aisee:srs                         ← 本 skill：需求发现 → SRS 文档
   └─ aisee:change-plan <srs-file>       ← 将 SRS 映射为独立 Change
        └─ /opsx:new <change>   ← 创建 Change Folder
             └─ aisee:change-author       ← 按当前 schema 生成 / 补齐 change artifacts
-            └─ /opsx:apply     ← 实现
-            └─ /ce:review      ← 代码审查
-            └─ /opsx:archive   ← 归档
+            └─ openspec validate
+            └─ aisee:implementation-bridge
+            └─ compound plan / work / review / test
+            └─ aisee:verify
+            └─ aisee:apply-guard
+            └─ openspec apply
 ```
