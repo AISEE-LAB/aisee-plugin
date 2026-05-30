@@ -27,6 +27,9 @@ def main() -> int:
     pack_parser.add_argument("--json", action="store_true", help="output JSON")
     subparsers.add_parser("id")
     subparsers.add_parser("flow")
+    gaps_parser = subparsers.add_parser("gaps")
+    gaps_parser.add_argument("--change", required=True, help="OpenSpec change name")
+    gaps_parser.add_argument("--json", action="store_true", help="output JSON")
     args = parser.parse_args()
 
     if args.version:
@@ -43,12 +46,43 @@ def main() -> int:
         print(json.dumps(pack, ensure_ascii=False, indent=2))
         return 0
 
+    if args.command == "gaps":
+        root = resolve_project_root(Path.cwd())
+        pack = build_context_pack(root, args.change, "aisee-verify")
+        result = {
+            "schema_version": pack["schema_version"],
+            "change": pack["change"],
+            "result": summarize_gaps(pack["gaps"]),
+            "gaps": pack["gaps"],
+            "guardrails": pack["guardrails"],
+            "meta": {
+                "command": f"aisee gaps --change {args.change} --json",
+                "source_context_target": "aisee-verify",
+            },
+        }
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
     print(json.dumps({
         "status": "planned",
         "command": args.command,
         "message": "Aisee CLI scaffold is initialized; implementation pending."
     }, ensure_ascii=False, indent=2))
     return 0
+
+
+def summarize_gaps(gaps: list[dict[str, object]]) -> dict[str, int | str]:
+    blocker = sum(1 for gap in gaps if gap.get("severity") == "blocker")
+    risk = sum(1 for gap in gaps if gap.get("severity") == "risk")
+    info = sum(1 for gap in gaps if gap.get("severity") == "info")
+    status = "blocked" if blocker else ("risk" if risk else "clear")
+    return {
+        "status": status,
+        "blocker": blocker,
+        "risk": risk,
+        "info": info,
+        "total": len(gaps),
+    }
 
 
 if __name__ == "__main__":
