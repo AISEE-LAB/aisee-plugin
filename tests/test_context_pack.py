@@ -194,3 +194,33 @@ def test_cli_gaps_outputs_summary(tmp_path: Path) -> None:
     assert data["change"]["id"] == "add-auth"
     assert data["result"]["status"] == "clear"
     assert data["gaps"] == []
+
+
+def test_cli_change_inspect_outputs_summary(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    env = os.environ.copy()
+    repo_src = Path(__file__).resolve().parents[1] / "src"
+    env["PYTHONPATH"] = str(repo_src)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "aisee_cli.__main__",
+            "change",
+            "inspect",
+            "add-auth",
+            "--json",
+        ],
+        cwd=tmp_path,
+        env=env,
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+
+    data = json.loads(result.stdout)
+    assert data["change"]["id"] == "add-auth"
+    assert data["schema"]["name"] == "aisee-app-spec-driven"
+    assert data["task_state"]["total"] == 2
+    assert "src/auth/session.py" in data["paths"]["code"]

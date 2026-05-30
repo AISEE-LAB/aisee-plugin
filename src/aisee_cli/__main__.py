@@ -19,6 +19,11 @@ def main() -> int:
     subparsers.add_parser("bootstrap")
     subparsers.add_parser("sources")
     subparsers.add_parser("index")
+    change_parser = subparsers.add_parser("change")
+    change_subparsers = change_parser.add_subparsers(dest="change_command")
+    inspect_parser = change_subparsers.add_parser("inspect")
+    inspect_parser.add_argument("change", help="OpenSpec change name")
+    inspect_parser.add_argument("--json", action="store_true", help="output JSON")
     context_parser = subparsers.add_parser("context")
     context_subparsers = context_parser.add_subparsers(dest="context_command")
     pack_parser = context_subparsers.add_parser("pack")
@@ -57,6 +62,30 @@ def main() -> int:
             "guardrails": pack["guardrails"],
             "meta": {
                 "command": f"aisee gaps --change {args.change} --json",
+                "source_context_target": "aisee-verify",
+            },
+        }
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "change" and args.change_command == "inspect":
+        root = resolve_project_root(Path.cwd())
+        pack = build_context_pack(root, args.change, "aisee-verify")
+        parsed = pack["facts"]["parsed"]
+        derived = pack["facts"]["derived"]
+        result = {
+            "schema_version": pack["schema_version"],
+            "change": pack["change"],
+            "schema": parsed["schema"],
+            "artifacts": parsed["schema"]["artifacts"],
+            "task_state": derived["task_state"],
+            "paths": {
+                "code": derived["code_paths"],
+                "tests": derived["test_paths"],
+            },
+            "gaps": summarize_gaps(pack["gaps"]),
+            "meta": {
+                "command": f"aisee change inspect {args.change} --json",
                 "source_context_target": "aisee-verify",
             },
         }
