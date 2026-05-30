@@ -17,10 +17,10 @@ The user provides one of:
 Optional flags the user may include:
 - `--lang zh|en` — output language (default: `zh`, Chinese)
 - `--depth shallow|standard|deep` — dialogue depth (default: `standard`)
-  - `shallow`: skip Phase 3 deepening, suitable for small features
-  - `deep`: add a third dialogue round focused on edge cases and error flows
+  - `shallow`: complete Round 1–2 only, then enter Confirmation Gate if scope, users, main flow, MVP, non-goals, and acceptance direction are clear
+  - `standard`: follow Round 1–4 in `references/question-bank.md`
+  - `deep`: after Round 4, add targeted rounds for complex business rules, baseline conflicts, external collaboration, permissions, and edge cases
 - `--baseline-aware` — 基于现有 OpenSpec baseline specs、active changes 和既有需求文档识别新增 / 修改 / 移除 / 兼容行为。若项目中存在 `openspec/specs/`、`openspec/changes/`、`docs/spec-migration/` 或历史 SRS，默认自动启用。
-- `--ui-handoff` — SRS 生成后追加简短移交说明，列出适合继续扩展为 UI 内容规格的候选模块。不要在 SRS 内展开页面布局、视觉风格或组件设计。
 
 ---
 
@@ -296,7 +296,7 @@ mkdir -p docs/requirements/<YYYY-MM-DD>-<slug>
 - **不要把后续交接提示写成实现方案**。Section 8 只能说明后续需要哪些上下文、哪些 FR/PAGE/业务对象值得关注，不输出 API path、DB 字段、服务拆分或任务清单。
 - **Do not exceed 20 FRs** in a single SRS document (主文档或单份模块文档均适用). If total scope exceeds 20 FRs, flag it as an epic and enter Epic 模式.
 - Every `[ASSUMPTION]` recorded during dialogue must appear in the main document's Section 5.2.
-- **Epic 模式下，每份文档独立完整** — 模块文档不依赖主文档即可被 `aisee:change-plan` 单独处理。
+- **Epic 模式下，每份模块文档必须包含模块上下文摘要** — 即使模块文档链接到主文档，也要包含足够的模块范围、用户/角色、业务对象/状态、关键规则和非目标，确保可被 `aisee:change-plan` 单独处理。
 - **Epic 模式下，每份文档生成后必须暂停** — 不允许连续生成所有文档后才通知用户，每次暂停时等待用户确认继续。
 - **模块划分依据功能边界** — 不按 FR 数量机械切割，避免把同一业务流程的 FR 拆到不同文档。
 - **主文档的 Section 7 必须包含所有 FR 的链接** — 确保主文档可独立作为全局索引使用。

@@ -36,7 +36,7 @@ Read only the blocks that match the FRs being written. These blocks keep SRS pla
 
 **搜索与筛选条件**：
 
-| 条件名 | 控件类型 | 匹配方式 | 默认值 |
+| 条件名 | 输入方式 | 匹配方式 | 默认值 |
 |--------|---------|---------|--------|
 | {条件名} | 输入框 / 下拉 / 日期范围 / 多选 | 模糊/精确/范围 | {默认值或"无"} |
 
@@ -50,7 +50,7 @@ Read only the blocks that match the FRs being written. These blocks keep SRS pla
 - 操作权限控制：{按角色 / 按数据所有权 / 无限制}
 
 **空状态**：
-- 无数据时展示：{空态图 + 提示文案 / 仅提示文案}
+- 无数据时反馈：{提示文案 / 引导操作 / 其他}
 - 搜索无结果时展示：{提示文案}
 ```
 
@@ -69,7 +69,7 @@ Read only the blocks that match the FRs being written. These blocks keep SRS pla
 - {编辑 / 删除 / 状态变更 / 其他操作}：{触发条件，如：仅草稿状态可编辑}
 
 **关联数据展示**：
-- {关联模块名}：{展示方式，如：底部列表 / 侧边栏 / Tab 页签}
+- {关联模块名}：{展示内容与用户可执行操作}
 ```
 
 ## 扩展块 D：外部系统协作
@@ -171,7 +171,7 @@ Read only the blocks that match the FRs being written. These blocks keep SRS pla
 | {其他功能点} | | | |
 
 **无权限时的处理**：
-- 功能入口：{隐藏按钮 / 置灰按钮 + Tooltip}
+- 功能入口：{隐藏 / 禁用并提示原因 / 显示但不可操作}
 - 直接访问受限页面：{跳转登录 / 跳转 403 页 / 显示无权限提示}
 ```
 
@@ -203,5 +203,5 @@ Read only the blocks that match the FRs being written. These blocks keep SRS pla
 
 **审批记录**：
 - 是否保留完整流转历史：{是 / 否}
-- 历史记录展示位置：{详情页时间轴 / 独立记录 Tab / 不展示}
+- 历史记录展示要求：{展示完整流转历史 / 仅展示最近记录 / 不展示}
 ```
