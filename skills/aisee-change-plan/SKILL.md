@@ -1,6 +1,6 @@
 ---
 name: aisee:change-plan
-description: 将已确认的 SRS、UI 内容规格、技术上下文和项目事实映射为可独立交付的 OpenSpec changes。用于规划 change 边界、依赖顺序、并行关系、source-map 初稿和 /opsx:new 命令；不重新做业务模块划分，不重新生成需求。
+description: 将已确认的 SRS、UI 内容规格、设计规范、技术上下文和项目事实映射为可独立交付的 OpenSpec changes。用于规划 change 边界、依赖顺序、并行关系、source-map 初稿和 /opsx:new 命令；不重新做业务模块划分，不重新生成需求。
 ---
 
 # aisee:change-plan — Change Boundary Planner for OpenSpec
@@ -15,7 +15,7 @@ The user provides one of:
 - A raw requirement description (free text)
 - A ticket/issue reference (will be read if MCP is available)
 - A file path to an existing requirements doc (including SRS output from `aisee:srs`)
-- Optional companion inputs: UI content spec from `aisee:ui-content` and technical context from `aisee:tech-context`
+- Optional companion inputs: UI content spec from `aisee:ui-content`, design spec from `aisee:design-spec`, and technical context from `aisee:tech-context`
 
 Optional flags the user may include:
 - `--strategy vertical|risk|parallel` (default: vertical)
@@ -63,6 +63,16 @@ If the user provides a technical context document produced by `aisee:tech-contex
 - Preserve blocking tags such as `[STACK-CONTEXT-MISSING]`, `[STACK-GAP]`, `[STACK-DECISION-REQUIRED]`, `[SPEC-GAP]`, and `[STACK-CONFLICT]` in change rationale when they affect boundaries.
 - Do not reinterpret tech-context hints as a pre-made change list; `aisee:change-plan` still owns final change boundaries, dependencies, names, and `/opsx:new` commands.
 - Do not use `aisee:change-plan` to choose a missing project tech stack. If tech-context marks a stack decision as missing, surface it as a blocker or assumption instead of silently selecting tools.
+
+### Design-spec Input Mode
+
+If the user provides a design spec document produced by `aisee:design-spec`:
+
+- Treat its design strategy, component policy, design tokens, screen patterns, interaction patterns, responsive rules, accessibility rules, and Do/Don't as planning inputs.
+- Preserve blocking tags such as `[DESIGN-DECISION-REQUIRED]` and `[TECH-CONTEXT-MISSING]` in change rationale when they affect boundaries.
+- Do not reinterpret design-spec as a page list; UI Content still owns PAGE / FLOW content scope.
+- Do not use `aisee:change-plan` to create a design system from scratch. If design-spec marks a design decision as missing, surface it as a blocker or assumption instead of silently inventing visual rules.
+- If a shared component policy, token foundation, or cross-page screen pattern must exist before multiple UI changes can proceed, record that as a design prerequisite in the relevant change rationale.
 
 ### SRS Input Mode
 
@@ -281,6 +291,7 @@ Source-map seed:
   APP schema fields:
     PAGE: PAGE-001, PAGE-002 (or "N/A")
     FLOW: FLOW-001 (or "N/A")
+    DS:   expected design rule / pattern IDs or "TBD in ui-contract"
     API:  expected API capability IDs or "TBD in service-contract"
     DATA: expected DATA IDs or "TBD in data-model"
   DEVICE schema fields:
@@ -359,7 +370,7 @@ After saving, output:
 >
 > **{N} changes** across **{M} phases** · {Y} can run in parallel
 >
-> Run the Phase 1 `/opsx:new` commands above to create change folders, then use `/opsx:continue` to fill artifacts step by step. Use `aisee:change-design` only when the selected schema includes `design.md`.
+> Run the Phase 1 `/opsx:new` commands above to create change folders, then use `/opsx:continue` or the relevant change artifact authoring workflow to fill artifacts step by step.
 
 ---
 
@@ -376,12 +387,12 @@ After saving, output:
 ```
 aisee:srs                        ← 需求发现，输出 SRS 文档（docs/requirements/）
   ├─ aisee:ui-content            ← 页面内容规格（可选但推荐）
+  ├─ aisee:design-spec           ← UI 设计规范事实源（UI 型需求可选但推荐）
   ├─ aisee:tech-context          ← 技术事实与约束（可选但推荐）
   └─ aisee:change-plan <inputs>        ← 本 skill：规划独立 OpenSpec Change 边界
        └─ /opsx:new <change>     ← 创建 Change Folder
             └─ /opsx:continue    ← 创建 / 补 proposal.md
-            └─ aisee:change-design  # only if schema includes design.md
-            └─ /opsx:continue    ← 创建 / 补 specs 与 tasks
+            └─ change artifact authoring ← 按 schema 创建 / 补 specs、contracts、tasks
             └─ /opsx:apply       ← 实现
             └─ /ce:review        ← 代码审查
             └─ /opsx:archive     ← 归档

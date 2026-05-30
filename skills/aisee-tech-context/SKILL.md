@@ -194,11 +194,10 @@ mkdir -p docs/tech-context
 ```text
 aisee:srs
   ├─ aisee:ui-content
+  ├─ aisee:design-spec        ← UI 设计规范事实源（UI 型需求可选）
   ├─ aisee:tech-context       ← 本技能：change-plan 前技术事实与约束
-  └─ aisee:change-plan              ← 基于 SRS + UI content + tech-context 拆 change
+  └─ aisee:change-plan              ← 基于 SRS + UI content + design-spec + tech-context 拆 change
        └─ /opsx:new <change>
-            └─ aisee:change-design  # 仅当 schema 包含 design.md
-            └─ specs/
-            └─ tasks.md
+            └─ change artifact authoring
             └─ /opsx:apply
 ```
