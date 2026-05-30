@@ -1,9 +1,9 @@
-# aisee:srs — Standard Document Template
+# aisee:srs — 标准文档模板
 
-Use this template when FR <= 10, modules < 3, and no complex expansion blocks require Epic mode.
+当 FR <= 10、模块 < 3，且没有复杂扩展块需要 Epic 模式时，使用本模板。
 
 ```markdown
-# 软件需求规格说明书
+# 需求规格说明书
 
 **文档编号**：SRS-{YYYY-MM-DD}-{slug}
 **版本**：v1.0
@@ -16,17 +16,25 @@ Use this template when FR <= 10, modules < 3, and no complex expansion blocks re
 ## 1. 引言
 
 ### 1.1 目的
-本文档描述 {系统/功能名称} 的软件需求，供开发团队、产品负责人及相关干系人使用。
+本文档描述 {系统/功能名称} 的需求，供开发团队、产品负责人及相关干系人使用。
 
 ### 1.2 范围
 {两到三句话说明系统边界：它做什么、不做什么、与哪些系统交互}
 
-### 1.3 术语与缩写
+### 1.3 需求域
+| 项 | 内容 |
+|----|------|
+| 需求域 | software / backend / cli / job / hardware / embedded / hybrid |
+| 交付形态 | {Web / App / 小程序 / 桌面 / 后端服务 / CLI / Job / 设备 / 固件 / 混合系统} |
+| 域识别依据 | {用户说明 / 项目上下文 / 假设} |
+| 下游重点 | UI Content / Design Spec / Architecture / service contract / cli contract / job contract / hardware contract / firmware contract / verification contract |
+
+### 1.4 术语与缩写
 | 术语 | 定义 |
 |------|------|
 | {term} | {definition} |
 
-### 1.4 参考文档
+### 1.5 参考文档
 - {已引用文档，或填"暂无"}
 
 ---
@@ -57,6 +65,7 @@ Use this template when FR <= 10, modules < 3, and no complex expansion blocks re
 | CLI / 工具 | 是/否 | {谁在什么场景调用} | 需要 / 不需要 cli contract |
 | 异步任务 / 定时任务 / 导入导出 | 是/否 | {业务处理目的} | 需要 / 不需要 job contract |
 | 通知 / 消息 / 外部系统协作 | 是/否 | {触发和接收场景} | 需要 / 不需要 service/job contract |
+| 设备 / 硬件 / 固件 / 嵌入式能力 | 是/否 | {设备或操作者可观察的能力、输入输出、状态或故障行为} | 需要 / 不需要 hardware / firmware / runtime / verification contract |
 
 ### 2.5 现有基线影响
 
@@ -72,7 +81,9 @@ Use this template when FR <= 10, modules < 3, and no complex expansion blocks re
 
 > 每条需求使用唯一 ID（FR-001、FR-002…），便于 `aisee:change-plan` 引用和追踪。
 
-### 3.1 {功能模块名称}
+### 3.1 {能力模块名称}
+
+> 模块名称必须来自业务能力、用户任务、设备能力或状态生命周期；不要直接使用输入文档章节、页面类型、技术层或任务阶段。
 
 #### FR-001 {需求标题}
 

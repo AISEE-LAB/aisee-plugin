@@ -1,9 +1,9 @@
-# aisee:srs — Epic Main Document Template
+# aisee:srs — Epic 主文档模板
 
-Use this template only in Epic mode. The main document omits Section 3 FR details and acts as the global overview and index.
+仅在 Epic 模式下使用本模板。主文档不展开 Section 3 的 FR 详情，只作为全局概览和索引。
 
 ```markdown
-# 软件需求规格说明书（主文档）
+# 需求规格说明书（主文档）
 
 **文档编号**：SRS-{YYYY-MM-DD}-{slug}-main
 **版本**：v1.0
@@ -20,23 +20,37 @@ Use this template only in Epic mode. The main document omits Section 3 FR detail
 | {模块 A} | [`./01-{module-a}.md`](./01-{module-a}.md) | FR-001 ~ FR-00X | P0 |
 | {模块 B} | [`./02-{module-b}.md`](./02-{module-b}.md) | FR-00X ~ FR-00Y | P1 |
 
+### 模块划分依据
+
+| 候选模块 / 输入章节 | 处理结果 | 原因 |
+|---------------------|----------|------|
+| {candidate} | 保留 / 合并 / 拒绝 | {能力边界 / 只是背景材料 / 只是技术层 / 只是页面类型 / 与其他模块同属一个流程} |
+
 ---
 
 ## 1. 引言
 
 ### 1.1 目的
-本文档描述 {系统/功能名称} 的软件需求，供开发团队、产品负责人及相关干系人使用。
-各功能模块的详细 FR 见上方"模块文档索引"中的对应文档。
+本文档描述 {系统/功能名称} 的需求，供开发团队、产品负责人及相关干系人使用。
+各能力模块的详细 FR 见上方"模块文档索引"中的对应文档。
 
 ### 1.2 范围
 {两到三句话说明系统边界：它做什么、不做什么、与哪些系统交互}
 
-### 1.3 术语与缩写
+### 1.3 需求域
+| 项 | 内容 |
+|----|------|
+| 需求域 | software / backend / cli / job / hardware / embedded / hybrid |
+| 交付形态 | {Web / App / 小程序 / 桌面 / 后端服务 / CLI / Job / 设备 / 固件 / 混合系统} |
+| 域识别依据 | {用户说明 / 项目上下文 / 假设} |
+| 下游重点 | UI Content / Design Spec / Architecture / service contract / cli contract / job contract / hardware contract / firmware contract / verification contract |
+
+### 1.4 术语与缩写
 | 术语 | 定义 |
 |------|------|
 | {term} | {definition} |
 
-### 1.4 参考文档
+### 1.5 参考文档
 - {已引用文档，或填"暂无"}
 
 ---
@@ -67,6 +81,7 @@ Use this template only in Epic mode. The main document omits Section 3 FR detail
 | CLI / 工具 | 是/否 | {谁在什么场景调用} | 需要 / 不需要 cli contract |
 | 异步任务 / 定时任务 / 导入导出 | 是/否 | {业务处理目的} | 需要 / 不需要 job contract |
 | 通知 / 消息 / 外部系统协作 | 是/否 | {触发和接收场景} | 需要 / 不需要 service/job contract |
+| 设备 / 硬件 / 固件 / 嵌入式能力 | 是/否 | {设备或操作者可观察的能力、输入输出、状态或故障行为} | 需要 / 不需要 hardware / firmware / runtime / verification contract |
 
 ### 2.5 现有基线影响
 

@@ -1,6 +1,6 @@
-# aisee:srs — Epic Module Document Template
+# aisee:srs — Epic 模块文档模板
 
-Use this template for each module document in Epic mode.
+Epic 模式下，每份模块文档使用本模板。
 
 ```markdown
 # {模块名称} — 需求详情文档
@@ -25,6 +25,7 @@ Use this template for each module document in Epic mode.
 | 目标用户 / 角色 | {本模块涉及的用户或角色} |
 | 模块范围 | {本模块做什么} |
 | 模块非目标 | {本模块明确不做什么} |
+| 模块边界依据 | {用户任务 / 业务能力 / 设备能力 / 状态生命周期；不要写输入材料章节名} |
 | 业务对象 / 状态 | {本模块涉及的业务对象、关键状态和状态变化} |
 | 关键业务规则 | {本模块内必须保持一致的规则} |
 | 依赖 / 关联模块 | {依赖的模块、流程或上游文档；无则写“无”} |
@@ -35,7 +36,9 @@ Use this template for each module document in Epic mode.
 
 > 每条需求使用唯一 ID（FR-001、FR-002…），与主文档 Section 7 对应。
 
-### 3.{N} {功能模块名称}
+### 3.{N} {能力模块名称}
+
+> 模块名称必须来自业务能力、用户任务、设备能力或状态生命周期；不要直接使用输入文档章节、页面类型、技术层或任务阶段。
 
 #### FR-{XXX} {需求标题}
 

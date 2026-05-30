@@ -1,20 +1,21 @@
-# aisee:srs — Writing Rules
+# aisee:srs — 写作规则
 
-Read this file before generating any SRS document.
+生成任何 SRS 文档前读取本文件。
 
-## Requirement Quality Checklist
+## 需求质量检查清单
 
-Apply to each FR before writing it:
+写入每条 FR 前，先应用以下检查：
 
-- [ ] Describes what the system does, not how (no implementation decisions)
-- [ ] Testable: a QA engineer can write a test case from it
-- [ ] No framework choices, API endpoint names, or DB schema details
-- [ ] Priority is assigned (P0 / P1 / P2)
-- [ ] Dependencies on other FRs are explicit
-- [ ] Contains enough business context to support UI Content, Architecture, and Change Plan handoff
-- [ ] Scenario extension appended when relevant
+- [ ] 描述系统要做什么，而不是如何实现，不包含实现决策
+- [ ] 可测试，QA 可以据此写出测试用例
+- [ ] 不包含框架选择、API endpoint 名称或数据库 schema 细节
+- [ ] 已分配优先级（P0 / P1 / P2）
+- [ ] 明确依赖的其他 FR
+- [ ] 包含足够业务上下文，可支撑 UI Content、Architecture 和 Change Plan 交接
+- [ ] 相关时已追加场景扩展块
+- [ ] 已按需求域记录行为，但未写成实现设计
 
-Fix silently if a requirement fails these checks. Do not stop to ask unless the missing information can change scope or correctness.
+如果某条需求不满足检查项，优先静默修正。只有缺失信息会改变范围或正确性时，才停止追问。
 
 ## FR 写作规则：基础块 + 场景扩展块
 
@@ -36,7 +37,17 @@ Fix silently if a requirement fails these checks. Do not stop to ask unless the 
 | 权限/角色 | 关键词：权限、角色、访问控制、可见范围 |
 | 工作流/审批 | 关键词：审批、流程、状态流转、待办、驳回 |
 
-## Section Writing Notes
+对硬件 / 嵌入式 / 固件需求，除非需求确实包含 UI、外部集成、通知、权限、工作流或导入导出行为，否则不要强行套用上述软件场景扩展块。使用 `domain-rules.md`，让 FR 聚焦在外部可观察的设备行为或操作者行为。
+
+## 模块边界规则
+
+- 决定 Epic 模式模块前，先读取 `module-boundary-rules.md`。
+- 模块标题必须描述能力边界、用户任务、设备能力或状态生命周期。
+- 不要把来源文档标题、UI 页面分类、技术层、架构主题、schema artifact 名称、测试计划或实现阶段当作 SRS 模块。
+- 如果输入章节包含有效需求但不是有效模块，提取其背后的能力，并放入有效模块。
+- 如果模块候选被拒绝或合并，在 Epic 主文档的模块划分依据中摘要说明。
+
+## 章节写作说明
 
 ### Section 3：场景扩展块使用原则
 
@@ -46,6 +57,7 @@ Fix silently if a requirement fails these checks. Do not stop to ask unless the 
 - 扩展块中的枚举选项应使用实际值，不保留括号内的选项列表。
 - 扩展块只记录功能性 UI / 业务合约：字段、列、筛选、操作、状态、校验、权限、反馈。不要写视觉布局、组件库、颜色、图标或具体排版。
 - 如果需要进一步说明页面清单、页面内容、页面元素和跨页面交互流程，在 SRS 之后生成独立 UI Content，不要塞进 FR 正文。
+- 硬件 / 嵌入式需求只写设备能力、操作环境、输入输出业务含义、可观察状态、故障表现和验收方向；不要写引脚、寄存器、RTOS 任务、驱动结构、BOM、PCB 或制造细节。
 
 ### Section 5.2：假设
 

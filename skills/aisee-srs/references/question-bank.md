@@ -1,32 +1,32 @@
-# aisee:srs — Question Bank
+# aisee:srs — 问题库
 
-Reference file for Phase 2 discovery dialogue. Read this at the start of Phase 2.
-
----
-
-## Round Progression
-
-```
-Round 1: 业务目标与用户       — 建立问题、用户、成功标准和范围边界
-Round 2: 核心能力与业务流程   — 建立主流程、MVP、非目标和验收方向
-Round 3: 业务对象、规则、权限 — 填充数据概念、状态、权限和业务规则
-Round 4 (standard/deep): 异常、约束、基线影响、外部协作 — 补全边界条件
-Round 4+ (deep or user raises new topics): 针对性追问
-```
-
-For `--depth shallow`: stop after Round 2 and proceed to the Confirmation Gate, but only if scope, core users, main flow, MVP, non-goals, and acceptance direction are clear enough for a draft SRS.
+Phase 2 需求探讨使用的参考文件。进入 Phase 2 时读取。
 
 ---
 
-## Over-limit Warning (Round 8+)
+## 轮次推进
 
-After Round 8, if the user has not yet confirmed requirements are complete, display:
+```
+第 1 轮：业务目标与用户       — 建立问题、用户、成功标准和范围边界
+第 2 轮：核心能力与业务流程   — 建立主流程、MVP、非目标和验收方向
+第 3 轮：业务对象、规则、权限 — 填充数据概念、状态、权限和业务规则
+第 4 轮（standard/deep）：异常、约束、基线影响、外部协作 — 补全边界条件
+第 4 轮后（deep 或用户提出新主题）：针对性追问
+```
+
+对于 `--depth shallow`：第 2 轮后停止并进入确认门禁，但前提是范围、核心用户、主流程、MVP、非目标和验收方向已经足够支撑 SRS 草案。
+
+---
+
+## 过轮提醒（第 8 轮后）
+
+第 8 轮后，如果用户仍未确认需求完整，展示：
 
 > ⚠️ **提示**：我们已经进行了 8 轮探讨。建议在下一轮结束后确认需求范围，避免过度发散。如果核心问题还未覆盖，请直接告诉我重点是什么。
 
 ---
 
-## Question Bank by Theme
+## 按主题划分的问题库
 
 Select questions based on what remains unclear after each user response. Do **not** ask all of them.
 
@@ -36,7 +36,8 @@ Select questions based on what remains unclear after each user response. Do **no
 - 目标用户 / 角色是谁？他们各自的核心诉求是什么？
 - 业务成功的判断标准是什么？上线后怎样算“解决了问题”？
 - 这是全新能力，还是替换、增强、兼容或移除现有能力？
-- 需求属于哪个业务范围？明确不覆盖哪些范围？
+- 需求属于哪个业务范围和交付形态？是软件、后端服务、CLI、Job、硬件、嵌入式、固件，还是混合系统？
+- 明确不覆盖哪些范围？
 
 ### 核心能力与业务流程（Round 2）
 
@@ -46,6 +47,7 @@ Select questions based on what remains unclear after each user response. Do **no
 - MVP 范围是什么？哪些功能是未来迭代的？
 - 对每个核心能力，用户输入是什么、系统产出什么、失败时用户期望什么？
 - 哪些能力必须同一期交付，哪些可以拆到后续 change？
+- 如果输入材料已经按章节组织，哪些章节是真正的业务/设备能力，哪些只是背景、技术、设计、测试或实施材料？
 
 ### 业务对象与状态（Round 3）
 
@@ -100,19 +102,31 @@ Select questions based on what remains unclear after each user response. Do **no
 - 需要考虑国际化、无障碍访问吗？
 - 有合规、审计日志、数据留存方面的要求吗？
 
+### 硬件 / 嵌入式 / 固件（按需使用）
+
+> 只问需求层面的设备行为和验收边界，不问架构实现。
+
+- 目标设备或运行环境是什么？用户或操作者能观察到哪些能力？
+- 设备需要接收哪些输入、产生哪些输出？这些输入输出在业务上分别代表什么？
+- 是否有安全、可靠性、精度、功耗、环境、寿命、维护或校准要求？
+- 设备有哪些可观察状态、故障状态或降级行为？操作者应如何感知？
+- 验收时如何判断该设备能力满足需求？需要哪些业务级测试或现场场景？
+- 是否涉及云端、App、小程序、上位机或后台服务协作？协作目的是什么？
+
 ### 后续交接判断（确认门禁前使用）
 
 - 这个需求是否需要 UI Content？如果需要，是因为多页面、多端、复杂交互、权限可见性，还是状态反馈复杂？
 - 这个需求是否需要 Architecture？如果需要，是因为既有系统改造、技术栈未明确、复用能力未知、外部系统、异步任务、数据迁移或权限复杂？
+- 如果是硬件 / 嵌入式 / 混合系统，Architecture 是否需要补充设备能力、运行环境、资源约束、固件/硬件边界或验证约束？
 - 传给 `aisee:change-plan` 时，哪些 FR 可能必须放在同一 change，哪些可以独立拆分？
 - 哪些问题必须在 change authoring 前确认，哪些可以作为 Open Questions 进入后续阶段？
 
 ---
 
-## Assumption Handling
+## 假设处理
 
-If the user gives an incomplete answer and the missing info is not blocking, record an assumption and move forward:
+如果用户回答不完整，但缺失信息不阻塞范围判断，则记录假设并继续推进：
 
 > `[ASSUMPTION] 已假设 {内容} — 影响需求 {FR-xxx} — 请在确认前核实。`
 
-Block progress only when the scope could diverge by more than 30% depending on the answer.
+只有当答案可能导致范围偏差超过 30% 时，才阻塞继续推进。

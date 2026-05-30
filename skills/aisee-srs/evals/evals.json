@@ -15,6 +15,16 @@
       "name": "baseline-aware-refactor",
       "prompt": "基于现有订单系统整理 SRS：现在订单取消规则太乱，要改成待支付订单 30 分钟未支付自动取消，已支付订单只能由客服退款，用户手动取消只允许在待支付状态。需要兼容已有订单状态展示。",
       "expected_output": "应启用 baseline-aware 思路，追问或记录现有状态、兼容行为、用户可见变化和冲突；生成的 SRS 应标注变更类型、影响基线、业务状态流转和 Open Questions；不得输出迁移脚本、表结构或接口设计。"
+    },
+    {
+      "name": "misleading-source-headings",
+      "prompt": "帮我把这份初稿整理成 SRS。初稿章节包括：背景、目标、UI 页面、API 设计、数据库设计、测试计划、上线计划。实际需求是客服可以处理退款申请，财务可以查看退款报表，用户可以查看退款状态。",
+      "expected_output": "应识别输入章节中大部分不是 SRS 模块，不能把 UI 页面、API 设计、数据库设计、测试计划或上线计划当作功能模块。应把模块候选收敛到退款处理、退款报表、退款状态查看等业务能力，并把接口、数据库、测试和上线内容作为后续 Architecture/change artifact 提示或 Open Questions。"
+    },
+    {
+      "name": "embedded-device-requirement",
+      "prompt": "整理一个嵌入式设备 SRS：设备需要周期性采集温湿度，超过阈值时本地蜂鸣提醒，并把状态通过串口给上位机。现场维护人员需要能判断传感器异常。现在先写需求，不要写固件实现。",
+      "expected_output": "应识别为 embedded/hardware 需求域，SRS 应描述设备能力、输入输出业务含义、阈值提醒、异常状态、维护人员可观察行为和验收方向；不得输出引脚表、寄存器、RTOS 任务、驱动结构、固件代码或硬件架构。Section 8 应提示 Architecture 和硬件/固件/验证类 change artifacts 可能需要补充。"
     }
   ]
 }
