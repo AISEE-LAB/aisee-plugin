@@ -96,7 +96,7 @@ aisee bootstrap --apply
 
 高影响操作必须确认：
 
-- 覆盖或修改 `AGENTS.md`、`CLAUDE.md`、`openspec/project.md`。
+- 覆盖或修改 `AGENTS.md`、旧项目兼容用 `CLAUDE.md`、`openspec/project.md`。
 - 修改 `.codex/hooks.json`。
 - 安装全局依赖。
 - 删除、迁移或重命名已有文件。

@@ -20,7 +20,7 @@ description: 初始化、审计和修复 Aisee/OpenSpec/Compound 项目基础设
 ## 安全规则
 
 - 默认先输出 plan，不直接覆盖已有文件。
-- 修改 `AGENTS.md`、`CLAUDE.md`、`openspec/project.md`、hooks 前必须确认影响。
+- 修改 `AGENTS.md`、旧项目兼容用 `CLAUDE.md`、`openspec/project.md`、hooks 前必须确认影响。
 - 不静默安装全局依赖。
 - 不替代 `openspec init` 的内部逻辑；需要初始化 OpenSpec 时调用 OpenSpec CLI。
 

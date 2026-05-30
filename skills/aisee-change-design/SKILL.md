@@ -95,8 +95,8 @@ description: >-
 ```bash
 cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
-cat CLAUDE.md 2>/dev/null | head -160
 cat AGENTS.md 2>/dev/null | head -160
+cat CLAUDE.md 2>/dev/null | head -80
 find . -maxdepth 3 \( -name package.json -o -name pnpm-lock.yaml -o -name yarn.lock -o -name package-lock.json -o -name pyproject.toml -o -name requirements.txt -o -name Gemfile -o -name go.mod -o -name Cargo.toml -o -name pom.xml -o -name build.gradle -o -name composer.json -o -name prisma -o -name drizzle -o -name migrations -o -name schema.sql -o -name openapi.yaml -o -name openapi.json \) 2>/dev/null | head -80
 ```
 

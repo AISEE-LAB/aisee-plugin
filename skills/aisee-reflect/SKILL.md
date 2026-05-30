@@ -405,7 +405,7 @@ _Date: YYYY-MM-DD_
 
 ## Phase 5 — 更新索引
 
-写入任何 `docs/reflect/` 产物后，检查项目根目录是否有 `CLAUDE.md`、`AGENTS.md` 或其他项目规则索引。
+写入任何 `docs/reflect/` 产物后，检查项目根目录是否有 `AGENTS.md`、旧项目兼容用 `CLAUDE.md` 或其他项目规则索引。
 
 - 如果已有 `docs/reflect` 入口，不重复添加。
 - 如果存在项目规则文件但没有入口，建议用户确认是否添加索引；不要擅自改全局规则。

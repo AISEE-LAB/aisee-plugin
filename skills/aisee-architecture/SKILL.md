@@ -67,8 +67,8 @@ description: 在 aisee:change-plan 之前生成跨工程域技术架构文档，
 ```bash
 cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
-cat CLAUDE.md 2>/dev/null | head -160
 cat AGENTS.md 2>/dev/null | head -160
+cat CLAUDE.md 2>/dev/null | head -80
 find . -maxdepth 3 \( -name package.json -o -name pnpm-lock.yaml -o -name yarn.lock -o -name package-lock.json -o -name pyproject.toml -o -name requirements.txt -o -name Gemfile -o -name go.mod -o -name Cargo.toml -o -name pom.xml -o -name build.gradle -o -name composer.json -o -name prisma -o -name drizzle -o -name migrations -o -name schema.sql -o -name openapi.yaml -o -name openapi.json \) 2>/dev/null | head -80
 find . -maxdepth 4 \( -iname 'CMakeLists.txt' -o -iname 'Makefile' -o -iname '*.ioc' -o -iname '*.dts' -o -iname '*.dtsi' -o -iname 'platformio.ini' -o -iname 'west.yml' -o -iname 'Kconfig' -o -iname '*.ld' -o -iname '*.sv' -o -iname '*.v' -o -iname '*.xdc' -o -iname '*.sdc' \) 2>/dev/null | head -80
 find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*stack*' -o -iname '*design*' -o -iname '*hardware*' -o -iname '*firmware*' -o -iname '*rtos*' -o -iname '*driver*' \) 2>/dev/null | head -80

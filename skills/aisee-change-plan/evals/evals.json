@@ -14,6 +14,27 @@
       "prompt": "需求很小：后台优惠券列表增加一个按状态筛选的下拉筛选项。已有项目、权限和列表页都存在。请判断是否需要规划多个 change。",
       "expected_output": "判断这是单个小 change，不为了流程而规划多个 change。输出一个 change 详情块和单条 /opsx:new 命令，不得输出 /opsx:propose，也不得新增未确认的后端、数据库或 UI 需求。",
       "files": []
+    },
+    {
+      "id": 3,
+      "name": "reject-source-headings-as-change-boundaries",
+      "prompt": "基于一份 SRS 草稿规划 change。草稿章节包括：背景、UI 页面、API 设计、数据库设计、测试计划、上线计划。真实 FR 是：FR-001 客服处理退款申请；FR-002 财务查看退款报表；FR-003 用户查看退款状态。请输出 change-plan。",
+      "expected_output": "不得把背景、UI 页面、API 设计、数据库设计、测试计划或上线计划规划成同名 change。应围绕退款处理、退款报表、退款状态查看等可独立交付能力规划 change，并在整体理由中说明输入章节被拒绝或合并为边界提示。每个 change 必须包含 FR 引用、Out of Scope 和 source-map seed。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "architecture-decision-required-blocker",
+      "prompt": "根据 SRS 和 Architecture 规划 change：FR-001 需要新增实时库存扣减；FR-002 下单时校验库存；FR-003 库存不足通知。Architecture 标注 [ARCHITECTURE-DECISION-REQUIRED] 库存一致性策略未确认，可能是同步锁、异步预占或第三方库存服务。",
+      "expected_output": "必须保留 [ARCHITECTURE-DECISION-REQUIRED]，不得替用户选择库存一致性方案。若该决策影响独立交付边界，应输出需要先补 Architecture 决策的 blocker 或将其作为首个风险验证/决策 change，而不是直接规划具体实现边界。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "device-schema-source-map-seed",
+      "prompt": "为嵌入式设备需求规划 change：FR-001 周期性采集温湿度；FR-002 超阈值本地蜂鸣提醒；FR-003 传感器异常时通过串口给上位机状态。SRS 标注需求域为 embedded，architecture 标注板级引脚和传感器型号仍待确认。",
+      "expected_output": "应选择或建议 aisee-device-spec-driven，输出设备类 source-map seed，包含 HW/FW/RT/VER 或 TBD in 对应 contract。不得输出 Web/API/DB 字段或把 I2C/UART/RTOS 等技术资源直接作为 change 边界；板级引脚和传感器型号未确认应作为 blocker 或 Open Question。",
+      "files": []
     }
   ]
 }
