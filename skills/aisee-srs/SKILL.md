@@ -177,19 +177,22 @@ If the user corrects something, update the internal model and re-present the sum
 ### 标准模式（FR ≤ 10，模块 < 3，无复杂扩展块）
 
 Upon confirmation:
-1. **Read `assets/srs-template.md`** 中的"标准文档模板"部分
-2. Populate the template with all information gathered during dialogue
-3. Apply the Requirement Quality Checklist (in the template) to each FR before writing it
-4. 如果启用 baseline-aware mode，填写 Section 2.5，并为每条 FR 填写“变更类型”和“影响基线”。
-5. 填写 Section 8（后续交接提示），说明是否建议继续生成 UI Content、Tech Context，以及传给 `aisee:change-plan` 时需要注意的业务边界。只写规划提示，不展开实现级设计。
+1. **Read `assets/srs-template.md`** to confirm template routing.
+2. Read `references/writing-rules.md`.
+3. Read `assets/srs-template-standard.md`.
+4. Read only the relevant blocks from `references/scenario-extension-blocks.md`.
+5. Populate the template with all information gathered during dialogue.
+6. Apply the Requirement Quality Checklist to each FR before writing it.
+7. 如果启用 baseline-aware mode，填写 Section 2.5，并为每条 FR 填写“变更类型”和“影响基线”。
+8. 填写 Section 8（后续交接提示），说明是否建议继续生成 UI Content、Tech Context，以及传给 `aisee:change-plan` 时需要注意的业务边界。只写规划提示，不展开实现级设计。
 
 ### Epic 模式（超出阈值）
 
-**Read `assets/srs-template.md`** 中的"主文档模板"和"模块文档模板"部分，按以下顺序逐份生成。**每份生成后暂停并告知用户进度**，再继续下一份：
+Read `assets/srs-template.md` to confirm template routing, then generate documents in the following order. **每份生成后暂停并告知用户进度**，再继续下一份：
 
 **Step 1 — 生成主文档**
 
-读取 `assets/srs-template.md` 中的"主文档模板"部分，填充：
+读取 `references/writing-rules.md` 和 `assets/srs-template-epic-main.md`，填充：
 - Section 1（引言）、Section 2（整体描述）
 - Section 4（非功能需求，完整版）
 - Section 5（约束与假设，完整版，包含所有 `[ASSUMPTION]`）
@@ -204,7 +207,7 @@ Upon confirmation:
 
 **Step 2 — 逐模块生成详情文档**
 
-每份模块文档读取 `assets/srs-template.md` 中的"模块文档模板"部分，只包含：
+每份模块文档读取 `references/writing-rules.md`、`assets/srs-template-epic-module.md`，并按需读取 `references/scenario-extension-blocks.md` 中匹配的扩展块。模块文档只包含：
 - 模块引言（1–2 句，说明该模块职责及与主文档的关系）
 - Section 3（该模块的全部 FR，含完整场景扩展块）
 - Section 4（本模块特有的非功能补充；没有则写"无"）
