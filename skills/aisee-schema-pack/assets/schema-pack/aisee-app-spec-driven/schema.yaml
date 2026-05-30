@@ -1,11 +1,17 @@
 name: aisee-app-spec-driven
-version: 1
+version: 2
 description: |
-  适用场景：需要把 SRS、UI 内容规格、技术架构与 OpenSpec change 强绑定的功能开发。
-  与官方 spec-driven 的区别：在 proposal 之后增加 source-map.md 作为上游证据索引，
-  并将工程设计拆成 design.md、ui-contract.md、data-model.md、service-contract.md。
-  不适用的 contract artifact 必须写 N/A 原因，避免前端-only 或后端-only change 被无效流程拖慢。
+  适用场景：App、小程序、Web、桌面软件、后端/API、CLI/工具、异步任务和常规全栈开发。
+  本 schema 承接 change 前的 SRS、UI Content、Architecture 和 Change Plan，把它们压缩成
+  单个 OpenSpec change 内可实现、可验证、可追踪的 artifacts。
+  与官方 spec-driven 的区别：增加 source-map.md 作为 ID 路由表，增加 change-context.md 承接
+  本 change 相关架构约束，并按需生成 ui-contract.md、service-contract.md、data-model.md。
+  不适用的 contract artifact 必须写 N/A 原因，避免前端-only、后端-only、CLI-only 或 job-only
+  change 被无效流程拖慢。
+  正式 ID 必须来自 .aisee/id-registry.json。AI 不得临时发明正式 ID；工具不可用时只能使用
+  {{scope}}:<TYPE>-NEW-001 形式的临时占位符并标注 [ID-RESERVATION-REQUIRED]。
   创建时间：2026-05-24
+  更新：2026-05-30
   维护人：@aisee
 
 artifacts:
@@ -17,21 +23,28 @@ artifacts:
     instruction: |
       proposal.md 必须明确：
       - 背景、问题、目标和非目标
-      - 本 change 的需求、页面、接口、数据范围
+      - 本 change 覆盖的上游完整 ID，包括 FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK
+      - 正式 ID 必须来自 .aisee/id-registry.json；未分配 ID 时只使用临时占位符并标注 [ID-RESERVATION-REQUIRED]
       - 成功标准必须可验证
+      - 不要复制 SRS、UI Content 或 Architecture 全文
       - 不要写实现细节、接口字段或数据库字段；这些分别进入 contract artifacts
 
   - id: source-map
     generates: source-map.md
-    description: "来源映射：绑定 SRS、UI 内容规格、技术架构、change-plan 结果与本 change 范围"
+    description: "ID 路由表：绑定 SRS、UI Content、Architecture、Change Plan、change artifacts、tasks、代码和验证证据"
     template: source-map.md
     requires: [proposal]
     instruction: |
       source-map.md 是本 schema 的追踪核心，必须：
       - 列出上游来源：SRS、UI Content、Architecture、Change Plan、Issue 或用户输入
-      - 映射本 change 覆盖的 FR / PAGE / FLOW / API / DATA
+      - 使用完整 ID（如 auth:FR-001）建立追踪关系；短 ID 只用于人类阅读
+      - 生成或引用正式 ID 前必须通过 Aisee CLI / .aisee/id-registry.json 校验；不得由 AI 临时编正式编号
+      - 映射上游输入 ID：FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK
+      - 映射本 change 产出 ID：SPEC / API / DATA / TASK / TEST
       - 明确不在范围内的上游条目
-      - 声明 ui-contract.md、data-model.md、service-contract.md 是否适用
+      - 声明 change-context.md、ui-contract.md、service-contract.md、data-model.md 是否适用
+      - 记录 ID 是否来自 .aisee/id-registry.json；不得让 AI 临时发明编号
+      - 工具不可用时使用 {{scope}}:<TYPE>-NEW-001 临时占位符，并标注 [ID-RESERVATION-REQUIRED]
       - 保留 [ASSUMPTION]、[SPEC-GAP]、[STACK-CONTEXT-MISSING]、[STACK-DECISION-REQUIRED]、[ARCHITECTURE-DECISION-REQUIRED]、[STACK-CONFLICT] 等阻塞标签
 
   - id: specs
@@ -42,75 +55,88 @@ artifacts:
     instruction: |
       specs 必须只描述用户可观察行为和验收条件：
       - 使用 SHALL/MUST 或 Given/When/Then 场景表达行为
-      - 覆盖 source-map.md 中本 change 的 FR
-      - 可以引用 PAGE / API / DATA ID 作为追踪信息，但不要写布局、接口字段或数据库字段
+      - SPEC ID 必须来自 .aisee/id-registry.json；未分配时使用临时占位符并标注 [ID-RESERVATION-REQUIRED]
+      - 覆盖 source-map.md 中本 change 的 FR / NFR / RULE / FLOW / STATE
+      - 可以引用 PAGE / API / DATA / CONSTRAINT ID 作为追踪信息，但不要写布局、接口字段或数据库字段
       - 发现需求缺口时标注 [SPEC-GAP]，不要自行新增业务需求
 
-  - id: design
-    generates: design.md
-    description: "总体技术方案：架构边界、职责划分、状态机、权限模型和关键决策"
-    template: design.md
+  - id: change-context
+    generates: change-context.md
+    description: "Change 技术上下文：本 change 如何承接 Architecture 的架构边界、决策、约束和风险"
+    template: change-context.md
     requires: [specs]
     instruction: |
-      design.md 必须先于各 contract 生成，负责总体技术设计：
+      change-context.md 必须只描述本 change 相关的技术上下文：
       - 读取 proposal.md、source-map.md 和 specs
-      - 明确前后端职责、数据归属、同步/异步策略、权限模型、状态机归属
-      - 记录关键技术决策、风险、取舍和约束来源
-      - 不要展开完整页面字段、接口请求响应或表字段；这些进入对应 contract
+      - 承接 Architecture 中与本 change 相关的 ARCH / DEC / CONSTRAINT / RISK
+      - 新增局部 DEC / CONSTRAINT / RISK ID 前必须通过 ID registry 预留
+      - 记录本 change 的局部技术决策、约束、阻塞项和允许偏差
+      - 说明哪些约束必须进入 ui-contract.md、service-contract.md、data-model.md 或 tasks.md
+      - 不要重写全局 Architecture，不要展开页面字段、接口请求响应或表字段
 
   - id: ui-contract
     generates: ui-contract.md
-    description: "前端合同：页面内容、粗布局、交互状态、前端数据需求"
+    description: "UI 合同：页面内容结构、交互状态、权限可见性和前端数据需求"
     template: ui-contract.md
-    requires: [design]
+    requires: [source-map, specs, change-context]
     instruction: |
       ui-contract.md 仅在涉及页面、弹窗、交互、表单、权限可见性或前端数据需求时适用。
       如果不适用，必须写 N/A 原因。
       适用时必须覆盖：
       - 页面 / 弹窗 / 全局入口清单
-      - 页面内容、粗布局、操作、状态反馈和权限可见性
+      - 新增 PAGE / FLOW / STATE ID 前必须通过 ID registry 预留
+      - 页面内容结构、区块、操作、状态反馈和权限可见性
       - 前端需要的数据与来源能力
-      - FR / PAGE / FLOW / API 的追踪关系
+      - FR / NFR / RULE / PAGE / FLOW / STATE / API / DATA / CONSTRAINT 的追踪关系
+      - 不要写视觉设计、组件库、配色、排版或像素布局
 
   - id: data-model
     generates: data-model.md
     description: "数据模型合同：实体、表、字段、关系、约束、索引、迁移"
     template: data-model.md
-    requires: [design]
+    requires: [source-map, specs, change-context]
     instruction: |
       data-model.md 仅在新增或修改持久化数据、字段、表、关系、索引、迁移时适用。
       如果不适用，必须写 N/A 原因。
       适用时必须覆盖：
       - 核心实体与表
+      - 新增 DATA ID 前必须通过 ID registry 预留
       - 字段、类型、必填、默认值、约束和说明
       - 关系、唯一约束、索引、数据迁移、回滚和兼容策略
       - 数据所有权、删除/归档、审计字段和敏感数据处理
+      - FR / API / CONSTRAINT / RISK 的追踪关系
 
   - id: service-contract
     generates: service-contract.md
-    description: "服务合同：接口能力、请求响应、权限、错误、幂等、业务逻辑"
+    description: "服务合同：API、后端能力、异步任务、CLI/工具命令、外部集成、权限、错误和可观测性"
     template: service-contract.md
-    requires: [ui-contract, data-model]
+    requires: [source-map, specs, change-context]
     instruction: |
-      service-contract.md 仅在涉及接口、后端能力、服务边界、异步任务或外部集成时适用。
+      service-contract.md 仅在涉及接口、后端能力、服务边界、异步任务、CLI/工具命令或外部集成时适用。
       如果不适用，必须写 N/A 原因。
-      适用时必须同时读取 ui-contract.md 和 data-model.md：
-      - 接口能力必须满足前端数据需求
-      - 请求响应、权限、错误、幂等、分页、排序、过滤必须明确
+      适用时必须覆盖：
+      - API / backend service / async job / scheduled job / CLI or tool command / integration endpoint
+      - 新增 API ID 前必须通过 ID registry 预留
+      - 请求响应、命令参数、权限、错误、幂等、分页、排序、过滤、重试、超时必须明确
       - 业务逻辑、状态流转、校验规则、异步任务和通知必须可测试
-      - 不要脱离 data-model.md 自造字段或状态
+      - 可观测性、审计、日志、指标和告警要求必须明确
+      - 引用 ui-contract.md 的前端数据需求和 data-model.md 的数据对象时必须保持追踪闭合
+      - 不要脱离 source-map.md 或 data-model.md 自造字段或状态
 
   - id: tasks
     generates: tasks.md
-    description: "实现清单：从 specs、design 和 contract artifacts 生成可执行任务"
+    description: "实现清单：从 specs、change-context 和 contract artifacts 生成可执行任务和验证证据要求"
     template: tasks.md
-    requires: [specs, design, ui-contract, data-model, service-contract]
+    requires: [specs, change-context, ui-contract, data-model, service-contract]
     instruction: |
       tasks.md 必须先做一致性检查，再列实现任务：
       - 每个 FR 必须能追踪到 specs
       - 涉及页面的 FR 必须追踪到 ui-contract.md
       - 涉及接口的 FR 必须追踪到 service-contract.md
       - 涉及持久化的 FR 必须追踪到 data-model.md
+      - 涉及架构约束或风险的任务必须追踪到 change-context.md
+      - 每个实现或验证任务必须有 TASK ID，验证项必须能关联 TEST ID 或验证证据
+      - 新增 TASK / TEST ID 前必须通过 ID registry 预留
       - 不适用 artifact 必须已有 N/A 原因
       - 任务按实现和验证顺序排列，最后必须包含验收场景验证
 
@@ -119,7 +145,7 @@ apply:
   tracks: tasks.md
   instruction: |
     实现时必须按 tasks.md 执行并逐项打勾。
-    发现 specs、design 或 contract 与代码事实冲突时：
+    发现 specs、change-context 或 contract 与代码事实冲突时：
     - 暂停实现
     - 更新对应 artifact
     - 保持 source-map.md 的追踪关系闭合

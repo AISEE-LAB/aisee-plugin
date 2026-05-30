@@ -1,10 +1,12 @@
 ---
 name: aisee:change-design
 description: >-
-  当当前 OpenSpec change 的 schema 包含 design.md artifact 时，生成、补齐或审查 design.md。用于 proposal 已存在后，读取当前 change 使用的 OpenSpec schema，确认该 schema 存在 generates: design.md，并严格按照官方 design.md 模板与 artifact instruction 填充设计内容；把 SRS、UI 内容规格、技术架构、全局技术栈和 proposal 转成符合 OpenSpec 的 design.md。触发词包括 aisee:change-design、补 design.md、生成 design.md、完善 change design、OpenSpec design、根据 proposal 写设计、根据 SRS/UI content 补设计。若 schema 不包含 design.md，例如 aisee-docsite-driven、quick-fix、quick-research、infra-change 或 opsx-collab-pr-loop，应停止并提示改用该 schema 的对应 artifact；不要用于创建业务需求、直接写 specs、执行代码实现、替代 tasks，或自造 design.md 模板。
+  Legacy compatibility skill，待 aisee-app-spec-driven 与 device schema 定型后删除。仅当当前 OpenSpec change 的 schema 明确包含 design.md artifact 时，生成、补齐或审查 design.md。aisee-app-spec-driven v2 不再适用本技能，应改补 change-context.md 和相关 contracts。用于 proposal 已存在后，读取当前 change 使用的 OpenSpec schema，确认该 schema 存在 generates: design.md，并严格按照官方 design.md 模板与 artifact instruction 填充设计内容。触发词包括 aisee:change-design、补 design.md、生成 design.md、完善 change design、OpenSpec design。若 schema 不包含 design.md，应停止并提示改用该 schema 的对应 artifact；不要用于创建业务需求、直接写 specs、执行代码实现、替代 tasks，或自造 design.md 模板。
 ---
 
-# aisee:change-design — OpenSpec Change Design
+# aisee:change-design — Legacy OpenSpec Change Design
+
+> Legacy：本技能仅作为仍包含 `design.md` 的旧 schema / 兼容 schema 的过渡能力。`aisee-app-spec-driven` v2 已改用 `change-context.md`，不要再对 app schema 创建或补齐 `design.md`。待 app/device schema 定型后，本技能可以删除。
 
 在 OpenSpec change 中负责 **design.md 阶段**。它不是后端专用技能，而是单个 change 的设计补齐器：页面如何承载、前端如何取数和反馈、后端接口如何协作、数据如何落库、权限和状态如何流转。
 
@@ -37,12 +39,12 @@ description: >-
 `aisee:change-design` 输出 OpenSpec change 的 `design.md` 内容或补丁建议，结构必须来自 OpenSpec schema 模板。
 
 适用 schema：
-- `aisee-app-spec-driven`
 - `aisee-device-spec-driven`
 - `security-audit`
 - 官方或自定义 schema 中其他明确包含 `generates: design.md` 的 schema
 
 不适用 schema：
+- `aisee-app-spec-driven` v2：改补 `change-context.md` 和相关 contracts
 - `aisee-docsite-driven`：改补 `doc-change.md`
 - `quick-fix`：改补 `solution.md`
 - `quick-research`：改补 `findings.md` / `recommendation.md`

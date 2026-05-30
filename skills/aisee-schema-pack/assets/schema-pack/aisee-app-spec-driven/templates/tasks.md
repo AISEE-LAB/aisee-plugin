@@ -3,30 +3,39 @@
 ## 生成前一致性检查
 
 - [ ] 每个 FR 已映射到 specs。
+- [ ] Architecture 相关 ARCH / DEC / CONSTRAINT / RISK 已映射到 change-context.md。
 - [ ] 涉及页面的 FR 已映射到 ui-contract.md。
 - [ ] 涉及接口的 FR 已映射到 service-contract.md。
 - [ ] 涉及持久化的 FR 已映射到 data-model.md。
 - [ ] N/A artifact 已写明原因。
 - [ ] source-map.md 的阻塞项已处理或明确保留风险。
+- [ ] 新增 TASK / TEST ID 已通过 `aisee id reserve` 预留，或已标注 `[ID-RESERVATION-REQUIRED]`。
 
-## 1. 规格与设计确认
+## 1. 规格与上下文确认
 
 - [ ] 1.1 确认 source-map.md 覆盖范围与 proposal.md 一致。
 - [ ] 1.2 确认 specs 覆盖全部本 change 的 FR。
-- [ ] 1.3 确认 design.md 的关键决策没有未处理阻塞项。
+- [ ] 1.3 确认 change-context.md 的架构约束和风险没有未处理阻塞项。
 
 ## 2. 实现
 
-- [ ] 2.1 
-- [ ] 2.2 
+- [ ] {{scope}}:TASK-001
+- [ ] {{scope}}:TASK-002
 
 ## 3. 验证
 
-- [ ] 3.1 验证 specs 中的验收场景。
-- [ ] 3.2 验证 UI / API / 数据追踪关系闭合。
-- [ ] 3.3 运行相关测试和检查命令。
+- [ ] {{scope}}:TEST-001 验证 specs 中的验收场景。
+- [ ] {{scope}}:TEST-002 验证 UI / API / 数据 / 架构约束追踪关系闭合。
+- [ ] {{scope}}:TEST-003 运行相关测试和检查命令。
 
 ## 4. 收尾
 
 - [ ] 4.1 更新必要文档或示例。
 - [ ] 4.2 确认无未处理的 [SPEC-GAP] / [STACK-CONFLICT]。
+
+## 追踪矩阵
+
+| TASK / TEST ID | 类型 | 覆盖对象 | 证据 / 命令 | 状态 |
+|---|---|---|---|---|
+| {{scope}}:TASK-001 | 实现 | {{scope}}:FR-001 / {{scope}}:API-001 | | 未开始 / 进行中 / 完成 |
+| {{scope}}:TEST-001 | 验证 | {{scope}}:SPEC-001 | | 未开始 / 通过 / 失败 / N/A |

@@ -12,10 +12,12 @@
 
 #### Acceptance Notes
 
-- 覆盖 FR：
-- 关联页面：
-- 关联接口：
+- 覆盖上游 ID：
+- 关联页面 / 流程 / 状态：
+- 关联架构约束：
+- 关联接口 / 服务能力：
 - 关联数据：
+- 关联测试：
 
 ## MODIFIED Requirements
 
@@ -28,4 +30,3 @@
 ### Requirement: {{removed-requirement-name}}
 
 <!-- 如移除既有行为，在此说明移除原因和兼容影响。无则删除本节。 -->
-
