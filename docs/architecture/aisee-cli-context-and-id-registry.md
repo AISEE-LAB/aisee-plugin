@@ -15,7 +15,7 @@
 
 ```text
 OpenSpec CLI
-= 管理 OpenSpec change / spec / schema / validate / apply
+= 管理 OpenSpec change / spec / schema / validate / archive
 
 Aisee CLI
 = 解析 Aisee + OpenSpec + Compound 产物，返回结构化 context JSON
@@ -28,7 +28,7 @@ Aisee CLI 不替代 OpenSpec CLI，也不替代 Compound Engineering。它的核
 
 ## 设计原则
 
-- **只读优先**：V1 默认只解析、索引、查询和检查，不生成业务文档，不执行 apply。
+- **只读优先**：V1 默认只解析、索引、查询和检查，不生成业务文档，不执行 archive。
 - **JSON 优先**：所有关键命令都支持 `--json`，方便 AI 精准消费。
 - **来源可追踪**：返回内容必须包含文件路径、标题、行号、hash 或摘要。
 - **ID 驱动**：通过稳定 ID 查询需求、页面、接口、硬件约束、固件行为、验证项和任务。
@@ -474,7 +474,7 @@ doc-reviewed
 implementation-ready
 implemented
 verified
-apply-ready
+archive-ready
 ```
 
 ### aisee:change-author
@@ -544,7 +544,7 @@ aisee context pack --change <change> --for aisee-verify --json
 - 查 drift。
 - 消费 `ce-doc-review`、`ce-code-review`、`ce-test-*` 的结果。
 
-### aisee:apply-guard
+### aisee:archive-guard
 
 使用：
 
@@ -556,7 +556,7 @@ openspec validate <change>
 职责：
 
 - 读取已有验证和 review 结果。
-- 判断是否可以执行 `openspec apply`。
+- 判断是否可以执行 `openspec archive`。
 - 不重新做完整 review，不重新规划 change。
 
 ## Compound Engineering 的使用位置
@@ -854,8 +854,8 @@ Cache 只加速这些回答，不保存权威内容。
 12. aisee context pack --change <change> --for ce-work
 13. ce-work
 14. ce-code-review / ce-test-*
-15. aisee:apply-guard
-16. openspec apply
+15. aisee:archive-guard
+16. openspec archive
 ```
 
 ### 既有项目初始化
@@ -889,7 +889,7 @@ Cache 只加速这些回答，不保存权威内容。
 暂缓：
 
 - 自动生成完整业务文档。
-- 自动执行 `openspec apply`。
+- 自动执行 `openspec archive`。
 - 自动创建 PR。
 - 自动安装所有全局依赖。
 - 复杂图数据库或长期后台服务。
@@ -903,7 +903,7 @@ Aisee skills
   通过 CLI 获取精准上下文
 
 OpenSpec
-  提供规范目录、schema、validate、apply
+  提供规范目录、schema、validate、archive
 
 Compound Engineering
   消费 CLI 生成的 context pack 做审核、实现、测试和交付

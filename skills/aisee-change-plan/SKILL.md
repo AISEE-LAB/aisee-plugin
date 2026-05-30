@@ -442,12 +442,12 @@ aisee:srs                        ← 需求发现，输出 SRS 文档（docs/req
             └─ aisee:implementation-bridge ← 生成给 Compound 的实现上下文
             └─ compound plan / work / review / test ← 工程实现与验证
             └─ aisee:verify       ← 验证 specs / source-map / tasks / 实现一致性
-            └─ aisee:apply-guard  ← apply 前门禁
-            └─ openspec apply     ← 已验证 change 合入 baseline
+            └─ aisee:archive-guard  ← archive 前门禁
+            └─ openspec archive     ← 已验证 change 合入 baseline
 ```
 
 当多个 changes 同时进行时，必须显式指定 change 名：
 
 ```bash
-openspec apply change-name-3     # 避免歧义
+openspec archive change-name-3     # 避免歧义
 ```

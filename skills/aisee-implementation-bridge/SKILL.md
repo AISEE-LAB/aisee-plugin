@@ -22,7 +22,7 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 - 让 `ce-plan` 生成长期任务清单。
 - 默认写入新的长期交接文档。
 - 写代码或执行实现。
-- 替代 `aisee:verify`、`ce-code-review`、`ce-test-*` 或 `aisee:apply-guard`。
+- 替代 `aisee:verify`、`ce-code-review`、`ce-test-*` 或 `aisee:archive-guard`。
 
 ## Change 入口规则
 

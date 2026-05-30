@@ -357,6 +357,6 @@ aisee:srs                         ← 本 skill：需求发现 → SRS 文档
             └─ aisee:implementation-bridge
             └─ compound plan / work / review / test
             └─ aisee:verify
-            └─ aisee:apply-guard
-            └─ openspec apply
+            └─ aisee:archive-guard
+            └─ openspec archive
 ```

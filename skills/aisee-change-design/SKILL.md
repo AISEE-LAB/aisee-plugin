@@ -303,8 +303,8 @@ aisee:srs
             └─ aisee:implementation-bridge
             └─ compound plan / work / review / test
             └─ aisee:verify
-            └─ aisee:apply-guard
-            └─ openspec apply
+            └─ aisee:archive-guard
+            └─ openspec archive
 ```
 
 大 Epic 推荐先用 `aisee:change-plan` 规划为独立 change，再逐个运行 `aisee:change-design`。不要对整个 Epic 直接生成一份过大的 design。

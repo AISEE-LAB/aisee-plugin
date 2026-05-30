@@ -5,7 +5,7 @@
       "id": 1,
       "name": "init-template-uses-codex-stepwise-openspec-flow",
       "prompt": "初始化一个新的 OpenSpec 项目 Codex 配置。项目还没有明确完整技术栈，但要使用 aisee:srs、aisee:ui-content、aisee:architecture、aisee:change-plan 和 aisee:change-design 的规划链路。",
-      "expected_output": "生成或建议的 AGENTS.md / openspec/project.md 应使用 aisee:srs -> aisee:ui-content / aisee:architecture -> aisee:change-plan -> /opsx:new --schema aisee-app-spec-driven -> aisee:change-author 按 schema 生成 artifacts -> openspec validate -> aisee:implementation-bridge -> compound plan/work/review/test -> aisee:verify -> aisee:apply-guard -> openspec apply 的逐步流程，不得生成旧版非 Codex 规则文件，不得把 /opsx:propose 作为默认主流程。openspec/project.md 应允许技术栈未确认并明确标注，不能让 AGENTS.md 承载项目级技术选型。",
+      "expected_output": "生成或建议的 AGENTS.md / openspec/project.md 应使用 aisee:srs -> aisee:ui-content / aisee:architecture -> aisee:change-plan -> /opsx:new --schema aisee-app-spec-driven -> aisee:change-author 按 schema 生成 artifacts -> openspec validate -> aisee:implementation-bridge -> compound plan/work/review/test -> aisee:verify -> aisee:archive-guard -> openspec archive 的逐步流程，不得生成旧版非 Codex 规则文件，不得把 /opsx:propose 作为默认主流程。openspec/project.md 应允许技术栈未确认并明确标注，不能让 AGENTS.md 承载项目级技术选型。",
       "files": []
     },
     {

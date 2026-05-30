@@ -217,8 +217,8 @@ aisee:srs
             └─ aisee:implementation-bridge
             └─ compound plan / work / review / test
             └─ aisee:verify
-            └─ aisee:apply-guard
-            └─ openspec apply
+            └─ aisee:archive-guard
+            └─ openspec archive
 ```
 
 `design-assets` 与 `design-spec` 不要求固定先后：有视觉证据时先登记/引用资产再沉淀规范；已有规范时也可以反向指导资产生成。
