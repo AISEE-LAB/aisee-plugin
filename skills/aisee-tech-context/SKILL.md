@@ -1,23 +1,26 @@
 ---
 name: aisee:tech-context
-description: 在 aisee:change-plan 之前生成技术上下文摘要，提取项目级技术栈状态、现有架构边界、可复用能力、共享技术前置、技术耦合点、平台/端能力限制、技术风险和给 change-plan 的技术提示。用于用户要求“分析技术上下文”“补技术约束”“change-plan 前看技术边界”“现有项目技术栈扫描”“生成 tech-context”“判断技术栈是否已定”“为规划 change 边界提供技术输入”时触发。不要用于规划 change 边界、命名 change、生成 design.md、做技术选型或写实现方案。
+description: 在 aisee:change-plan 之前生成跨工程域技术上下文摘要，提取软件、Web、后端、CLI、Job、集成、数据、硬件、嵌入式、固件、RTOS、驱动等场景的技术栈/工具链状态、全局工程约定、现有架构边界、可复用能力、共享技术前置、技术耦合点、运行环境限制、技术风险和 schema artifact hints。用于用户要求“分析技术上下文”“补技术约束”“change-plan 前看技术边界”“现有项目技术栈扫描”“生成 tech-context”“判断技术栈/工具链是否已定”“为规划 change 边界提供技术输入”时触发。不要用于规划 change 边界、命名 change、做技术选型、写 API/DB/CLI/Job/硬件/固件详细契约或实现方案。
 ---
 
 # aisee:tech-context — 技术上下文摘要
 
-在 `aisee:change-plan` 前运行，给 change 边界规划提供技术事实和约束输入。它不拆 change，不生成 change 名称，不安排阶段，不写 `design.md`。
+在 `aisee:change-plan` 前运行，给 change 边界规划提供跨工程域的技术事实、全局工程约定、约束、缺口和 schema artifact hints。它不拆 change，不生成 change 名称，不安排阶段，不写具体契约或实现方案。
 
 ## 输入
 
 用户提供以下任意一种输入：
 - `aisee:srs` 输出的 SRS 文件
 - `aisee:ui-content` 输出的 UI 内容规格
+- `aisee:design-spec` 输出的设计规范
 - 已确认需求文本
 - 既有项目目录
 - `openspec/project.md` 或架构文档
+- 硬件 / 嵌入式 / 固件 / 驱动 / RTOS / 工具链相关文档
 
 可选参数：
 - `--scope project|feature|auto` — 技术上下文范围，默认 `auto`
+- `--domain software|web|backend|cli|job|integration|data|hardware|embedded|firmware|rtos|driver|hybrid|auto` — 工程域，默认 `auto`
 - `--mode scan|synthesize|auto` — 扫描现有项目或汇总用户提供材料，默认 `auto`
 - `--lang zh|en` — 输出语言，默认 `zh`
 
@@ -25,16 +28,20 @@ description: 在 aisee:change-plan 之前生成技术上下文摘要，提取项
 
 ## 输出边界
 
-`aisee:tech-context` 只输出技术上下文和 change-plan 输入提示。
+`aisee:tech-context` 只输出技术上下文、全局工程约定、schema artifact hints 和 change-plan 输入提示。
 
 必须覆盖：
-- 项目级技术栈状态：已确定 / 部分确定 / 未确定
-- 技术栈来源与可信度
+- 技术域识别：software / web / backend / cli / job / integration / data / hardware / embedded / firmware / rtos / driver / hybrid
+- 项目级技术栈 / 工具链状态：已确定 / 部分确定 / 未确定
+- 技术栈 / 工具链来源与可信度
+- 全局工程约定：已有约定或待决策缺口，不创造新契约
 - 现有架构边界和模块边界
 - 已有可复用能力：鉴权、权限、数据访问、队列、缓存、文件、通知、审计、日志等
 - 共享技术前置：多个 FR / 页面共同依赖的技术基础
 - 技术耦合点：数据模型、权限、异步任务、外部集成、多端能力等
-- 平台 / 端能力限制
+- 平台 / 端 / 板级 / 运行环境能力限制
+- 按需 Domain Context Blocks：Web、Backend、CLI、Job、Integration、Data、Hardware、Firmware、RTOS、Driver、Verification 等
+- Schema Artifact Hints：只提示后续契约类型，不绑定具体 schema 文件名
 - 技术风险和阻塞决策
 - 给 `aisee:change-plan` 的技术提示
 
@@ -44,7 +51,7 @@ description: 在 aisee:change-plan 之前生成技术上下文摘要，提取项
 - phase / dependency graph
 - `/opsx:new`、`/opsx:propose` 命令
 - `design.md` 内容
-- 数据库表结构、API endpoint、ORM 代码或实现计划
+- 数据库表结构、API endpoint、request/response 字段、CLI 参数完整契约、Job 调度/重试详细契约、寄存器表、引脚表、时序表、ORM 代码或实现计划
 - 技术栈选型结论；缺失时只能标注 `[STACK-CONTEXT-MISSING]` / `[STACK-DECISION-REQUIRED]`
 
 ---
@@ -61,21 +68,32 @@ cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat CLAUDE.md 2>/dev/null | head -160
 cat AGENTS.md 2>/dev/null | head -160
 find . -maxdepth 3 \( -name package.json -o -name pnpm-lock.yaml -o -name yarn.lock -o -name package-lock.json -o -name pyproject.toml -o -name requirements.txt -o -name Gemfile -o -name go.mod -o -name Cargo.toml -o -name pom.xml -o -name build.gradle -o -name composer.json -o -name prisma -o -name drizzle -o -name migrations -o -name schema.sql -o -name openapi.yaml -o -name openapi.json \) 2>/dev/null | head -80
-find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*stack*' -o -iname '*design*' \) 2>/dev/null | head -40
+find . -maxdepth 4 \( -iname 'CMakeLists.txt' -o -iname 'Makefile' -o -iname '*.ioc' -o -iname '*.dts' -o -iname '*.dtsi' -o -iname 'platformio.ini' -o -iname 'west.yml' -o -iname 'Kconfig' -o -iname '*.ld' -o -iname '*.sv' -o -iname '*.v' -o -iname '*.xdc' -o -iname '*.sdc' \) 2>/dev/null | head -80
+find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*stack*' -o -iname '*design*' -o -iname '*hardware*' -o -iname '*firmware*' -o -iname '*rtos*' -o -iname '*driver*' \) 2>/dev/null | head -80
 ```
 
 如果是既有项目：
 - 只读与输入需求相关的目录和文件
 - 查找路由、页面、控制器、服务、模型、schema、migration、API contract、权限中间件、任务队列、测试目录
+- 硬件 / 嵌入式项目还要查找板级配置、设备树、引脚/时钟/内存配置、启动文件、链接脚本、驱动、RTOS 配置、构建/烧录/调试工具链、验证目录
 - 不要因为文件名猜测项目事实；关键结论必须标注来源
 
-当涉及具体框架、SDK、ORM、数据库、云服务或 API 用法判断时，使用 Context7 获取当前官方文档；没有文档支撑时标注为假设。
+当涉及具体框架、SDK、ORM、数据库、云服务、API、RTOS、MCU SDK、驱动框架或工具链用法判断时，使用 Context7 获取当前官方文档；没有文档支撑时标注为假设。
 
 ---
 
-## Phase 1 — 技术栈状态判断
+## Phase 1 — 技术域与技术栈状态判断
 
-判断项目级技术栈状态：
+先判断技术域：
+
+| Domain | 适用场景 |
+|--------|----------|
+| software / web / backend | Web、App、小程序、桌面、后端服务、管理后台 |
+| cli / job / integration / data | CLI 工具、异步任务、第三方集成、数据能力 |
+| hardware / embedded / firmware / rtos / driver | 硬件、嵌入式、固件、RTOS、驱动、板级 bring-up |
+| hybrid | 同时包含软件服务与硬件 / 固件 / 设备侧能力 |
+
+再判断项目级技术栈 / 工具链状态：
 
 | 状态 | 条件 | 处理 |
 |------|------|------|
@@ -94,6 +112,7 @@ find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*
 - 文件存储
 - 通知 / 消息
 - 部署环境
+- 硬件 / 嵌入式域：MCU/SoC/FPGA、板卡、RTOS/裸机/Linux、编译器、构建系统、烧录/调试工具、驱动框架、外设/总线、时钟/电源/内存、验证工具
 
 ---
 
@@ -103,12 +122,15 @@ find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*
 
 提取并标注来源：
 - 技术栈事实
+- 全局工程约定
 - 模块边界
 - 数据模型现状
 - 权限体系现状
 - API / 路由 / 服务边界
 - 异步任务、队列、定时任务、通知现状
 - 外部集成现状
+- CLI / 工具入口、输出格式和分发现状
+- 硬件 / 固件 / RTOS / 驱动 / 外设 / 工具链现状
 - 多端能力限制
 - 已有测试和验证方式
 
@@ -129,6 +151,7 @@ find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*
 - 可并行边界：哪些模块从技术上相互独立
 - 不应横切的能力：例如不要把同一状态机拆散
 - 阻塞性技术决策：缺队列、缺鉴权、缺数据库方案等
+- Schema Artifact Hints：哪些后续契约类型需要承接，artifact 名称以 schema pack 为准
 - 高风险区域：外部集成、迁移、权限、安全、性能
 
 禁止写：
@@ -137,12 +160,23 @@ find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*
 - 阶段依赖图
 - 具体 `/opsx:*` 命令
 - 最终 change 边界规划结论
+- 具体 artifact 文件名必须存在的断言；schema 仍可能调整
 
 ---
 
-## Phase 4 — 保存文档
+## Phase 4 — 生成与保存文档
 
-读取 `assets/tech-context-template.md`，生成文档。
+先读取 `assets/tech-context-template.md` 入口索引，再按技术域读取必要模板；每次生成都必须同时读取 `references/writing-rules.md`。
+
+始终读取：
+- `assets/tech-context-template-core.md`
+- `assets/tech-context-template-artifact-hints.md`
+- `references/writing-rules.md`
+
+按需读取：
+- 软件域：`assets/tech-context-template-software.md`
+- 硬件 / 嵌入式域：`assets/tech-context-template-embedded.md`
+- 混合域：同时读取 software 与 embedded 模板
 
 默认保存：
 
@@ -167,7 +201,7 @@ mkdir -p docs/tech-context
 > 技术栈状态：已确定 / 部分确定 / 未确定
 > 识别：{N} 个架构边界、{M} 个可复用能力、{K} 个共享技术前置、{R} 个风险、{Q} 个阻塞决策。
 >
-> 下一步：将本文档与 SRS、UI 内容规格一起交给 `aisee:change-plan`。
+> 下一步：将本文档与 SRS、UI 内容规格、设计规范一起交给 `aisee:change-plan`。
 
 若存在阻塞项：
 
@@ -183,7 +217,8 @@ mkdir -p docs/tech-context
 - 不要生成 `design.md`。
 - 不要做技术选型；技术栈缺失时标注 `[STACK-CONTEXT-MISSING]` 或 `[STACK-DECISION-REQUIRED]`。
 - 不要把推断写成事实；每条关键技术事实都要有来源和可信度。
-- 不要输出数据库表结构、API endpoint、ORM 代码或实现步骤。
+- 不要输出数据库表结构、API endpoint、request/response 字段、CLI 参数完整契约、Job 详细调度策略、寄存器表、引脚表、时序表、ORM 代码或实现步骤。
+- 不要把建议 artifact 类型写死为当前 schema 的固定文件名；schema pack 未来可调整。
 - 如果发现需求与现有技术约束冲突，标注 `[SPEC-GAP]` 或 `[STACK-CONFLICT]`，不要静默绕过。
 - 给 `aisee:change-plan` 的技术提示只能是事实、约束和原因，不是边界规划结果。
 

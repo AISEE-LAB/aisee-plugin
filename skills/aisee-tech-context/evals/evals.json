@@ -21,6 +21,20 @@
       "prompt": "为 App 和微信小程序的门店预约功能生成 tech-context，供 aisee:change-plan 使用。需求包括门店详情、服务预约、预约详情、取消预约、预约提醒。小程序需要微信手机号授权，App 需要推送提醒。",
       "expected_output": "输出多端能力限制、平台差异、通知/授权相关技术前置、预约状态与取消操作的耦合点，以及给 change-plan 的技术提示。不得生成页面规格、change 名称或 design.md。",
       "files": []
+    },
+    {
+      "id": 4,
+      "name": "global-engineering-conventions-and-artifact-hints",
+      "prompt": "为现有订单退款功能生成 tech-context。项目已有统一 API 响应 envelope `{ code, message, data }`，分页使用 page/pageSize/total，鉴权使用 Authorization Bearer token，日志里有 X-Request-Id。需求包括退款申请、退款审核、退款状态通知和退款报表导出。队列是否已有不确定。",
+      "expected_output": "应输出全局工程约定，记录 API envelope、分页、鉴权和 Trace ID 的来源/可信度/影响范围；队列能力未确认应标注 [STACK-GAP] 或 Open Question。应输出 Schema Artifact Hints，提示 UI、服务、数据、Job/异步、通知/观测性等后续契约类型，但不得写具体 endpoint、request/response 字段、数据库表结构、change 名称或 phase。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "embedded-firmware-domain-context",
+      "prompt": "为一个 STM32 设备固件需求生成 tech-context，供 change-plan 使用。需求是新增 I2C 温湿度传感器采集，周期性读取数据并通过 UART 输出诊断日志。项目使用 FreeRTOS，CMake 构建，J-Link 调试；板级引脚和 I2C 总线配置还未确认。",
+      "expected_output": "应识别为 embedded/firmware/rtos/driver 技术域，输出工具链状态、RTOS/任务、I2C 外设、UART 日志、板级引脚/总线配置缺口、验证/调试上下文和硬件/固件/运行时/驱动/验证等建议 artifact 类型。不得输出 Web/API/DB 契约、接口 endpoint、寄存器表、引脚表或具体实现代码。",
+      "files": []
     }
   ]
 }
