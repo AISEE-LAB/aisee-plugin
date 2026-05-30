@@ -1,6 +1,6 @@
-# aisee:tech-context — 写作规则
+# aisee:architecture — 写作规则
 
-每次生成技术上下文摘要时读取。
+每次生成技术架构文档时读取。
 
 ## 通用规则
 
@@ -17,6 +17,7 @@
 - 不要做技术栈 / 工具链选型；缺失时标注 `[STACK-CONTEXT-MISSING]` 或 `[STACK-DECISION-REQUIRED]`。
 - 不要输出数据库表结构、API endpoint、request/response 字段、CLI 参数完整契约、Job 详细调度策略、寄存器表、引脚表、时序表、ORM 代码或实现步骤。
 - 给 `aisee:change-plan` 的提示只能是事实、约束和原因，不是边界规划结果。
+- 架构决策必须区分“已确认”和“待确认”；没有可信来源时只能写入待确认决策、阻塞项或 Open Questions。
 
 ## 来源规则
 
@@ -28,7 +29,7 @@
 ## 全局工程约定
 
 - 全局工程约定只记录已有事实或待决策缺口。
-- 不要在 tech-context 中创造新的 API、数据、CLI、Job、硬件或固件契约。
+- 不要在 architecture 中创造新的 API、数据、CLI、Job、硬件或固件详细契约。
 - 全局工程约定缺失时使用 `[TECH-CONVENTION-MISSING]`，不要替项目制定新约定。
 
 ## Domain Blocks

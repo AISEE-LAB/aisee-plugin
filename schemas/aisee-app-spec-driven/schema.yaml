@@ -1,7 +1,7 @@
 name: aisee-app-spec-driven
 version: 1
 description: |
-  适用场景：需要把 SRS、UI 内容规格、技术上下文与 OpenSpec change 强绑定的功能开发。
+  适用场景：需要把 SRS、UI 内容规格、技术架构与 OpenSpec change 强绑定的功能开发。
   与官方 spec-driven 的区别：在 proposal 之后增加 source-map.md 作为上游证据索引，
   并将工程设计拆成 design.md、ui-contract.md、data-model.md、service-contract.md。
   不适用的 contract artifact 必须写 N/A 原因，避免前端-only 或后端-only change 被无效流程拖慢。
@@ -23,16 +23,16 @@ artifacts:
 
   - id: source-map
     generates: source-map.md
-    description: "来源映射：绑定 SRS、UI 内容规格、技术上下文、change-plan 结果与本 change 范围"
+    description: "来源映射：绑定 SRS、UI 内容规格、技术架构、change-plan 结果与本 change 范围"
     template: source-map.md
     requires: [proposal]
     instruction: |
       source-map.md 是本 schema 的追踪核心，必须：
-      - 列出上游来源：SRS、UI Content、Tech Context、Change Plan、Issue 或用户输入
+      - 列出上游来源：SRS、UI Content、Architecture、Change Plan、Issue 或用户输入
       - 映射本 change 覆盖的 FR / PAGE / FLOW / API / DATA
       - 明确不在范围内的上游条目
       - 声明 ui-contract.md、data-model.md、service-contract.md 是否适用
-      - 保留 [ASSUMPTION]、[SPEC-GAP]、[STACK-DECISION-REQUIRED]、[STACK-CONFLICT] 等阻塞标签
+      - 保留 [ASSUMPTION]、[SPEC-GAP]、[STACK-CONTEXT-MISSING]、[STACK-DECISION-REQUIRED]、[ARCHITECTURE-DECISION-REQUIRED]、[STACK-CONFLICT] 等阻塞标签
 
   - id: specs
     generates: specs/**/*.md

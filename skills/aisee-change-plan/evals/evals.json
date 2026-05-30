@@ -4,8 +4,8 @@
     {
       "id": 1,
       "name": "uses-new-not-propose-for-stepwise-change",
-      "prompt": "基于 SRS、UI 内容规格和 tech-context 规划团队成员管理功能的 OpenSpec change 边界。需求包括创建团队、邀请成员、设置成员角色、移除成员。tech-context 标注鉴权和 RBAC 已存在，邀请链接过期规则需要本 change 设计确认。请输出可执行的 OpenSpec change 边界规划结果。",
-      "expected_output": "输出 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。所有命令必须使用 /opsx:new \"<change>\" --schema <schema>，不得输出 /opsx:propose。应保留 tech-context 中的 RBAC 复用事实和邀请链接规则待确认项，并说明后续通过 /opsx:continue 或相关 change artifact authoring workflow 按 schema 补齐 artifacts；不得建议使用旧的 change design skill 作为固定后续步骤。",
+      "prompt": "基于 SRS、UI 内容规格和 architecture 规划团队成员管理功能的 OpenSpec change 边界。需求包括创建团队、邀请成员、设置成员角色、移除成员。architecture 标注鉴权和 RBAC 已存在，邀请链接过期规则需要本 change 设计确认。请输出可执行的 OpenSpec change 边界规划结果。",
+      "expected_output": "输出 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。所有命令必须使用 /opsx:new \"<change>\" --schema <schema>，不得输出 /opsx:propose。应保留 architecture 中的 RBAC 复用事实和邀请链接规则待确认项，并说明后续通过 /opsx:continue 或相关 change artifact authoring workflow 按 schema 补齐 artifacts；不得建议使用旧的 change design skill 作为固定后续步骤。",
       "files": []
     },
     {

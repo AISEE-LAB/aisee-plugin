@@ -2,7 +2,7 @@
 
 ## 背景
 
-当前 `aisee*` 能力以多个独立 skill 的形式存在，覆盖需求澄清、UI 内容规格、技术上下文、OpenSpec change 规划、schema pack、项目初始化、视觉资产、对象级图片处理和会话复盘等工作。
+当前 `aisee*` 能力以多个独立 skill 的形式存在，覆盖需求澄清、UI 内容规格、技术架构、OpenSpec change 规划、schema pack、项目初始化、视觉资产、对象级图片处理和会话复盘等工作。
 
 Compound Engineering 插件则更偏向工程执行、代码审查、测试、提交、PR、复盘和团队知识沉淀。OpenSpec 是规范状态机和 baseline source of truth。
 
@@ -39,7 +39,7 @@ aisee-plugin/
     aisee-setup/
     aisee-srs/
     aisee-ui-content/
-    aisee-tech-context/
+    aisee-architecture/
     aisee-device-context/
     aisee-change-plan/
     aisee-change-author/
@@ -77,7 +77,7 @@ aisee-plugin/
 
 ```text
 aisee-core:
-  flow / setup / srs / tech-context / change-plan / change-author / verify / apply-guard / reflect
+  flow / setup / srs / architecture / change-plan / change-author / verify / apply-guard / reflect
 
 aisee-app:
   ui-content / app schema / ui-contract / service-contract / data-model / frontend handoff
@@ -113,7 +113,7 @@ Aisee CLI 是 Aisee/OpenSpec/Compound 之间的上下文总线：
 
 - `aisee doctor`：检查 OpenSpec、Aisee、Compound 能力是否可用。
 - `aisee bootstrap --plan/--apply`：生成或执行项目初始化计划。
-- `aisee sources`：登记 SRS、UI 内容、tech-context、device-context 等 change 外部产物来源。
+- `aisee sources`：登记 SRS、UI 内容、architecture、device-context 等 change 外部产物来源。
 - `aisee index`：建立可删除、可重建的解析缓存，用于加速查询；不是内容事实源。
 - `aisee get <id>`：根据稳定 ID 查询需求、页面、硬件约束、固件行为、任务等详情。
 - `aisee trace <id>`：查询 ID 上下游关系。
@@ -175,7 +175,7 @@ ce-commit / ce-commit-push-pr / ce-resolve-pr-feedback
 
 ```text
 aisee:change-plan
-= 需求 / 页面 / 技术上下文 -> OpenSpec change 边界、依赖、schema、source-map 初稿
+= 需求 / 页面 / 技术架构 -> OpenSpec change 边界、依赖、schema、source-map 初稿
 
 compound plan / ce-plan
 = 单个已确认 OpenSpec change -> 工程实现步骤、测试策略、代码修改路径
@@ -193,7 +193,7 @@ aisee:srs
   ↓
 aisee:ui-content 或 aisee:device-context
   ↓
-aisee:tech-context
+aisee:architecture
   ↓
 aisee:change-plan
   ↓
@@ -314,9 +314,9 @@ aisee:change-author
 
 保留独立。它负责 App/Web 的页面、元素、状态、权限可见性和跨页面流程，不负责视觉设计或实现方案。
 
-### aisee:tech-context
+### aisee:architecture
 
-保留独立。它负责项目技术事实和约束，不负责拆 change、技术选型或实现方案。
+保留独立。它负责技术架构事实、架构决策和约束，不负责拆 change、技术选型或实现方案。
 
 ### aisee-spec-migrate
 
@@ -379,7 +379,7 @@ aisee:change-plan
 
 - SRS: `docs/requirements/auth-srs.md`
 - UI Content: `docs/ui-content/auth-ui.md`
-- Tech Context: `docs/tech-context/auth-tech.md`
+- Architecture: `docs/architecture/auth-architecture.md`
 
 ## Missing / Blocking
 
@@ -597,7 +597,7 @@ aisee:srs
 aisee:ui-content
   -> 可选 ce-doc-review，审核页面状态、权限、异常流和跨页面流程
 
-aisee:tech-context / aisee:device-context
+aisee:architecture / aisee:device-context
   -> 可选 ce-doc-review，审核技术约束、硬件/固件/运行时约束缺口
 
 aisee:change-plan
@@ -645,7 +645,7 @@ aisee:flow
 aisee:setup
 aisee:srs
 aisee:ui-content
-aisee:tech-context
+aisee:architecture
 aisee:device-context
 aisee:change-plan
 aisee:change-author
@@ -699,7 +699,7 @@ Web 后端关注 API、数据库、权限、队列、缓存；嵌入式关注驱
 aisee-core
   setup
   srs
-  tech-context
+  architecture
   change-plan
   change-author
   verify
@@ -782,7 +782,7 @@ docs/**/*.md / openspec/**/*.md
 = 可删除、可重建的解析缓存，不是事实源
 ```
 
-SRS、UI content、tech-context、device-context 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `.aisee/sources.json` 和 `source-map.md` 衔接：
+SRS、UI content、architecture、device-context 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `.aisee/sources.json` 和 `source-map.md` 衔接：
 
 ```text
 .aisee/sources.json
@@ -830,7 +830,7 @@ aisee id check --json
 `source-map.md` 是 OpenSpec change 内的上下文路由表，负责连接：
 
 ```text
-SRS / UI Content / Tech Context / Device Context
+SRS / UI Content / Architecture / Device Context
   -> OpenSpec artifacts
   -> tasks
   -> code paths
@@ -874,7 +874,7 @@ aisee:srs
   ↓
 aisee:ui-content
   ↓
-aisee:tech-context
+aisee:architecture
   ↓
 aisee:change-plan --schema aisee-app-spec-driven
   ↓

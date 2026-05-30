@@ -4,7 +4,7 @@
 
 - 当前问题：
 - 触发原因：
-- 上游来源：SRS / UI Content / Tech Context / Change Plan / Issue / 用户输入
+- 上游来源：SRS / UI Content / Architecture / Change Plan / Issue / 用户输入
 
 ## 目标
 

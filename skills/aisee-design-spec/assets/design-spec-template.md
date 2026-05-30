@@ -28,7 +28,7 @@
 **版本**：v1.0
 **状态**：草稿
 **创建日期**：{date}
-**来源输入**：{SRS / UI Content / Tech Context / Design Assets / 用户输入}
+**来源输入**：{SRS / UI Content / Architecture / Design Assets / 用户输入}
 **设计策略**：adopt / extend / rewrite
 
 ---
@@ -52,7 +52,7 @@
 
 | Source ID | 类型 | 路径 / 位置 | 用途 | 可信度 | 备注 |
 |-----------|------|-------------|------|--------|------|
-| DA-001 / DSRC-001 / UIC-001 / TC-001 | Logo / 参考图 / 截图 / UI Content / Tech Context / 组件库 / theme / 用户说明 | {path or description} | {usage} | high / medium / low | {note} |
+| DA-001 / DSRC-001 / UIC-001 / ARCH-001 | Logo / 参考图 / 截图 / UI Content / Architecture / 组件库 / theme / 用户说明 | {path or description} | {usage} | high / medium / low | {note} |
 
 ---
 

@@ -295,7 +295,7 @@ docs/ui-content/<YYYY-MM-DD>-<slug>/
 >
 > 覆盖 {N} 个页面、{M} 条流程、{K} 个平台差异、{Q} 个待确认事项。
 >
-> 下一步建议：将本文档与对应 SRS、技术上下文和必要的 UI 设计规范一起交给 `aisee:change-plan`。
+> 下一步建议：将本文档与对应 SRS、技术架构和必要的 UI 设计规范一起交给 `aisee:change-plan`。
 
 Epic 模式完成后：
 
@@ -306,7 +306,7 @@ Epic 模式完成后：
 > - 跨模块流程：{path or "无"}
 > - 平台差异：{path or "无"}
 >
-> 下一步建议：按模块将 UI 内容规格与对应 SRS、技术上下文和必要的 UI 设计规范一起交给 `aisee:change-plan`。
+> 下一步建议：按模块将 UI 内容规格与对应 SRS、技术架构和必要的 UI 设计规范一起交给 `aisee:change-plan`。
 
 ---
 
@@ -332,8 +332,8 @@ Epic 模式完成后：
 aisee:srs                         ← 需求发现 → SRS
   ├─ aisee:ui-content              ← 页面清单、页面内容、元素、交互、平台差异
   ├─ aisee:design-assets            ← 可选：参考图、StyleSpec、视觉规范
-  ├─ aisee:tech-context            ← 技术事实、项目约束、共享前置
-  └─ aisee:change-plan <inputs>          ← 基于 SRS + UI content + tech-context 规划 Change 边界
+  ├─ aisee:architecture            ← 技术架构事实、决策、项目约束、共享前置
+  └─ aisee:change-plan <inputs>          ← 基于 SRS + UI content + architecture 规划 Change 边界
        └─ /opsx:new <change>
             └─ /opsx:continue      ← 创建 / 补 proposal.md
             └─ change artifact authoring ← 按 schema 创建 / 补 specs、contracts、tasks
@@ -347,6 +347,6 @@ aisee:srs                         ← 需求发现 → SRS
 ```text
 aisee:srs Epic
   ├─ 按模块运行 aisee:ui-content，生成模块 UI 内容规格
-  ├─ 必要时补充 aisee:design-assets 和 aisee:tech-context
+  ├─ 必要时补充 aisee:design-assets 和 aisee:architecture
   └─ aisee:change-plan 按模块规划 change 边界
 ```

@@ -18,7 +18,7 @@ Choose the output mode from `SKILL.md` Phase 3:
 - Read only the template file needed for the current output mode.
 - Read only the scenario extension blocks that match the FRs being written.
 - Do not copy scenario extension blocks mechanically when they do not apply.
-- Keep SRS planning-level detailed: enough for UI Content, Tech Context, and Change Plan handoff, but not implementation-level API, DB, code, or task design.
+- Keep SRS planning-level detailed: enough for UI Content, Architecture, and Change Plan handoff, but not implementation-level API, DB, code, or task design.
 
 ## Future Domain Extension
 

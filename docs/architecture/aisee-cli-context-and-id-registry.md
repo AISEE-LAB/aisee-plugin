@@ -4,7 +4,7 @@
 
 在 Aisee、OpenSpec 与 Compound Engineering 串通之后，最大的效率瓶颈不再是“能不能生成文档”，而是：
 
-- AI 每次都要重新读取大量 SRS、UI 内容规格、技术上下文、OpenSpec change 和 review 记录。
+- AI 每次都要重新读取大量 SRS、UI 内容规格、技术架构、OpenSpec change 和 review 记录。
 - 不同 skill 之间容易复制上下文，导致重复文档和事实漂移。
 - Compound Engineering 的 `ce-work`、`ce-doc-review`、`ce-code-review` 需要准确输入，但不应该重新理解全局需求。
 - 如果用 ID 串联需求、页面、spec、任务、代码和验证记录，就必须保证 ID 不乱、不重复、不复用。
@@ -122,7 +122,7 @@ aisee schemas install
 
 登记 change 外部的 Aisee 产物来源。
 
-SRS、UI content、tech-context、device-context、design-assets 等通常不在 OpenSpec change 目录内，仅依赖 change schema 无法发现这些上游产物。因此需要项目级来源登记：
+SRS、UI content、architecture、device-context、design-assets 等通常不在 OpenSpec change 目录内，仅依赖 change schema 无法发现这些上游产物。因此需要项目级来源登记：
 
 ```text
 .aisee/sources.json
@@ -154,13 +154,13 @@ SRS、UI content、tech-context、device-context、design-assets 等通常不在
         "parser": "ui-content"
       }
     ],
-    "tech_context": [
+    "architecture": [
       {
         "scope": "auth",
-        "type": "tech-context",
-        "path": "docs/tech-context/auth-tech.md",
-        "template": "aisee-tech-context",
-        "parser": "tech-context"
+        "type": "architecture",
+        "path": "docs/architecture/auth-architecture.md",
+        "template": "aisee-architecture",
+        "parser": "architecture"
       }
     ]
   }
@@ -192,7 +192,7 @@ aisee index --json
 .aisee/id-registry.json
 docs/requirements/**
 docs/ui-content/**
-docs/tech-context/**
+docs/architecture/**
 docs/design-assets/**
 docs/svg-assets/**
 openspec/changes/**
@@ -318,7 +318,7 @@ aisee context pack --change add-auth-login --for aisee-verify --json
 默认行为：
 
 ```text
-1. 读取 .aisee/sources.json，发现 SRS / UI content / tech-context / device-context 等 change 外部产物。
+1. 读取 .aisee/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
 2. 读取 .aisee/id-registry.json，获取 ID 分配和生命周期。
 3. 读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件和 artifact。
 4. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema。
@@ -439,7 +439,7 @@ aisee context pack --change <change> --for flow --json
   "known_inputs": {
     "srs": "docs/requirements/auth-srs.md",
     "ui_content": "docs/ui-content/auth-ui.md",
-    "tech_context": "docs/tech-context/auth-tech.md"
+    "architecture": "docs/architecture/auth-architecture.md"
   },
   "missing": [
     "change-plan",
@@ -490,7 +490,7 @@ aisee trace <id> --json
 职责：
 
 - 根据 schema 补齐 OpenSpec artifacts。
-- 只引用 SRS/UI/tech-context 中的 ID，不复制整段内容。
+- 只引用 SRS/UI/architecture 中的 ID，不复制整段内容。
 - 为 `source-map.md` 建立关系。
 
 ### aisee:implementation-bridge
@@ -806,7 +806,7 @@ Sources 负责回答：
 ```text
 SRS 在哪里？
 UI content 在哪里？
-tech-context / device-context 在哪里？
+architecture / device-context 在哪里？
 这些外部产物使用哪个模板和 parser？
 ```
 

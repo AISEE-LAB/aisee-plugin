@@ -9,7 +9,7 @@
     {
       "name": "backend-no-ui-feature",
       "prompt": "生成一个后端会员等级自动升级能力的 SRS。系统每天根据用户近 12 个月消费金额自动调整会员等级，并发送站内通知。没有页面，本期只做后台规则和通知。",
-      "expected_output": "应识别为非 UI 型需求，SRS 应覆盖业务对象、等级规则、定时触发、通知、异常和验收方向；Section 8 应标注 UI Content 不需要、Tech Context 需要，change-plan 可能需要 job/service contract；不得硬造页面。"
+      "expected_output": "应识别为非 UI 型需求，SRS 应覆盖业务对象、等级规则、定时触发、通知、异常和验收方向；Section 8 应标注 UI Content 不需要、Architecture 需要，change-plan 可能需要 job/service contract；不得硬造页面。"
     },
     {
       "name": "baseline-aware-refactor",

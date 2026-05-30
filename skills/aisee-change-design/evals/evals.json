@@ -4,8 +4,8 @@
     {
       "id": 1,
       "name": "missing-project-stack-context-gate",
-      "prompt": "当前已有 OpenSpec change proposal，内容是：用户可以创建团队、邀请成员、设置成员角色，管理员可以移除成员。需要支持成员列表、邀请链接过期、重复邀请处理。FR-001 创建团队；FR-002 邀请成员；FR-003 设置成员角色；FR-004 移除成员。请补齐 design.md，但项目级技术栈还没有写入 openspec/project.md，也没有 tech-context。",
-      "expected_output": "必须先解析当前 change 的 OpenSpec schema，并读取该 schema 的官方 design.md 模板；同时识别项目级技术栈来源缺失，标注 [STACK-CONTEXT-MISSING] 或 [STACK-DECISION-REQUIRED]。不得继续生成具体数据库、ORM、endpoint、队列或部署设计；只能输出可确认的设计框架和阻塞项，建议先更新 openspec/project.md 或运行 aisee:tech-context。",
+      "prompt": "当前已有 OpenSpec change proposal，内容是：用户可以创建团队、邀请成员、设置成员角色，管理员可以移除成员。需要支持成员列表、邀请链接过期、重复邀请处理。FR-001 创建团队；FR-002 邀请成员；FR-003 设置成员角色；FR-004 移除成员。请补齐 design.md，但项目级技术栈还没有写入 openspec/project.md，也没有 architecture。",
+      "expected_output": "必须先解析当前 change 的 OpenSpec schema，并读取该 schema 的官方 design.md 模板；同时识别项目级技术栈来源缺失，标注 [STACK-CONTEXT-MISSING] 或 [STACK-DECISION-REQUIRED]。不得继续生成具体数据库、ORM、endpoint、队列或部署设计；只能输出可确认的设计框架和阻塞项，建议先更新 openspec/project.md 或运行 aisee:architecture。",
       "files": []
     },
     {

@@ -6,7 +6,7 @@
 ```markdown
 # 项目上下文
 
-> 本文件描述项目技术上下文。Codex 行为规则见 `AGENTS.md`。
+> 本文件描述项目技术架构。Codex 行为规则见 `AGENTS.md`。
 > 最后更新：{date}
 
 ## 项目概览

@@ -11,7 +11,7 @@ Apply to each FR before writing it:
 - [ ] No framework choices, API endpoint names, or DB schema details
 - [ ] Priority is assigned (P0 / P1 / P2)
 - [ ] Dependencies on other FRs are explicit
-- [ ] Contains enough business context to support UI Content, Tech Context, and Change Plan handoff
+- [ ] Contains enough business context to support UI Content, Architecture, and Change Plan handoff
 - [ ] Scenario extension appended when relevant
 
 Fix silently if a requirement fails these checks. Do not stop to ask unless the missing information can change scope or correctness.

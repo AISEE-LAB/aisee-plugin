@@ -1,6 +1,6 @@
 ---
 name: aisee:change-plan
-description: 将已确认的 SRS、UI 内容规格、设计规范、技术上下文和项目事实映射为可独立交付的 OpenSpec changes。用于规划 change 边界、依赖顺序、并行关系、source-map 初稿和 /opsx:new 命令；不重新做业务模块划分，不重新生成需求。
+description: 将已确认的 SRS、UI 内容规格、设计规范、技术架构和项目事实映射为可独立交付的 OpenSpec changes。用于规划 change 边界、依赖顺序、并行关系、source-map 初稿和 /opsx:new 命令；不重新做业务模块划分，不重新生成需求。
 ---
 
 # aisee:change-plan — Change Boundary Planner for OpenSpec
@@ -15,7 +15,7 @@ The user provides one of:
 - A raw requirement description (free text)
 - A ticket/issue reference (will be read if MCP is available)
 - A file path to an existing requirements doc (including SRS output from `aisee:srs`)
-- Optional companion inputs: UI content spec from `aisee:ui-content`, design spec from `aisee:design-spec`, and technical context from `aisee:tech-context`
+- Optional companion inputs: UI content spec from `aisee:ui-content`, design spec from `aisee:design-spec`, and architecture document from `aisee:architecture`
 
 Optional flags the user may include:
 - `--strategy vertical|risk|parallel` (default: vertical)
@@ -55,21 +55,21 @@ Use this context to:
 - Identify any in-progress changes that the new work may depend on or conflict with
 - Match the naming style of existing changes (kebab-case, length, vocabulary)
 
-### Tech-context Input Mode
+### Architecture Input Mode
 
-If the user provides a technical context document produced by `aisee:tech-context`:
+If the user provides an architecture document produced by `aisee:architecture`:
 
-- Treat its technical facts, stack state, reusable capabilities, shared prerequisites, coupling points, and platform constraints as change planning inputs.
-- Preserve blocking tags such as `[STACK-CONTEXT-MISSING]`, `[STACK-GAP]`, `[STACK-DECISION-REQUIRED]`, `[SPEC-GAP]`, and `[STACK-CONFLICT]` in change rationale when they affect boundaries.
-- Do not reinterpret tech-context hints as a pre-made change list; `aisee:change-plan` still owns final change boundaries, dependencies, names, and `/opsx:new` commands.
-- Do not use `aisee:change-plan` to choose a missing project tech stack. If tech-context marks a stack decision as missing, surface it as a blocker or assumption instead of silently selecting tools.
+- Treat its technical facts, architecture decisions, stack state, reusable capabilities, shared prerequisites, coupling points, and platform constraints as change planning inputs.
+- Preserve blocking tags such as `[STACK-CONTEXT-MISSING]`, `[STACK-GAP]`, `[STACK-DECISION-REQUIRED]`, `[ARCHITECTURE-DECISION-REQUIRED]`, `[SPEC-GAP]`, and `[STACK-CONFLICT]` in change rationale when they affect boundaries.
+- Do not reinterpret architecture hints as a pre-made change list; `aisee:change-plan` still owns final change boundaries, dependencies, names, and `/opsx:new` commands.
+- Do not use `aisee:change-plan` to choose a missing project tech stack. If architecture marks a stack decision as missing, surface it as a blocker or assumption instead of silently selecting tools.
 
 ### Design-spec Input Mode
 
 If the user provides a design spec document produced by `aisee:design-spec`:
 
 - Treat its design strategy, component policy, design tokens, screen patterns, interaction patterns, responsive rules, accessibility rules, and Do/Don't as planning inputs.
-- Preserve blocking tags such as `[DESIGN-DECISION-REQUIRED]` and `[TECH-CONTEXT-MISSING]` in change rationale when they affect boundaries.
+- Preserve blocking tags such as `[DESIGN-DECISION-REQUIRED]` and `[ARCHITECTURE-CONTEXT-MISSING]` in change rationale when they affect boundaries.
 - Do not reinterpret design-spec as a page list; UI Content still owns PAGE / FLOW content scope.
 - Do not use `aisee:change-plan` to create a design system from scratch. If design-spec marks a design decision as missing, surface it as a blocker or assumption instead of silently inventing visual rules.
 - If a shared component policy, token foundation, or cross-page screen pattern must exist before multiple UI changes can proceed, record that as a design prerequisite in the relevant change rationale.
@@ -155,7 +155,7 @@ When using this strategy:
 
 ### Rule 4 — Schema selection
 
-- `aisee-app-spec-driven`: default for feature development that needs SRS / UI Content / Tech Context / Change Plan traceability
+- `aisee-app-spec-driven`: default for feature development that needs SRS / UI Content / Architecture / Change Plan traceability
 - `aisee-device-spec-driven`: for embedded, firmware, Linux device, driver, RTOS, bare-metal, MCU, SoC, or board bring-up work
 - `spec-driven`: use only for lightweight changes that do not need the aisee planning chain
 - `opsx-collab-pr-loop`: for technical research, external PR review, investigative work with uncertain scope
@@ -388,7 +388,7 @@ After saving, output:
 aisee:srs                        ← 需求发现，输出 SRS 文档（docs/requirements/）
   ├─ aisee:ui-content            ← 页面内容规格（可选但推荐）
   ├─ aisee:design-spec           ← UI 设计规范事实源（UI 型需求可选但推荐）
-  ├─ aisee:tech-context          ← 技术事实与约束（可选但推荐）
+  ├─ aisee:architecture          ← 技术架构事实、决策与约束（可选但推荐）
   └─ aisee:change-plan <inputs>        ← 本 skill：规划独立 OpenSpec Change 边界
        └─ /opsx:new <change>     ← 创建 Change Folder
             └─ /opsx:continue    ← 创建 / 补 proposal.md

@@ -103,7 +103,7 @@ Select questions based on what remains unclear after each user response. Do **no
 ### 后续交接判断（确认门禁前使用）
 
 - 这个需求是否需要 UI Content？如果需要，是因为多页面、多端、复杂交互、权限可见性，还是状态反馈复杂？
-- 这个需求是否需要 Tech Context？如果需要，是因为既有系统改造、技术栈未明确、复用能力未知、外部系统、异步任务、数据迁移或权限复杂？
+- 这个需求是否需要 Architecture？如果需要，是因为既有系统改造、技术栈未明确、复用能力未知、外部系统、异步任务、数据迁移或权限复杂？
 - 传给 `aisee:change-plan` 时，哪些 FR 可能必须放在同一 change，哪些可以独立拆分？
 - 哪些问题必须在 change authoring 前确认，哪些可以作为 Open Questions 进入后续阶段？
 

@@ -198,7 +198,7 @@ openspec validate
 >
 > 写入 / 建议写入：{N} 个 baseline spec，覆盖 {M} 个能力，发现 {C} 个冲突、{Q} 个待确认项。
 >
-> 下一步：确认 Open Questions 后，后续新需求使用 `aisee:srs → aisee:ui-content / aisee:tech-context → aisee:change-plan → /opsx:new`。
+> 下一步：确认 Open Questions 后，后续新需求使用 `aisee:srs → aisee:ui-content / aisee:architecture → aisee:change-plan → /opsx:new`。
 
 若存在阻塞项：
 
@@ -231,7 +231,7 @@ openspec validate
 后续新需求
   ├─ aisee:srs
   ├─ aisee:ui-content
-  ├─ aisee:tech-context
+  ├─ aisee:architecture
   └─ aisee:change-plan
        └─ /opsx:new <change>
             └─ aisee:change-design

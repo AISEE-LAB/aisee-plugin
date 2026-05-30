@@ -37,7 +37,7 @@ openspec templates --schema <schema> --json
 - [ ] 已读取官方 `design.md` 模板
 - [ ] design 输出保持官方模板顶层结构
 - [ ] 没有新增未确认业务需求
-- [ ] 关键设计能追踪到 proposal、SRS、UI 内容规格、技术上下文或现有代码事实
+- [ ] 关键设计能追踪到 proposal、SRS、UI 内容规格、技术架构或现有代码事实
 - [ ] 项目级技术栈缺失时标注 `[STACK-CONTEXT-MISSING]` 或 `[STACK-DECISION-REQUIRED]`
 - [ ] 需求缺口标注 `[SPEC-GAP]`
 - [ ] 需要修改上游需求或 proposal 时标注 `[SPEC-CHANGE-REQUIRED]`

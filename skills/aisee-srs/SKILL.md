@@ -1,11 +1,11 @@
 ---
 name: aisee:srs
-description: 通过结构化对话充分澄清业务需求，并生成规划级详细的软件需求规格说明书（SRS）。当用户想写需求文档、澄清产品范围、整理业务目标/用户角色/业务能力/业务流程/业务规则/权限/非目标、为 UI Content、Tech Context 或 aisee:change-plan 准备稳定输入，或把模糊想法整理成可测试需求时使用。触发词包括“帮我写需求文档”“编写需求规格说明书”“整理产品需求”“生成 SRS”“业务需求澄清”“我有个需求想整理一下”“aisee:srs”。SRS 应写到足够支持后续拆 change 和生成 UI/技术上下文，但不要写成接口设计、数据库设计、技术方案、视觉设计或开发任务。
+description: 通过结构化对话充分澄清业务需求，并生成规划级详细的软件需求规格说明书（SRS）。当用户想写需求文档、澄清产品范围、整理业务目标/用户角色/业务能力/业务流程/业务规则/权限/非目标、为 UI Content、Architecture 或 aisee:change-plan 准备稳定输入，或把模糊想法整理成可测试需求时使用。触发词包括“帮我写需求文档”“编写需求规格说明书”“整理产品需求”“生成 SRS”“业务需求澄清”“我有个需求想整理一下”“aisee:srs”。SRS 应写到足够支持后续拆 change 和生成 UI/技术架构，但不要写成接口设计、数据库设计、技术方案、视觉设计或开发任务。
 ---
 
 # aisee:srs — OpenSpec 需求规格说明书
 
-通过结构化对话挖掘需求，然后生成可交给 `aisee:ui-content`、`aisee:tech-context` 和 `aisee:change-plan` 使用的软件需求规格说明书（SRS）。
+通过结构化对话挖掘需求，然后生成可交给 `aisee:ui-content`、`aisee:architecture` 和 `aisee:change-plan` 使用的软件需求规格说明书（SRS）。
 
 ## Inputs
 
@@ -26,7 +26,7 @@ Optional flags the user may include:
 
 ## 输出边界
 
-`aisee:srs` 产出的是 **规划级需求契约**：它要足够详细，能支撑后续 UI 内容规格、技术上下文和 change 边界规划；但它不是实现级接口设计、数据库设计、技术方案、UI 内容规格或设计系统。
+`aisee:srs` 产出的是 **规划级需求契约**：它要足够详细，能支撑后续 UI 内容规格、技术架构和 change 边界规划；但它不是实现级接口设计、数据库设计、技术方案、UI 内容规格或设计系统。
 
 如果是既有项目二次开发，SRS 必须是 **baseline-aware**：识别现有业务行为、现有 OpenSpec specs、历史需求和 active changes 对本需求的影响。SRS 只记录业务行为层面的新增 / 修改 / 移除 / 兼容，不写接口、数据库、代码模块、迁移脚本或实现方案。
 
@@ -40,7 +40,7 @@ Optional flags the user may include:
 - 业务对象、业务状态、状态流转、业务规则和权限规则
 - 交付形态信号，例如 Web 管理后台、小程序、桌面 GUI、后端服务、CLI、导入导出、通知、异步处理
 - 外部系统交互的业务目的、触发条件、成功/失败处理和数据含义
-- 后续是否需要 UI Content、Tech Context 或特殊 change artifact 的提示
+- 后续是否需要 UI Content、Architecture 或特殊 change artifact 的提示
 
 不要写入：
 - 视觉布局、间距、颜色、字体、图标或组件库选择
@@ -153,7 +153,7 @@ Present a structured summary before generating the document. **Do not proceed un
 - 明确非目标：{list or "暂无"}
 - 待确认假设：{list or "无"}
 - 已识别风险：{list or "无"}
-- 后续建议：UI Content 需要 / 不需要；Tech Context 需要 / 不需要；change-plan 输入是否已充足
+- 后续建议：UI Content 需要 / 不需要；Architecture 需要 / 不需要；change-plan 输入是否已充足
 - 基线感知：启用 / 未启用（如启用，列出主要影响基线）
 - 📄 输出模式：**标准模式**（单文档）/ **Epic 模式**（主文档 + {N} 份模块文档）← 自动选择
 
@@ -184,7 +184,7 @@ Upon confirmation:
 5. Populate the template with all information gathered during dialogue.
 6. Apply the Requirement Quality Checklist to each FR before writing it.
 7. 如果启用 baseline-aware mode，填写 Section 2.5，并为每条 FR 填写“变更类型”和“影响基线”。
-8. 填写 Section 8（后续交接提示），说明是否建议继续生成 UI Content、Tech Context，以及传给 `aisee:change-plan` 时需要注意的业务边界。只写规划提示，不展开实现级设计。
+8. 填写 Section 8（后续交接提示），说明是否建议继续生成 UI Content、Architecture，以及传给 `aisee:change-plan` 时需要注意的业务边界。只写规划提示，不展开实现级设计。
 
 ### Epic 模式（超出阈值）
 
@@ -198,7 +198,7 @@ Read `assets/srs-template.md` to confirm template routing, then generate documen
 - Section 5（约束与假设，完整版，包含所有 `[ASSUMPTION]`）
 - Section 6（Open Questions，完整版）
 - Section 7（变更候选清单，列出所有 FR ID，链接到对应模块文档）
-- Section 8（后续交接提示，列出 UI Content / Tech Context / Change Plan 的输入建议）
+- Section 8（后续交接提示，列出 UI Content / Architecture / Change Plan 的输入建议）
 - 如果启用 baseline-aware mode，Section 2.5 必须列出全局基线影响，并在 Section 7 标注每个 FR 的变更类型和影响基线
 - **Section 3 留空**，注明"各模块 FR 详情见模块文档索引"
 
@@ -214,7 +214,7 @@ Read `assets/srs-template.md` to confirm template routing, then generate documen
 - 模块级假设（仅与本模块相关的 `[ASSUMPTION]`，已在主文档 Section 5 中出现，此处仅列编号和标题作为引用）
 - 模块级待确认事项（仅与本模块相关的问题）
 - 模块变更候选清单（列出该模块全部 FR，确保模块文档可独立传给 `aisee:change-plan`）
-- 模块级后续交接提示（该模块是否需要 UI Content、Tech Context 重点补充项、change-plan 注意事项）
+- 模块级后续交接提示（该模块是否需要 UI Content、Architecture 重点补充项、change-plan 注意事项）
 - 如果启用 baseline-aware mode，每条 FR 必须填写“变更类型”和“影响基线”
 
 每份生成后输出：
@@ -263,7 +263,7 @@ mkdir -p docs/requirements/<YYYY-MM-DD>-<slug>
 > aisee:change-plan docs/requirements/{filename}.md
 > ```
 >
-> 如果 Section 8 标注需要 UI Content 或 Tech Context，请先补齐对应文档，再进入 `aisee:change-plan`；不要把接口、数据库或技术实现设计补进 SRS。
+> 如果 Section 8 标注需要 UI Content 或 Architecture，请先补齐对应文档，再进入 `aisee:change-plan`；不要把接口、数据库或技术实现设计补进 SRS。
 
 **Epic 模式**完成后输出：
 
@@ -281,7 +281,7 @@ mkdir -p docs/requirements/<YYYY-MM-DD>-<slug>
 > aisee:change-plan docs/requirements/{slug}/02-{module-b}.md
 > ```
 >
-> 如果其中某些模块的 Section 8 标注需要 UI Content 或 Tech Context，请先按模块补齐对应文档，再进入 `aisee:change-plan`。
+> 如果其中某些模块的 Section 8 标注需要 UI Content 或 Architecture，请先按模块补齐对应文档，再进入 `aisee:change-plan`。
 
 ---
 
@@ -292,7 +292,7 @@ mkdir -p docs/requirements/<YYYY-MM-DD>-<slug>
 - **Never include implementation decisions** in functional requirements (no framework choices, no specific API endpoints, no DB schema).
 - **Never invent requirements** not raised by the user. Implied-but-unstated items go to Section 6 (Open Questions).
 - **不要把 SRS 写成 UI 设计文档**。页面字段、列表列、操作和空状态只作为功能合约；视觉布局和详细页面构成应留给独立的 UI 内容/设计步骤。
-- **不要把 baseline-aware 写成技术设计**。已有基线只用于描述业务行为变化、兼容约束和影响范围；接口、数据库、迁移、代码结构留给 tech-context 和 change artifacts。
+- **不要把 baseline-aware 写成技术设计**。已有基线只用于描述业务行为变化、兼容约束和影响范围；接口、数据库、迁移、代码结构留给 architecture 和 change artifacts。
 - **不要把后续交接提示写成实现方案**。Section 8 只能说明后续需要哪些上下文、哪些 FR/PAGE/业务对象值得关注，不输出 API path、DB 字段、服务拆分或任务清单。
 - **Do not exceed 20 FRs** in a single SRS document (主文档或单份模块文档均适用). If total scope exceeds 20 FRs, flag it as an epic and enter Epic 模式.
 - Every `[ASSUMPTION]` recorded during dialogue must appear in the main document's Section 5.2.
@@ -308,7 +308,7 @@ mkdir -p docs/requirements/<YYYY-MM-DD>-<slug>
 ```
 aisee:srs                         ← 本 skill：需求发现 → SRS 文档
   ├─ [conditional] aisee:ui-content       ← UI 型软件的页面清单、页面内容、页面元素、交互路径（不含视觉设计规范）
-  ├─ [recommended] aisee:tech-context     ← 技术栈状态、架构边界、共享前置和技术约束
+  ├─ [recommended] aisee:architecture     ← 技术栈状态、架构边界、共享前置和技术约束
   └─ aisee:change-plan <srs-file>       ← 将 SRS 映射为独立 Change
        └─ /opsx:new <change>   ← 创建 Change Folder
             └─ aisee:change-author       ← 按当前 schema 生成 / 补齐 change artifacts

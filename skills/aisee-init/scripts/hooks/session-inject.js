@@ -87,7 +87,7 @@ function buildContext(cwd) {
   const knowledge = [
     ['docs/requirements', 'SRS 与 FR 来源，仅用于追溯，不能替代 openspec/'],
     ['docs/ui-content', '页面内容、元素、状态和交互来源'],
-    ['docs/tech-context', '技术事实、项目约束、共享前置和风险来源'],
+    ['docs/architecture', '技术架构事实、决策、项目约束、共享前置和风险来源'],
     ['docs/change-plan', 'change 边界规划结果，后续仍需创建 OpenSpec artifacts'],
     ['docs/learnings', '团队复盘与模式库'],
     ['docs/solutions', '历史解决方案'],

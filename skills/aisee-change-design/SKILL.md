@@ -1,7 +1,7 @@
 ---
 name: aisee:change-design
 description: >-
-  当当前 OpenSpec change 的 schema 包含 design.md artifact 时，生成、补齐或审查 design.md。用于 proposal 已存在后，读取当前 change 使用的 OpenSpec schema，确认该 schema 存在 generates: design.md，并严格按照官方 design.md 模板与 artifact instruction 填充设计内容；把 SRS、UI 内容规格、技术上下文、全局技术栈和 proposal 转成符合 OpenSpec 的 design.md。触发词包括 aisee:change-design、补 design.md、生成 design.md、完善 change design、OpenSpec design、根据 proposal 写设计、根据 SRS/UI content 补设计。若 schema 不包含 design.md，例如 aisee-docsite-driven、quick-fix、quick-research、infra-change 或 opsx-collab-pr-loop，应停止并提示改用该 schema 的对应 artifact；不要用于创建业务需求、直接写 specs、执行代码实现、替代 tasks，或自造 design.md 模板。
+  当当前 OpenSpec change 的 schema 包含 design.md artifact 时，生成、补齐或审查 design.md。用于 proposal 已存在后，读取当前 change 使用的 OpenSpec schema，确认该 schema 存在 generates: design.md，并严格按照官方 design.md 模板与 artifact instruction 填充设计内容；把 SRS、UI 内容规格、技术架构、全局技术栈和 proposal 转成符合 OpenSpec 的 design.md。触发词包括 aisee:change-design、补 design.md、生成 design.md、完善 change design、OpenSpec design、根据 proposal 写设计、根据 SRS/UI content 补设计。若 schema 不包含 design.md，例如 aisee-docsite-driven、quick-fix、quick-research、infra-change 或 opsx-collab-pr-loop，应停止并提示改用该 schema 的对应 artifact；不要用于创建业务需求、直接写 specs、执行代码实现、替代 tasks，或自造 design.md 模板。
 ---
 
 # aisee:change-design — OpenSpec Change Design
@@ -21,7 +21,7 @@ description: >-
 可附加输入：
 - `aisee:srs` 输出的 SRS
 - `aisee:ui-content` 输出的 UI 内容规格
-- `aisee:tech-context` 或项目级技术栈摘要
+- `aisee:architecture` 或项目级技术栈摘要
 - 本 change 的特殊技术约束（必须与项目级技术栈兼容）
 
 可选参数：
@@ -146,12 +146,12 @@ openspec templates --schema <schema> --json
 
 ## Phase 1 — 项目技术栈约束校验
 
-`aisee:change-design` 运行时已经进入 OpenSpec change 阶段。正常情况下，项目级技术栈应已在 `openspec/project.md`、`aisee:tech-context` 或既有项目文件中确认。
+`aisee:change-design` 运行时已经进入 OpenSpec change 阶段。正常情况下，项目级技术栈应已在 `openspec/project.md`、`aisee:architecture` 或既有项目文件中确认。
 
 本阶段只做校验，不做技术选型。
 
 必须确认：
-- 项目级技术栈来源：`openspec/project.md` / tech-context / 现有项目文件 / 用户明确确认
+- 项目级技术栈来源：`openspec/project.md` / architecture / 现有项目文件 / 用户明确确认
 - 本 change 是否有特殊技术约束
 - 特殊约束是否与项目级技术栈兼容
 - 当前设计需要的关键基础设施是否已存在或已被项目级技术栈覆盖（数据库、ORM、鉴权、队列、缓存、文件存储、外部服务等）
@@ -160,7 +160,7 @@ openspec templates --schema <schema> --json
 - 项目事实优先于用户临时偏好。
 - 如果 `--stack` 或用户输入与项目级技术栈冲突，标注 `[STACK-CONFLICT]`，解释冲突并等待确认，不要静默改栈。
 - 如果 change 需要的关键基础设施没有在项目级技术栈中定义，标注 `[STACK-GAP]` 或 `[STACK-DECISION-REQUIRED]`，暂停具体设计，不要临场选型。
-- 如果完全找不到项目级技术栈来源，标注 `[STACK-CONTEXT-MISSING]`，建议先更新 `openspec/project.md` 或运行 `aisee:tech-context`。
+- 如果完全找不到项目级技术栈来源，标注 `[STACK-CONTEXT-MISSING]`，建议先更新 `openspec/project.md` 或运行 `aisee:architecture`。
 - 只有在技术栈来源已确认的情况下，才写具体数据库、接口、ORM、队列或部署相关设计。
 
 ---
@@ -209,7 +209,7 @@ openspec templates --schema <schema> --json
 读取 Phase 0.5 解析出的官方 `design.md` 模板，按该模板生成或补齐。
 
 设计原则：
-- 基于 `proposal.md`、SRS、UI 内容规格、技术上下文和现有项目事实推导
+- 基于 `proposal.md`、SRS、UI 内容规格、技术架构和现有项目事实推导
 - 每个关键设计都标注来源：proposal、SRS FR、UI 内容规格、现有代码事实或用户约束
 - 保持 schema 官方模板的顶层章节；补充细节只能写入对应官方章节内部
 - 如果 schema instruction 要求但模板未显式包含某节，可在最接近的官方章节中用子标题表达，不要重排整份模板
@@ -249,7 +249,7 @@ openspec templates --schema <schema> --json
 
 > Change design 已生成 / 已补齐：`openspec/changes/{change}/design.md`
 >
-> 技术栈来源：openspec/project.md / tech-context / 现有项目文件 / 用户确认
+> 技术栈来源：openspec/project.md / architecture / 现有项目文件 / 用户确认
 > 覆盖：{pages} 个页面承载、{entities} 个核心实体、{apis} 个接口能力、{jobs} 个异步任务、{risks} 个风险、{questions} 个待确认事项。
 >
 > 下一步：根据 design.md 的 “后续 specs 应覆盖的行为” 生成 specs，然后补 tasks。
@@ -290,7 +290,7 @@ openspec templates --schema <schema> --json
 ```text
 aisee:srs
   ├─ aisee:ui-content
-  ├─ aisee:tech-context / stack decision  # 可选，change-plan 前技术边界
+  ├─ aisee:architecture / stack decision  # 可选，change-plan 前技术边界
   └─ aisee:change-plan
        └─ /opsx:new <change>
             └─ 补 proposal.md

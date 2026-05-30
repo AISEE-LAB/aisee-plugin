@@ -9,7 +9,7 @@ description: 将 aisee:change-plan 的结果转成 OpenSpec change artifacts 初
 
 ## 职责
 
-- 读取 change-plan、SRS、UI/device context、tech-context 和项目事实。
+- 读取 change-plan、SRS、UI/device context、architecture 和项目事实。
 - 识别当前 schema 需要哪些 artifacts。
 - 为单个 OpenSpec change 创建或补齐 artifacts 初稿。
 - 通过 ID 和 `source-map.md` 串联上游产物、spec、tasks、代码路径和验证。

@@ -111,7 +111,7 @@ Use this template for each module document in Epic mode.
 | 后续环节 | 建议 | 原因 / 关注点 |
 |----------|------|---------------|
 | UI Content | 需要 / 不需要 | {页面、窗口、状态、权限、多端差异等} |
-| Tech Context | 需要 / 不需要 | {既有系统、技术栈、外部系统、异步任务、数据迁移等} |
+| Architecture | 需要 / 不需要 | {既有系统、技术栈、外部系统、异步任务、数据迁移等} |
 | Change Plan | 注意事项 | {建议边界、不可拆散的流程、关键依赖、Open Questions} |
 
 **下一步**：将本文档路径传入 `aisee:change-plan`，进行 Change 边界规划：

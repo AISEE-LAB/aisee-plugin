@@ -149,7 +149,7 @@ Use this template only in Epic mode. The main document omits Section 3 FR detail
 |-----------|--------------------------|------|--------|
 | {模块 / FR-xxx} | 是/否 | {多页面 / 多角色 / 多端 / 状态反馈复杂 / 无 UI} | {页面入口、状态、权限、流程等} |
 
-### 8.2 Tech Context 建议
+### 8.2 Architecture 建议
 
 | 关注点 | 是否需要补充 | 原因 |
 |--------|--------------|------|

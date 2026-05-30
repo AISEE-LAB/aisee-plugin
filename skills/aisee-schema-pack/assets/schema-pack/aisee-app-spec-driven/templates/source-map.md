@@ -6,7 +6,7 @@
 |---|---|---|---|
 | SRS | docs/requirements/... | 已确认 / 缺失 / N/A | |
 | UI Content | docs/ui-content/... | 已确认 / 缺失 / N/A | |
-| Tech Context | docs/tech-context/... | 已确认 / 缺失 / N/A | |
+| Architecture | docs/architecture/... | 已确认 / 缺失 / N/A | |
 | Change Plan | docs/change-plan/... | 已确认 / 缺失 / N/A | |
 | Issue / 用户输入 |  | 已确认 / 缺失 / N/A | |
 
@@ -38,6 +38,7 @@
 - [SPEC-GAP] 
 - [STACK-CONTEXT-MISSING] 
 - [STACK-DECISION-REQUIRED] 
+- [ARCHITECTURE-DECISION-REQUIRED] 
 - [STACK-CONFLICT] 
 
 ## 追踪规则
@@ -47,4 +48,3 @@
 - data-model.md 必须覆盖 Required=yes 的 DATA。
 - service-contract.md 必须覆盖 Required=yes 的 API，并满足 ui-contract.md 的前端数据需求。
 - tasks.md 生成前必须确认上述追踪关系闭合。
-
