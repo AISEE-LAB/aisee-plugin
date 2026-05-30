@@ -8,6 +8,7 @@
 - [ ] 涉及接口的 FR 已映射到 service-contract.md。
 - [ ] 涉及持久化的 FR 已映射到 data-model.md。
 - [ ] N/A artifact 已写明原因。
+- [ ] source-map.md 已回填新增 SPEC / API / DATA / TASK / TEST ID 的 owner artifact。
 - [ ] source-map.md 的阻塞项已处理或明确保留风险。
 - [ ] 新增 TASK / TEST ID 已通过 `aisee id reserve` 预留，或已标注 `[ID-RESERVATION-REQUIRED]`。
 
@@ -19,8 +20,8 @@
 
 ## 2. 实现
 
-- [ ] {{scope}}:TASK-001
-- [ ] {{scope}}:TASK-002
+- [ ] {{scope}}:TASK-001 实现 {{scope}}:SPEC-001 对应行为，并满足相关 contract。
+- [ ] {{scope}}:TASK-002 更新 source-map.md 中本任务覆盖的追踪关系。
 
 ## 3. 验证
 

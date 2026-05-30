@@ -27,19 +27,21 @@ N/A 原因：
 
 | 决策 ID | 决策 | 依据 | 影响 | 是否需要回写 Architecture |
 |---|---|---|---|---|
-| {{scope}}:DEC-NEW-001 | | proposal.md / source-map.md / specs | | 是 / 否 |
+| {{scope}}:DEC-NEW-001 [ID-RESERVATION-REQUIRED] | | proposal.md / source-map.md / specs | | 是 / 否 |
 
 ## 约束传递
 
 | 约束 ID | 必须传递到 | 具体要求 | 验证方式 |
 |---|---|---|---|
 | {{scope}}:CONSTRAINT-001 | service-contract.md / data-model.md / tasks.md | | |
+| {{scope}}:CONSTRAINT-NEW-001 [ID-RESERVATION-REQUIRED] |  |  |  |
 
 ## 风险与阻塞
 
 | 风险 ID | 风险 / 阻塞 | 影响 | 处理方式 | 状态 |
 |---|---|---|---|---|
 | {{scope}}:RISK-001 | | | 规避 / 接受 / 待确认 | Open / Accepted / Closed |
+| {{scope}}:RISK-NEW-001 [ID-RESERVATION-REQUIRED] | | | 规避 / 接受 / 待确认 | Open / Accepted / Closed |
 
 ## 禁止假设
 

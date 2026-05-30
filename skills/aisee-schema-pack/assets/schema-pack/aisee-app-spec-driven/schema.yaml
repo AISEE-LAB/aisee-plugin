@@ -36,7 +36,7 @@ artifacts:
     requires: [proposal]
     instruction: |
       source-map.md 是本 schema 的追踪核心，必须：
-      - 列出上游来源：SRS、UI Content、Architecture、Change Plan、Issue 或用户输入
+      - 列出上游来源：SRS、UI Content、Design Spec / Design Assets、Architecture、Change Plan、Issue 或用户输入
       - 使用完整 ID（如 auth:FR-001）建立追踪关系；短 ID 只用于人类阅读
       - 生成或引用正式 ID 前必须通过 Aisee CLI / .aisee/id-registry.json 校验；不得由 AI 临时编正式编号
       - 映射上游输入 ID：FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK
@@ -87,8 +87,9 @@ artifacts:
       - 新增 PAGE / FLOW / STATE ID 前必须通过 ID registry 预留
       - 页面内容结构、区块、操作、状态反馈和权限可见性
       - 前端需要的数据与来源能力
+      - 引用 Design Spec / Design Assets 中对本 change 生效的组件库、token、资产、布局、响应式、可访问性和动效约束
       - FR / NFR / RULE / PAGE / FLOW / STATE / API / DATA / CONSTRAINT 的追踪关系
-      - 不要写视觉设计、组件库、配色、排版或像素布局
+      - 不要在 ui-contract.md 重新定义或复制完整视觉规范、组件库、配色、排版或像素布局；这些仍以 Design Spec / Design Assets 为事实源
 
   - id: data-model
     generates: data-model.md

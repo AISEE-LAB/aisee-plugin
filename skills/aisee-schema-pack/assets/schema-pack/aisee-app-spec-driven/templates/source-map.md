@@ -18,9 +18,10 @@
 |---|---|---|---|---|
 | SRS | docs/requirements/... | SRC-001 | 已确认 / 缺失 / N/A | |
 | UI Content | docs/ui-content/... | SRC-002 | 已确认 / 缺失 / N/A | |
-| Architecture | docs/architecture/... | SRC-003 | 已确认 / 缺失 / N/A | |
-| Change Plan | docs/change-plan/... | SRC-004 | 已确认 / 缺失 / N/A | |
-| Issue / 用户输入 |  | SRC-005 / N/A | 已确认 / 缺失 / N/A | |
+| Design Spec / Assets | docs/design/... / assets/... | SRC-003 / N/A | 已确认 / 缺失 / N/A | |
+| Architecture | docs/architecture/... | SRC-004 | 已确认 / 缺失 / N/A | |
+| Change Plan | docs/change-plan/... | SRC-005 | 已确认 / 缺失 / N/A | |
+| Issue / 用户输入 |  | SRC-006 / N/A | 已确认 / 缺失 / N/A | |
 
 ## 上游输入 ID
 
@@ -53,12 +54,12 @@
 
 ## Artifact 适用性
 
-| Artifact | Required | 原因 |
-|---|---:|---|
-| change-context.md | yes / no | |
-| ui-contract.md | yes / no | |
-| service-contract.md | yes / no | |
-| data-model.md | yes / no | |
+| Artifact | Required | 依据上游 ID | 原因 / N/A 说明 | 相关约束转交 |
+|---|---:|---|---|---|
+| change-context.md | yes / no | {{scope}}:ARCH-001 / {{scope}}:DEC-001 / N/A | | tasks.md / N/A |
+| ui-contract.md | yes / no | {{scope}}:PAGE-001 / {{scope}}:FLOW-001 / N/A | | service-contract.md / tasks.md / N/A |
+| service-contract.md | yes / no | {{scope}}:FR-001 / {{scope}}:API-001 / N/A | | data-model.md / tasks.md / N/A |
+| data-model.md | yes / no | {{scope}}:DATA-001 / N/A | | service-contract.md / tasks.md / N/A |
 
 ## 阻塞项 / 假设
 
@@ -78,5 +79,6 @@
 - ui-contract.md 必须覆盖 Required=yes 的 PAGE / FLOW。
 - data-model.md 必须覆盖 Required=yes 的 DATA。
 - service-contract.md 必须覆盖 Required=yes 的 API / backend service / async job / CLI / integration，并满足 ui-contract.md 的前端数据需求。
+- 每个新增 ID 激活后必须回填到“本 Change 产出 ID”并记录 owner artifact。
 - tasks.md 内新增 TASK / TEST ID 前必须先 reserve；无法 reserve 时只使用临时 ID。
 - tasks.md 生成前必须确认上述追踪关系闭合。

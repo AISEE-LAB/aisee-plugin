@@ -69,6 +69,28 @@ tasks.md -> single durable task list + verification evidence requirements
 - 生成每个 artifact 前，读取它的 `instruction` 和 `template`。
 - 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`。
 
+## Artifact 编写边界
+
+`change-author` 按 schema 编排 artifacts，但每个 artifact 只能承接自己的信息层级：
+
+| Artifact | 主要输入 | 可新增 ID | 禁止内容 |
+|---|---|---|---|
+| `proposal.md` | confirmed change-plan、上游来源 ID、用户确认边界 | 无；只引用上游 ID | 接口字段、数据库字段、实现步骤、重新拆 change |
+| `source-map.md` | proposal、上游文档、ID registry、schema artifact list | `SPEC / API / DATA / TASK / TEST` 的预留记录 | 业务需求正文、契约细节、实现方案 |
+| `specs/**/*.md` | source-map 中覆盖的 `FR / NFR / RULE / FLOW / STATE` | `SPEC` | UI 布局、API 字段、表字段、任务清单 |
+| `change-context.md` | Architecture 中相关 `ARCH / DEC / CONSTRAINT / RISK` | 局部 `DEC / CONSTRAINT / RISK` | 重写全局 Architecture、展开服务 / 数据 / UI 契约 |
+| `ui-contract.md` | UI Content、Design Spec / Assets、specs、change-context、source-map | 必要时新增局部 `PAGE / FLOW / STATE` | 重新制定或复制完整视觉规范、组件库选择、像素布局 |
+| `data-model.md` | specs、change-context、service data needs | `DATA` | API 协议、UI 内容、迁移执行任务 |
+| `service-contract.md` | specs、ui data needs、data-model、change-context | `API` | 代码实现步骤、数据库物理迁移脚本 |
+| `tasks.md` | specs、change-context、适用 contracts、source-map | `TASK / TEST` | 新增需求、替代 source-map 或 project tasks |
+
+`source-map.md` 不是一次性文件。先用它建立初始路由，再在每个 artifact 写入或激活 ID 后回填：
+
+- artifact 是否适用及 N/A 原因。
+- 新增 ID 的 owner path、标题和上游追踪关系。
+- 发现的 `[SPEC-GAP]`、`[ID-RESERVATION-REQUIRED]`、`[STACK-CONFLICT]` 或其他阻塞标签。
+- 不覆盖的上游 ID 及原因。
+
 ## App Schema v2 顺序
 
 `aisee-app-spec-driven` v2 使用以下顺序：
