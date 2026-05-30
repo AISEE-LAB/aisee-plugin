@@ -13,6 +13,7 @@
 **覆盖 FR**：{FR-xxx ~ FR-yyy}
 **页面范围**：{PAGE-xxx ~ PAGE-yyy}
 **场景模式**：{new-build / enhancement / inventory}
+**ID Scope**：{scope}
 
 ---
 
@@ -37,13 +38,14 @@
 
 | 页面 ID | 页面名称 | 变化状态 | 页面类型 | 页面目标 | 关联 FR | 主要用户 | 优先级 | 适用平台 |
 |---------|----------|----------|----------|----------|---------|----------|--------|----------|
-| PAGE-001 | {name} | New / Changed / Existing / Deprecated / Unknown | {type} | {goal} | FR-001 | {role} | P0 | {platforms} |
+| {{scope}}:PAGE-001 | {name} | New / Changed / Existing / Deprecated / Unknown | {type} | {goal} | {{scope}}:FR-001 | {role} | P0 | {platforms} |
 
 ---
 
 ## 4. 本模块用户路径
 
 ### FLOW-001 {流程名称}
+<!-- aisee:id {scope}:FLOW-001 -->
 
 1. {step}
 2. {step}
@@ -58,12 +60,13 @@
 > 单个模块文档最多包含 8 个页面详情；超过时继续按子模块拆分。二开场景只展开 Changed / New / Deprecated 页面，Existing 页面只引用来源。
 
 ### PAGE-001 {页面名称}
+<!-- aisee:id {scope}:PAGE-001 -->
 
 **变化状态**：{New / Changed / Existing / Deprecated / Unknown}
 **当前来源**：{现有页面/路由/source-map/baseline/历史文档；新建则写“无”}
 **页面类型**：{列表页 / 详情页 / 表单页 / 流程页 / 设置页 / 结果页 / 授权页 / 通知落地页}
 **页面目标**：{一句话说明用户在此页面完成什么}
-**关联 FR**：{FR-xxx}
+**关联 FR**：{{scope}}:FR-xxx
 **适用平台**：{PC Web / H5 / App / 微信小程序}
 **入口来源**：{从哪里进入}
 **完成后去向**：{成功后跳转 / 返回 / 留在当前页}
@@ -146,7 +149,7 @@
 
 | FR | 覆盖页面 | 覆盖元素 / 操作 | 是否完整 | 备注 |
 |----|----------|-----------------|----------|------|
-| FR-001 | PAGE-001 | E-001 | 是/否 | {note} |
+| {{scope}}:FR-001 | {{scope}}:PAGE-001 | E-001 | 是/否 | {note} |
 
 ---
 

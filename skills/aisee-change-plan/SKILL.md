@@ -5,9 +5,9 @@ description: 将已确认的 SRS、UI 内容规格、设计规范、技术架构
 
 # aisee:change-plan — OpenSpec Change 边界规划
 
-将已确认需求映射为边界清晰、可独立交付的 OpenSpec changes。每个输出 change 都应足够小，可以用 `/opsx:new` 创建，并在实现前按所选 schema 的 artifact 顺序补齐内容。对于 app / device schema，通常会包含 `source-map.md`、`specs/`、`design.md`、contract artifacts 和 `tasks.md`；轻量 schema 可能使用不同 artifacts。
+将已确认需求映射为边界清晰、可独立交付的 OpenSpec changes。每个输出 change 都应足够小，可以用 `/opsx:new` 创建，并在实现前按所选 schema 的 artifact 顺序补齐内容。对于 app schema v2，通常会包含 `source-map.md`、`specs/`、`change-context.md`、contract artifacts 和 `tasks.md`；device schema 可能包含 `design.md` 或设备侧 contracts；轻量 schema 可能使用不同 artifacts。
 
-`aisee:change-plan` 不负责业务模块划分。SRS 的模块回答“业务上有哪些模块”，本技能回答“哪些 FR / PAGE / API / DATA 应放进同一个可独立交付的 OpenSpec change”。
+`aisee:change-plan` 不负责业务模块划分。SRS 的模块回答“业务上有哪些模块”，本技能回答“哪些 FR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 应放进同一个可独立交付的 OpenSpec change”。
 
 ## 输入
 
@@ -49,6 +49,7 @@ ls openspec/changes/archive/ 2>/dev/null | head -20
 # 读取团队约定；AGENTS.md 是主入口，CLAUDE.md 只作为旧项目兼容
 cat AGENTS.md 2>/dev/null | head -120
 cat CLAUDE.md 2>/dev/null | head -80
+cat .aisee/id-registry.json 2>/dev/null || true
 ```
 
 用这些上下文：
@@ -61,6 +62,7 @@ cat CLAUDE.md 2>/dev/null | head -80
 如果用户提供 `aisee:architecture` 生成的技术架构文档：
 
 - 将技术事实、架构决策、技术栈状态、可复用能力、共享前置、耦合点和平台约束作为规划输入。
+- 引用 Architecture 中已有的完整 `ARCH / DEC / CONSTRAINT / RISK` ID；不要在 change-plan 阶段分配这些 ID。
 - 当阻塞标签影响边界时，在 change rationale 中保留 `[STACK-CONTEXT-MISSING]`、`[STACK-GAP]`、`[STACK-DECISION-REQUIRED]`、`[ARCHITECTURE-DECISION-REQUIRED]`、`[SPEC-GAP]`、`[STACK-CONFLICT]`。
 - 不要把 architecture hints 解释成预先写好的 change 列表；最终 change 边界、依赖、命名和 `/opsx:new` 命令仍由 `aisee:change-plan` 决定。
 - 不要在 `aisee:change-plan` 中替用户选择缺失的技术栈。如果 architecture 标记技术栈决策缺失，把它作为 blocker 或 assumption 暴露出来。
@@ -79,11 +81,27 @@ cat CLAUDE.md 2>/dev/null | head -80
 
 如果输入文件是 `aisee:srs` 生成的 SRS（可通过 `FR-xxx` 需求 ID 和“变更候选清单”识别），启用 **SRS 输入模式**：
 
-- 将 FR-xxx ID 作为分析的规范单元，不重新发明需求。
+- 将完整 `FR / NFR / RULE / FLOW / STATE` ID 作为分析的规范单元，不重新发明需求。
 - 读取 Section 7（变更候选清单）作为主要规划输入，其中的优先级、规模估计和依赖提示可作为参考。
 - 读取 Section 5.2（假设）和 Section 6（Open Questions）；未解决事项应影响 change rationale，并可能触发 Phase 2 的澄清问题。
-- 每个 change 的 In Scope 必须保留 FR-xxx 引用，确保能追踪回 SRS。
+- 每个 change 的 In Scope 必须保留完整 FR ID，确保能追踪回 SRS。
 - SRS 模块名只是能力边界提示，不是 change 名称或 change 边界结论；最终边界必须通过 `references/input-boundary-rules.md` 审查。
+
+### ID 输入规则
+
+`aisee:change-plan` 只引用前置文档已经存在的正式 ID，不负责为上游对象分配 ID：
+
+- SRS：引用 `FR / NFR / RULE / FLOW / STATE`。
+- UI Content：引用 `PAGE / FLOW / STATE`。
+- Architecture：引用 `ARCH / DEC / CONSTRAINT / RISK`。
+
+如果前置文档缺少 ID：
+
+- 不得临时发明正式 ID。
+- 在相关 change 的 source-map seed 中写 `[SOURCE-ID-MISSING]` 或 `[ID-RESERVATION-REQUIRED]`。
+- 如边界无法判断，输出 blocker；如边界可判断，继续规划但保留风险。
+
+`SPEC / API / DATA / TASK / TEST` 属于 change-author 阶段产出，change-plan 只能写 `TBD in <artifact>`。
 
 ### 输入边界审查
 
@@ -226,11 +244,13 @@ Out of Scope:
 每个 planned change 必须包含 source-map seed。生成 seed 前读取 `references/source-map-rules.md`。
 
 对于 `aisee-app-spec-driven`：
-- FR ID 来自 SRS 或 proposal
-- PAGE / FLOW ID 来自 UI Content，或写 `N/A`
-- 预期 API 能力 ID，或写 `TBD in service-contract`
-- 预期 DATA 能力 ID，或写 `TBD in data-model`
-- 判断 `ui-contract.md`、`data-model.md`、`service-contract.md` 是否适用
+- FR / NFR / RULE / FLOW / STATE ID 来自 SRS
+- PAGE / FLOW / STATE ID 来自 UI Content，或写 `N/A`
+- ARCH / DEC / CONSTRAINT / RISK ID 来自 Architecture，或写 `N/A`
+- API 能力 ID 写 `TBD in service-contract`
+- DATA ID 写 `TBD in data-model`
+- SPEC / TASK / TEST ID 写 `TBD in change-author`
+- 判断 `change-context.md`、`ui-contract.md`、`data-model.md`、`service-contract.md` 是否适用
 
 对于 `aisee-device-spec-driven`：
 - FR ID 来自 SRS 或 proposal
@@ -306,19 +326,26 @@ Out of Scope:
   - 明确排除事项 2
 
 Source-map seed:
-  FR:   FR-001, FR-002
+  Upstream:
+    FR:          <scope>:FR-001, <scope>:FR-002
+    NFR/RULE:    <scope>:NFR-001, <scope>:RULE-001 (or "N/A")
+    PAGE/FLOW:   <scope>:PAGE-001, <scope>:FLOW-001 (or "N/A")
+    ARCH/DEC:    <scope>:ARCH-001, <scope>:DEC-001 (or "N/A")
+    CONSTRAINT:  <scope>:CONSTRAINT-001 (or "N/A")
+    RISK:        <scope>:RISK-001 (or "N/A")
   APP schema fields:
-    PAGE: PAGE-001, PAGE-002 (or "N/A")
-    FLOW: FLOW-001 (or "N/A")
-    DS:   expected design rule / pattern IDs or "TBD in ui-contract"
-    API:  expected API capability IDs or "TBD in service-contract"
-    DATA: expected DATA IDs or "TBD in data-model"
+    SPEC: TBD in change-author
+    API:  TBD in service-contract
+    DATA: TBD in data-model
+    TASK: TBD in tasks
+    TEST: TBD in tasks / verification evidence
   DEVICE schema fields:
     HW:  expected HW IDs or "TBD in hardware-contract"
     FW:  expected FW IDs or "TBD in firmware-contract"
     RT:  expected RT IDs or "TBD in runtime-contract"
     VER: expected VER IDs or "TBD in verification-contract"
   Artifact applicability:
+    - change-context.md: yes/no — 原因
     - ui-contract.md: yes/no — 原因
     - data-model.md: yes/no — 原因
     - service-contract.md: yes/no — 原因

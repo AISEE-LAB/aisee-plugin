@@ -29,11 +29,14 @@ description: 将 aisee:change-plan 的结果转成 OpenSpec change artifacts 初
 
 ```text
 ID registry preflight -> aisee id check / reserve / activate
+proposal.md -> change scope from confirmed change-plan
+source-map.md -> upstream IDs + produced IDs + artifact applicability
+specs/**/*.md -> observable behavior and acceptance
 change-context.md -> app architecture context author
 design.md -> only when schema generates design.md, use aisee:change-design
 ui-contract.md / service-contract.md / data-model.md -> app domain author
 hardware-contract.md / firmware-contract.md / runtime-contract.md / verification-contract.md -> device domain author
-source-map.md -> ID trace + sources + OpenSpec artifacts
+tasks.md -> single durable task list + verification evidence requirements
 ```
 
 ## ID 规则
@@ -43,3 +46,106 @@ source-map.md -> ID trace + sources + OpenSpec artifacts
 - 写入 artifact 后，使用 `aisee id activate <full-id> --owner <path> --title "<title>"` 激活。
 - 交付前运行或要求运行 `aisee id check --json`。
 - 如果 Aisee CLI 或 ID registry 不可用，只能写临时占位符，例如 `{{scope}}:API-NEW-001`，并在 `source-map.md` 标注 `[ID-RESERVATION-REQUIRED]`。不要声称占位符是正式 ID。
+
+## 输入门禁
+
+开始 author 前必须确认：
+
+- 当前只处理一个 OpenSpec change；不要一次为多个 changes 生成 artifacts。
+- change 已由 `aisee:change-plan` 或用户明确确认边界、schema 和依赖。
+- 能读取 `openspec/changes/<change>/`，或用户明确要求先输出补丁 / 草稿而不直接写文件。
+- 能读取当前 schema 的 `schema.yaml` 和所有 `templates/`；不得自造 artifact 顶层结构。
+- 已收集与该 change 直接相关的上游输入：SRS、UI Content、Architecture、Change Plan、Issue / 用户输入。
+- 已读取项目规则：优先 `AGENTS.md`，`CLAUDE.md` 只作为 legacy fallback。
+- 如涉及既有系统，先读取相关 existing specs、代码事实、路由/API/模型/测试；不要只按上游文档猜现状。
+
+如果缺少阻塞输入，输出 `[CHANGE-AUTHOR-BLOCKED]` 并列出缺口。非阻塞缺口进入 `source-map.md` 的阻塞项 / 假设，不要静默补齐。
+
+## Schema DAG 规则
+
+- 以当前 schema 的 `artifacts[].requires` 为唯一生成顺序来源。
+- 不要因为某个模板常见就创建 schema 未声明的 artifact。
+- 不要跳过 schema 声明的 artifact；不适用时按模板写 N/A 原因。
+- 生成每个 artifact 前，读取它的 `instruction` 和 `template`。
+- 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`。
+
+## App Schema v2 顺序
+
+`aisee-app-spec-driven` v2 使用以下顺序：
+
+```text
+proposal.md
+source-map.md
+specs/**/*.md
+change-context.md
+ui-contract.md
+data-model.md
+service-contract.md
+tasks.md
+```
+
+生成规则：
+
+- `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用完整 ID，不复制上游全文。
+- `source-map.md`：先建立上游输入 ID、产出 ID、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
+- `specs/**/*.md`：只写用户可观察行为和验收场景，覆盖 FR / NFR / RULE / FLOW / STATE。
+- `change-context.md`：只承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture。
+- `ui-contract.md`：只在涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
+- `data-model.md`：只在涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
+- `service-contract.md`：只在涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
+- `tasks.md`：最后生成，是唯一长期任务清单；任务必须追踪到 specs、change-context 和适用 contracts。
+
+## Artifact 适用性判断
+
+在 `source-map.md` 先写适用性，再生成对应 artifact：
+
+| Artifact | 适用信号 | N/A 合法原因 |
+|---|---|---|
+| `change-context.md` | 有 Architecture 约束、技术决策、平台限制、集成边界、风险或阻塞 | 纯文案 / 极小配置变更，且无技术约束影响 |
+| `ui-contract.md` | 页面、弹窗、表单、导航、权限可见性、前端状态、前端数据需求 | backend-only / job-only / CLI-only 且无前端可见变更 |
+| `data-model.md` | 持久化实体、字段、表、关系、索引、迁移、审计、敏感数据 | 无持久化数据变化，且不改变数据生命周期 |
+| `service-contract.md` | API、后端能力、异步任务、定时任务、CLI、外部集成、权限、错误语义 | UI-only 静态展示或纯内容变更，无服务能力变化 |
+
+N/A artifact 不能留空，必须写：
+
+- N/A 原因。
+- 哪些上游 ID 使它不适用。
+- 是否有需要其他 artifact 承接的相关约束。
+
+## ID Preflight
+
+建议顺序：
+
+```bash
+aisee id check --json
+aisee trace <upstream-id> --json
+aisee id reserve --scope <scope> --type SPEC --count <n> --json
+aisee id reserve --scope <scope> --type API --count <n> --json
+aisee id reserve --scope <scope> --type DATA --count <n> --json
+aisee id reserve --scope <scope> --type TASK --count <n> --json
+aisee id reserve --scope <scope> --type TEST --count <n> --json
+```
+
+只 reserve 实际需要的 ID 类型。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时 reserve。
+
+工具不可用时：
+
+- 继续生成草稿可以，但所有新增 ID 必须用 `{{scope}}:<TYPE>-NEW-001`。
+- `source-map.md` 必须写 `[ID-RESERVATION-REQUIRED]`。
+- final / handoff 必须说明这些不是正式 ID，后续需要运行 `aisee id reserve / activate / check`。
+
+## 写入与输出
+
+如果用户要求直接写文件：
+
+- 只写当前 change 目录内 schema 声明的 artifacts。
+- 已存在 artifact 时先读取并增量补齐，避免覆盖用户内容。
+- 不要删除用户已有内容，除非它与 schema 明确冲突且用户确认。
+
+输出摘要必须包含：
+
+- 生成 / 更新了哪些 artifacts。
+- 哪些 artifacts 是 N/A 及原因。
+- 是否存在临时 ID 或 `[ID-RESERVATION-REQUIRED]`。
+- 需要用户确认的 blocker。
+- 建议下一步：`openspec validate`，再进入 `aisee:implementation-bridge`。

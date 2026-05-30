@@ -11,12 +11,15 @@
 **创建日期**：{date}
 **来源 SRS / 需求**：{path or description}
 **场景模式**：{new-build / enhancement / inventory}
+**ID Scope**：{scope}
+
+> 正式 PAGE / FLOW / STATE ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 
 ## 1. 来源与范围
 
-- 覆盖 FR：{FR-001 ~ FR-00X}
+- 覆盖 FR：{{scope}}:FR-001 ~ {{scope}}:FR-00X
 - 覆盖模块：{modules}
 - 覆盖平台：{platforms}
 - 输出模式：Epic
@@ -42,7 +45,7 @@
 
 | 文档 | 路径 | 覆盖范围 | 页面范围 |
 |------|------|----------|----------|
-| {模块 A} | [`./01-{module-a}.md`](./01-{module-a}.md) | FR-001 ~ FR-00X | PAGE-001 ~ PAGE-00X |
+| {模块 A} | [`./01-{module-a}.md`](./01-{module-a}.md) | {{scope}}:FR-001 ~ {{scope}}:FR-00X | {{scope}}:PAGE-001 ~ {{scope}}:PAGE-00X |
 | 跨模块流程 | [`./shared-flows.md`](./shared-flows.md) | {FRs} | {flows} |
 | 平台差异 | [`./platform-diff.md`](./platform-diff.md) | {FRs} | {platforms} |
 
@@ -71,7 +74,7 @@
 
 | 页面 ID | 页面名称 | 变化状态 | 页面类型 | 所属模块 | 关联 FR | 适用平台 | 文档 |
 |---------|----------|----------|----------|----------|---------|----------|------|
-| PAGE-001 | {name} | New / Changed / Existing / Deprecated / Unknown | {type} | {module} | FR-001 | {platforms} | [`./01-{module-a}.md`](./01-{module-a}.md#page-001) |
+| {{scope}}:PAGE-001 | {name} | New / Changed / Existing / Deprecated / Unknown | {type} | {module} | {{scope}}:FR-001 | {platforms} | [`./01-{module-a}.md`](./01-{module-a}.md#page-001) |
 
 ---
 
@@ -79,7 +82,7 @@
 
 | 流程 ID | 流程名称 | 起点 | 终点 | 关联 FR | 文档 |
 |---------|----------|------|------|---------|------|
-| FLOW-001 | {name} | PAGE-001 | PAGE-003 | FR-001 | [`./shared-flows.md`](./shared-flows.md#flow-001) |
+| {{scope}}:FLOW-001 | {name} | {{scope}}:PAGE-001 | {{scope}}:PAGE-003 | {{scope}}:FR-001 | [`./shared-flows.md`](./shared-flows.md#flow-001) |
 
 ---
 
@@ -87,7 +90,7 @@
 
 | FR | 覆盖页面 | 覆盖文档 | 是否完整 | 备注 |
 |----|----------|----------|----------|------|
-| FR-001 | PAGE-001, PAGE-002 | `01-{module-a}.md` | 是/否 | {note} |
+| {{scope}}:FR-001 | {{scope}}:PAGE-001, {{scope}}:PAGE-002 | `01-{module-a}.md` | 是/否 | {note} |
 
 ---
 

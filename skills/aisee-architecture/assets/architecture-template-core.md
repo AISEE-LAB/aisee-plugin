@@ -11,6 +11,9 @@
 **创建日期**：{date}
 **来源输入**：{SRS / UI 内容规格 / 设计规范 / 项目目录 / 用户输入}
 **技术域**：{software / web / backend / cli / job / integration / data / hardware / embedded / firmware / rtos / driver / hybrid}
+**ID Scope**：{scope}
+
+> 正式 ARCH / DEC / CONSTRAINT / RISK ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 
@@ -33,6 +36,14 @@
 ---
 
 ## 2. 技术域与技术栈 / 工具链状态
+
+### 2.0 ID Registry 状态
+
+| 检查项 | 状态 | 证据 / 命令 | 备注 |
+|---|---|---|---|
+| 已读取 `.aisee/id-registry.json` | yes / no | `aisee id check --json` | |
+| 已为新增 ARCH / DEC / CONSTRAINT / RISK 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
+| 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
 
 **状态**：已确定 / 部分确定 / 未确定
 
@@ -61,12 +72,12 @@
 
 ## 4. 架构概览
 
-| 项 | 当前事实 / 决策 | 来源 | 可信度 | 对 change-plan 的影响 |
-|----|-----------------|------|--------|------------------------|
-| 系统分层 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
-| 主要运行单元 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
-| 端 / 服务 / 设备协作关系 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
-| 模块边界原则 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| ARCH ID | 项 | 当前事实 / 决策 | 来源 | 可信度 | 对 change-plan 的影响 |
+|----|----|-----------------|------|--------|------------------------|
+| {scope}:ARCH-001 | 系统分层 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| {scope}:ARCH-002 | 主要运行单元 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| {scope}:ARCH-003 | 端 / 服务 / 设备协作关系 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| {scope}:ARCH-004 | 模块边界原则 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
 
 ---
 
@@ -74,9 +85,9 @@
 
 > 只记录已有约定或待决策缺口，不在本节创造新的 API、数据、CLI、Job、硬件或固件契约。
 
-| 类型 | 当前约定 / 现状 | 来源 | 可信度 | 影响范围 | 后续 artifact 提示 |
-|------|-----------------|------|--------|----------|--------------------|
-| API 响应 / 错误码 / 分页 / 时间格式 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
+| CONSTRAINT ID | 类型 | 当前约定 / 现状 | 来源 | 可信度 | 影响范围 | 后续 artifact 提示 |
+|------|------|-----------------|------|--------|----------|--------------------|
+| {scope}:CONSTRAINT-001 | API 响应 / 错误码 / 分页 / 时间格式 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
 | 鉴权 / 权限 / Trace ID / 日志 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
 | 配置 / Feature Flag / Secrets | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
 | CLI 输出 / 退出码 / 配置优先级 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
@@ -90,15 +101,15 @@
 
 ### 6.1 已确认决策
 
-| 编号 | 决策 | 来源 | 可信度 | 影响范围 | 后续约束 |
+| DEC ID | 决策 | 来源 | 可信度 | 影响范围 | 后续约束 |
 |------|------|------|--------|----------|----------|
-| ADR-001 | {decision or 无} | {source} | high/medium/low | {scope} | {constraint} |
+| {scope}:DEC-001 | {decision or 无} | {source} | high/medium/low | {scope} | {constraint} |
 
 ### 6.2 待确认决策
 
-| 编号 | 待确认事项 | 影响范围 | 阻塞程度 | 建议处理 |
+| DEC ID | 待确认事项 | 影响范围 | 阻塞程度 | 建议处理 |
 |------|------------|----------|----------|----------|
-| ADR-Q-001 | {question or 无} | {scope} | blocker/risk/info | {next step} |
+| {scope}:DEC-NEW-001 | {question or 无} | {scope} | blocker/risk/info | {next step} |
 
 ### 6.3 禁止假设项
 
@@ -110,9 +121,9 @@
 
 ## 7. 现有架构边界
 
-| 边界 | 当前事实 | 来源 | 对 change-plan 的影响 |
-|------|----------|------|------------------------|
-| {boundary} | {fact} | {source} | {impact note} |
+| ARCH ID | 边界 | 当前事实 | 来源 | 对 change-plan 的影响 |
+|------|------|----------|------|------------------------|
+| {scope}:ARCH-001 | {boundary} | {fact} | {source} | {impact note} |
 
 ---
 
@@ -179,9 +190,9 @@
 
 ## 15. 阻塞决策与风险
 
-| 编号 | 标记 | 内容 | 影响 | 建议处理 |
+| RISK ID | 标记 | 内容 | 影响 | 建议处理 |
 |------|------|------|------|----------|
-| B-001 | [STACK-CONTEXT-MISSING] / [STACK-GAP] / [STACK-DECISION-REQUIRED] / [ARCHITECTURE-DECISION-REQUIRED] / [SPEC-GAP] / [STACK-CONFLICT] / [TECH-CONVENTION-MISSING] / [SCHEMA-HINT-UNCLEAR] | {content} | {impact} | {next step} |
+| {scope}:RISK-001 | [STACK-CONTEXT-MISSING] / [STACK-GAP] / [STACK-DECISION-REQUIRED] / [ARCHITECTURE-DECISION-REQUIRED] / [SPEC-GAP] / [STACK-CONFLICT] / [TECH-CONVENTION-MISSING] / [SCHEMA-HINT-UNCLEAR] / [ID-RESERVATION-REQUIRED] | {content} | {impact} | {next step} |
 
 ---
 

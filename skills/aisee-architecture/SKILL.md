@@ -58,6 +58,32 @@ description: 在 aisee:change-plan 之前生成跨工程域技术架构文档，
 
 ---
 
+## ID 规则
+
+`aisee:architecture` 负责架构侧上游 ID：
+
+- `ARCH`：架构边界、架构上下文项、系统分层或运行单元。
+- `DEC`：已确认或局部待确认的架构决策。
+- `CONSTRAINT`：技术约束、平台约束、集成约束、运行环境限制。
+- `RISK`：技术风险、阻塞项、冲突或需要验证的风险。
+
+正式 ID 必须来自 `.aisee/id-registry.json`。新增架构项前，使用：
+
+```bash
+aisee id reserve --scope <scope> --type ARCH --count <N> --json
+aisee id reserve --scope <scope> --type DEC --count <N> --json
+aisee id reserve --scope <scope> --type CONSTRAINT --count <N> --json
+aisee id reserve --scope <scope> --type RISK --count <N> --json
+```
+
+写入文档后，使用 `aisee id activate <full-id> --owner <path> --title "<title>"` 激活；交付前运行或建议运行 `aisee id check --json`。
+
+如果 Aisee CLI 或 ID registry 不可用，只能使用临时占位符，例如 `{{scope}}:DEC-NEW-001`，并在文档 ID 状态中标注 `[ID-RESERVATION-REQUIRED]`。不要声称占位符是正式 ID。
+
+Architecture 不负责 `API / DATA / TASK / TEST`，也不负责 UI 的 `PAGE` 分配。它只输出后续 `change-context.md` 可以引用的架构 ID。
+
+---
+
 ## Phase 0 — 读取输入与项目上下文
 
 先读取用户提供的输入文件或文本。若路径不存在，停止并说明。
@@ -69,6 +95,7 @@ cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat AGENTS.md 2>/dev/null | head -160
 cat CLAUDE.md 2>/dev/null | head -80
+cat .aisee/id-registry.json 2>/dev/null || true
 find . -maxdepth 3 \( -name package.json -o -name pnpm-lock.yaml -o -name yarn.lock -o -name package-lock.json -o -name pyproject.toml -o -name requirements.txt -o -name Gemfile -o -name go.mod -o -name Cargo.toml -o -name pom.xml -o -name build.gradle -o -name composer.json -o -name prisma -o -name drizzle -o -name migrations -o -name schema.sql -o -name openapi.yaml -o -name openapi.json \) 2>/dev/null | head -80
 find . -maxdepth 4 \( -iname 'CMakeLists.txt' -o -iname 'Makefile' -o -iname '*.ioc' -o -iname '*.dts' -o -iname '*.dtsi' -o -iname 'platformio.ini' -o -iname 'west.yml' -o -iname 'Kconfig' -o -iname '*.ld' -o -iname '*.sv' -o -iname '*.v' -o -iname '*.xdc' -o -iname '*.sdc' \) 2>/dev/null | head -80
 find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*stack*' -o -iname '*design*' -o -iname '*hardware*' -o -iname '*firmware*' -o -iname '*rtos*' -o -iname '*driver*' \) 2>/dev/null | head -80
@@ -227,6 +254,7 @@ mkdir -p docs/architecture
 - 不要把建议 artifact 类型写死为当前 schema 的固定文件名；schema pack 未来可调整。
 - 如果发现需求与现有技术约束冲突，标注 `[SPEC-GAP]` 或 `[STACK-CONFLICT]`，不要静默绕过。
 - 给 `aisee:change-plan` 的技术提示只能是事实、约束和原因，不是边界规划结果。
+- 正式 ARCH / DEC / CONSTRAINT / RISK ID 必须来自 ID registry；工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 

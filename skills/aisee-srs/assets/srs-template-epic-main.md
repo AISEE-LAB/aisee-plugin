@@ -10,6 +10,9 @@
 **状态**：草稿
 **创建日期**：{date}
 **作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}
+**ID Scope**：{scope}
+
+> 正式 ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 
@@ -17,8 +20,8 @@
 
 | 模块名称 | 文档路径 | FR 范围 | 优先级 |
 |----------|---------|---------|--------|
-| {模块 A} | [`./01-{module-a}.md`](./01-{module-a}.md) | FR-001 ~ FR-00X | P0 |
-| {模块 B} | [`./02-{module-b}.md`](./02-{module-b}.md) | FR-00X ~ FR-00Y | P1 |
+| {模块 A} | [`./01-{module-a}.md`](./01-{module-a}.md) | {scope}:FR-001 ~ {scope}:FR-00X | P0 |
+| {模块 B} | [`./02-{module-b}.md`](./02-{module-b}.md) | {scope}:FR-00X ~ {scope}:FR-00Y | P1 |
 
 ### 模块划分依据
 
@@ -56,6 +59,14 @@
 ---
 
 ## 2. 整体描述
+
+### 2.0 ID Registry 状态
+
+| 检查项 | 状态 | 证据 / 命令 | 备注 |
+|---|---|---|---|
+| 已读取 `.aisee/id-registry.json` | yes / no | `aisee id check --json` | |
+| 已为新增 FR / NFR / RULE / FLOW / STATE 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
+| 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
 
 ### 2.1 产品概述
 {系统定位、解决的核心问题、与现有系统的关系}
@@ -150,9 +161,9 @@
 
 | 优先级 | 需求 ID | 标题 | 变更类型 | 影响基线 | 所属模块 | 估计规模 | 依赖 |
 |--------|---------|------|----------|----------|----------|----------|------|
-| P0 | [FR-001](./01-{module-a}.md#fr-001) | {title} | 新增 / 修改 / 移除 / 兼容 | {baseline ref or 无} | {模块 A} | M | 无 |
-| P0 | [FR-002](./01-{module-a}.md#fr-002) | {title} | 修改 | {openspec/specs/...} | {模块 A} | S | FR-001 |
-| P1 | [FR-003](./02-{module-b}.md#fr-003) | {title} | 新增 | 无 | {模块 B} | L | 无 |
+| P0 | [{scope}:FR-001](./01-{module-a}.md#fr-001) | {title} | 新增 / 修改 / 移除 / 兼容 | {baseline ref or 无} | {模块 A} | M | 无 |
+| P0 | [{scope}:FR-002](./01-{module-a}.md#fr-002) | {title} | 修改 | {openspec/specs/...} | {模块 A} | S | {scope}:FR-001 |
+| P1 | [{scope}:FR-003](./02-{module-b}.md#fr-003) | {title} | 新增 | 无 | {模块 B} | L | 无 |
 
 ---
 

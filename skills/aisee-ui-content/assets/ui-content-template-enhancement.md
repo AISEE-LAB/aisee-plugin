@@ -11,13 +11,16 @@
 **创建日期**：{date}
 **来源 SRS / 需求**：{path or description}
 **场景模式**：enhancement
+**ID Scope**：{scope}
+
+> 正式 PAGE / FLOW / STATE ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 
 ## 1. 来源与范围
 
 ### 1.1 覆盖范围
-- 覆盖 FR：{FR-001 ~ FR-00X}
+- 覆盖 FR：{{scope}}:FR-001 ~ {{scope}}:FR-00X
 - 覆盖模块：{modules}
 - 覆盖平台：{platforms}
 - 本次 UI 工作类型：二开增量
@@ -74,13 +77,14 @@
 
 | ID | 名称 | 变化状态 | 类型 | 页面目标 / 承载目标 | 关联 FR | 主要用户 | 适用平台 |
 |----|------|----------|------|---------------------|---------|----------|----------|
-| PAGE-001 | {name} | Changed / New / Deprecated / Unknown | {type} | {goal} | FR-001 | {role} | {platforms} |
+| {{scope}}:PAGE-001 | {name} | Changed / New / Deprecated / Unknown | {type} | {goal} | {{scope}}:FR-001 | {role} | {platforms} |
 
 ---
 
 ## 6. 变化流程总览
 
 ### FLOW-001 {流程名称}
+<!-- aisee:id {scope}:FLOW-001 -->
 
 **变化类型**：新增 / 修改 / 替换 / 下线
 **目标用户**：{role}
@@ -100,12 +104,13 @@
 ## 7. 页面变化规格
 
 ### PAGE-001 {页面名称}
+<!-- aisee:id {scope}:PAGE-001 -->
 
 **变化状态**：Changed / New / Deprecated / Unknown
 **当前来源**：{现有页面/路由/source-map/baseline/历史文档；新建则写“无”}
 **页面类型**：{列表页 / 详情页 / 表单页 / 流程页 / 设置页 / 结果页 / 授权页 / 通知落地页}
 **页面目标**：{一句话说明用户在此页面完成什么}
-**关联 FR**：{FR-xxx}
+**关联 FR**：{{scope}}:FR-xxx
 **适用平台**：{PC Web / H5 / App / 微信小程序}
 **入口来源**：{从哪里进入}
 **完成后去向**：{成功后跳转 / 返回 / 留在当前页}
@@ -213,7 +218,7 @@
 
 | FR | 覆盖页面 | 覆盖元素 / 操作 | 非页面型承载 | 是否完整 | 备注 |
 |----|----------|-----------------|--------------|----------|------|
-| FR-001 | PAGE-001 | E-001 / 操作名 | 无 | 是/否 | {note} |
+| {{scope}}:FR-001 | {{scope}}:PAGE-001 | E-001 / 操作名 | 无 | 是/否 | {note} |
 
 ---
 

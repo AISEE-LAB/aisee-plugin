@@ -10,7 +10,8 @@ Epic 模式下，每份模块文档使用本模板。
 **版本**：v1.0
 **状态**：草稿
 **创建日期**：{date}
-**FR 范围**：FR-{XXX} ~ FR-{YYY}
+**ID Scope**：{scope}
+**FR 范围**：{scope}:FR-{XXX} ~ {scope}:FR-{YYY}
 
 ---
 
@@ -34,13 +35,14 @@ Epic 模式下，每份模块文档使用本模板。
 
 ## 3. 功能需求
 
-> 每条需求使用唯一 ID（FR-001、FR-002…），与主文档 Section 7 对应。
+> 每条需求使用来自 `.aisee/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker。
 
 ### 3.{N} {能力模块名称}
 
 > 模块名称必须来自业务能力、用户任务、设备能力或状态生命周期；不要直接使用输入文档章节、页面类型、技术层或任务阶段。
 
 #### FR-{XXX} {需求标题}
+<!-- aisee:id {scope}:FR-{XXX} -->
 
 **描述**：{一句话说明该需求交付什么}
 
@@ -60,8 +62,8 @@ Epic 模式下，每份模块文档使用本模板。
 - [ ] {criterion 2}
 
 **业务规则 / 约束**：
-- {rule 1}
-- {rule 2}
+- {scope}:RULE-001 {rule 1}
+- {scope}:RULE-002 {rule 2}
 
 **优先级**：P0 / P1 / P2
 **变更类型**：新增 / 修改 / 移除 / 兼容
@@ -104,8 +106,8 @@ Epic 模式下，每份模块文档使用本模板。
 
 | 优先级 | 需求 ID | 标题 | 变更类型 | 影响基线 | 估计规模 | 依赖 |
 |--------|---------|------|----------|----------|----------|------|
-| P0 | FR-{XXX} | {title} | 新增 / 修改 / 移除 / 兼容 | {baseline ref or 无} | M | 无 |
-| P1 | FR-{YYY} | {title} | 修改 | {openspec/specs/...} | S | FR-{XXX} |
+| P0 | {scope}:FR-{XXX} | {title} | 新增 / 修改 / 移除 / 兼容 | {baseline ref or 无} | M | 无 |
+| P1 | {scope}:FR-{YYY} | {title} | 修改 | {openspec/specs/...} | S | {scope}:FR-{XXX} |
 
 ---
 

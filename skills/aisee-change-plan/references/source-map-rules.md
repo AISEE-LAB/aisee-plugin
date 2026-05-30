@@ -4,10 +4,11 @@
 
 ## 通用规则
 
-- FR 必须引用 SRS 或 proposal 中的需求 ID；没有 ID 时写 `TBD in proposal/specs`。
-- PAGE / FLOW 必须来自 UI Content；没有 UI 时写 `N/A`，不要硬造页面。
-- Design 相关来源只引用 design-spec 中的规则、pattern 或 token ID；没有 ID 时写 `TBD in ui-contract`。
-- Architecture 相关来源只引用架构决策、共享前置或阻塞标签，不复制整段架构说明。
+- FR / NFR / RULE / FLOW / STATE 必须引用 SRS 中的完整 ID；没有 ID 时标注 `[SOURCE-ID-MISSING]` 或 `[ID-RESERVATION-REQUIRED]`。
+- PAGE / FLOW / STATE 必须来自 UI Content；没有 UI 时写 `N/A`，不要硬造页面。
+- Architecture 相关来源只引用 `ARCH / DEC / CONSTRAINT / RISK` 完整 ID，不复制整段架构说明。
+- `aisee:change-plan` 不分配上游 ID，不临时发明正式 ID。
+- SPEC / API / DATA / TASK / TEST 是 change-author 阶段产出，seed 中写 `TBD in <artifact>`。
 - artifact 适用性要写 yes/no 和原因，不能只写 yes/no。
 - 不要在 seed 中写最终 API endpoint、数据库字段、引脚表、寄存器表或实现任务。
 
@@ -17,15 +18,17 @@
 
 | 字段 | 填写规则 |
 |------|----------|
-| FR | SRS / proposal 中的 FR ID |
-| PAGE | UI Content 中的 PAGE ID，或 `N/A` |
-| FLOW | UI Content 中的 FLOW ID，或 `N/A` |
-| DS | design-spec 中的设计规则 / pattern / token ID，或 `TBD in ui-contract` |
-| API | 预期服务能力 ID，或 `TBD in service-contract` |
-| DATA | 预期数据能力 ID，或 `TBD in data-model` |
+| FR / NFR / RULE | SRS 中的完整 ID |
+| PAGE / FLOW / STATE | UI Content 中的完整 ID，或 `N/A` |
+| ARCH / DEC / CONSTRAINT / RISK | Architecture 中的完整 ID，或 `N/A` |
+| SPEC | `TBD in change-author` |
+| API | `TBD in service-contract` |
+| DATA | `TBD in data-model` |
+| TASK / TEST | `TBD in tasks` |
 
 必须判断以下 artifact 是否适用：
 
+- `change-context.md`
 - `ui-contract.md`
 - `data-model.md`
 - `service-contract.md`

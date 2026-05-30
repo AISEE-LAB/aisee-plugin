@@ -10,10 +10,10 @@
 
 | 输入来源 | 使用方式 | 不得做什么 |
 |----------|----------|------------|
-| SRS | 使用 FR、优先级、依赖、假设、Open Questions、需求域、交付形态 | 不把 SRS 模块名直接当 change 名 |
-| UI Content | 使用 PAGE / FLOW、角色可见性、页面状态、跨页面流程 | 不把页面类型直接当 change 边界 |
+| SRS | 使用 FR / NFR / RULE / FLOW / STATE、优先级、依赖、假设、Open Questions、需求域、交付形态 | 不把 SRS 模块名直接当 change 名；不临时分配正式需求 ID |
+| UI Content | 使用 PAGE / FLOW / STATE、角色可见性、页面状态、跨页面流程 | 不把页面类型直接当 change 边界；不临时分配正式 UI ID |
 | Design Spec | 使用设计策略、组件策略、tokens、screen patterns、设计阻塞项 | 不把设计规范拆成独立实现 change，除非它是明确前置能力 |
-| Architecture | 使用架构决策、技术事实、共享前置、耦合点、阻塞标签 | 不把架构层、技术层或 artifact hint 直接当 change |
+| Architecture | 使用 ARCH / DEC / CONSTRAINT / RISK、技术事实、共享前置、耦合点、阻塞标签 | 不把架构层、技术层或 artifact hint 直接当 change；不临时分配正式架构 ID |
 | 原始草稿 | 先提取真实需求和约束 | 不把“背景 / API / 数据库 / 测试 / 上线计划”等章节当 change |
 
 ## 有效 Change 候选信号
@@ -24,6 +24,7 @@
 - 它合并后系统仍保持工作状态，必要时可通过 feature flag 隐藏未完成能力。
 - 它有相对清晰的 owner 和边界，不要求多个团队在同一 change 内做互相阻塞的决策。
 - 它能映射到明确的 FR / PAGE / FLOW / HW / FW / RT / VER 或其他 source-map seed。
+- 对 app schema，优先映射到完整 FR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK ID。
 - 它的 Out of Scope 能明确排除相邻能力。
 
 ## 无效 Change 候选信号
@@ -44,7 +45,7 @@
 
 | 候选 change | 保留 / 合并 / 拆分 / 拒绝 | 原因 | 主要来源 |
 |-------------|----------------------------|------|----------|
-| {name} | 保留 | {独立可交付的业务能力} | FR-001 / PAGE-001 / ARCH-001 |
+| {name} | 保留 | {独立可交付的业务能力} | {scope}:FR-001 / {scope}:PAGE-001 / {scope}:ARCH-001 |
 
 规则：
 

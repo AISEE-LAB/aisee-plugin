@@ -10,6 +10,9 @@
 **状态**：草稿
 **创建日期**：{date}
 **作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}
+**ID Scope**：{scope}
+
+> 正式 ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 
@@ -40,6 +43,14 @@
 ---
 
 ## 2. 整体描述
+
+### 2.0 ID Registry 状态
+
+| 检查项 | 状态 | 证据 / 命令 | 备注 |
+|---|---|---|---|
+| 已读取 `.aisee/id-registry.json` | yes / no | `aisee id check --json` | |
+| 已为新增 FR / NFR / RULE / FLOW / STATE 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
+| 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
 
 ### 2.1 产品概述
 {系统定位、解决的核心问题、与现有系统的关系}
@@ -79,13 +90,14 @@
 
 ## 3. 功能需求
 
-> 每条需求使用唯一 ID（FR-001、FR-002…），便于 `aisee:change-plan` 引用和追踪。
+> 每条需求使用来自 `.aisee/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker，便于 `aisee:change-plan` 引用和追踪。
 
 ### 3.1 {能力模块名称}
 
 > 模块名称必须来自业务能力、用户任务、设备能力或状态生命周期；不要直接使用输入文档章节、页面类型、技术层或任务阶段。
 
 #### FR-001 {需求标题}
+<!-- aisee:id {scope}:FR-001 -->
 
 **描述**：{一句话说明该需求交付什么}
 
@@ -105,8 +117,8 @@
 - [ ] {criterion 2}
 
 **业务规则 / 约束**：
-- {rule 1}
-- {rule 2}
+- {scope}:RULE-001 {rule 1}
+- {scope}:RULE-002 {rule 2}
 
 **优先级**：P0 / P1 / P2
 **变更类型**：新增 / 修改 / 移除 / 兼容
@@ -120,11 +132,11 @@
 ## 4. 非功能需求
 
 ### 4.1 性能
-| 指标 | 要求 | 备注 |
+| NFR ID | 指标 | 要求 | 备注 |
 |------|------|------|
-| 响应时间 | {e.g., P99 < 500ms} | |
-| 并发用户数 | {e.g., 1000} | |
-| 列表查询 | {e.g., 10万条数据下 < 1s} | |
+| {scope}:NFR-001 | 响应时间 | {e.g., P99 < 500ms} | |
+| {scope}:NFR-002 | 并发用户数 | {e.g., 1000} | |
+| {scope}:NFR-003 | 列表查询 | {e.g., 10万条数据下 < 1s} | |
 
 ### 4.2 安全
 - {认证/授权要求}
@@ -168,9 +180,9 @@
 
 | 优先级 | 需求 ID | 标题 | 变更类型 | 影响基线 | 估计规模 | 依赖 |
 |--------|---------|------|----------|----------|----------|------|
-| P0 | FR-001 | {title} | 新增 / 修改 / 移除 / 兼容 | {baseline ref or 无} | M | 无 |
-| P0 | FR-002 | {title} | 修改 | {openspec/specs/...} | S | FR-001 |
-| P1 | FR-003 | {title} | 新增 | 无 | L | 无 |
+| P0 | {scope}:FR-001 | {title} | 新增 / 修改 / 移除 / 兼容 | {baseline ref or 无} | M | 无 |
+| P0 | {scope}:FR-002 | {title} | 修改 | {openspec/specs/...} | S | {scope}:FR-001 |
+| P1 | {scope}:FR-003 | {title} | 新增 | 无 | L | 无 |
 
 ---
 
