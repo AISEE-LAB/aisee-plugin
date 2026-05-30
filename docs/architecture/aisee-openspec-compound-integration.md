@@ -57,21 +57,14 @@ aisee-plugin/
     compound-bridge.md
     context-pack-contract.md
     id-policy.md
-  schemas/
-    aisee-app-spec-driven/
-    aisee-device-spec-driven/
-    aisee-docsite-driven/
-    quick-fix/
-    quick-research/
-    security-audit/
-    infra-change/
-    opsx-collab-pr-loop/
   scripts/
     context-parser/
     id-registry/
     bootstrap/
   README.md
 ```
+
+Schema pack 的唯一维护源位于 `skills/aisee-schema-pack/assets/schema-pack/`，由 `aisee-schema-pack/scripts/setup-schemas.js` 安装到目标项目的 `openspec/schemas/`。仓库根目录不再保留第二份 `schemas/` 副本。
 
 插件内部建议分层：
 

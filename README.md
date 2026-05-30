@@ -5,7 +5,7 @@ Aisee means **AI-Enhanced Software Engineering**.
 This repository contains the Aisee plugin system for OpenSpec-driven development:
 
 - Aisee skills for requirements, UI content, technical context, OpenSpec change authoring, verification, and reflection.
-- OpenSpec schema packs for app, device, docsite, infra, security, quick-fix, research, and collaboration workflows.
+- OpenSpec schema packs under `skills/aisee-schema-pack/assets/schema-pack/` for app, device, docsite, infra, security, quick-fix, research, and collaboration workflows.
 - Planning documents for Aisee CLI, context packs, ID registry, source registry, and Compound Engineering handoffs.
 
 ## Repository Layout
@@ -16,7 +16,6 @@ This repository contains the Aisee plugin system for OpenSpec-driven development
 .cursor-plugin/
 bin/
 skills/
-schemas/
 references/
 scripts/
 docs/architecture/
