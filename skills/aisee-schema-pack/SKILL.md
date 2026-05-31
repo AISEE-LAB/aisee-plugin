@@ -53,6 +53,10 @@ openspec init
 安装命令：
 
 ```bash
+aisee schemas list --json
+aisee schemas check --json
+aisee schemas install --all --json
+aisee schemas install --schema aisee-docsite-driven --json
 node aisee-schema-pack/scripts/setup-schemas.js --list
 node aisee-schema-pack/scripts/setup-schemas.js --all
 node aisee-schema-pack/scripts/setup-schemas.js --schema aisee-docsite-driven
@@ -63,6 +67,7 @@ node aisee-schema-pack/scripts/setup-schemas.js --schema security-audit --force
 
 安装规则：
 
+- 优先使用 `aisee schemas list/check/install --json` 获取机器可解析结果；需要 baseline 初始化等高级选项时，再使用 `setup-schemas.js`。
 - 写入 `openspec/schemas/<schema-name>/`。
 - 已存在同名 schema 时默认跳过；`--force` 才覆盖。
 - schema 可附带 `baseline-templates/`，使用 `--init-baseline` 初始化到项目 `openspec/` 下。

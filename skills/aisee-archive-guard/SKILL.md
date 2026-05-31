@@ -10,7 +10,7 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 ## 职责
 
 - 读取已有 validate、verify、review、test、verification 结果。
-- 运行或读取 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 运行或读取 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change archive-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
 - 判断是否可以执行 `openspec archive <change>`。
 - 输出可以 archive / 暂不建议 archive / 有风险但可接受。
 
@@ -26,6 +26,7 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 ## 归档前检查
 
 - `aisee change author-check <change> --json` 无 blocker，且 `missing_artifacts` 已处理。
+- `aisee change archive-check <change> --json` 无 blocker，或所有 risk 已有接受理由。
 - `aisee gaps --change <change> --json` 为 clear，或 risk 已有接受理由。
 - `aisee context pack --change <change> --for aisee-verify --json` 可生成，且无 archive 阻断项。
 - `openspec validate <change>` 已通过，或失败项已有明确处理结论。
@@ -49,6 +50,7 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 ```bash
 aisee change author-check <change> --json
 aisee gaps --change <change> --json
+aisee change archive-check <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 openspec validate <change>
 ```

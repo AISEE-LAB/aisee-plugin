@@ -10,7 +10,7 @@ description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、
 ## 职责
 
 - 运行或建议运行 `openspec validate`。
-- 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change verify-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
 - 检查 schema artifact DAG 和 template / artifact 缺失。
 - 检查 ID、`source-map.md`、spec、tasks、contracts 的一致性。
 - 检查实现后是否出现 spec drift。
@@ -33,6 +33,7 @@ description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、
 aisee change author-check <change> --json
 aisee gaps --change <change> --json
 aisee change inspect <change> --json
+aisee change verify-check <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 ```
 
@@ -49,7 +50,7 @@ openspec validate <change>
 - `author-check.status=blocked`：直接输出 fail，引用 `author-check.blockers`，不要继续推断实现状态。
 - `gaps.result.status=blocked`：直接输出 fail，要求回到对应 artifact 修复。
 - `change inspect.ids.registry.missing / temporary / inactive` 非空：至少输出 RISK；inactive 或 removed ID 输出 BLOCKER。
-- `context pack.facts.derived.checks` 是 verify 的结构化检查入口；不要把 verify 报告当成新事实源。
+- `aisee change verify-check` 是 verify 的机器门禁入口；`context pack.facts.derived.checks` 是补充结构化检查入口。不要把 verify 报告当成新事实源。
 - `openspec validate` 未运行时，输出 RISK；运行失败且无接受理由时输出 BLOCKER。
 - 已有 `ce-doc-review`、`ce-code-review`、`ce-test-*` 结果只作为 evidence；verify 不替代它们。
 

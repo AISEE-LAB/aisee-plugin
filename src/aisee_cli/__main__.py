@@ -7,14 +7,18 @@ from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.author_check import build_author_check
+from aisee_cli.bootstrap import build_bootstrap_apply_response, build_bootstrap_plan
 from aisee_cli.change import build_change_inspect
 from aisee_cli.change_checks import build_archive_check, build_verify_check
 from aisee_cli.context_pack import build_context_pack
+from aisee_cli.doctor import build_doctor
+from aisee_cli.flow import build_flow
 from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids
 from aisee_cli.index import build_index
 from aisee_cli.lookup import get_id, trace_id
 from aisee_cli.output import error_response, exit_code_for, print_json
 from aisee_cli.project import resolve_project_root
+from aisee_cli.schema_pack import check_schema_packs, install_schema_packs, list_schema_packs
 from aisee_cli.sources import add_source, check_sources, list_sources, remove_source
 
 
@@ -22,8 +26,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(prog="aisee")
     parser.add_argument("--version", action="store_true", help="print version")
     subparsers = parser.add_subparsers(dest="command")
-    subparsers.add_parser("doctor")
-    subparsers.add_parser("bootstrap")
+    doctor_parser = subparsers.add_parser("doctor")
+    doctor_parser.add_argument("--json", action="store_true", help="output JSON")
+    doctor_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
+    bootstrap_parser = subparsers.add_parser("bootstrap")
+    bootstrap_group = bootstrap_parser.add_mutually_exclusive_group()
+    bootstrap_group.add_argument("--plan", action="store_true", help="output bootstrap plan")
+    bootstrap_group.add_argument("--apply", action="store_true", help="apply bootstrap plan")
+    bootstrap_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_parser = subparsers.add_parser("sources")
     sources_subparsers = sources_parser.add_subparsers(dest="sources_command")
     sources_list_parser = sources_subparsers.add_parser("list")
@@ -43,6 +53,18 @@ def main() -> int:
     sources_remove_parser.add_argument("--type", required=True, help="source type")
     sources_remove_parser.add_argument("--path", required=True, help="source path")
     sources_remove_parser.add_argument("--json", action="store_true", help="output JSON")
+    schemas_parser = subparsers.add_parser("schemas")
+    schemas_subparsers = schemas_parser.add_subparsers(dest="schemas_command")
+    schemas_list_parser = schemas_subparsers.add_parser("list")
+    schemas_list_parser.add_argument("--json", action="store_true", help="output JSON")
+    schemas_check_parser = schemas_subparsers.add_parser("check")
+    schemas_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    schemas_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
+    schemas_install_parser = schemas_subparsers.add_parser("install")
+    schemas_install_parser.add_argument("--schema", action="append", default=[], help="schema name to install")
+    schemas_install_parser.add_argument("--all", action="store_true", help="install all schemas")
+    schemas_install_parser.add_argument("--force", action="store_true", help="overwrite installed schemas")
+    schemas_install_parser.add_argument("--json", action="store_true", help="output JSON")
     index_parser = subparsers.add_parser("index")
     index_parser.add_argument("--json", action="store_true", help="output JSON")
     index_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
@@ -92,7 +114,14 @@ def main() -> int:
     id_deprecate_parser.add_argument("--replaced-by", action="append", default=[], help="replacement full ID")
     id_deprecate_parser.add_argument("--reason", required=True, help="deprecation reason")
     id_deprecate_parser.add_argument("--json", action="store_true", help="output JSON")
-    subparsers.add_parser("flow")
+    flow_parser = subparsers.add_parser("flow")
+    flow_subparsers = flow_parser.add_subparsers(dest="flow_command")
+    flow_inspect_parser = flow_subparsers.add_parser("inspect")
+    flow_inspect_parser.add_argument("--change", help="OpenSpec change name")
+    flow_inspect_parser.add_argument("--json", action="store_true", help="output JSON")
+    flow_next_parser = flow_subparsers.add_parser("next")
+    flow_next_parser.add_argument("--change", help="OpenSpec change name")
+    flow_next_parser.add_argument("--json", action="store_true", help="output JSON")
     gaps_parser = subparsers.add_parser("gaps")
     gaps_parser.add_argument("--change", required=True, help="OpenSpec change name")
     gaps_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -107,6 +136,18 @@ def main() -> int:
     if args.version:
         print(f"aisee {__version__}")
         return 0
+
+    if args.command == "doctor":
+        root = resolve_project_root(Path.cwd())
+        result = build_doctor(root)
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
+
+    if args.command == "bootstrap":
+        root = resolve_project_root(Path.cwd())
+        result = build_bootstrap_apply_response() if args.apply else build_bootstrap_plan(root)
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=args.apply)
 
     if args.command == "context" and args.context_command == "pack":
         try:
@@ -182,6 +223,26 @@ def main() -> int:
             print_json(error_response(str(error)), stderr=True)
             return 2
 
+    if args.command == "schemas":
+        root = resolve_project_root(Path.cwd())
+        try:
+            if args.schemas_command in {None, "list"}:
+                result = list_schema_packs(root)
+                print_json(result)
+                return 0
+            if args.schemas_command == "check":
+                result = check_schema_packs(root)
+                print_json(result)
+                return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
+            if args.schemas_command == "install":
+                selected = ["*"] if args.all else args.schema
+                result = install_schema_packs(root, selected, force=args.force)
+                print_json(result)
+                return 0
+        except ValueError as error:
+            print_json(error_response(str(error)), stderr=True)
+            return 2
+
     if args.command == "index":
         root = resolve_project_root(Path.cwd())
         result = build_index(root, write_cache=True)
@@ -231,6 +292,12 @@ def main() -> int:
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
+        print_json(result)
+        return 0
+
+    if args.command == "flow":
+        root = resolve_project_root(Path.cwd())
+        result = build_flow(root, change=getattr(args, "change", None))
         print_json(result)
         return 0
 

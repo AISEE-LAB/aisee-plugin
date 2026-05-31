@@ -1,7 +1,7 @@
 ---
 title: "feat: 完整设计 Aisee CLI"
 type: feat
-status: active
+status: completed
 date: 2026-06-01
 ---
 
