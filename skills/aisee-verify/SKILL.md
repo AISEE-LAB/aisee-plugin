@@ -5,14 +5,14 @@ description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、
 
 # aisee:verify
 
-`aisee:verify` 是当前 change 的一致性诊断器，不是 archive 放行器。
+`aisee:verify` 是当前 change 的一致性诊断器，不是 archive 放行器，也不是 OpenSpec parser。OpenSpec artifact 合法性必须以 `openspec validate` 和 OpenSpec schema 机制为准。
 
 ## 职责
 
 - 运行或建议运行 `openspec validate`。
 - 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change verify-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
-- 检查 schema artifact DAG 和 template / artifact 缺失。
-- 检查 ID、`source-map.md`、spec、tasks、contracts 的一致性。
+- 检查 schema artifact metadata、artifact 缺失和 Aisee 补充信息断链。
+- 检查 ID、`source-map.md`、tasks checkbox、review/test evidence 与 OpenSpec validate 结果的衔接。
 - 检查实现后是否出现 spec drift。
 - 消费 `ce-doc-review`、`ce-code-review`、`ce-test-*` 结果。
 - 输出问题清单和修复建议。
@@ -24,6 +24,7 @@ description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、
 - 替代测试工具或重新跑完整测试矩阵。
 - 修改 artifacts、代码或 baseline specs。
 - 判断是否可以执行 `openspec archive`；这是 `aisee:archive-guard` 的职责。
+- 替代 OpenSpec 解析 proposal/spec/tasks/design/contracts 的业务语义。
 
 ## 输入入口
 
@@ -63,10 +64,10 @@ openspec validate <change>
 
 | 维度 | 检查内容 |
 |---|---|
-| Schema artifacts | schema 声明的 artifacts 是否存在；N/A artifact 是否写明原因 |
+| Schema artifacts | schema 声明的 artifacts metadata 是否存在；N/A artifact 是否写明原因 |
 | ID / source-map | 上游 ID、产出 ID、owner artifact、代码路径、测试路径是否闭合 |
-| Specs | specs 是否覆盖本 change 的 FR / NFR / RULE / FLOW / STATE |
-| Contracts | contracts 是否覆盖 specs 和 source-map 中声明的 UI / service / data / device 约束 |
+| OpenSpec validate | `openspec validate` 是否通过；失败项是否处理 |
+| Artifacts metadata | heading、ID、路径引用、checkbox、evidence 入口是否可追踪 |
 | Tasks | tasks 是否覆盖实现、验证、证据记录；状态是否真实 |
 | Implementation drift | 代码或配置是否偏离 specs/contracts/source-map |
 | Review / test evidence | CE P0/P1、测试失败、人工验证缺口是否处理或记录接受理由 |

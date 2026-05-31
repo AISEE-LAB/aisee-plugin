@@ -5,7 +5,7 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 
 # aisee:archive-guard
 
-`aisee:archive-guard` 是 archive 前的放行判断，不是深度验证器。
+`aisee:archive-guard` 是 archive 前的放行判断，不是深度验证器，也不是 OpenSpec parser。OpenSpec artifact 合法性必须以 `openspec validate` 和 OpenSpec schema 机制为准。
 
 ## 职责
 
@@ -22,6 +22,7 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 - 修改 change artifacts。
 - 修改 baseline specs。
 - 替代 `openspec archive`。
+- 替代 `openspec validate` 或自行判断 spec delta / baseline merge 合法性。
 
 ## 归档前检查
 
@@ -33,8 +34,8 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 - `aisee:verify` 无未处理 blocker。
 - `tasks.md` 的实现任务和验证任务已完成或明确标注 N/A / accepted risk。
 - `source-map.md` 的 ID、代码路径、测试路径和验证证据没有断链。
-- `specs/**` 与实现后的行为一致，没有未处理 spec drift。
-- app schema 的 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 或 device schema 的 `design.md` / contracts 已同步最终实现事实。
+- `openspec validate <change>` 已通过，且没有未处理 spec drift finding。
+- app schema 的 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 或 device schema 的 `design.md` / contracts 已有 metadata/evidence 可追踪；业务语义由 OpenSpec validate、review 和人工确认负责。
 - CE P0/P1 review 结果已修复或记录接受理由。
 - 测试、人工验证、截图、日志或设备验证证据已记录在 `tasks.md` 或 schema 指定位置。
 - `aisee change archive-check` 中未关闭 P0/P1、failed validate、failed test evidence 必须视为 blocker。

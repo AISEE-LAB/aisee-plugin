@@ -1,20 +1,38 @@
 # Context Pack Contract
 
-`aisee context pack` 默认调用时直接解析，不维护第二份内容事实源。
+`aisee context pack` 是 OpenSpec context companion。它默认调用时衔接 OpenSpec change、Aisee 补充信息和 CE evidence，不维护第二份内容事实源，也不替代 OpenSpec parser。
 
 事实源：
 
-- Markdown / OpenSpec artifacts：内容事实源。
+- OpenSpec artifacts / Markdown：内容事实源。
 - `.aisee/id-registry.json`：ID 分配和生命周期事实源。
 - `.aisee/sources.json`：change 外部 Aisee 产物来源登记事实源。
 - `.aisee/cache/context-index.json`：可删除、可重建缓存，不是事实源。
 
 默认输出只包含：
 
-- `parsed`：从模板化 Markdown / OpenSpec artifacts 直接解析。
+- `parsed`：从 Aisee 自有补充文件、OpenSpec metadata scan 和可用 OpenSpec CLI 输出解析。
 - `derived`：根据 source-map、ID registry、文件关系和校验规则推导。
 
 AI 生成摘要必须显式启用，并在 JSON 中标记为 `generated`。
+
+## OpenSpec Boundary
+
+Aisee CLI 不解析 OpenSpec 已负责的规范语义：
+
+- 不替代 `openspec validate`。
+- 不判断 OpenSpec spec delta、baseline merge、artifact schema 合法性。
+- 不把 proposal/spec/tasks/design/contracts 的自由文本解释为业务事实。
+- 不把 artifact template 发展成 Aisee 的第二套 DSL。
+
+Aisee CLI 对 OpenSpec artifacts 只做 metadata scan：
+
+- artifact 路径、存在性、hash。
+- heading、line、ID 引用、路径引用。
+- checkbox 任务状态。
+- 与 `source-map.md`、ID registry、review/test evidence 的链接。
+
+当 OpenSpec CLI 提供结构化输出时，context pack 应优先消费 OpenSpec 输出；当没有结构化输出时，只返回 metadata scan 和 gaps，不用 Aisee 自己模拟 OpenSpec parser。
 
 ## Command
 
@@ -58,8 +76,8 @@ Field rules:
 - `schema_version`：context pack 契约版本，不等同于 OpenSpec schema 版本。
 - `target`：只能是明确目标，如 `ce-work`、`aisee-verify`、`ce-doc-review`、`ce-code-review`。
 - `change`：当前 change 是唯一入口。
-- `facts.parsed`：只放从文件和模板直接解析出的事实。
-- `facts.derived`：只放由 `source-map.md`、ID registry、schema DAG、artifact 关系推导出的事实。
+- `facts.parsed`：只放从 Aisee 补充文件、OpenSpec metadata scan 或 OpenSpec CLI 输出得到的事实。
+- `facts.derived`：只放由 `source-map.md`、ID registry、文件关系和轻量校验规则推导出的事实。
 - `generated`：默认 `null`。只有显式 `--with-summary` 才允许出现 AI 生成摘要。
 - `gaps`：缺口和断链，不是自动补齐结果。
 - `guardrails`：执行限制和禁止越界项。
@@ -109,8 +127,8 @@ Rules:
 
 - `project_rules.primary` 优先为 `AGENTS.md`。
 - `CLAUDE.md` 只能作为 legacy fallback。
-- `schema.artifacts` 来自当前 change schema，不得硬编码 app/device artifact。
-- `artifacts.contracts` 按 schema 填充。例如 app 可包含 `ui-contract.md`、`service-contract.md`、`data-model.md`、`change-context.md`；device 可包含 `design.md`、`hardware-contract.md`、`firmware-contract.md`、`runtime-contract.md`、`verification-contract.md`。
+- `schema.artifacts` 来自当前 change schema 或 OpenSpec CLI 输出，不得硬编码 app/device artifact。
+- `artifacts` 只承诺 metadata scan 和原文入口；不要把 contract 内容解析成业务语义。
 - `sources` 只包含 `.aisee/sources.json` 和 `source-map.md` 明确引用的上游来源。
 - `id_registry` 只报告当前状态，不分配新 ID。
 

@@ -18,7 +18,7 @@ OpenSpec CLI
 = 管理 OpenSpec change / spec / schema / validate / archive
 
 Aisee CLI
-= 解析 Aisee + OpenSpec + Compound 产物，返回结构化 context JSON
+= OpenSpec context companion：解析 OpenSpec 不管理的补充上下文，并把 OpenSpec 结果、Aisee 补充信息和 CE evidence 汇总为 context JSON
 
 Compound Engineering
 = 审核、执行、测试、提交、PR、复盘
@@ -26,13 +26,27 @@ Compound Engineering
 
 Aisee CLI 不替代 OpenSpec CLI，也不替代 Compound Engineering。它的核心价值是为 AI 和 skill 提供 **高效、准确、可追踪的上下文接口**。
 
+一句话边界：
+
+```text
+Aisee CLI is an OpenSpec context companion, not an OpenSpec parser.
+```
+
+也就是说：
+
+- OpenSpec 负责 schema、artifact 合法性、spec delta、baseline、validate 和 archive。
+- Aisee CLI 不复刻 OpenSpec parser，不替代 `openspec validate`，不判断 OpenSpec artifact 的业务语义是否合法。
+- Aisee CLI 只解析 OpenSpec 不管理但 workflow 需要的补充信息：`.aisee/id-registry.json`、`.aisee/sources.json`、`source-map.md`、review/test/verification evidence、AGENTS 项目规则入口，以及文件 metadata。
+- 对 OpenSpec artifacts，Aisee CLI 默认只做 metadata scan：路径、存在性、hash、heading、ID 引用、路径引用、checkbox 状态和 evidence 入口。
+- 当 OpenSpec CLI 提供可用 JSON 输出时，Aisee CLI 应优先消费 OpenSpec CLI 输出；缺少结构化输出时才做保守 metadata scan。
+
 ## 设计原则
 
 - **只读优先**：V1 默认只解析、索引、查询和检查，不生成业务文档，不执行 archive。
 - **JSON 优先**：所有关键命令都支持 `--json`，方便 AI 精准消费。
 - **来源可追踪**：返回内容必须包含文件路径、标题、行号、hash 或摘要。
 - **ID 驱动**：通过稳定 ID 查询需求、页面、接口、硬件约束、固件行为、验证项和任务。
-- **OpenSpec 作为规范事实源**：Aisee CLI 解析 OpenSpec change，但不重写 OpenSpec 状态机。
+- **OpenSpec 作为规范事实源**：Aisee CLI 衔接 OpenSpec change，但不复刻 OpenSpec parser 或 validate/archive 状态机。
 - **Compound 作为执行消费方**：Aisee CLI 可生成给 `ce-doc-review`、`ce-work`、`ce-code-review` 的 context pack。
 - **幂等初始化**：bootstrap 能检查和补齐环境，但必须可审计、可回滚、默认先 plan。
 
@@ -306,7 +320,7 @@ CLI 应该 schema-aware，不要把 App/Web schema 硬套到硬件/嵌入式 cha
 
 ### context pack
 
-调用时直接解析 Markdown、OpenSpec artifacts、ID Registry、sources registry 和 source-map，为不同 skill 或 CE 能力生成最小上下文包。
+调用时衔接 OpenSpec change、ID Registry、sources registry、source-map 和 evidence，为不同 skill 或 CE 能力生成最小上下文包。
 
 ```bash
 aisee context pack --change add-auth-login --for ce-doc-review --json
@@ -321,17 +335,18 @@ aisee context pack --change add-auth-login --for aisee-verify --json
 1. 读取 .aisee/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
 2. 读取 .aisee/id-registry.json，获取 ID 分配和生命周期。
 3. 读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件和 artifact。
-4. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema。
-5. 读取 schema.yaml 与 artifact 模板，解析 change 内部 OpenSpec artifacts。
-6. 按 Aisee source template 解析 change 外部产物。
-7. 输出 JSON。
+4. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema 和 artifact 路径。
+5. 对 OpenSpec artifacts 只做 metadata scan：存在性、路径、heading、ID、路径引用、checkbox 和 hash；不解释 artifact 业务语义。
+6. 优先消费 OpenSpec CLI / validate / schema 的结构化输出；没有可用输出时，不用 Aisee 自己替代 validate。
+7. 解析 Aisee 自己管理的补充信息：source-map、sources registry、ID registry、review/test/verification evidence。
+8. 输出 JSON。
 ```
 
-JSON 是当前 Markdown / artifact 的结构化视图，不是新生成的事实源。默认只包含：
+JSON 是当前 Markdown / OpenSpec / Aisee 补充信息的上下文视图，不是新生成的事实源。默认只包含：
 
 ```text
 parsed
-= 从模板化 Markdown / OpenSpec artifacts 直接解析
+= 从 sources、ID registry、source-map、evidence 和 OpenSpec metadata scan 得到的事实
 
 derived
 = 根据 source-map、ID registry、文件关系和校验规则推导
@@ -355,16 +370,21 @@ aisee context pack --change add-auth-login --for ce-work --json --with-summary
 }
 ```
 
-解析器应是 template-aware，不应自由猜测任意 Markdown。高置信解析依赖：
+解析器应是 boundary-aware，不应自由猜测任意 Markdown。高置信解析仅限：
 
 ```text
-- Aisee source template
-- OpenSpec schema.yaml
-- artifact templates
-- frontmatter
-- 固定 heading
-- ID marker
-- source-map 约定
+- Aisee 自有补充文件：sources registry、ID registry、source-map、evidence
+- OpenSpec metadata：schema 名称、artifact 路径、存在性、heading、ID/path/checkbox scan
+- OpenSpec CLI / validate / schema 的结构化输出
+```
+
+不做：
+
+```text
+- 不解释 OpenSpec proposal/spec/tasks/design/contracts 的业务语义
+- 不替代 OpenSpec schema validator
+- 不把 artifact template 变成 Aisee 的第二套 DSL
+- 不从散文中推断接口字段、UI 完整性、硬件资源正确性或验收语义
 ```
 
 不同目标的上下文不同：
@@ -392,6 +412,7 @@ aisee-verify:
 - `aisee-verify` 必须包含 schema artifact 检查、traceability 检查、task 检查、contract 检查、implementation drift 候选和 review/test evidence。
 - 默认不生成 AI 摘要；`--with-summary` 才允许输出 `generated.summary`。
 - 任何字段都不能替代 Markdown / OpenSpec artifacts / ID registry / sources registry 的事实源地位。
+- OpenSpec artifact 的合法性结论必须来自 `openspec validate` 或 OpenSpec schema 机制；Aisee CLI 的 artifact metadata scan 只能作为 workflow hint。
 
 ### gaps
 
