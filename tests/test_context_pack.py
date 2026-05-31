@@ -16,7 +16,66 @@ def write(path: Path, text: str) -> None:
 
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
-    write(root / ".aisee" / "id-registry.json", "{}\n")
+    write(
+        root / ".aisee" / "id-registry.json",
+        json.dumps(
+            {
+                "version": 1,
+                "scopes": {
+                    "auth": {
+                        "counters": {
+                            "FR": 1,
+                            "API": 1,
+                            "SPEC": 1,
+                            "TASK": 1,
+                            "TEST": 1,
+                        },
+                        "ids": {
+                            "auth:FR-001": {
+                                "type": "FR",
+                                "number": 1,
+                                "status": "active",
+                                "title": "登录",
+                                "owner": "docs/requirements/auth-srs.md",
+                            },
+                            "auth:API-001": {
+                                "type": "API",
+                                "number": 1,
+                                "status": "active",
+                                "title": "登录接口",
+                                "owner": "openspec/changes/add-auth/service-contract.md",
+                            },
+                            "auth:SPEC-001": {
+                                "type": "SPEC",
+                                "number": 1,
+                                "status": "active",
+                                "title": "登录行为",
+                                "owner": "openspec/changes/add-auth/specs/auth.md",
+                            },
+                            "auth:TASK-001": {
+                                "type": "TASK",
+                                "number": 1,
+                                "status": "active",
+                                "title": "实现登录",
+                                "owner": "openspec/changes/add-auth/tasks.md",
+                            },
+                            "auth:TEST-001": {
+                                "type": "TEST",
+                                "number": 1,
+                                "status": "active",
+                                "title": "验证登录",
+                                "owner": "openspec/changes/add-auth/tasks.md",
+                            },
+                        },
+                    }
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+    )
+    write(root / "docs" / "requirements" / "auth-srs.md", "覆盖需求：auth:FR-001\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
@@ -136,6 +195,18 @@ def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:
     assert pack["facts"]["derived"]["drift_candidates"] == []
 
 
+def test_context_pack_reports_unregistered_change_ids(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(tmp_path / ".aisee" / "id-registry.json", "{}\n")
+
+    pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
+
+    gap_codes = {gap["code"] for gap in pack["gaps"]}
+    assert "ID_UNREGISTERED_REFERENCE" in gap_codes
+    id_registry = pack["facts"]["parsed"]["id_registry"]
+    assert "auth:FR-001" in id_registry["missing_ids"]
+
+
 def test_cli_context_pack_outputs_json(tmp_path: Path) -> None:
     create_project(tmp_path)
     env = os.environ.copy()
@@ -222,5 +293,9 @@ def test_cli_change_inspect_outputs_summary(tmp_path: Path) -> None:
     data = json.loads(result.stdout)
     assert data["change"]["id"] == "add-auth"
     assert data["schema"]["name"] == "aisee-app-spec-driven"
+    assert data["ids"]["upstream"] == ["auth:API-001", "auth:FR-001"]
+    assert "auth:SPEC-001" in data["ids"]["produced"]
+    assert data["ids"]["registry"]["missing"] == []
+    assert data["ids"]["registry"]["status_counts"]["active"] == 5
     assert data["task_state"]["total"] == 2
     assert "src/auth/session.py" in data["paths"]["code"]

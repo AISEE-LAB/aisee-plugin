@@ -9,7 +9,7 @@ from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.context_pack import build_context_pack, resolve_project_root
-from aisee_cli.id_registry import activate_id, check_registry, reserve_ids
+from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids, trace_id
 
 
 def main() -> int:
@@ -35,6 +35,10 @@ def main() -> int:
     id_subparsers = id_parser.add_subparsers(dest="id_command")
     id_check_parser = id_subparsers.add_parser("check")
     id_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    id_next_parser = id_subparsers.add_parser("next")
+    id_next_parser.add_argument("--scope", required=True, help="ID scope")
+    id_next_parser.add_argument("--type", required=True, help="ID type")
+    id_next_parser.add_argument("--json", action="store_true", help="output JSON")
     id_reserve_parser = id_subparsers.add_parser("reserve")
     id_reserve_parser.add_argument("--scope", required=True, help="ID scope")
     id_reserve_parser.add_argument("--type", required=True, help="ID type")
@@ -45,10 +49,18 @@ def main() -> int:
     id_activate_parser.add_argument("--owner", required=True, help="owner document path")
     id_activate_parser.add_argument("--title", required=True, help="ID title")
     id_activate_parser.add_argument("--json", action="store_true", help="output JSON")
+    id_deprecate_parser = id_subparsers.add_parser("deprecate")
+    id_deprecate_parser.add_argument("id", help="full ID, for example auth:FR-001")
+    id_deprecate_parser.add_argument("--replaced-by", action="append", default=[], help="replacement full ID")
+    id_deprecate_parser.add_argument("--reason", required=True, help="deprecation reason")
+    id_deprecate_parser.add_argument("--json", action="store_true", help="output JSON")
     subparsers.add_parser("flow")
     gaps_parser = subparsers.add_parser("gaps")
     gaps_parser.add_argument("--change", required=True, help="OpenSpec change name")
     gaps_parser.add_argument("--json", action="store_true", help="output JSON")
+    trace_parser = subparsers.add_parser("trace")
+    trace_parser.add_argument("id", help="full ID to trace")
+    trace_parser.add_argument("--json", action="store_true", help="output JSON")
     args = parser.parse_args()
 
     if args.version:
@@ -87,11 +99,26 @@ def main() -> int:
         pack = build_context_pack(root, args.change, "aisee-verify")
         parsed = pack["facts"]["parsed"]
         derived = pack["facts"]["derived"]
+        id_registry = parsed["id_registry"]
+        traceability = derived["traceability"]
         result = {
             "schema_version": pack["schema_version"],
             "change": pack["change"],
             "schema": parsed["schema"],
             "artifacts": parsed["schema"]["artifacts"],
+            "ids": {
+                "upstream": traceability["upstream_ids"],
+                "produced": traceability["produced_ids"],
+                "registry": {
+                    "available": id_registry["available"],
+                    "path": id_registry["path"],
+                    "registered": id_registry["registered_ids"],
+                    "missing": id_registry["missing_ids"],
+                    "temporary": id_registry["temporary_ids"],
+                    "inactive": id_registry["inactive_ids"],
+                    "status_counts": id_registry["status_counts"],
+                },
+            },
             "task_state": derived["task_state"],
             "paths": {
                 "code": derived["code_paths"],
@@ -111,16 +138,30 @@ def main() -> int:
         try:
             if args.id_command == "check":
                 result = check_registry(root)
+            elif args.id_command == "next":
+                result = next_id(root, args.scope, args.type)
             elif args.id_command == "reserve":
                 result = reserve_ids(root, args.scope, args.type, args.count)
             elif args.id_command == "activate":
                 result = activate_id(root, args.id, args.owner, args.title)
+            elif args.id_command == "deprecate":
+                result = deprecate_id(root, args.id, args.replaced_by, args.reason)
             else:
                 result = {
                     "status": "planned",
                     "command": args.command,
-                    "message": "Use one of: check, reserve, activate.",
+                    "message": "Use one of: check, next, reserve, activate, deprecate.",
                 }
+        except ValueError as error:
+            print(json.dumps({"status": "error", "message": str(error)}, ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "trace":
+        root = resolve_project_root(Path.cwd())
+        try:
+            result = trace_id(root, args.id)
         except ValueError as error:
             print(json.dumps({"status": "error", "message": str(error)}, ensure_ascii=False, indent=2), file=sys.stderr)
             return 2

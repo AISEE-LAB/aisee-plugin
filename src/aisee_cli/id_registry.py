@@ -66,6 +66,43 @@ def reserve_ids(project_root: Path, scope: str, id_type: str, count: int) -> dic
     }
 
 
+def next_id(project_root: Path, scope: str, id_type: str) -> dict[str, Any]:
+    validate_scope(scope)
+    validate_type(id_type)
+
+    root = project_root.resolve()
+    path = registry_path(root)
+    registry = load_registry(root)
+    scope_data = registry.get("scopes", {}).get(scope, {})
+    counters = scope_data.get("counters", {}) if isinstance(scope_data, dict) else {}
+    ids = scope_data.get("ids", {}) if isinstance(scope_data, dict) else {}
+    counter_value = counters.get(id_type, 0) if isinstance(counters, dict) else 0
+    counter = counter_value if isinstance(counter_value, int) else 0
+    allocated_numbers = [
+        parsed["number"]
+        for full_id in ids
+        if isinstance(full_id, str)
+        if (parsed := try_parse_id(full_id)) is not None and parsed["type"] == id_type
+    ] if isinstance(ids, dict) else []
+    number = max([counter, *allocated_numbers]) + 1
+    full_id = format_id(scope, id_type, number)
+    return {
+        "status": "ok",
+        "registry": {
+            "available": path.exists(),
+            "path": path.relative_to(root).as_posix(),
+        },
+        "next": {
+            "id": full_id,
+            "short_id": short_id(id_type, number),
+            "scope": scope,
+            "type": id_type,
+            "number": number,
+        },
+        "writes": False,
+    }
+
+
 def activate_id(project_root: Path, full_id: str, owner: str, title: str) -> dict[str, Any]:
     parsed = parse_id(full_id)
     if not owner:
@@ -89,6 +126,43 @@ def activate_id(project_root: Path, full_id: str, owner: str, title: str) -> dic
         "status": "active",
         "title": title,
         "owner": owner,
+        "updated_at": now,
+    })
+    entry.setdefault("created_at", now)
+    save_registry(root, registry)
+    return {
+        "status": "ok",
+        "id": full_id,
+        "entry": entry,
+    }
+
+
+def deprecate_id(project_root: Path, full_id: str, replaced_by: list[str], reason: str) -> dict[str, Any]:
+    parsed = parse_id(full_id)
+    if not reason:
+        raise ValueError("--reason is required")
+    for replacement in replaced_by:
+        parse_id(replacement)
+
+    root = project_root.resolve()
+    registry = load_registry(root)
+    for replacement in replaced_by:
+        if lookup_entry(registry, replacement) is None:
+            raise ValueError(f"replacement ID is not registered: {replacement}")
+    scope_data = ensure_scope(registry, parsed["scope"])
+    entry = scope_data["ids"].get(full_id)
+    if not isinstance(entry, dict):
+        raise ValueError(f"ID is not registered: {full_id}")
+    if entry.get("status") in {"merged", "split", "removed"}:
+        raise ValueError(f"ID cannot be deprecated from status {entry.get('status')}: {full_id}")
+
+    now = timestamp()
+    entry.update({
+        "type": parsed["type"],
+        "number": parsed["number"],
+        "status": "deprecated",
+        "reason": reason,
+        "replaced_by": replaced_by,
         "updated_at": now,
     })
     entry.setdefault("created_at", now)
@@ -124,6 +198,55 @@ def check_registry(project_root: Path) -> dict[str, Any]:
         "scopes": sorted(registry.get("scopes", {}).keys()),
         "issues": issues,
         "summary": summary,
+    }
+
+
+def trace_id(project_root: Path, full_id: str) -> dict[str, Any]:
+    parsed = parse_id(full_id)
+    root = project_root.resolve()
+    path = registry_path(root)
+    registry_available = path.exists()
+    registry = load_registry(root) if registry_available else {"version": REGISTRY_VERSION, "scopes": {}}
+    scope_data = registry.get("scopes", {}).get(parsed["scope"], {})
+    ids = scope_data.get("ids", {}) if isinstance(scope_data, dict) else {}
+    entry = ids.get(full_id) if isinstance(ids, dict) else None
+    references = scan_id_occurrences(root, full_id)
+    changes = sorted({
+        parts[2]
+        for reference in references
+        if (parts := reference["path"].split("/"))[:2] == ["openspec", "changes"] and len(parts) >= 3
+    })
+
+    issues: list[dict[str, str]] = []
+    if entry is None:
+        severity = "risk" if references else "info"
+        issues.append(issue("ID_NOT_REGISTERED", severity, f"{full_id} is not registered", ".aisee/id-registry.json"))
+    elif entry.get("status") != "active":
+        issues.append(issue("ID_NOT_ACTIVE", "info", f"{full_id} status is {entry.get('status')}", ".aisee/id-registry.json"))
+    if entry is not None and entry.get("status") == "active" and not references:
+        issues.append(issue("ID_NO_REFERENCES", "risk", f"{full_id} is active but has no scanned references", str(entry.get("owner") or "")))
+
+    return {
+        "status": trace_status(entry, references),
+        "id": full_id,
+        "scope": parsed["scope"],
+        "type": parsed["type"],
+        "number": parsed["number"],
+        "registry": {
+            "available": registry_available,
+            "path": path.relative_to(root).as_posix(),
+            "entry": entry,
+        },
+        "references": references,
+        "relations": {
+            "changes": changes,
+        },
+        "issues": issues,
+        "summary": {
+            "reference_count": len(references),
+            "change_count": len(changes),
+            "issue_count": len(issues),
+        },
     }
 
 
@@ -186,6 +309,10 @@ def validate_registry(root: Path, registry: dict[str, Any]) -> list[dict[str, An
                     issues.append(issue("ID_OWNER_MISSING", "risk", f"{full_id} is active without owner", ".aisee/id-registry.json"))
                 elif not (root / owner).exists():
                     issues.append(issue("ID_OWNER_NOT_FOUND", "risk", f"{full_id} owner does not exist: {owner}", owner))
+            if entry.get("status") in {"deprecated", "merged", "split"}:
+                for replacement in entry.get("replaced_by", []):
+                    if try_parse_id(str(replacement)) is None:
+                        issues.append(issue("ID_REPLACEMENT_INVALID", "blocker", f"{full_id} has invalid replacement ID: {replacement}", ".aisee/id-registry.json"))
             max_numbers[parsed["type"]] = max(max_numbers.get(parsed["type"], 0), parsed["number"])
 
         for id_type, max_number in max_numbers.items():
@@ -193,9 +320,16 @@ def validate_registry(root: Path, registry: dict[str, Any]) -> list[dict[str, An
             if not isinstance(counter, int) or counter < max_number:
                 issues.append(issue("ID_COUNTER_BEHIND", "blocker", f"{scope}:{id_type} counter is behind allocated IDs", ".aisee/id-registry.json"))
 
+    inactive_statuses = {"deprecated", "merged", "split", "removed"}
     for full_id, owner_path in scan_id_references(root):
         if full_id not in registered_ids:
             issues.append(issue("ID_UNREGISTERED_REFERENCE", "risk", f"unregistered ID reference: {full_id}", owner_path))
+            continue
+        entry = lookup_entry(registry, full_id)
+        status = entry.get("status") if isinstance(entry, dict) else None
+        if status in inactive_statuses:
+            severity = "blocker" if status == "removed" else "risk"
+            issues.append(issue("ID_INACTIVE_REFERENCE", severity, f"{full_id} is {status} but still referenced", owner_path))
 
     return issues
 
@@ -216,6 +350,29 @@ def scan_id_references(root: Path) -> list[tuple[str, str]]:
     return references
 
 
+def scan_id_occurrences(root: Path, full_id: str) -> list[dict[str, Any]]:
+    occurrences: list[dict[str, Any]] = []
+    for dirname in SCAN_DIRS:
+        base = root / dirname
+        if not base.exists():
+            continue
+        for path in base.rglob("*"):
+            if not path.is_file() or path.suffix.lower() not in {".md", ".yaml", ".yml", ".json"}:
+                continue
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            if full_id not in text:
+                continue
+            rel_path = path.relative_to(root).as_posix()
+            for line_number, line in enumerate(text.splitlines(), start=1):
+                if full_id in line:
+                    occurrences.append({
+                        "path": rel_path,
+                        "line": line_number,
+                        "text": line.strip(),
+                    })
+    return occurrences
+
+
 def ensure_scope(registry: dict[str, Any], scope: str) -> dict[str, Any]:
     scopes = registry.setdefault("scopes", {})
     scope_data = scopes.setdefault(scope, {"counters": {}, "ids": {}})
@@ -228,6 +385,16 @@ def normalize_registry(registry: dict[str, Any]) -> dict[str, Any]:
     registry.setdefault("version", REGISTRY_VERSION)
     registry.setdefault("scopes", {})
     return registry
+
+
+def lookup_entry(registry: dict[str, Any], full_id: str) -> dict[str, Any] | None:
+    parsed = try_parse_id(full_id)
+    if parsed is None:
+        return None
+    scope_data = registry.get("scopes", {}).get(parsed["scope"], {})
+    ids = scope_data.get("ids", {}) if isinstance(scope_data, dict) else {}
+    entry = ids.get(full_id) if isinstance(ids, dict) else None
+    return entry if isinstance(entry, dict) else None
 
 
 def parse_id(full_id: str) -> dict[str, Any]:
@@ -293,3 +460,11 @@ def summarize_issues(issues: list[dict[str, Any]]) -> dict[str, int]:
         "info": info,
         "total": len(issues),
     }
+
+
+def trace_status(entry: Any, references: list[dict[str, Any]]) -> str:
+    if entry is None:
+        return "unregistered" if references else "missing"
+    if entry.get("status") == "active" and references:
+        return "linked"
+    return str(entry.get("status") or "registered")

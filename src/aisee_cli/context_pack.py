@@ -62,11 +62,12 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     code_paths = [p for p in all_paths if not is_test_path(p)]
     test_paths = [p for p in all_paths if is_test_path(p)]
 
-    id_registry = inspect_id_registry(root)
     sources = inspect_sources(root, source_map_text)
     task_state = parse_task_state(tasks_text)
     upstream_ids = sorted(extract_ids(source_map_text))
     produced_ids = sorted(extract_ids(tasks_text) | extract_ids(combined_text))
+    all_change_ids = sorted(extract_ids(combined_text))
+    id_registry = inspect_id_registry(root, all_change_ids)
 
     gaps = build_gaps(
         change_path=change_path,
@@ -354,12 +355,60 @@ def inspect_project_rules(root: Path) -> dict[str, Any]:
     }
 
 
-def inspect_id_registry(root: Path) -> dict[str, Any]:
+def inspect_id_registry(root: Path, ids: list[str]) -> dict[str, Any]:
     path = root / ".aisee" / "id-registry.json"
-    return {
+    result: dict[str, Any] = {
         "available": path.exists(),
         "checked": path.exists(),
         "path": rel(root, path) if path.exists() else None,
+        "registered_ids": [],
+        "missing_ids": [],
+        "temporary_ids": sorted([item for item in ids if "-NEW-" in item]),
+        "inactive_ids": [],
+        "status_counts": {},
+    }
+    if not path.exists():
+        return result
+
+    try:
+        data = json.loads(read_text(path))
+    except json.JSONDecodeError as error:
+        result["error"] = f"invalid-json: {error}"
+        return result
+
+    registry_ids: dict[str, dict[str, Any]] = {}
+    scopes = data.get("scopes", {}) if isinstance(data, dict) else {}
+    if isinstance(scopes, dict):
+        for scope_data in scopes.values():
+            if isinstance(scope_data, dict) and isinstance(scope_data.get("ids"), dict):
+                for full_id, entry in scope_data["ids"].items():
+                    if isinstance(entry, dict):
+                        registry_ids[full_id] = entry
+
+    formal_ids = [item for item in ids if "-NEW-" not in item]
+    registered: list[str] = []
+    missing: list[str] = []
+    inactive: list[dict[str, str]] = []
+    status_counts: dict[str, int] = {}
+    for full_id in formal_ids:
+        entry = registry_ids.get(full_id)
+        if entry is None:
+            missing.append(full_id)
+            continue
+        registered.append(full_id)
+        status = str(entry.get("status") or "unknown")
+        status_counts[status] = status_counts.get(status, 0) + 1
+        if status in {"deprecated", "merged", "split", "removed"}:
+            inactive.append({"id": full_id, "status": status})
+
+    result.update({
+        "registered_ids": sorted(registered),
+        "missing_ids": sorted(missing),
+        "inactive_ids": sorted(inactive, key=lambda item: item["id"]),
+        "status_counts": status_counts,
+    })
+    return {
+        **result,
     }
 
 
@@ -444,6 +493,42 @@ def build_gaps(
 
     if not id_registry["available"]:
         gaps.append(gap("ID_REGISTRY_GAP", "risk", ".aisee/id-registry.json is missing", ".aisee/id-registry.json"))
+    elif id_registry.get("error"):
+        gaps.append(gap("ID_REGISTRY_INVALID", "blocker", str(id_registry["error"]), ".aisee/id-registry.json"))
+    else:
+        temporary_ids = id_registry.get("temporary_ids", [])
+        if temporary_ids:
+            gaps.append(
+                gap(
+                    "ID_RESERVATION_REQUIRED",
+                    "risk",
+                    "Change contains temporary IDs that must be reserved before final authoring",
+                    "source-map.md",
+                    temporary_ids,
+                )
+            )
+        missing_ids = id_registry.get("missing_ids", [])
+        if missing_ids:
+            gaps.append(
+                gap(
+                    "ID_UNREGISTERED_REFERENCE",
+                    "risk",
+                    "Change references IDs that are not registered in .aisee/id-registry.json",
+                    "source-map.md",
+                    missing_ids,
+                )
+            )
+        inactive_ids = id_registry.get("inactive_ids", [])
+        if inactive_ids:
+            gaps.append(
+                gap(
+                    "ID_INACTIVE_REFERENCE",
+                    "blocker",
+                    "Change references deprecated, merged, split, or removed IDs",
+                    "source-map.md",
+                    [item["id"] for item in inactive_ids],
+                )
+            )
 
     if target == "ce-work":
         if task_state["total"] == 0:
@@ -460,13 +545,13 @@ def build_gaps(
     return gaps
 
 
-def gap(code: str, severity: str, message: str, owner_artifact: str) -> dict[str, Any]:
+def gap(code: str, severity: str, message: str, owner_artifact: str, related_ids: list[str] | None = None) -> dict[str, Any]:
     return {
         "code": code,
         "severity": severity,
         "message": message,
         "owner_artifact": owner_artifact,
-        "related_ids": [],
+        "related_ids": related_ids or [],
         "suggested_fix": None,
     }
 
