@@ -187,3 +187,54 @@ def test_context_pack_adds_doc_review_focus_and_evidence(tmp_path: Path) -> None
     assert data["facts"]["derived"]["review"]["focus"][0] == "schema_artifacts"
     assert data["evidence"]["ce_doc_review"] == ["docs/reviews/add-auth-doc-review.md"]
     assert data["evidence"]["tests"] == ["docs/verification/add-auth-test-results.md"]
+
+
+def test_verify_check_blocks_failed_validate_or_test_evidence(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(tmp_path / "docs" / "verification" / "add-auth-openspec-validate.md", "FAILED: spec error\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "verify-check", "add-auth", "--json")
+
+    assert data["status"] == "blocked"
+    assert any(item["code"] == "VALIDATE_FAILED" for item in data["blockers"])
+    assert data["evidence"]["details"]["openspec_validate"]["status"] == "failed"
+
+
+def test_review_p1_is_risk_for_verify_and_blocker_for_archive(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(tmp_path / "docs" / "reviews" / "add-auth-code-review.md", "- P1 source-map missing test detail\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-openspec-validate.md", "passed\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    verify = run_json(tmp_path, "change", "verify-check", "add-auth", "--json")
+    archive = run_json(tmp_path, "change", "archive-check", "add-auth", "--json")
+
+    assert verify["status"] == "risk"
+    assert any(item["code"] == "REVIEW_P1_OPEN" for item in verify["warnings"])
+    assert archive["status"] == "blocked"
+    assert any(item["code"] == "REVIEW_P1_OPEN" for item in archive["blockers"])
+
+
+def test_accepted_review_finding_allows_archive_ready(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(tmp_path / "docs" / "reviews" / "add-auth-code-review.md", "- P1 accepted risk: legacy endpoint remains unchanged\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-openspec-validate.md", "passed\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "archive-check", "add-auth", "--json")
+
+    assert data["status"] == "archive-ready"
+    assert data["summary"]["blocker"] == 0
+    assert data["evidence"]["details"]["accepted_risks"][0]["text"].startswith("- P1 accepted risk")
+
+
+def test_na_artifact_without_reason_is_verify_risk(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(tmp_path / "openspec" / "changes" / "add-auth" / "service-contract.md", "N/A\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "verify-check", "add-auth", "--json")
+
+    assert data["status"] == "risk"
+    assert any(item["code"] == "NA_REASON_MISSING" for item in data["warnings"])

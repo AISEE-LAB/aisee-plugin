@@ -51,8 +51,11 @@ openspec validate <change>
 - `gaps.result.status=blocked`：直接输出 fail，要求回到对应 artifact 修复。
 - `change inspect.ids.registry.missing / temporary / inactive` 非空：至少输出 RISK；inactive 或 removed ID 输出 BLOCKER。
 - `aisee change verify-check` 是 verify 的机器门禁入口；`context pack.facts.derived.checks` 是补充结构化检查入口。不要把 verify 报告当成新事实源。
+- `context pack.evidence.details` 可用于读取 validate/test/review 的轻量解析结果；路径数组仍是 evidence 原始入口。
 - `openspec validate` 未运行时，输出 RISK；运行失败且无接受理由时输出 BLOCKER。
 - 已有 `ce-doc-review`、`ce-code-review`、`ce-test-*` 结果只作为 evidence；verify 不替代它们。
+- 未关闭的 P0 必须输出 BLOCKER；未关闭的 P1 至少输出 RISK。标记为 accepted risk / 接受风险的 finding 可视为已关闭，但需要 archive-guard 再判断是否可接受。
+- 标记为 N/A 的 artifact 必须写明原因；缺少原因时输出 RISK。
 
 ## 检查项
 

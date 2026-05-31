@@ -664,7 +664,105 @@ def build_evidence(root: Path, change: str) -> dict[str, Any]:
         "ce_code_review": [path for path in review_files if "code" in path],
         "tests": [path for path in verification_files if "test" in path],
         "manual_verification": [path for path in verification_files if "manual" in path or "verify" in path],
+        "details": build_evidence_details(root, review_files, verification_files),
     }
+
+
+def build_evidence_details(root: Path, review_files: list[str], verification_files: list[str]) -> dict[str, Any]:
+    validate_path = first_matching(verification_files, ("validate", "openspec"))
+    return {
+        "openspec_validate": parse_status_file(root, validate_path) if validate_path else None,
+        "reviews": [parse_review_file(root, path) for path in review_files],
+        "tests": [parse_status_file(root, path) for path in verification_files if "test" in path.lower()],
+        "manual_verification": [
+            parse_status_file(root, path)
+            for path in verification_files
+            if "manual" in path.lower() or "verify" in path.lower()
+        ],
+        "accepted_risks": collect_accepted_risks(root, review_files + verification_files),
+    }
+
+
+def parse_review_file(root: Path, path: str) -> dict[str, Any]:
+    text = read_text(root / path)
+    findings = []
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        priority = first_priority(line)
+        if not priority:
+            continue
+        findings.append({
+            "path": path,
+            "line": line_number,
+            "priority": priority,
+            "status": evidence_line_status(line),
+            "text": line.strip(),
+        })
+    return {
+        "path": path,
+        "status": aggregate_finding_status(findings),
+        "findings": findings,
+    }
+
+
+def parse_status_file(root: Path, path: str | None) -> dict[str, Any] | None:
+    if not path:
+        return None
+    text = read_text(root / path)
+    return {
+        "path": path,
+        "status": status_from_text(text),
+        "accepted_risks": accepted_risk_lines(text, path),
+    }
+
+
+def collect_accepted_risks(root: Path, paths: list[str]) -> list[dict[str, Any]]:
+    risks = []
+    for path in paths:
+        risks.extend(accepted_risk_lines(read_text(root / path), path))
+    return risks
+
+
+def accepted_risk_lines(text: str, path: str) -> list[dict[str, Any]]:
+    risks = []
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        lowered = line.lower()
+        if "[accepted-risk]" in lowered or "accepted risk" in lowered or "接受风险" in line or "已接受风险" in line:
+            risks.append({"path": path, "line": line_number, "text": line.strip()})
+    return risks
+
+
+def first_priority(line: str) -> str | None:
+    upper = line.upper()
+    for priority in ("P0", "P1", "P2", "P3"):
+        if priority in upper:
+            return priority
+    return None
+
+
+def evidence_line_status(line: str) -> str:
+    lowered = line.lower()
+    if any(term in lowered for term in ("resolved", "fixed", "done", "accepted", "accept risk")):
+        return "closed"
+    if any(term in line for term in ("已处理", "已修复", "已接受", "接受风险")):
+        return "closed"
+    return "open"
+
+
+def aggregate_finding_status(findings: list[dict[str, Any]]) -> str:
+    if any(item["status"] == "open" and item["priority"] == "P0" for item in findings):
+        return "failed"
+    if any(item["status"] == "open" and item["priority"] == "P1" for item in findings):
+        return "risk"
+    return "passed"
+
+
+def status_from_text(text: str) -> str:
+    lowered = text.lower()
+    if any(term in lowered for term in ("failed", "failure", "error", "blocked")) or any(term in text for term in ("失败", "未通过", "阻断")):
+        return "failed"
+    if any(term in lowered for term in ("passed", "success", "succeeded", "ok")) or any(term in text for term in ("通过", "成功")):
+        return "passed"
+    return "unknown"
 
 
 def first_matching(paths: list[str], terms: tuple[str, ...]) -> str | None:

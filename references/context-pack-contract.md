@@ -248,7 +248,14 @@ Required additions:
     "ce_doc_review": [],
     "ce_code_review": [],
     "tests": [],
-    "manual_verification": []
+    "manual_verification": [],
+    "details": {
+      "openspec_validate": null,
+      "reviews": [],
+      "tests": [],
+      "manual_verification": [],
+      "accepted_risks": []
+    }
   }
 }
 ```
@@ -258,6 +265,9 @@ Rules:
 - `aisee-verify` 可以检查实现后代码/test evidence 是否偏离 specs/contracts。
 - 发现未被当前 change 纳入范围的问题，应输出为 gap 或 follow-up，不直接扩大当前 change。
 - `aisee-verify` 不做 archive 放行审批；archive 结论属于 `aisee:archive-guard`。
+- `evidence.details` 是对 review/test/validate 文件的轻量解析结果，保留原始路径数组以兼容旧消费者。
+- review finding 中未关闭的 P0/P1 必须进入 verify/archive 门禁；`accepted risk` 或“接受风险”可作为关闭依据，但不能替代 owner 文档修复。
+- `openspec_validate` 或 test evidence 显示 failed 时必须输出 blocker；unknown 状态至少输出 risk。
 
 ## Generated Summary
 

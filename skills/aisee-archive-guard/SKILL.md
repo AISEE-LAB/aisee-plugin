@@ -37,6 +37,8 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 - app schema 的 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 或 device schema 的 `design.md` / contracts 已同步最终实现事实。
 - CE P0/P1 review 结果已修复或记录接受理由。
 - 测试、人工验证、截图、日志或设备验证证据已记录在 `tasks.md` 或 schema 指定位置。
+- `aisee change archive-check` 中未关闭 P0/P1、failed validate、failed test evidence 必须视为 blocker。
+- accepted risk / 接受风险只能让 finding 从 blocker 转为可评估风险；仍需在输出中列入 Accepted Risks。
 
 ## 判定规则
 
