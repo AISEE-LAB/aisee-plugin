@@ -154,6 +154,21 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "review_and_tests": [],
         }
         pack["facts"]["derived"]["drift_candidates"] = []
+    elif target == "ce-doc-review":
+        pack["facts"]["derived"]["review"] = {
+            "focus": ["schema_artifacts", "traceability", "tasks", "contracts", "open_questions"],
+            "schema_artifacts": summarize_artifact_checks(artifact_entries),
+            "traceability": summarize_trace_checks(upstream_ids, produced_ids),
+            "tasks": summarize_task_checks(task_state),
+            "contracts": summarize_contract_checks(artifact_entries),
+        }
+    elif target == "ce-code-review":
+        pack["facts"]["derived"]["review"] = {
+            "focus": ["implementation", "tests", "source-map", "task_state"],
+            "implementation": summarize_implementation_checks(code_paths, test_paths),
+            "tasks": summarize_task_checks(task_state),
+            "evidence": pack["evidence"],
+        }
 
     return pack
 
@@ -627,6 +642,10 @@ def build_guardrails(target: str) -> list[str]:
         ])
     elif target == "aisee-verify":
         common.append("Diagnose consistency; do not make archive approval decisions.")
+    elif target == "ce-doc-review":
+        common.append("Review OpenSpec artifacts and traceability; do not implement code.")
+    elif target == "ce-code-review":
+        common.append("Review implementation evidence against the current OpenSpec change.")
     return common
 
 
@@ -635,13 +654,25 @@ def build_evidence(root: Path, change: str) -> dict[str, Any]:
     review_files = []
     if review_dir.exists():
         review_files = [rel(root, path) for path in sorted(review_dir.glob(f"*{change}*")) if path.is_file()]
+    verification_dir = root / "docs" / "verification"
+    verification_files = []
+    if verification_dir.exists():
+        verification_files = [rel(root, path) for path in sorted(verification_dir.glob(f"*{change}*")) if path.is_file()]
     return {
-        "openspec_validate": None,
+        "openspec_validate": first_matching(verification_files, ("validate", "openspec")),
         "ce_doc_review": [path for path in review_files if "doc" in path],
         "ce_code_review": [path for path in review_files if "code" in path],
-        "tests": [],
-        "manual_verification": [],
+        "tests": [path for path in verification_files if "test" in path],
+        "manual_verification": [path for path in verification_files if "manual" in path or "verify" in path],
     }
+
+
+def first_matching(paths: list[str], terms: tuple[str, ...]) -> str | None:
+    for path in paths:
+        lowered = path.lower()
+        if all(term in lowered for term in terms):
+            return path
+    return None
 
 
 def should_require_ce_plan(task_state: dict[str, Any], code_paths: list[str], test_paths: list[str], gaps: list[dict[str, Any]]) -> bool:

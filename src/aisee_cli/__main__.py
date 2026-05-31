@@ -7,6 +7,8 @@ from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.author_check import build_author_check
+from aisee_cli.change import build_change_inspect
+from aisee_cli.change_checks import build_archive_check, build_verify_check
 from aisee_cli.context_pack import build_context_pack
 from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids
 from aisee_cli.index import build_index
@@ -52,6 +54,14 @@ def main() -> int:
     author_check_parser = change_subparsers.add_parser("author-check")
     author_check_parser.add_argument("change", help="OpenSpec change name")
     author_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    verify_check_parser = change_subparsers.add_parser("verify-check")
+    verify_check_parser.add_argument("change", help="OpenSpec change name")
+    verify_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    verify_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
+    archive_check_parser = change_subparsers.add_parser("archive-check")
+    archive_check_parser.add_argument("change", help="OpenSpec change name")
+    archive_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    archive_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
     context_parser = subparsers.add_parser("context")
     context_subparsers = context_parser.add_subparsers(dest="context_command")
     pack_parser = context_subparsers.add_parser("pack")
@@ -127,40 +137,7 @@ def main() -> int:
 
     if args.command == "change" and args.change_command == "inspect":
         root = resolve_project_root(Path.cwd())
-        pack = build_context_pack(root, args.change, "aisee-verify")
-        parsed = pack["facts"]["parsed"]
-        derived = pack["facts"]["derived"]
-        id_registry = parsed["id_registry"]
-        traceability = derived["traceability"]
-        result = {
-            "schema_version": pack["schema_version"],
-            "change": pack["change"],
-            "schema": parsed["schema"],
-            "artifacts": parsed["schema"]["artifacts"],
-            "ids": {
-                "upstream": traceability["upstream_ids"],
-                "produced": traceability["produced_ids"],
-                "registry": {
-                    "available": id_registry["available"],
-                    "path": id_registry["path"],
-                    "registered": id_registry["registered_ids"],
-                    "missing": id_registry["missing_ids"],
-                    "temporary": id_registry["temporary_ids"],
-                    "inactive": id_registry["inactive_ids"],
-                    "status_counts": id_registry["status_counts"],
-                },
-            },
-            "task_state": derived["task_state"],
-            "paths": {
-                "code": derived["code_paths"],
-                "tests": derived["test_paths"],
-            },
-            "gaps": summarize_gaps(pack["gaps"]),
-            "meta": {
-                "command": f"aisee change inspect {args.change} --json",
-                "source_context_target": "aisee-verify",
-            },
-        }
+        result = build_change_inspect(root, args.change)
         print_json(result)
         return 0
 
@@ -169,6 +146,18 @@ def main() -> int:
         result = build_author_check(root, args.change)
         print_json(result)
         return 0
+
+    if args.command == "change" and args.change_command == "verify-check":
+        root = resolve_project_root(Path.cwd())
+        result = build_verify_check(root, args.change)
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
+
+    if args.command == "change" and args.change_command == "archive-check":
+        root = resolve_project_root(Path.cwd())
+        result = build_archive_check(root, args.change)
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
 
     if args.command == "sources":
         root = resolve_project_root(Path.cwd())
