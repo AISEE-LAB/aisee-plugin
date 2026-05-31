@@ -111,6 +111,9 @@ apply:
   tracks: tasks.md
 """,
     )
+    schema_templates = root / "openspec" / "schemas" / "aisee-app-spec-driven" / "templates"
+    for template in ("proposal.md", "source-map.md", "spec.md", "change-context.md", "service-contract.md", "tasks.md"):
+        write(schema_templates / template, f"# {template}\n")
     change = root / "openspec" / "changes" / "add-auth"
     write(change / ".openspec.yaml", "schema: aisee-app-spec-driven\n")
     write(
@@ -299,3 +302,66 @@ def test_cli_change_inspect_outputs_summary(tmp_path: Path) -> None:
     assert data["ids"]["registry"]["status_counts"]["active"] == 5
     assert data["task_state"]["total"] == 2
     assert "src/auth/session.py" in data["paths"]["code"]
+
+
+def test_cli_change_author_check_reports_ready_change(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    env = os.environ.copy()
+    repo_src = Path(__file__).resolve().parents[1] / "src"
+    env["PYTHONPATH"] = str(repo_src)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "aisee_cli.__main__",
+            "change",
+            "author-check",
+            "add-auth",
+            "--json",
+        ],
+        cwd=tmp_path,
+        env=env,
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+
+    data = json.loads(result.stdout)
+    assert data["status"] == "ready"
+    assert data["schema"]["valid"] is True
+    assert data["missing_artifacts"] == []
+    assert data["ids"]["actions"]["reserve"] == []
+    assert data["next_actions"] == ["continue authoring or run openspec validate"]
+
+
+def test_cli_change_author_check_reports_missing_artifact(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    (tmp_path / "openspec" / "changes" / "add-auth" / "service-contract.md").unlink()
+    env = os.environ.copy()
+    repo_src = Path(__file__).resolve().parents[1] / "src"
+    env["PYTHONPATH"] = str(repo_src)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "aisee_cli.__main__",
+            "change",
+            "author-check",
+            "add-auth",
+            "--json",
+        ],
+        cwd=tmp_path,
+        env=env,
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+
+    data = json.loads(result.stdout)
+    assert data["status"] == "needs-work"
+    assert data["missing_artifacts"] == [
+        {"id": "service-contract", "generates": "service-contract.md", "requires": ["source-map", "specs", "change-context"]}
+    ]
+    assert "create service-contract.md" in data["next_actions"]

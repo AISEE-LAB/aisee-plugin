@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from aisee_cli import __version__
+from aisee_cli.author_check import build_author_check
 from aisee_cli.context_pack import build_context_pack, resolve_project_root
 from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids, trace_id
 
@@ -25,6 +26,9 @@ def main() -> int:
     inspect_parser = change_subparsers.add_parser("inspect")
     inspect_parser.add_argument("change", help="OpenSpec change name")
     inspect_parser.add_argument("--json", action="store_true", help="output JSON")
+    author_check_parser = change_subparsers.add_parser("author-check")
+    author_check_parser.add_argument("change", help="OpenSpec change name")
+    author_check_parser.add_argument("--json", action="store_true", help="output JSON")
     context_parser = subparsers.add_parser("context")
     context_subparsers = context_parser.add_subparsers(dest="context_command")
     pack_parser = context_subparsers.add_parser("pack")
@@ -130,6 +134,12 @@ def main() -> int:
                 "source_context_target": "aisee-verify",
             },
         }
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "change" and args.change_command == "author-check":
+        root = resolve_project_root(Path.cwd())
+        result = build_author_check(root, args.change)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
