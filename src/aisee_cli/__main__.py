@@ -9,6 +9,7 @@ from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.context_pack import build_context_pack, resolve_project_root
+from aisee_cli.id_registry import activate_id, check_registry, reserve_ids
 
 
 def main() -> int:
@@ -30,7 +31,20 @@ def main() -> int:
     pack_parser.add_argument("--change", required=True, help="OpenSpec change name")
     pack_parser.add_argument("--for", dest="target", required=True, help="context target")
     pack_parser.add_argument("--json", action="store_true", help="output JSON")
-    subparsers.add_parser("id")
+    id_parser = subparsers.add_parser("id")
+    id_subparsers = id_parser.add_subparsers(dest="id_command")
+    id_check_parser = id_subparsers.add_parser("check")
+    id_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    id_reserve_parser = id_subparsers.add_parser("reserve")
+    id_reserve_parser.add_argument("--scope", required=True, help="ID scope")
+    id_reserve_parser.add_argument("--type", required=True, help="ID type")
+    id_reserve_parser.add_argument("--count", type=int, default=1, help="number of IDs to reserve")
+    id_reserve_parser.add_argument("--json", action="store_true", help="output JSON")
+    id_activate_parser = id_subparsers.add_parser("activate")
+    id_activate_parser.add_argument("id", help="full ID, for example auth:FR-001")
+    id_activate_parser.add_argument("--owner", required=True, help="owner document path")
+    id_activate_parser.add_argument("--title", required=True, help="ID title")
+    id_activate_parser.add_argument("--json", action="store_true", help="output JSON")
     subparsers.add_parser("flow")
     gaps_parser = subparsers.add_parser("gaps")
     gaps_parser.add_argument("--change", required=True, help="OpenSpec change name")
@@ -89,6 +103,27 @@ def main() -> int:
                 "source_context_target": "aisee-verify",
             },
         }
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.command == "id":
+        root = resolve_project_root(Path.cwd())
+        try:
+            if args.id_command == "check":
+                result = check_registry(root)
+            elif args.id_command == "reserve":
+                result = reserve_ids(root, args.scope, args.type, args.count)
+            elif args.id_command == "activate":
+                result = activate_id(root, args.id, args.owner, args.title)
+            else:
+                result = {
+                    "status": "planned",
+                    "command": args.command,
+                    "message": "Use one of: check, reserve, activate.",
+                }
+        except ValueError as error:
+            print(json.dumps({"status": "error", "message": str(error)}, ensure_ascii=False, indent=2), file=sys.stderr)
+            return 2
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
