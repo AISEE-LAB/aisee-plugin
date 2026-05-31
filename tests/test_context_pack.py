@@ -183,9 +183,35 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path) -> None:
     assert "tests/auth/test_session.py" in pack["facts"]["derived"]["test_paths"]
     assert pack["facts"]["derived"]["task_state"]["total"] == 2
     assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
+    assert pack["facts"]["derived"]["execution"]["allowed_paths"] == [
+        "src/auth/session.py",
+        "tests/auth/test_session.py",
+    ]
+    assert pack["facts"]["derived"]["implementation_references"]["unmapped_reference_paths"] == []
     assert pack["generated"] is None
     assert pack["facts"]["parsed"]["source_map"]["parse_level"] == "structured"
     assert pack["facts"]["parsed"]["source_map"]["implementation_paths"]
+
+
+def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md",
+        """# Tasks
+
+- [ ] auth:TASK-001 Implement src/auth/session.py.
+- [ ] auth:TEST-001 Verify tests/auth/test_session.py.
+- [ ] auth:TASK-001 Investigate src/auth/side_effect.py.
+""",
+    )
+
+    pack = build_context_pack(tmp_path, "add-auth", "ce-work")
+
+    execution = pack["facts"]["derived"]["execution"]
+    references = pack["facts"]["derived"]["implementation_references"]
+    assert "src/auth/side_effect.py" not in execution["allowed_paths"]
+    assert references["unmapped_reference_paths"] == ["src/auth/side_effect.py"]
+    assert "SOURCE_MAP_UNMAPPED_PATH" in {gap["code"] for gap in pack["gaps"]}
 
 
 def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:

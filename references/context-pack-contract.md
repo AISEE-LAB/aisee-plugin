@@ -155,6 +155,11 @@ Rules:
   "artifact_applicability": [],
   "code_paths": [],
   "test_paths": [],
+  "implementation_references": {
+    "declared_paths": [],
+    "referenced_paths": [],
+    "unmapped_reference_paths": []
+  },
   "task_state": {
     "total": 0,
     "done": 0,
@@ -171,7 +176,9 @@ Rules:
 - `read_order` 只能来自当前 change、schema artifact DAG、`source-map.md` 和 project rules。
 - `scope.in/out` 来自 proposal、source-map 和 tasks。
 - `follow_up_candidates` 可记录实现中发现但未纳入当前 change 的问题。
-- `code_paths` 和 `test_paths` 必须来自 `source-map.md`、tasks、contracts 或明确的 implementation evidence；不得自由全项目搜索后加入。
+- `code_paths` 和 `test_paths` 是实现允许路径，必须来自 `source-map.md` 的 `Implementation Paths` 结构化声明；不得自由全项目搜索后加入。
+- OpenSpec artifacts 和 source-map 文本中额外出现的路径只能进入 `implementation_references.referenced_paths`。
+- `implementation_references.unmapped_reference_paths` 表示被 artifact 文本提到但未在 `source-map.md` Implementation Paths 声明的实现路径；`ce-work` 不得把这些路径加入 `allowed_paths`。
 - 缺路径时写入 `gaps`，不要猜测。
 
 ## Gap Object
@@ -222,6 +229,7 @@ Required additions:
         "start_from": [],
         "suggested_order": [],
         "allowed_paths": [],
+        "unmapped_reference_paths": [],
         "forbidden_scope": [],
         "requires_ce_plan": false,
         "ce_plan_reason": null
@@ -238,7 +246,7 @@ Required additions:
 
 Rules:
 
-- `allowed_paths` 来自 `source-map.md`、tasks 或 contracts。
+- `allowed_paths` 只来自 `source-map.md` 的 `Implementation Paths`。artifact 文本提到但未在 source-map 声明的路径只能作为 `unmapped_reference_paths` 和 gap 输出。
 - 如果 `tasks.md` 太粗、路径缺失或 contract 冲突，`requires_ce_plan` 可以为 `true`，但 `ce-plan` 结论必须回写 `tasks.md` / `source-map.md`。
 - 不包含完整 SRS / UI Content / Architecture 正文，只包含当前 change 追踪到的 ID、路径和必要摘录。
 - 未纳入当前 change 的问题可以放入 `follow_up_candidates`，不能进入 `suggested_order`。

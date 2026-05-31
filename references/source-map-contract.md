@@ -63,7 +63,8 @@ Rules:
 Rules:
 
 - `Kind` 建议使用 `code / test / config / docs / asset / reference`。
-- `ce-work` 的 allowed paths 优先来自这里。
+- `ce-work` 的 `allowed_paths` 只来自这里。
+- artifact 文本中提到但未在本表声明的实现路径只能进入 `unmapped_reference_paths` 和 gap，不能自动放行。
 - 没有本表时，CLI 可以从 source-map 全文路径降级抽取。
 
 ### Verification Evidence

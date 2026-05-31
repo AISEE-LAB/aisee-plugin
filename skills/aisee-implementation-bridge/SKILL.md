@@ -78,7 +78,8 @@ aisee context pack --change <change> --for ce-work --json
 - `facts.derived.read_order`：实现前读取顺序。
 - `facts.derived.scope`：in/out scope 与 follow-up candidates。
 - `facts.derived.traceability`：上游 ID、产出 ID、ID links。
-- `facts.derived.code_paths` / `test_paths`：允许读取和修改的代码 / 测试入口。
+- `facts.derived.code_paths` / `test_paths`：来自 `source-map.md` Implementation Paths 的允许读取和修改入口。
+- `facts.derived.implementation_references.unmapped_reference_paths`：tasks/contracts/specs 提到但未在 source-map 声明的路径，只能作为缺口处理，不能交给 `ce-work` 自动修改。
 - `facts.derived.execution`：执行顺序、是否需要先 ce-plan、禁止越界项。
 - `gaps` 和 `guardrails`：阻塞项、风险和执行限制。
 
@@ -135,7 +136,7 @@ aisee context pack --change <change> --for ce-work --json
 - `source-map.md` 是代码定位入口。
 - app schema 中，`ui-contract.md`、`service-contract.md`、`data-model.md` 和 `change-context.md` 是实现 contracts；不要只读 specs 就开始写代码。
 - device schema 中，`design.md` 和 hardware/firmware/runtime/verification contracts 是实现 contracts；不要把 app contract 假设套到设备项目。
-- `ce-work` 的允许路径应来自 context pack 的 `allowed_paths`、`code_paths` 和 `test_paths`；缺失时标记 `[SOURCE-MAP-GAP]`，不要自行扩大实现范围。
+- `ce-work` 的允许路径应来自 context pack 的 `allowed_paths`、`code_paths` 和 `test_paths`，这些字段必须由 `source-map.md` Implementation Paths 派生；缺失时标记 `[SOURCE-MAP-GAP]`，不要自行扩大实现范围。
 - 实现中发现需求/spec/contract/code 事实不一致，先回写当前 OpenSpec change，再继续实现。
 - 不创建新的长期计划文件；需要临时推理时，结论必须回写 `tasks.md` 或 `source-map.md`。
 - 不扩大 change 范围；超出范围的发现记录为 follow-up 或新 change 候选。

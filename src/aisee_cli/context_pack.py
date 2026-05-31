@@ -58,12 +58,18 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     tasks_text = read_text(change_path / "tasks.md")
     combined_text = collect_artifact_text(parsed_artifacts)
 
-    source_paths = sorted({item["path"] for item in source_map["implementation_paths"]} | extract_paths(source_map_text))
+    source_paths = sorted({item["path"] for item in source_map["implementation_paths"] if item.get("path")})
     task_paths = sorted(extract_paths(tasks_text))
     artifact_paths = sorted(extract_paths(combined_text))
-    all_paths = sorted(set(source_paths + task_paths + artifact_paths))
-    code_paths = [p for p in all_paths if not is_test_path(p)]
-    test_paths = [p for p in all_paths if is_test_path(p)]
+    referenced_paths = sorted(set(task_paths + artifact_paths) | extract_paths(source_map_text))
+    unmapped_reference_paths = [
+        path
+        for path in referenced_paths
+        if is_execution_path(path) and path not in source_paths
+    ]
+    read_paths = sorted(set(source_paths + referenced_paths))
+    code_paths = [p for p in source_paths if not is_test_path(p)]
+    test_paths = [p for p in source_paths if is_test_path(p)]
 
     sources = inspect_sources(root, source_map_text)
     task_state = parse_task_state(tasks_text)
@@ -81,9 +87,10 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         target=target,
         id_registry=id_registry,
         source_map=source_map,
+        unmapped_reference_paths=unmapped_reference_paths,
     )
 
-    read_order = build_read_order(root, change_path, artifact_entries, all_paths)
+    read_order = build_read_order(root, change_path, artifact_entries, read_paths)
     status = "missing" if not change_path.exists() else ("authored" if task_state["total"] else "draft")
     requires_ce_plan = target == "ce-work" and should_require_ce_plan(task_state, code_paths, test_paths, gaps)
 
@@ -123,6 +130,11 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 "artifact_applicability": source_map["artifact_applicability"] or derive_artifact_applicability(source_map_text),
                 "code_paths": code_paths,
                 "test_paths": test_paths,
+                "implementation_references": {
+                    "declared_paths": source_paths,
+                    "referenced_paths": referenced_paths,
+                    "unmapped_reference_paths": unmapped_reference_paths,
+                },
                 "task_state": task_state,
                 "verification_requirements": derive_verification_requirements(tasks_text),
                 "open_questions": extract_tagged_lines(combined_text, ("[ASSUMPTION]", "[SPEC-GAP]", "[SOURCE-MAP-GAP]")),
@@ -145,6 +157,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "start_from": task_state["open_items"][:1],
             "suggested_order": task_state["open_items"],
             "allowed_paths": sorted(set(code_paths + test_paths)),
+            "unmapped_reference_paths": unmapped_reference_paths,
             "forbidden_scope": pack["facts"]["derived"]["scope"]["out"],
             "requires_ce_plan": requires_ce_plan,
             "ce_plan_reason": ce_plan_reason(task_state, code_paths, test_paths, gaps) if requires_ce_plan else None,
@@ -494,6 +507,7 @@ def build_gaps(
     target: str,
     id_registry: dict[str, Any],
     source_map: dict[str, Any],
+    unmapped_reference_paths: list[str],
 ) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if not change_path.exists():
@@ -561,8 +575,18 @@ def build_gaps(
                 gap(
                     "SOURCE_MAP_GAP",
                     "risk",
-                    "No code or test paths were found from source-map, tasks, or contracts",
+                    "No code or test paths were declared by source-map Implementation Paths",
                     "source-map.md",
+                )
+            )
+        if unmapped_reference_paths:
+            gaps.append(
+                gap(
+                    "SOURCE_MAP_UNMAPPED_PATH",
+                    "risk",
+                    "artifact text references implementation paths not declared in source-map Implementation Paths",
+                    "source-map.md",
+                    unmapped_reference_paths,
                 )
             )
     return gaps
@@ -857,6 +881,11 @@ def extract_section_lines(text: str, headings: tuple[str, ...]) -> list[str]:
 def is_test_path(path: str) -> bool:
     lowered = path.lower()
     return lowered.startswith(("tests/", "test/")) or "/tests/" in lowered or lowered.endswith((".test.ts", ".test.js", ".spec.ts", ".spec.js", "_test.py"))
+
+
+def is_execution_path(path: str) -> bool:
+    lowered = path.lower()
+    return lowered.startswith(("src/", "app/", "apps/", "lib/", "libs/", "packages/", "tests/", "test/"))
 
 
 def read_yaml_scalar(text: str, key: str) -> str | None:
