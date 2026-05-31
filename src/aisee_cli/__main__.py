@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import argparse
-import json
-import sys
 from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.author_check import build_author_check
-from aisee_cli.context_pack import build_context_pack, resolve_project_root
-from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids, trace_id
+from aisee_cli.context_pack import build_context_pack
+from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids
+from aisee_cli.index import build_index
+from aisee_cli.lookup import get_id, trace_id
+from aisee_cli.output import error_response, exit_code_for, print_json
+from aisee_cli.project import resolve_project_root
+from aisee_cli.sources import add_source, check_sources, list_sources, remove_source
 
 
 def main() -> int:
@@ -19,8 +22,28 @@ def main() -> int:
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser("doctor")
     subparsers.add_parser("bootstrap")
-    subparsers.add_parser("sources")
-    subparsers.add_parser("index")
+    sources_parser = subparsers.add_parser("sources")
+    sources_subparsers = sources_parser.add_subparsers(dest="sources_command")
+    sources_list_parser = sources_subparsers.add_parser("list")
+    sources_list_parser.add_argument("--json", action="store_true", help="output JSON")
+    sources_check_parser = sources_subparsers.add_parser("check")
+    sources_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    sources_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
+    sources_add_parser = sources_subparsers.add_parser("add")
+    sources_add_parser.add_argument("--scope", required=True, help="source scope")
+    sources_add_parser.add_argument("--type", required=True, help="source type")
+    sources_add_parser.add_argument("--path", required=True, help="source path")
+    sources_add_parser.add_argument("--template", help="source template")
+    sources_add_parser.add_argument("--parser", help="source parser")
+    sources_add_parser.add_argument("--json", action="store_true", help="output JSON")
+    sources_remove_parser = sources_subparsers.add_parser("remove")
+    sources_remove_parser.add_argument("--scope", required=True, help="source scope")
+    sources_remove_parser.add_argument("--type", required=True, help="source type")
+    sources_remove_parser.add_argument("--path", required=True, help="source path")
+    sources_remove_parser.add_argument("--json", action="store_true", help="output JSON")
+    index_parser = subparsers.add_parser("index")
+    index_parser.add_argument("--json", action="store_true", help="output JSON")
+    index_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
     change_parser = subparsers.add_parser("change")
     change_subparsers = change_parser.add_subparsers(dest="change_command")
     inspect_parser = change_subparsers.add_parser("inspect")
@@ -39,6 +62,7 @@ def main() -> int:
     id_subparsers = id_parser.add_subparsers(dest="id_command")
     id_check_parser = id_subparsers.add_parser("check")
     id_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    id_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
     id_next_parser = id_subparsers.add_parser("next")
     id_next_parser.add_argument("--scope", required=True, help="ID scope")
     id_next_parser.add_argument("--type", required=True, help="ID type")
@@ -65,6 +89,9 @@ def main() -> int:
     trace_parser = subparsers.add_parser("trace")
     trace_parser.add_argument("id", help="full ID to trace")
     trace_parser.add_argument("--json", action="store_true", help="output JSON")
+    get_parser = subparsers.add_parser("get")
+    get_parser.add_argument("id", help="full ID to get")
+    get_parser.add_argument("--json", action="store_true", help="output JSON")
     args = parser.parse_args()
 
     if args.version:
@@ -76,9 +103,9 @@ def main() -> int:
             root = resolve_project_root(Path.cwd())
             pack = build_context_pack(root, args.change, args.target)
         except ValueError as error:
-            print(json.dumps({"status": "error", "message": str(error)}, ensure_ascii=False, indent=2), file=sys.stderr)
+            print_json(error_response(str(error)), stderr=True)
             return 2
-        print(json.dumps(pack, ensure_ascii=False, indent=2))
+        print_json(pack)
         return 0
 
     if args.command == "gaps":
@@ -95,7 +122,7 @@ def main() -> int:
                 "source_context_target": "aisee-verify",
             },
         }
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print_json(result)
         return 0
 
     if args.command == "change" and args.change_command == "inspect":
@@ -134,14 +161,43 @@ def main() -> int:
                 "source_context_target": "aisee-verify",
             },
         }
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print_json(result)
         return 0
 
     if args.command == "change" and args.change_command == "author-check":
         root = resolve_project_root(Path.cwd())
         result = build_author_check(root, args.change)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print_json(result)
         return 0
+
+    if args.command == "sources":
+        root = resolve_project_root(Path.cwd())
+        try:
+            if args.sources_command in {None, "list"}:
+                result = list_sources(root)
+                print_json(result)
+                return 0
+            if args.sources_command == "check":
+                result = check_sources(root)
+                print_json(result)
+                return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
+            if args.sources_command == "add":
+                result = add_source(root, args.scope, args.type, args.path, args.template, args.parser)
+                print_json(result)
+                return 0
+            if args.sources_command == "remove":
+                result = remove_source(root, args.scope, args.type, args.path)
+                print_json(result)
+                return 0
+        except ValueError as error:
+            print_json(error_response(str(error)), stderr=True)
+            return 2
+
+    if args.command == "index":
+        root = resolve_project_root(Path.cwd())
+        result = build_index(root, write_cache=True)
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
 
     if args.command == "id":
         root = resolve_project_root(Path.cwd())
@@ -163,26 +219,37 @@ def main() -> int:
                     "message": "Use one of: check, next, reserve, activate, deprecate.",
                 }
         except ValueError as error:
-            print(json.dumps({"status": "error", "message": str(error)}, ensure_ascii=False, indent=2), file=sys.stderr)
+            print_json(error_response(str(error)), stderr=True)
             return 2
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-        return 0
+        print_json(result)
+        fail_on_blocker = bool(getattr(args, "fail_on_blocker", False))
+        return exit_code_for(result, fail_on_blocker=fail_on_blocker)
 
     if args.command == "trace":
         root = resolve_project_root(Path.cwd())
         try:
             result = trace_id(root, args.id)
         except ValueError as error:
-            print(json.dumps({"status": "error", "message": str(error)}, ensure_ascii=False, indent=2), file=sys.stderr)
+            print_json(error_response(str(error)), stderr=True)
             return 2
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print_json(result)
         return 0
 
-    print(json.dumps({
+    if args.command == "get":
+        root = resolve_project_root(Path.cwd())
+        try:
+            result = get_id(root, args.id)
+        except ValueError as error:
+            print_json(error_response(str(error)), stderr=True)
+            return 2
+        print_json(result)
+        return 0
+
+    print_json({
         "status": "planned",
         "command": args.command,
         "message": "Aisee CLI scaffold is initialized; implementation pending."
-    }, ensure_ascii=False, indent=2))
+    })
     return 0
 
 
