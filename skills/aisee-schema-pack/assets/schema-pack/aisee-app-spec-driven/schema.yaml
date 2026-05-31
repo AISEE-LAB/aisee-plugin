@@ -11,7 +11,7 @@ description: |
   正式 ID 必须来自 .aisee/id-registry.json。AI 不得临时发明正式 ID；工具不可用时只能使用
   {{scope}}:<TYPE>-NEW-001 形式的临时占位符并标注 [ID-RESERVATION-REQUIRED]。
   创建时间：2026-05-24
-  更新：2026-05-30
+  更新：2026-06-01
   维护人：@aisee
 
 artifacts:
@@ -36,9 +36,11 @@ artifacts:
     requires: [proposal]
     instruction: |
       source-map.md 是本 schema 的追踪核心，必须：
+      - 记录 `aisee change author-check <change> --json` 的状态、blockers、missing_artifacts 和 next_actions
       - 列出上游来源：SRS、UI Content、Design Spec / Design Assets、Architecture、Change Plan、Issue 或用户输入
       - 使用完整 ID（如 auth:FR-001）建立追踪关系；短 ID 只用于人类阅读
       - 生成或引用正式 ID 前必须通过 Aisee CLI / .aisee/id-registry.json 校验；不得由 AI 临时编正式编号
+      - 记录需要执行的 ID 动作：reserve、activate、fix missing、replace inactive
       - 映射上游输入 ID：FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK
       - 映射本 change 产出 ID：SPEC / API / DATA / TASK / TEST
       - 明确不在范围内的上游条目
@@ -131,6 +133,8 @@ artifacts:
     requires: [specs, change-context, ui-contract, data-model, service-contract]
     instruction: |
       tasks.md 必须先做一致性检查，再列实现任务：
+      - 生成前必须运行或记录 `aisee change author-check <change> --json`
+      - author-check 的 blocker 必须清除后才能生成可执行任务
       - 每个 FR 必须能追踪到 specs
       - 涉及页面的 FR 必须追踪到 ui-contract.md
       - 涉及接口的 FR 必须追踪到 service-contract.md
@@ -140,6 +144,7 @@ artifacts:
       - 新增 TASK / TEST ID 前必须通过 ID registry 预留
       - 不适用 artifact 必须已有 N/A 原因
       - 任务按实现和验证顺序排列，最后必须包含验收场景验证
+      - 收尾必须记录 `aisee change author-check` 和 `aisee gaps` 状态
 
 apply:
   requires: [tasks]

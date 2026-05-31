@@ -6,11 +6,33 @@
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
+| 已运行 author preflight | yes / no | `aisee change author-check {{change-name}} --json` | |
 | 已读取 `.aisee/id-registry.json` | yes / no | `aisee id check --json` | |
 | 已为新增 ID 执行 reserve | yes / no / N/A | `aisee id reserve --scope {{scope}} --type <TYPE> --count <N> --json` | |
 | 已为写入 artifact 的 ID 执行 activate | yes / no / N/A | `aisee id activate <id> --owner <path> --title "<title>"` | |
+| 存在未注册 ID | yes / no | `author-check.ids.registry.missing` / `aisee trace <id> --json` | |
 | 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
-| 存在废弃 / 拆分 / 合并 ID | yes / no | `aisee trace <id> --json` | |
+| 存在废弃 / 拆分 / 合并 / 删除 ID | yes / no | `author-check.ids.registry.inactive` / `aisee trace <id> --json` | |
+
+## Author Check 摘要
+
+| 项目 | 结果 | 处理 |
+|---|---|---|
+| status | ready / needs-work / blocked | |
+| schema.valid | true / false | |
+| missing_artifacts |  | 按 artifact_order 补齐 |
+| blockers |  | 停止 author，先处理 |
+| warnings |  | 写入阻塞项 / 假设 |
+| next_actions |  | 执行后回填本文 |
+
+## ID 处理动作
+
+| 动作 | ID / 类型 | 命令 / 处理方式 | 状态 |
+|---|---|---|---|
+| reserve | SPEC / API / DATA / TASK / TEST | `aisee id reserve --scope {{scope}} --type <TYPE> --count <N> --json` | pending / done / N/A |
+| activate | {{scope}}:SPEC-001 | `aisee id activate <id> --owner <path> --title "<title>"` | pending / done / N/A |
+| fix missing | {{scope}}:TYPE-001 | 注册 / 替换 / 标注 `[ID-RESERVATION-REQUIRED]` | pending / done / N/A |
+| replace inactive | {{scope}}:TYPE-001 | `aisee trace <id> --json` 后替换为有效 ID | pending / done / N/A |
 
 ## 上游来源
 
@@ -81,4 +103,5 @@
 - service-contract.md 必须覆盖 Required=yes 的 API / backend service / async job / CLI / integration，并满足 ui-contract.md 的前端数据需求。
 - 每个新增 ID 激活后必须回填到“本 Change 产出 ID”并记录 owner artifact。
 - tasks.md 内新增 TASK / TEST ID 前必须先 reserve；无法 reserve 时只使用临时 ID。
+- tasks.md 生成前必须重新运行 `aisee change author-check {{change-name}} --json`，确认 blocker 已清除或明确保留。
 - tasks.md 生成前必须确认上述追踪关系闭合。

@@ -2,6 +2,9 @@
 
 ## 生成前一致性检查
 
+- [ ] 已运行 `aisee change author-check {{change-name}} --json`，且无 blocker。
+- [ ] `author-check.missing_artifacts` 已处理，所有 N/A artifact 已写明原因。
+- [ ] `author-check.ids.actions.reserve / activate` 已执行，或已在 source-map.md 标注 `[ID-RESERVATION-REQUIRED]`。
 - [ ] 每个 FR 已映射到 specs。
 - [ ] Architecture 相关 ARCH / DEC / CONSTRAINT / RISK 已映射到 change-context.md。
 - [ ] 涉及页面的 FR 已映射到 ui-contract.md。
@@ -33,6 +36,8 @@
 
 - [ ] 4.1 更新必要文档或示例。
 - [ ] 4.2 确认无未处理的 [SPEC-GAP] / [STACK-CONFLICT]。
+- [ ] 4.3 运行 `aisee change author-check {{change-name}} --json` 并记录状态。
+- [ ] 4.4 运行 `aisee gaps --change {{change-name}} --json` 并记录状态。
 
 ## 追踪矩阵
 
@@ -40,3 +45,10 @@
 |---|---|---|---|---|
 | {{scope}}:TASK-001 | 实现 | {{scope}}:FR-001 / {{scope}}:API-001 | | 未开始 / 进行中 / 完成 |
 | {{scope}}:TEST-001 | 验证 | {{scope}}:SPEC-001 | | 未开始 / 通过 / 失败 / N/A |
+
+## Author / Gaps 复查记录
+
+| 命令 | 状态 | blocker | risk | 备注 |
+|---|---|---:|---:|---|
+| `aisee change author-check {{change-name}} --json` | ready / needs-work / blocked | | | |
+| `aisee gaps --change {{change-name}} --json` | clear / risk / blocked | | | |

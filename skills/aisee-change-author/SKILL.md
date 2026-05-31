@@ -1,34 +1,56 @@
 ---
 name: aisee:change-author
-description: 将 aisee:change-plan 的结果转成 OpenSpec change artifacts 初稿。用于单个已确认 change 的 proposal、change-context、spec、tasks、source-map、ui/service/data contract 或 hardware/firmware/runtime/verification contract 编排。它不拆 change 边界、不写代码；仅当当前 schema 明确包含 design.md 时才调用 aisee:change-design。
+description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifacts 初稿。用于已确认 change 的 author preflight、proposal、source-map、specs、change-context、tasks、ui/service/data 或 device contracts 编排。必须先运行 aisee change author-check；不拆 change 边界、不写代码；仅当当前 schema 明确包含 design.md 时才调用 aisee:change-design。
 ---
 
 # aisee:change-author
 
 `aisee:change-author` 是 OpenSpec change 产物编排器。
 
-## 职责
+## 职责边界
 
 - 读取 change-plan、SRS、UI/device context、architecture 和项目事实。
-- 识别当前 schema 需要哪些 artifacts。
-- 生成 artifacts 前检查 `.aisee/id-registry.json` 和 `source-map.md` 的 ID 状态。
-- 需要新增正式 ID 时，先通过 `aisee id reserve` 获取，不允许 AI 临时编正式编号。
+- 通过 `aisee change author-check <change> --json` 识别 schema、artifact、ID 和 blocker 状态。
 - 为单个 OpenSpec change 创建或补齐 artifacts 初稿。
 - 通过 ID 和 `source-map.md` 串联上游产物、spec、tasks、代码路径和验证。
-- 对 `change-context.md` 承接 Architecture 的本 change 局部上下文。
+- 需要新增正式 ID 时，先通过 `aisee id reserve` 获取；写入后用 `aisee id activate` 激活。
 - 仅当 schema 明确包含 `design.md` 时，调用或复用 `aisee:change-design` 规则。
 
-## 不负责
+不负责：
 
 - 拆 change 边界。
 - 为多个 change 规划 schema。
 - 写代码。
 - 让 `ce-plan` 生成长期任务清单。
 
+## 必须先运行的检查
+
+开始 author 前必须运行：
+
+```bash
+aisee change author-check <change> --json
+```
+
+处理规则：
+
+- `status=blocked`：停止 author，向用户列出 `blockers`；不要创建或修改 artifacts。
+- `schema.valid=false`：停止 author；不得自造 schema 未声明的 artifact 或模板。
+- `missing_artifacts` 非空：只按 `artifact_order` 和 schema templates 补齐缺失项；不重排 schema。
+- `ids.actions.reserve` 非空：先运行对应 `aisee id reserve`，再写入正式 ID。
+- `ids.actions.activate` 非空：写入 artifact 后运行 `aisee id activate`。
+- `ids.registry.missing / inactive` 非空：先修复 registry 或替换引用；不要把断链 ID 写入新的 artifact。
+- `next_actions` 是执行提示，不是新的事实源；所有结论必须回写到 OpenSpec artifacts。
+
+如 CLI 不可用，允许继续草稿，但必须：
+
+- 使用 `{{scope}}:<TYPE>-NEW-001` 临时 ID。
+- 在 `source-map.md` 标注 `[ID-RESERVATION-REQUIRED]`。
+- 交付摘要说明尚未完成 `author-check / id reserve / id activate / id check`。
+
 ## Author 子阶段
 
 ```text
-ID registry preflight -> aisee id check / reserve / activate
+author-check -> blocker / schema / ID preflight
 proposal.md -> change scope from confirmed change-plan
 source-map.md -> upstream IDs + produced IDs + artifact applicability
 specs/**/*.md -> observable behavior and acceptance
@@ -37,14 +59,16 @@ design.md -> only when schema generates design.md, use aisee:change-design
 ui-contract.md / service-contract.md / data-model.md -> app domain author
 hardware-contract.md / firmware-contract.md / runtime-contract.md / verification-contract.md -> device domain author
 tasks.md -> single durable task list + verification evidence requirements
+final check -> aisee change author-check + aisee gaps
 ```
 
 ## ID 规则
 
 - 正式 ID 必须来自 `.aisee/id-registry.json`，不得由 AI 直接发明。
+- 生成或修改 artifacts 前，先读取 `author-check.ids.actions`。
 - 新增 `FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK / SPEC / API / DATA / TASK / TEST` 前，先使用 `aisee id reserve --scope <scope> --type <TYPE> --count <N> --json`。
 - 写入 artifact 后，使用 `aisee id activate <full-id> --owner <path> --title "<title>"` 激活。
-- 交付前运行或要求运行 `aisee id check --json`。
+- 交付前运行或要求运行 `aisee id check --json` 和 `aisee change author-check <change> --json`。
 - 如果 Aisee CLI 或 ID registry 不可用，只能写临时占位符，例如 `{{scope}}:API-NEW-001`，并在 `source-map.md` 标注 `[ID-RESERVATION-REQUIRED]`。不要声称占位符是正式 ID。
 
 ## 输入门禁
@@ -54,6 +78,7 @@ tasks.md -> single durable task list + verification evidence requirements
 - 当前只处理一个 OpenSpec change；不要一次为多个 changes 生成 artifacts。
 - change 已由 `aisee:change-plan` 或用户明确确认边界、schema 和依赖。
 - 能读取 `openspec/changes/<change>/`，或用户明确要求先输出补丁 / 草稿而不直接写文件。
+- `aisee change author-check <change> --json` 已完成，且没有 blocker。
 - 能读取当前 schema 的 `schema.yaml` 和所有 `templates/`；不得自造 artifact 顶层结构。
 - 已收集与该 change 直接相关的上游输入：SRS、UI Content、Architecture、Change Plan、Issue / 用户输入。
 - 已读取项目规则：优先 `AGENTS.md`，`CLAUDE.md` 只作为 legacy fallback。
@@ -63,11 +88,11 @@ tasks.md -> single durable task list + verification evidence requirements
 
 ## Schema DAG 规则
 
-- 以当前 schema 的 `artifacts[].requires` 为唯一生成顺序来源。
+- 以 `author-check.artifact_order` 和当前 schema 的 `artifacts[].requires` 为唯一生成顺序来源。
 - 不要因为某个模板常见就创建 schema 未声明的 artifact。
 - 不要跳过 schema 声明的 artifact；不适用时按模板写 N/A 原因。
 - 生成每个 artifact 前，读取它的 `instruction` 和 `template`。
-- 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`。
+- 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`；优先引用 `author-check.schema.issues`。
 
 ## Artifact 编写边界
 
@@ -136,9 +161,10 @@ N/A artifact 不能留空，必须写：
 
 ## ID Preflight
 
-建议顺序：
+优先使用 `aisee change author-check <change> --json` 中的 `ids.actions`。需要手动补查时使用：
 
 ```bash
+aisee change author-check <change> --json
 aisee id check --json
 aisee trace <upstream-id> --json
 aisee id reserve --scope <scope> --type SPEC --count <n> --json
@@ -146,6 +172,7 @@ aisee id reserve --scope <scope> --type API --count <n> --json
 aisee id reserve --scope <scope> --type DATA --count <n> --json
 aisee id reserve --scope <scope> --type TASK --count <n> --json
 aisee id reserve --scope <scope> --type TEST --count <n> --json
+aisee id activate <full-id> --owner <artifact-path> --title "<title>"
 ```
 
 只 reserve 实际需要的 ID 类型。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时 reserve。
@@ -170,4 +197,5 @@ aisee id reserve --scope <scope> --type TEST --count <n> --json
 - 哪些 artifacts 是 N/A 及原因。
 - 是否存在临时 ID 或 `[ID-RESERVATION-REQUIRED]`。
 - 需要用户确认的 blocker。
+- 最后一次 `aisee change author-check <change> --json` 和 `aisee gaps --change <change> --json` 的状态。
 - 建议下一步：`openspec validate`，再进入 `aisee:implementation-bridge`。
