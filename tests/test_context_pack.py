@@ -184,6 +184,8 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path) -> None:
     assert pack["facts"]["derived"]["task_state"]["total"] == 2
     assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
     assert pack["generated"] is None
+    assert pack["facts"]["parsed"]["source_map"]["parse_level"] == "structured"
+    assert pack["facts"]["parsed"]["source_map"]["implementation_paths"]
 
 
 def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:

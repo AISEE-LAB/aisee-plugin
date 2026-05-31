@@ -32,6 +32,8 @@ Aisee CLI 对 OpenSpec artifacts 只做 metadata scan：
 - checkbox 任务状态。
 - 与 `source-map.md`、ID registry、review/test evidence 的链接。
 
+`source-map.md` 是 Aisee companion 路由表，允许结构化解析。解析规则见 [source-map-contract.md](source-map-contract.md)。除 `source-map.md` 外，OpenSpec artifacts 只承诺 metadata scan。
+
 当 OpenSpec CLI 提供结构化输出时，context pack 应优先消费 OpenSpec 输出；当没有结构化输出时，只返回 metadata scan 和 gaps，不用 Aisee 自己模拟 OpenSpec parser。
 
 ## Command
@@ -129,6 +131,7 @@ Rules:
 - `CLAUDE.md` 只能作为 legacy fallback。
 - `schema.artifacts` 来自当前 change schema 或 OpenSpec CLI 输出，不得硬编码 app/device artifact。
 - `artifacts` 只承诺 metadata scan 和原文入口；不要把 contract 内容解析成业务语义。
+- `source_map` 作为 Aisee companion artifact，可包含 `upstream_sources`、`id_trace`、`artifact_applicability`、`implementation_paths`、`verification_evidence`、`out_of_scope` 和 parse issues。
 - `sources` 只包含 `.aisee/sources.json` 和 `source-map.md` 明确引用的上游来源。
 - `id_registry` 只报告当前状态，不分配新 ID。
 

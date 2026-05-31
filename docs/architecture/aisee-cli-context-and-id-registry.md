@@ -40,6 +40,8 @@ Aisee CLI is an OpenSpec context companion, not an OpenSpec parser.
 - 对 OpenSpec artifacts，Aisee CLI 默认只做 metadata scan：路径、存在性、hash、heading、ID 引用、路径引用、checkbox 状态和 evidence 入口。
 - 当 OpenSpec CLI 提供可用 JSON 输出时，Aisee CLI 应优先消费 OpenSpec CLI 输出；缺少结构化输出时才做保守 metadata scan。
 
+`source-map.md` 是例外中的重点：它是 Aisee 自己定义的 OpenSpec companion 路由表，因此 Aisee CLI 可以结构化解析它。解析范围维护在 [source-map-contract.md](../../references/source-map-contract.md)，只覆盖 upstream sources、ID trace、artifact applicability、implementation paths、verification evidence 和 out-of-scope/follow-up，不扩展到其它 OpenSpec artifact 的业务语义。
+
 ## 设计原则
 
 - **只读优先**：V1 默认只解析、索引、查询和检查，不生成业务文档，不执行 archive。

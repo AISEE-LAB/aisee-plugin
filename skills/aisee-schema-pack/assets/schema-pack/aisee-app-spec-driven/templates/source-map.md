@@ -74,6 +74,22 @@
 
 - 
 
+## Implementation Paths
+
+| Kind | Path | IDs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/... | {{scope}}:API-001 / {{scope}}:DATA-001 | add / modify / remove / reference | |
+| test | tests/... | {{scope}}:TEST-001 | add / modify / manual / N/A | |
+| docs | docs/... | {{scope}}:SPEC-001 / {{scope}}:TASK-001 | update / reference | |
+
+## Verification Evidence
+
+| Type | Path / Command | Status | IDs | Notes |
+|---|---|---|---|---|
+| openspec-validate | `openspec validate {{change-name}}` | pending / passed / failed / blocked | {{scope}}:SPEC-001 | 结果文件建议写入 docs/verification/{{change-name}}-openspec-validate.md |
+| test | docs/verification/{{change-name}}-test-results.md | pending / passed / failed / blocked | {{scope}}:TEST-001 | |
+| manual | docs/verification/{{change-name}}-manual.md | N/A / pending / passed / failed | {{scope}}:TEST-001 | |
+
 ## Artifact 适用性
 
 | Artifact | Required | 依据上游 ID | 原因 / N/A 说明 | 相关约束转交 |

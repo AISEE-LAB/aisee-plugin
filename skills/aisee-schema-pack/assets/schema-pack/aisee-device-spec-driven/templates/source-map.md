@@ -44,6 +44,23 @@
 
 - 
 
+## Implementation Paths
+
+| Kind | Path | IDs | Mode | Notes |
+|---|---|---|---|---|
+| code | Core/... / src/... / drivers/... | {{scope}}:FW-001 / {{scope}}:RT-001 | add / modify / remove / reference | |
+| config | linker / device-tree / build config path | {{scope}}:HW-001 / {{scope}}:RT-001 | add / modify / reference / N/A | |
+| test | tests/... / scripts/... / HIL log path | {{scope}}:VER-001 | add / modify / manual / N/A | |
+| docs | docs/verification/... | {{scope}}:VER-001 | update / reference | |
+
+## Verification Evidence
+
+| Type | Path / Command | Status | IDs | Notes |
+|---|---|---|---|---|
+| openspec-validate | `openspec validate {{change-name}}` | pending / passed / failed / blocked | {{scope}}:FR-001 | 结果文件建议写入 docs/verification/{{change-name}}-openspec-validate.md |
+| test | docs/verification/{{change-name}}-test-results.md | pending / passed / failed / blocked | {{scope}}:VER-001 | 单元 / 仿真 / HIL / 板级 / 系统测试 |
+| manual | docs/verification/{{change-name}}-manual.md | pending / passed / failed / N/A | {{scope}}:VER-001 | 仪器、烧录、板级或现场验证 |
+
 ## Artifact 适用性
 
 | Artifact | Required | 原因 |

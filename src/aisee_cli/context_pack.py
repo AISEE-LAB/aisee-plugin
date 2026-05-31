@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.source_map import parse_source_map
+
 
 SUPPORTED_TARGETS = {"ce-work", "aisee-verify", "ce-doc-review", "ce-code-review"}
 CONTEXT_SCHEMA_VERSION = "1.0"
@@ -44,6 +46,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
 
     root = project_root.resolve()
     change_path = root / "openspec" / "changes" / change
+    source_map = parse_source_map(change_path)
     schema_name = resolve_change_schema(root, change_path)
     schema_path = find_schema_path(root, schema_name)
     schema_info = parse_schema(schema_path) if schema_path else default_schema_info(schema_name)
@@ -55,7 +58,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     tasks_text = read_text(change_path / "tasks.md")
     combined_text = collect_artifact_text(parsed_artifacts)
 
-    source_paths = sorted(extract_paths(source_map_text))
+    source_paths = sorted({item["path"] for item in source_map["implementation_paths"]} | extract_paths(source_map_text))
     task_paths = sorted(extract_paths(tasks_text))
     artifact_paths = sorted(extract_paths(combined_text))
     all_paths = sorted(set(source_paths + task_paths + artifact_paths))
@@ -77,6 +80,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         test_paths=test_paths,
         target=target,
         id_registry=id_registry,
+        source_map=source_map,
     )
 
     read_order = build_read_order(root, change_path, artifact_entries, all_paths)
@@ -104,6 +108,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                     "archive_tracks": derive_archive_tracks(schema_info),
                 },
                 "artifacts": parsed_artifacts,
+                "source_map": source_map,
                 "sources": sources,
                 "id_registry": id_registry,
             },
@@ -115,7 +120,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                     "produced_ids": produced_ids,
                     "id_links": derive_id_links(source_map_text, tasks_text),
                 },
-                "artifact_applicability": derive_artifact_applicability(source_map_text),
+                "artifact_applicability": source_map["artifact_applicability"] or derive_artifact_applicability(source_map_text),
                 "code_paths": code_paths,
                 "test_paths": test_paths,
                 "task_state": task_state,
@@ -488,11 +493,14 @@ def build_gaps(
     test_paths: list[str],
     target: str,
     id_registry: dict[str, Any],
+    source_map: dict[str, Any],
 ) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if not change_path.exists():
         gaps.append(gap("MISSING_CHANGE", "blocker", "Change directory does not exist", "openspec/changes"))
         return gaps
+
+    gaps.extend(source_map.get("issues", []))
 
     for entry in artifact_entries:
         if entry["status"] == "missing":

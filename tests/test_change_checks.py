@@ -35,7 +35,37 @@ def run_json(root: Path, *args: str) -> dict:
 def create_change_project(root: Path, *, task_mark: str = " ") -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
-    write(root / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
+    write(
+        root / ".aisee" / "id-registry.json",
+        json.dumps(
+            {
+                "version": 1,
+                "scopes": {
+                    "auth": {
+                        "counters": {"API": 1, "TEST": 1},
+                        "ids": {
+                            "auth:API-001": {
+                                "type": "API",
+                                "number": 1,
+                                "status": "active",
+                                "title": "登录接口",
+                                "owner": "openspec/changes/add-auth/source-map.md",
+                            },
+                            "auth:TEST-001": {
+                                "type": "TEST",
+                                "number": 1,
+                                "status": "active",
+                                "title": "登录验证",
+                                "owner": "openspec/changes/add-auth/source-map.md",
+                            },
+                        },
+                    }
+                },
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+    )
     write(
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
@@ -69,7 +99,24 @@ apply:
     change = root / "openspec" / "changes" / "add-auth"
     write(change / ".openspec.yaml", "schema: aisee-app-spec-driven\n")
     write(change / "proposal.md", "# Proposal\n")
-    write(change / "source-map.md", "src/auth/session.py tests/auth/test_session.py\n")
+    write(
+        change / "source-map.md",
+        """# Source Map
+
+## Implementation Paths
+
+| Kind | Path | IDs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/auth/session.py | auth:API-001 | modify | |
+| test | tests/auth/test_session.py | auth:TEST-001 | add | |
+
+## Artifact Applicability
+
+| Artifact | Required | IDs | Reason | Handoff |
+|---|---|---|---|---|
+| service-contract.md | yes | auth:API-001 | 需要接口 | tasks.md |
+""",
+    )
     write(change / "specs" / "auth.md", "## ADDED Requirements\n")
     write(change / "service-contract.md", "src/auth/session.py\n")
     write(change / "tasks.md", f"# Tasks\n\n- [{task_mark}] Implement src/auth/session.py.\n")
