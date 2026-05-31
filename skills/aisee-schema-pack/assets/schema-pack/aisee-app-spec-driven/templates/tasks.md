@@ -38,6 +38,8 @@
 - [ ] 4.2 确认无未处理的 [SPEC-GAP] / [STACK-CONFLICT]。
 - [ ] 4.3 运行 `aisee change author-check {{change-name}} --json` 并记录状态。
 - [ ] 4.4 运行 `aisee gaps --change {{change-name}} --json` 并记录状态。
+- [ ] 4.5 运行 / 记录 `aisee:verify` 结果。
+- [ ] 4.6 归档前运行 / 记录 `aisee:archive-guard` 结果。
 
 ## 追踪矩阵
 
@@ -46,9 +48,11 @@
 | {{scope}}:TASK-001 | 实现 | {{scope}}:FR-001 / {{scope}}:API-001 | | 未开始 / 进行中 / 完成 |
 | {{scope}}:TEST-001 | 验证 | {{scope}}:SPEC-001 | | 未开始 / 通过 / 失败 / N/A |
 
-## Author / Gaps 复查记录
+## Author / Verify / Archive 复查记录
 
 | 命令 | 状态 | blocker | risk | 备注 |
 |---|---|---:|---:|---|
 | `aisee change author-check {{change-name}} --json` | ready / needs-work / blocked | | | |
 | `aisee gaps --change {{change-name}} --json` | clear / risk / blocked | | | |
+| `aisee:verify` | pass / pass-with-risk / fail | | | |
+| `aisee:archive-guard` | 可以 archive / 有风险但可接受 / 暂不建议 archive | | | |

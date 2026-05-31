@@ -144,7 +144,7 @@ artifacts:
       - 新增 TASK / TEST ID 前必须通过 ID registry 预留
       - 不适用 artifact 必须已有 N/A 原因
       - 任务按实现和验证顺序排列，最后必须包含验收场景验证
-      - 收尾必须记录 `aisee change author-check` 和 `aisee gaps` 状态
+      - 收尾必须记录 `aisee change author-check`、`aisee gaps`、`aisee:verify` 和 `aisee:archive-guard` 状态
 
 apply:
   requires: [tasks]

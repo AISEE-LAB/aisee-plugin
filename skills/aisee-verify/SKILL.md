@@ -1,6 +1,6 @@
 ---
 name: aisee:verify
-description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、contracts、CE review/test 结果和实现状态是否一致。用于实现前后检查缺口、断链、drift、schema artifact 完整性和验证证据。它输出问题清单和修复建议，不负责 archive 放行审批。
+description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、contracts、CE review/test 结果和实现状态是否一致。用于实现前后运行 author-check、gaps、context pack 和 change inspect，检查缺口、断链、drift、schema artifact 完整性和验证证据。它输出问题清单和修复建议，不负责 archive 放行审批。
 ---
 
 # aisee:verify
@@ -10,7 +10,8 @@ description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、
 ## 职责
 
 - 运行或建议运行 `openspec validate`。
-- 检查 schema artifact DAG。
+- 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 检查 schema artifact DAG 和 template / artifact 缺失。
 - 检查 ID、`source-map.md`、spec、tasks、contracts 的一致性。
 - 检查实现后是否出现 spec drift。
 - 消费 `ce-doc-review`、`ce-code-review`、`ce-test-*` 结果。
@@ -26,20 +27,31 @@ description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、
 
 ## 输入入口
 
-必须以当前 change 为入口。优先使用 context pack，字段契约见 `references/context-pack-contract.md`：
+必须以当前 change 为入口。按顺序运行：
 
 ```bash
+aisee change author-check <change> --json
+aisee gaps --change <change> --json
+aisee change inspect <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 ```
 
-同时建议读取 / 运行：
+同时建议运行：
 
 ```bash
 openspec validate <change>
-aisee gaps --change <change> --json
 ```
 
 如果 CLI 不可用，仍然只从当前 change artifacts、schema、`source-map.md` 指向的路径和已有 review/test evidence 读取；不要自由扩大全项目范围。
+
+## 输入处理规则
+
+- `author-check.status=blocked`：直接输出 fail，引用 `author-check.blockers`，不要继续推断实现状态。
+- `gaps.result.status=blocked`：直接输出 fail，要求回到对应 artifact 修复。
+- `change inspect.ids.registry.missing / temporary / inactive` 非空：至少输出 RISK；inactive 或 removed ID 输出 BLOCKER。
+- `context pack.facts.derived.checks` 是 verify 的结构化检查入口；不要把 verify 报告当成新事实源。
+- `openspec validate` 未运行时，输出 RISK；运行失败且无接受理由时输出 BLOCKER。
+- 已有 `ce-doc-review`、`ce-code-review`、`ce-test-*` 结果只作为 evidence；verify 不替代它们。
 
 ## 检查项
 
@@ -54,6 +66,7 @@ aisee gaps --change <change> --json
 | Tasks | tasks 是否覆盖实现、验证、证据记录；状态是否真实 |
 | Implementation drift | 代码或配置是否偏离 specs/contracts/source-map |
 | Review / test evidence | CE P0/P1、测试失败、人工验证缺口是否处理或记录接受理由 |
+| Archive readiness signals | 是否存在会阻止 archive-guard 的 blocker |
 
 ## Severity
 
@@ -70,6 +83,14 @@ aisee gaps --change <change> --json
 
 pass / fail / pass-with-risk
 
+## Inputs
+
+- Author check:
+- Gaps:
+- Change inspect:
+- Context pack:
+- OpenSpec validate:
+
 ## Findings
 
 ### BLOCKER
@@ -79,6 +100,11 @@ pass / fail / pass-with-risk
 ## Required Fixes
 
 ## Evidence Reviewed
+
+## Archive-Guard Readiness
+
+- Ready for archive-guard: yes / no / with-risk
+- Reasons:
 
 ## Suggested Next Step
 ```
