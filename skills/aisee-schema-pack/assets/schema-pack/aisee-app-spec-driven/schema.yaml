@@ -33,7 +33,7 @@ artifacts:
 
   - id: source-map
     generates: source-map.md
-    description: "ID 路由表：绑定 SRS、UI Content、Architecture、Change Plan、change artifacts、tasks、代码和验证证据"
+    description: "ID 路由表：绑定 SRS、UI Content、Architecture、Change Plan、change artifacts 和 tasks，并索引候选影响路径与预期证据类型"
     template: source-map.md
     requires: [proposal]
     instruction: |
@@ -48,6 +48,8 @@ artifacts:
       - 明确不在范围内的上游条目
       - 声明 change-context.md、ui-contract.md、service-contract.md、data-model.md 是否适用；Required=no 必须写具体原因
       - Required=no 的 contract 不需要展开完整模板；如项目要求保留文件，只写状态和 N/A 原因即可
+      - 候选影响路径只作为索引，不写具体实现步骤
+      - 预期证据只作为索引，不写最终验证结论
       - 记录 ID 是否来自 .aisee/id-registry.json；不得让 AI 临时发明编号
       - 工具不可用时使用 {{scope}}:<TYPE>-NEW-001 临时占位符，并标注 [ID-RESERVATION-REQUIRED]
       - 保留 [ASSUMPTION]、[SPEC-GAP]、[STACK-CONTEXT-MISSING]、[STACK-DECISION-REQUIRED]、[ARCHITECTURE-DECISION-REQUIRED]、[STACK-CONFLICT] 等阻塞标签

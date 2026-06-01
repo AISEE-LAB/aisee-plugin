@@ -1,6 +1,7 @@
 # Source Map: {{change-name}}
 
 > 完整 ID 格式：`<scope>:<TYPE>-<number>`。文档中可以显示短 ID，但跨文档引用必须使用完整 ID。正式 ID 必须来自 `.aisee/id-registry.json`；未注册、废弃、拆分或合并的 ID 必须标注。工具不可用时只能使用 `{{scope}}:<TYPE>-NEW-001` 形式的临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> Source Map 只记录来源、ID、artifact 适用性、追踪关系、候选影响路径和预期证据类型；不写 contract 细节、不写实现步骤、不写最终验证结论。
 
 ## ID Registry 状态
 
@@ -74,7 +75,9 @@
 
 - 
 
-## Implementation Paths
+## Affected Paths Index
+
+> 仅记录候选影响路径和 ID 关联，供 tasks.md 和实现阶段引用；不要在这里写具体修改步骤。
 
 | Kind | Path | IDs | Mode | Notes |
 |---|---|---|---|---|
@@ -82,13 +85,15 @@
 | test | tests/... | {{scope}}:TEST-001 | add / modify / manual / N/A | |
 | docs | docs/... | {{scope}}:SPEC-001 / {{scope}}:TASK-001 | update / reference | |
 
-## Verification Evidence
+## Expected Evidence Index
+
+> 仅记录预期证据类型、路径或命令。最终验证任务、执行状态和结论写入 tasks.md、验证报告或归档记录。
 
 | Type | Path / Command | Status | IDs | Notes |
 |---|---|---|---|---|
-| openspec-validate | `openspec validate {{change-name}}` | pending / passed / failed / blocked | {{scope}}:SPEC-001 | 结果文件建议写入 docs/verification/{{change-name}}-openspec-validate.md |
-| test | docs/verification/{{change-name}}-test-results.md | pending / passed / failed / blocked | {{scope}}:TEST-001 | |
-| manual | docs/verification/{{change-name}}-manual.md | N/A / pending / passed / failed | {{scope}}:TEST-001 | |
+| openspec-validate | `openspec validate {{change-name}}` | expected / N/A | {{scope}}:SPEC-001 | 结果文件建议写入 docs/verification/{{change-name}}-openspec-validate.md |
+| test | docs/verification/{{change-name}}-test-results.md | expected / N/A | {{scope}}:TEST-001 | |
+| manual | docs/verification/{{change-name}}-manual.md | expected / N/A | {{scope}}:TEST-001 | |
 
 ## Artifact 适用性
 
