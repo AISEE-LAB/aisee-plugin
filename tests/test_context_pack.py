@@ -172,6 +172,45 @@ auth:API-001 uses src/auth/session.py and tests/auth/test_session.py.
     )
 
 
+def create_quick_fix_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: quick-fix\n")
+    write(
+        root / "openspec" / "schemas" / "quick-fix" / "schema.yaml",
+        """name: quick-fix
+version: 1
+artifacts:
+  - id: problem
+    generates: problem.md
+    template: problem.md
+    requires: []
+  - id: solution
+    generates: solution.md
+    template: solution.md
+    requires: [problem]
+  - id: tasks
+    generates: tasks.md
+    template: tasks.md
+    requires: [solution]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+""",
+    )
+    change = root / "openspec" / "changes" / "fix-login-copy"
+    write(change / ".openspec.yaml", "schema: quick-fix\n")
+    write(change / "problem.md", "# Problem\n\n登录按钮文案错误。\n")
+    write(change / "solution.md", "# Solution\n\n修改 src/auth/login_view.py，并验证 tests/auth/test_login_view.py。\n")
+    write(
+        change / "tasks.md",
+        """# Tasks
+
+- [ ] 修改 src/auth/login_view.py 的按钮文案。
+- [ ] 运行 tests/auth/test_login_view.py。
+""",
+    )
+
+
 def test_ce_work_pack_contains_execution_context(tmp_path: Path) -> None:
     create_project(tmp_path)
 
@@ -212,6 +251,25 @@ def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None
     assert "src/auth/side_effect.py" not in execution["allowed_paths"]
     assert references["unmapped_reference_paths"] == ["src/auth/side_effect.py"]
     assert "SOURCE_MAP_UNMAPPED_PATH" in {gap["code"] for gap in pack["gaps"]}
+
+
+def test_quick_fix_pack_does_not_require_source_map(tmp_path: Path) -> None:
+    create_quick_fix_project(tmp_path)
+
+    pack = build_context_pack(tmp_path, "fix-login-copy", "ce-work")
+
+    assert pack["change"]["schema"] == "quick-fix"
+    assert pack["facts"]["parsed"]["schema"]["source_map_required"] is False
+    assert pack["facts"]["parsed"]["source_map"]["status"] == "not_applicable"
+    assert "SOURCE_MAP_MISSING" not in {gap["code"] for gap in pack["gaps"]}
+    assert pack["facts"]["derived"]["implementation_references"]["source"] == "schema-artifacts"
+    assert pack["facts"]["derived"]["code_paths"] == ["src/auth/login_view.py"]
+    assert pack["facts"]["derived"]["test_paths"] == ["tests/auth/test_login_view.py"]
+    assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
+    assert pack["facts"]["derived"]["execution"]["allowed_paths"] == [
+        "src/auth/login_view.py",
+        "tests/auth/test_login_view.py",
+    ]
 
 
 def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:

@@ -12,16 +12,18 @@ from aisee_cli.output import issue, summarize_issues
 def build_verify_check(project_root: Path, change: str) -> dict[str, Any]:
     pack = build_context_pack(project_root, change, "aisee-verify")
     task_state = pack["facts"]["derived"]["task_state"]
+    tasks_required = schema_requires_tasks(pack)
+    verification_required = schema_requires_verification_evidence(pack)
     checks = pack["facts"]["derived"].get("checks", {})
     evidence = pack["evidence"]
     blockers = [normalize_gap(gap) for gap in pack["gaps"] if gap.get("severity") == "blocker"]
     warnings = [normalize_gap(gap) for gap in pack["gaps"] if gap.get("severity") == "risk"]
 
-    if task_state["total"] == 0:
+    if tasks_required and task_state["total"] == 0:
         blockers.append(issue("TASKS_MISSING", "blocker", "tasks.md has no checkbox tasks", "tasks.md"))
-    if task_state["blocked"]:
+    if tasks_required and task_state["blocked"]:
         blockers.append(issue("TASKS_BLOCKED", "blocker", "tasks.md has blocked tasks", "tasks.md"))
-    if not evidence_has_verification(evidence):
+    if verification_required and not evidence_has_verification(evidence):
         warnings.append(issue("TEST_EVIDENCE_MISSING", "risk", "no test or verification evidence was found", "tasks.md"))
     append_evidence_issues(evidence, blockers, warnings, archive_mode=False)
     warnings.extend(na_artifact_issues(pack))
@@ -48,10 +50,11 @@ def build_archive_check(project_root: Path, change: str) -> dict[str, Any]:
     verify = build_verify_check(project_root, change)
     pack = build_context_pack(project_root, change, "aisee-verify")
     task_state = pack["facts"]["derived"]["task_state"]
+    tasks_required = schema_requires_tasks(pack)
     blockers = list(verify["blockers"])
     warnings = list(verify["warnings"])
 
-    if task_state["open"]:
+    if tasks_required and task_state["open"]:
         blockers.append(issue("TASKS_OPEN", "blocker", "tasks.md still has open tasks", "tasks.md"))
     if pack["evidence"].get("openspec_validate") is None:
         warnings.append(issue("VALIDATE_EVIDENCE_MISSING", "risk", "openspec validate evidence was not found", "openspec"))
@@ -73,6 +76,19 @@ def build_archive_check(project_root: Path, change: str) -> dict[str, Any]:
             "source_context_target": "aisee-verify",
         },
     }
+
+
+def schema_requires_tasks(pack: dict[str, Any]) -> bool:
+    schema = pack["facts"]["parsed"].get("schema", {})
+    return bool(schema.get("tasks_required"))
+
+
+def schema_requires_verification_evidence(pack: dict[str, Any]) -> bool:
+    schema = pack["facts"]["parsed"].get("schema", {})
+    if not schema.get("tasks_required"):
+        return False
+    schema_name = str(schema.get("name") or "")
+    return schema_name != "quick-research"
 
 
 def normalize_gap(gap: dict[str, Any]) -> dict[str, str]:

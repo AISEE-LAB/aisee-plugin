@@ -56,26 +56,30 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
 
     root = project_root.resolve()
     change_path = root / "openspec" / "changes" / change
-    source_map = parse_source_map(change_path)
     schema_name = resolve_change_schema(root, change_path)
     schema_path = find_schema_path(root, schema_name)
     schema_info = parse_schema(schema_path) if schema_path else default_schema_info(schema_name)
     artifact_specs = schema_info["artifacts"]
+    source_map_required = schema_generates_source_map(artifact_specs)
+    source_map = parse_source_map(change_path) if source_map_required else not_applicable_source_map()
 
     artifact_entries = build_artifact_entries(change_path, artifact_specs)
     parsed_artifacts = parse_artifacts(change_path, artifact_entries)
-    source_map_text = read_text(change_path / "source-map.md")
+    source_map_text = read_text(change_path / "source-map.md") if source_map_required else ""
     tasks_text = read_text(change_path / "tasks.md")
     combined_text = collect_artifact_text(parsed_artifacts)
 
-    source_paths = sorted({item["path"] for item in source_map["implementation_paths"] if item.get("path")})
     task_paths = sorted(extract_paths(tasks_text))
     artifact_paths = sorted(extract_paths(combined_text))
     referenced_paths = sorted(set(task_paths + artifact_paths) | extract_paths(source_map_text))
+    if source_map_required:
+        source_paths = sorted({item["path"] for item in source_map["implementation_paths"] if item.get("path")})
+    else:
+        source_paths = [path for path in referenced_paths if is_execution_path(path)]
     unmapped_reference_paths = [
         path
         for path in referenced_paths
-        if is_execution_path(path) and path not in source_paths
+        if source_map_required and is_execution_path(path) and path not in source_paths
     ]
     read_paths = sorted(set(source_paths + referenced_paths))
     code_paths = [p for p in source_paths if not is_test_path(p)]
@@ -97,6 +101,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         target=target,
         id_registry=id_registry,
         source_map=source_map,
+        source_map_required=source_map_required,
         unmapped_reference_paths=unmapped_reference_paths,
     )
 
@@ -123,6 +128,8 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                     "artifacts": artifact_entries,
                     "apply_requires": schema_info.get("apply_requires", []),
                     "archive_tracks": derive_archive_tracks(schema_info),
+                    "source_map_required": source_map_required,
+                    "tasks_required": schema_requires_tasks(schema_info, artifact_specs),
                 },
                 "artifacts": parsed_artifacts,
                 "source_map": source_map,
@@ -141,6 +148,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 "code_paths": code_paths,
                 "test_paths": test_paths,
                 "implementation_references": {
+                    "source": "source-map" if source_map_required else "schema-artifacts",
                     "declared_paths": source_paths,
                     "referenced_paths": referenced_paths,
                     "unmapped_reference_paths": unmapped_reference_paths,
@@ -152,7 +160,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         },
         "generated": None,
         "gaps": gaps,
-        "guardrails": build_guardrails(target),
+        "guardrails": build_guardrails(target, source_map_required),
         "evidence": build_evidence(root, change),
         "meta": {
             "command": f"aisee context pack --change {change} --for {target} --json",
@@ -170,7 +178,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "unmapped_reference_paths": unmapped_reference_paths,
             "forbidden_scope": pack["facts"]["derived"]["scope"]["out"],
             "requires_ce_plan": requires_ce_plan,
-            "ce_plan_reason": ce_plan_reason(task_state, code_paths, test_paths, gaps) if requires_ce_plan else None,
+            "ce_plan_reason": ce_plan_reason(task_state, code_paths, test_paths, gaps, source_map_required) if requires_ce_plan else None,
         }
     elif target == "aisee-verify":
         pack["facts"]["derived"]["checks"] = {
@@ -178,7 +186,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "traceability": summarize_trace_checks(upstream_ids, produced_ids),
             "tasks": summarize_task_checks(task_state),
             "contracts": summarize_contract_checks(artifact_entries),
-            "implementation": summarize_implementation_checks(code_paths, test_paths),
+            "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
             "review_and_tests": [],
         }
         pack["facts"]["derived"]["drift_candidates"] = []
@@ -192,8 +200,8 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         }
     elif target == "ce-code-review":
         pack["facts"]["derived"]["review"] = {
-            "focus": ["implementation", "tests", "source-map", "task_state"],
-            "implementation": summarize_implementation_checks(code_paths, test_paths),
+            "focus": ["implementation", "tests", "source-map" if source_map_required else "schema-artifacts", "task_state"],
+            "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
             "tasks": summarize_task_checks(task_state),
             "evidence": pack["evidence"],
         }
@@ -306,6 +314,39 @@ def default_schema_info(schema_name: str) -> dict[str, Any]:
     }
 
 
+def schema_generates_source_map(artifact_specs: list[ArtifactSpec]) -> bool:
+    return any(
+        spec.artifact_id == "source-map" or spec.generates == "source-map.md"
+        for spec in artifact_specs
+    )
+
+
+def schema_requires_tasks(schema_info: dict[str, Any], artifact_specs: list[ArtifactSpec]) -> bool:
+    apply_requires = schema_info.get("apply_requires", [])
+    apply_tracks = schema_info.get("apply_tracks")
+    return any(
+        spec.artifact_id == "tasks" or spec.generates == "tasks.md"
+        for spec in artifact_specs
+    ) or "tasks" in apply_requires or apply_tracks == "tasks.md"
+
+
+def not_applicable_source_map() -> dict[str, Any]:
+    return {
+        "path": None,
+        "status": "not_applicable",
+        "parse_level": "not_applicable",
+        "upstream_sources": [],
+        "id_trace": [],
+        "artifact_applicability": [],
+        "implementation_paths": [],
+        "verification_evidence": [],
+        "out_of_scope": [],
+        "ids": [],
+        "paths": [],
+        "issues": [],
+    }
+
+
 def build_artifact_entries(change_path: Path, artifact_specs: list[ArtifactSpec]) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     for spec in artifact_specs:
@@ -404,6 +445,7 @@ def inspect_id_registry(root: Path, ids: list[str]) -> dict[str, Any]:
         "available": path.exists(),
         "checked": path.exists(),
         "path": rel(root, path) if path.exists() else None,
+        "queried_ids": sorted(ids),
         "registered_ids": [],
         "missing_ids": [],
         "temporary_ids": sorted([item for item in ids if "-NEW-" in item]),
@@ -517,6 +559,7 @@ def build_gaps(
     target: str,
     id_registry: dict[str, Any],
     source_map: dict[str, Any],
+    source_map_required: bool,
     unmapped_reference_paths: list[str],
 ) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
@@ -524,7 +567,8 @@ def build_gaps(
         gaps.append(gap("MISSING_CHANGE", "blocker", "Change directory does not exist", "openspec/changes"))
         return gaps
 
-    gaps.extend(source_map.get("issues", []))
+    if source_map_required:
+        gaps.extend(source_map.get("issues", []))
 
     for entry in artifact_entries:
         if entry["status"] == "missing":
@@ -540,7 +584,9 @@ def build_gaps(
                 )
             )
 
-    if not id_registry["available"]:
+    has_change_ids = bool(id_registry.get("queried_ids"))
+    id_owner_artifact = "source-map.md" if source_map_required else "schema artifacts"
+    if not id_registry["available"] and (source_map_required or has_change_ids):
         gaps.append(gap("ID_REGISTRY_GAP", "risk", ".aisee/id-registry.json is missing", ".aisee/id-registry.json"))
     elif id_registry.get("error"):
         gaps.append(gap("ID_REGISTRY_INVALID", "blocker", str(id_registry["error"]), ".aisee/id-registry.json"))
@@ -552,7 +598,7 @@ def build_gaps(
                     "ID_RESERVATION_REQUIRED",
                     "risk",
                     "Change contains temporary IDs that must be reserved before final authoring",
-                    "source-map.md",
+                    id_owner_artifact,
                     temporary_ids,
                 )
             )
@@ -563,7 +609,7 @@ def build_gaps(
                     "ID_UNREGISTERED_REFERENCE",
                     "risk",
                     "Change references IDs that are not registered in .aisee/id-registry.json",
-                    "source-map.md",
+                    id_owner_artifact,
                     missing_ids,
                 )
             )
@@ -574,7 +620,7 @@ def build_gaps(
                     "ID_INACTIVE_REFERENCE",
                     "blocker",
                     "Change references deprecated, merged, split, or removed IDs",
-                    "source-map.md",
+                    id_owner_artifact,
                     [item["id"] for item in inactive_ids],
                 )
             )
@@ -583,12 +629,18 @@ def build_gaps(
         if task_state["total"] == 0:
             gaps.append(gap("TASK_GAP", "blocker", "tasks.md has no checkbox tasks", "tasks.md"))
         if not code_paths and not test_paths:
+            owner_artifact = "source-map.md" if source_map_required else "tasks.md"
+            message = (
+                "No code or test paths were declared by source-map Implementation Paths"
+                if source_map_required
+                else "No code or test paths were referenced by schema artifacts"
+            )
             gaps.append(
                 gap(
-                    "SOURCE_MAP_GAP",
+                    "SOURCE_MAP_GAP" if source_map_required else "IMPLEMENTATION_PATHS_GAP",
                     "risk",
-                    "No code or test paths were declared by source-map Implementation Paths",
-                    "source-map.md",
+                    message,
+                    owner_artifact,
                 )
             )
         if unmapped_reference_paths:
@@ -648,7 +700,12 @@ def derive_archive_tracks(schema_info: dict[str, Any]) -> list[str]:
     tracks = schema_info.get("apply_tracks")
     if isinstance(tracks, str) and tracks:
         return [tracks]
-    return ["tasks.md", "source-map.md", "specs/**/*.md"]
+    artifact_tracks = [
+        spec.generates
+        for spec in schema_info.get("artifacts", [])
+        if isinstance(spec, ArtifactSpec) and spec.generates in {"tasks.md", "source-map.md", "specs/**/*.md"}
+    ]
+    return artifact_tracks
 
 
 def derive_scope(proposal_text: str, source_map_text: str) -> dict[str, list[str]]:
@@ -689,7 +746,7 @@ def derive_verification_requirements(tasks_text: str) -> list[str]:
     ]
 
 
-def build_guardrails(target: str) -> list[str]:
+def build_guardrails(target: str, source_map_required: bool) -> list[str]:
     common = [
         "Use the current change as the only scope entry.",
         "Do not treat generated summaries as authoritative.",
@@ -698,8 +755,11 @@ def build_guardrails(target: str) -> list[str]:
     if target == "ce-work":
         common.extend([
             "Follow tasks.md; do not create a parallel durable plan.",
-            "Use only source-map Implementation Paths for executable paths; treat other path references as gaps or follow-up findings.",
         ])
+        if source_map_required:
+            common.append("Use only source-map Implementation Paths for executable paths; treat other path references as gaps or follow-up findings.")
+        else:
+            common.append("Use executable paths explicitly referenced by current schema artifacts; treat unrelated paths as out of scope.")
     elif target == "aisee-verify":
         common.append("Diagnose consistency; do not make archive approval decisions.")
     elif target == "ce-doc-review":
@@ -841,15 +901,23 @@ def should_require_ce_plan(task_state: dict[str, Any], code_paths: list[str], te
     return not code_paths and not test_paths
 
 
-def ce_plan_reason(task_state: dict[str, Any], code_paths: list[str], test_paths: list[str], gaps: list[dict[str, Any]]) -> str:
+def ce_plan_reason(
+    task_state: dict[str, Any],
+    code_paths: list[str],
+    test_paths: list[str],
+    gaps: list[dict[str, Any]],
+    source_map_required: bool,
+) -> str:
     blocker_codes = [item["code"] for item in gaps if item["severity"] == "blocker"]
     if blocker_codes:
         return f"blocked by {', '.join(blocker_codes)}"
     if task_state["total"] == 0:
         return "tasks.md has no executable tasks"
     if not code_paths and not test_paths:
-        return "source-map Implementation Paths do not identify code or test paths"
-    return "tasks/source-map need implementation refinement"
+        if source_map_required:
+            return "source-map Implementation Paths do not identify code or test paths"
+        return "schema artifacts do not identify code or test paths"
+    return "tasks/source-map need implementation refinement" if source_map_required else "tasks/artifacts need implementation refinement"
 
 
 def summarize_artifact_checks(artifact_entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -872,8 +940,12 @@ def summarize_contract_checks(artifact_entries: list[dict[str, Any]]) -> list[di
     ]
 
 
-def summarize_implementation_checks(code_paths: list[str], test_paths: list[str]) -> list[dict[str, Any]]:
-    return [{"code_path_count": len(code_paths), "test_path_count": len(test_paths)}]
+def summarize_implementation_checks(code_paths: list[str], test_paths: list[str], source_map_required: bool) -> list[dict[str, Any]]:
+    return [{
+        "source": "source-map" if source_map_required else "schema-artifacts",
+        "code_path_count": len(code_paths),
+        "test_path_count": len(test_paths),
+    }]
 
 
 def extract_paths(text: str) -> set[str]:

@@ -184,6 +184,67 @@ apply:
     write(change / "tasks.md", "# Tasks\n\n- [x] Verify board behavior.\n")
 
 
+def create_quick_fix_project(root: Path, *, task_mark: str = "x") -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: quick-fix\n")
+    write(
+        root / "openspec" / "schemas" / "quick-fix" / "schema.yaml",
+        """name: quick-fix
+version: 1
+artifacts:
+  - id: problem
+    generates: problem.md
+    template: problem.md
+    requires: []
+  - id: solution
+    generates: solution.md
+    template: solution.md
+    requires: [problem]
+  - id: tasks
+    generates: tasks.md
+    template: tasks.md
+    requires: [solution]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+""",
+    )
+    change = root / "openspec" / "changes" / "fix-login-copy"
+    write(change / ".openspec.yaml", "schema: quick-fix\n")
+    write(change / "problem.md", "# Problem\n\n登录按钮文案错误。\n")
+    write(change / "solution.md", "# Solution\n\n修改 src/auth/login_view.py。\n")
+    write(change / "tasks.md", f"# Tasks\n\n- [{task_mark}] 修改 src/auth/login_view.py。\n- [{task_mark}] 运行 tests/auth/test_login_view.py。\n")
+
+
+def create_quick_research_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: quick-research\n")
+    write(
+        root / "openspec" / "schemas" / "quick-research" / "schema.yaml",
+        """name: quick-research
+version: 1
+artifacts:
+  - id: question
+    generates: question.md
+    template: question.md
+    requires: []
+  - id: findings
+    generates: findings.md
+    template: findings.md
+    requires: [question]
+  - id: recommendation
+    generates: recommendation.md
+    template: recommendation.md
+    requires: [findings]
+""",
+    )
+    change = root / "openspec" / "changes" / "research-cache"
+    write(change / ".openspec.yaml", "schema: quick-research\n")
+    write(change / "question.md", "# Question\n\n是否引入缓存？\n")
+    write(change / "findings.md", "# Findings\n\n官方文档和现有代码分析表明可以引入本地缓存。\n")
+    write(change / "recommendation.md", "# Recommendation\n\n有条件支持，后续另起实现 change。\n")
+
+
 def test_change_inspect_uses_current_schema_artifacts(tmp_path: Path) -> None:
     create_device_project(tmp_path)
 
@@ -285,3 +346,28 @@ def test_na_artifact_without_reason_is_verify_risk(tmp_path: Path) -> None:
 
     assert data["status"] == "risk"
     assert any(item["code"] == "NA_REASON_MISSING" for item in data["warnings"])
+
+
+def test_quick_fix_archive_check_ignores_missing_source_map(tmp_path: Path) -> None:
+    create_quick_fix_project(tmp_path, task_mark="x")
+    write(tmp_path / "docs" / "verification" / "fix-login-copy-openspec-validate.md", "passed\n")
+    write(tmp_path / "docs" / "verification" / "fix-login-copy-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "archive-check", "fix-login-copy", "--json")
+
+    assert data["status"] == "archive-ready"
+    assert "SOURCE_MAP_MISSING" not in {item["code"] for item in data["issues"]}
+    assert data["summary"]["blocker"] == 0
+
+
+def test_quick_research_verify_and_archive_do_not_require_tasks_or_tests(tmp_path: Path) -> None:
+    create_quick_research_project(tmp_path)
+    write(tmp_path / "docs" / "verification" / "research-cache-openspec-validate.md", "passed\n")
+
+    verify = run_json(tmp_path, "change", "verify-check", "research-cache", "--json")
+    archive = run_json(tmp_path, "change", "archive-check", "research-cache", "--json")
+
+    assert verify["status"] == "ready"
+    assert "TASKS_MISSING" not in {item["code"] for item in verify["issues"]}
+    assert "TEST_EVIDENCE_MISSING" not in {item["code"] for item in verify["issues"]}
+    assert archive["status"] == "archive-ready"
