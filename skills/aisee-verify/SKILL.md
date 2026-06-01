@@ -56,7 +56,7 @@ openspec validate <change>
 - `apply_tracks`：schema apply 阶段跟踪的文件，通常是 `tasks.md`。
 - `required_contracts`：仅 app/device 等 source-map schema 中 Required=yes 的按需 artifacts。
 
-若 CLI 对不生成 `source-map.md` 的 schema 报 `SOURCE_MAP_MISSING`，先标记为 tooling/schema mismatch RISK，不要直接当成 change BLOCKER；除非当前 schema 明确生成 `source-map.md`。
+若当前 schema 不生成 `source-map.md`，`source_map_required=false` 应由 CLI/context pack 直接体现；不要手工补伪 source-map。
 
 ## 输入处理规则
 

@@ -56,7 +56,7 @@ openspec archive <change>
 - `required_contracts`：仅 source-map schema 中 Required=yes 的按需 artifacts。
 - `domain_evidence`：当前 schema 特有的归档证据，如 docsite 构建/链接、infra 回滚/变更后验证、security review/test、device 验证记录。
 
-如果 CLI 对不生成 `source-map.md` 的 schema 报 `SOURCE_MAP_MISSING`，不要要求补伪 source-map；将其列为 tooling/schema mismatch，并基于当前 schema artifacts 手动判断归档风险。
+如果当前 schema 不生成 `source-map.md`，`source_map_required=false` 应由 CLI/context pack 直接体现；不要要求补伪 source-map。
 
 ## 归档前检查
 
