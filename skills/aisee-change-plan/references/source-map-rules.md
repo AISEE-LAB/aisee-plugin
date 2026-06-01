@@ -33,6 +33,8 @@
 - `data-model.md`
 - `service-contract.md`
 
+其中 `proposal.md`、`source-map.md`、`specs/**/*.md` 和 `tasks.md` 是 app 最小闭环，不通过 Required=no 跳过。上述四个 app contract 只有 Required=yes 时才需要在 change-author 阶段展开；Required=no 必须写具体原因。
+
 ## Device Schema Seed
 
 适用于 `aisee-device-spec-driven`：

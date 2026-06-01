@@ -28,6 +28,16 @@ PATH_PATTERN = re.compile(
     r"/[A-Za-z0-9_./@:+-]+)"
 )
 CHECKBOX_PATTERN = re.compile(r"^\s*-\s+\[(?P<mark>[ xX~-])\]\s*(?P<title>.*)$")
+OPTIONAL_APP_ARTIFACTS = {
+    "change-context",
+    "change-context.md",
+    "ui-contract",
+    "ui-contract.md",
+    "service-contract",
+    "service-contract.md",
+    "data-model",
+    "data-model.md",
+}
 
 
 @dataclass(frozen=True)
@@ -518,6 +528,8 @@ def build_gaps(
 
     for entry in artifact_entries:
         if entry["status"] == "missing":
+            if artifact_not_required(entry, source_map):
+                continue
             severity = "blocker" if entry["id"] in {"proposal", "source-map", "tasks"} else "risk"
             gaps.append(
                 gap(
@@ -603,6 +615,22 @@ def gap(code: str, severity: str, message: str, owner_artifact: str, related_ids
     }
 
 
+def artifact_not_required(entry: dict[str, Any], source_map: dict[str, Any]) -> bool:
+    artifact_id = str(entry.get("id") or "")
+    generates = str(entry.get("generates") or "")
+    if artifact_id not in OPTIONAL_APP_ARTIFACTS and generates not in OPTIONAL_APP_ARTIFACTS:
+        return False
+    for row in source_map.get("artifact_applicability", []):
+        if not isinstance(row, dict):
+            continue
+        artifact = str(row.get("artifact") or "")
+        if artifact not in {artifact_id, generates}:
+            continue
+        if row.get("required") == "no" and str(row.get("reason") or "").strip():
+            return True
+    return False
+
+
 def build_read_order(root: Path, change_path: Path, artifact_entries: list[dict[str, Any]], paths: list[str]) -> list[str]:
     read_order: list[str] = []
     agents = root / "AGENTS.md"
@@ -670,7 +698,7 @@ def build_guardrails(target: str) -> list[str]:
     if target == "ce-work":
         common.extend([
             "Follow tasks.md; do not create a parallel durable plan.",
-            "Use only source-map/tasks/contracts paths unless reporting follow-up findings.",
+            "Use only source-map Implementation Paths for executable paths; treat other path references as gaps or follow-up findings.",
         ])
     elif target == "aisee-verify":
         common.append("Diagnose consistency; do not make archive approval decisions.")
@@ -820,7 +848,7 @@ def ce_plan_reason(task_state: dict[str, Any], code_paths: list[str], test_paths
     if task_state["total"] == 0:
         return "tasks.md has no executable tasks"
     if not code_paths and not test_paths:
-        return "source-map/tasks/contracts do not identify code or test paths"
+        return "source-map Implementation Paths do not identify code or test paths"
     return "tasks/source-map need implementation refinement"
 
 

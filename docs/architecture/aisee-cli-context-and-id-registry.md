@@ -304,13 +304,11 @@ aisee change inspect add-auth-login --json
 解析内容：
 
 - `proposal.md`
-- `design.md`
+- `source-map.md`
 - `specs/**/spec.md`
 - `tasks.md`
-- `source-map.md`
-- `ui-contract.md`
-- `service-contract.md`
-- `data-model.md`
+- app schema 中 Required=yes 的 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md`
+- 含 `design.md` 的 schema 中的 `design.md`
 - `hardware-contract.md`
 - `firmware-contract.md`
 - `runtime-contract.md`
@@ -612,7 +610,7 @@ ce:work
 ```text
 需求 / 规范阶段:
   ce-doc-review
-  审核 SRS、design.md、contracts、tasks.md
+  审核 SRS、source-map、specs、tasks 和 Required=yes 的 contracts
 
 实现阶段:
   ce-work

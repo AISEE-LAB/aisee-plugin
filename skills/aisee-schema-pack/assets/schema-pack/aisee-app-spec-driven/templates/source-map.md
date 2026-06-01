@@ -20,7 +20,7 @@
 |---|---|---|
 | status | ready / needs-work / blocked | |
 | schema.valid | true / false | |
-| missing_artifacts |  | 按 artifact_order 补齐 |
+| missing_artifacts |  | 按 artifact_order 补齐；Required=no 且有原因的按需 artifact 不应列入 |
 | blockers |  | 停止 author，先处理 |
 | warnings |  | 写入阻塞项 / 假设 |
 | next_actions |  | 执行后回填本文 |
@@ -92,6 +92,10 @@
 
 ## Artifact 适用性
 
+> 最小闭环为 `proposal.md`、`source-map.md`、`specs/**/*.md` 和 `tasks.md`。
+> 下列 artifacts 只在本 change 需要对应契约时 Required=yes。
+> Required=no 时必须写具体 N/A 原因；可不展开对应完整模板。
+
 | Artifact | Required | 依据上游 ID | 原因 / N/A 说明 | 相关约束转交 |
 |---|---:|---|---|---|
 | change-context.md | yes / no | {{scope}}:ARCH-001 / {{scope}}:DEC-001 / N/A | | tasks.md / N/A |
@@ -113,11 +117,11 @@
 ## 追踪规则
 
 - specs 必须覆盖本 change 的全部 FR。
-- change-context.md 必须覆盖 Required=yes 的 ARCH / DEC / CONSTRAINT / RISK。
-- ui-contract.md 必须覆盖 Required=yes 的 PAGE / FLOW。
-- data-model.md 必须覆盖 Required=yes 的 DATA。
-- service-contract.md 必须覆盖 Required=yes 的 API / backend service / async job / CLI / integration，并满足 ui-contract.md 的前端数据需求。
+- change-context.md 仅在 Required=yes 时覆盖 ARCH / DEC / CONSTRAINT / RISK。
+- ui-contract.md 仅在 Required=yes 时覆盖 PAGE / FLOW。
+- data-model.md 仅在 Required=yes 时覆盖 DATA。
+- service-contract.md 仅在 Required=yes 时覆盖 API / backend service / async job / CLI / integration，并满足适用的前端数据需求。
 - 每个新增 ID 激活后必须回填到“本 Change 产出 ID”并记录 owner artifact。
 - tasks.md 内新增 TASK / TEST ID 前必须先 reserve；无法 reserve 时只使用临时 ID。
 - tasks.md 生成前必须重新运行 `aisee change author-check {{change-name}} --json`，确认 blocker 已清除或明确保留。
-- tasks.md 生成前必须确认上述追踪关系闭合。
+- tasks.md 生成前必须确认 Required=yes 的追踪关系闭合；Required=no 的 artifact 必须有明确原因。

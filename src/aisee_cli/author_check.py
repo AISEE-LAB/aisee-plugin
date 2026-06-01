@@ -6,7 +6,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.context_pack import build_context_pack
+from aisee_cli.context_pack import artifact_not_required, build_context_pack
 from aisee_cli.id_registry import load_registry, lookup_entry, registry_path
 
 
@@ -23,7 +23,12 @@ def build_author_check(project_root: Path, change: str) -> dict[str, Any]:
 
     schema_issues = inspect_schema(schema, artifacts, root)
     artifact_order = build_artifact_order(artifacts)
-    missing_artifacts = [artifact_summary(item) for item in artifacts if item.get("status") == "missing"]
+    source_map = parsed.get("source_map", {})
+    missing_artifacts = [
+        artifact_summary(item)
+        for item in artifacts
+        if item.get("status") == "missing" and not artifact_not_required(item, source_map)
+    ]
     id_actions = build_id_actions(id_registry, registry_entries)
     blockers = build_blockers(pack["gaps"], schema_issues)
     warnings = build_warnings(pack["gaps"], schema_issues)

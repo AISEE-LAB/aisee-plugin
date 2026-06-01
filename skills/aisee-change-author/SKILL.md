@@ -35,7 +35,7 @@ aisee change author-check <change> --json
 
 - `status=blocked`：停止 author，向用户列出 `blockers`；不要创建或修改 artifacts。
 - `schema.valid=false`：停止 author；不得自造 schema 未声明的 artifact 或模板。
-- `missing_artifacts` 非空：只按 `artifact_order` 和 schema templates 补齐缺失项；不重排 schema。
+- `missing_artifacts` 非空：只按 `artifact_order` 和 schema templates 补齐缺失项；不重排 schema。source-map.md 中 Required=no 且有原因的按需 artifact 不应进入补齐队列。
 - `ids.actions.reserve` 非空：先运行对应 `aisee id reserve`，再写入正式 ID。
 - `ids.actions.activate` 非空：写入 artifact 后运行 `aisee id activate`。
 - `ids.registry.missing / inactive` 非空：先修复 registry 或替换引用；不要把断链 ID 写入新的 artifact。
@@ -54,9 +54,9 @@ author-check -> blocker / schema / ID preflight
 proposal.md -> change scope from confirmed change-plan
 source-map.md -> upstream IDs + produced IDs + artifact applicability
 specs/**/*.md -> observable behavior and acceptance
-change-context.md -> app architecture context author
+change-context.md -> app architecture context author, only when Required=yes
 design.md -> only when schema generates design.md, use aisee:change-design
-ui-contract.md / service-contract.md / data-model.md -> app domain author
+ui-contract.md / service-contract.md / data-model.md -> app domain author, only when Required=yes
 hardware-contract.md / firmware-contract.md / runtime-contract.md / verification-contract.md -> device domain author
 tasks.md -> single durable task list + verification evidence requirements
 final check -> aisee change author-check + aisee gaps
@@ -90,7 +90,9 @@ final check -> aisee change author-check + aisee gaps
 
 - 以 `author-check.artifact_order` 和当前 schema 的 `artifacts[].requires` 为唯一生成顺序来源。
 - 不要因为某个模板常见就创建 schema 未声明的 artifact。
-- 不要跳过 schema 声明的 artifact；不适用时按模板写 N/A 原因。
+- 不要创建 schema 未声明的 artifact。
+- 对 app schema 的按需 artifacts，先读取 source-map.md 的 Artifact 适用性；Required=no 且有原因时不展开完整模板。
+- 如果项目要求保留 N/A 文件，只写状态和 N/A 原因；不要为了填模板而复制无关表格。
 - 生成每个 artifact 前，读取它的 `instruction` 和 `template`。
 - 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`；优先引用 `author-check.schema.issues`。
 
@@ -118,17 +120,24 @@ final check -> aisee change author-check + aisee gaps
 
 ## App Schema v2 顺序
 
-`aisee-app-spec-driven` v2 使用以下顺序：
+`aisee-app-spec-driven` v2 使用同一个 schema，但分为最小闭环和按需 artifacts。
+
+最小闭环：
 
 ```text
 proposal.md
 source-map.md
 specs/**/*.md
+tasks.md
+```
+
+按需 artifacts：
+
+```text
 change-context.md
 ui-contract.md
 data-model.md
 service-contract.md
-tasks.md
 ```
 
 生成规则：
@@ -136,11 +145,11 @@ tasks.md
 - `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用完整 ID，不复制上游全文。
 - `source-map.md`：先建立上游输入 ID、产出 ID、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
 - `specs/**/*.md`：只写用户可观察行为和验收场景，覆盖 FR / NFR / RULE / FLOW / STATE。
-- `change-context.md`：只承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture。
-- `ui-contract.md`：只在涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
-- `data-model.md`：只在涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
-- `service-contract.md`：只在涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
-- `tasks.md`：最后生成，是唯一长期任务清单；任务必须追踪到 specs、change-context 和适用 contracts。
+- `change-context.md`：只在 Required=yes 时承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture。
+- `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
+- `data-model.md`：只在 Required=yes 且涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
+- `service-contract.md`：只在 Required=yes 且涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
+- `tasks.md`：最后生成，是唯一长期任务清单；任务必须追踪到 specs、source-map 和 Required=yes 的适用 contracts。
 
 ## Artifact 适用性判断
 
@@ -153,11 +162,13 @@ tasks.md
 | `data-model.md` | 持久化实体、字段、表、关系、索引、迁移、审计、敏感数据 | 无持久化数据变化，且不改变数据生命周期 |
 | `service-contract.md` | API、后端能力、异步任务、定时任务、CLI、外部集成、权限、错误语义 | UI-only 静态展示或纯内容变更，无服务能力变化 |
 
-N/A artifact 不能留空，必须写：
+Required=no 的 artifact 不能留空原因。必须在 source-map.md 写：
 
 - N/A 原因。
 - 哪些上游 ID 使它不适用。
 - 是否有需要其他 artifact 承接的相关约束。
+
+如果同时创建 N/A 文件，文件只需要包含状态和 N/A 原因，不需要填完整模板。
 
 ## ID Preflight
 

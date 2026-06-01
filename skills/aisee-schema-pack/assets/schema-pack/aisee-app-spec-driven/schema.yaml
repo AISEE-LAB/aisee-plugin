@@ -6,8 +6,10 @@ description: |
   单个 OpenSpec change 内可实现、可验证、可追踪的 artifacts。
   与官方 spec-driven 的区别：增加 source-map.md 作为 ID 路由表，增加 change-context.md 承接
   本 change 相关架构约束，并按需生成 ui-contract.md、service-contract.md、data-model.md。
-  不适用的 contract artifact 必须写 N/A 原因，避免前端-only、后端-only、CLI-only 或 job-only
-  change 被无效流程拖慢。
+  最小闭环是 proposal.md、source-map.md、specs/**/*.md 和 tasks.md。
+  change-context.md、ui-contract.md、service-contract.md、data-model.md 是按需 artifacts；
+  source-map.md 的 Artifact 适用性表明确 Required=no 且写明原因时，可以不展开对应 contract。
+  这避免前端-only、后端-only、CLI-only、job-only 或极小 change 被无效流程拖慢。
   正式 ID 必须来自 .aisee/id-registry.json。AI 不得临时发明正式 ID；工具不可用时只能使用
   {{scope}}:<TYPE>-NEW-001 形式的临时占位符并标注 [ID-RESERVATION-REQUIRED]。
   创建时间：2026-05-24
@@ -44,7 +46,8 @@ artifacts:
       - 映射上游输入 ID：FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK
       - 映射本 change 产出 ID：SPEC / API / DATA / TASK / TEST
       - 明确不在范围内的上游条目
-      - 声明 change-context.md、ui-contract.md、service-contract.md、data-model.md 是否适用
+      - 声明 change-context.md、ui-contract.md、service-contract.md、data-model.md 是否适用；Required=no 必须写具体原因
+      - Required=no 的 contract 不需要展开完整模板；如项目要求保留文件，只写状态和 N/A 原因即可
       - 记录 ID 是否来自 .aisee/id-registry.json；不得让 AI 临时发明编号
       - 工具不可用时使用 {{scope}}:<TYPE>-NEW-001 临时占位符，并标注 [ID-RESERVATION-REQUIRED]
       - 保留 [ASSUMPTION]、[SPEC-GAP]、[STACK-CONTEXT-MISSING]、[STACK-DECISION-REQUIRED]、[ARCHITECTURE-DECISION-REQUIRED]、[STACK-CONFLICT] 等阻塞标签
@@ -66,9 +69,11 @@ artifacts:
     generates: change-context.md
     description: "Change 技术上下文：本 change 如何承接 Architecture 的架构边界、决策、约束和风险"
     template: change-context.md
-    requires: [specs]
+    requires: [source-map, specs]
     instruction: |
-      change-context.md 必须只描述本 change 相关的技术上下文：
+      change-context.md 仅在涉及 Architecture 决策、技术约束、平台限制、集成边界或风险时适用。
+      如果 source-map.md 标为 Required=no，可不展开完整模板；需要保留文件时只写状态和 N/A 原因。
+      适用时必须只描述本 change 相关的技术上下文：
       - 读取 proposal.md、source-map.md 和 specs
       - 承接 Architecture 中与本 change 相关的 ARCH / DEC / CONSTRAINT / RISK
       - 新增局部 DEC / CONSTRAINT / RISK ID 前必须通过 ID registry 预留
@@ -80,10 +85,10 @@ artifacts:
     generates: ui-contract.md
     description: "UI 合同：页面内容结构、交互状态、权限可见性和前端数据需求"
     template: ui-contract.md
-    requires: [source-map, specs, change-context]
+    requires: [source-map, specs]
     instruction: |
       ui-contract.md 仅在涉及页面、弹窗、交互、表单、权限可见性或前端数据需求时适用。
-      如果不适用，必须写 N/A 原因。
+      如果 source-map.md 标为 Required=no，可不展开完整模板；需要保留文件时只写状态和 N/A 原因。
       适用时必须覆盖：
       - 页面 / 弹窗 / 全局入口清单
       - 新增 PAGE / FLOW / STATE ID 前必须通过 ID registry 预留
@@ -97,10 +102,10 @@ artifacts:
     generates: data-model.md
     description: "数据模型合同：实体、表、字段、关系、约束、索引、迁移"
     template: data-model.md
-    requires: [source-map, specs, change-context]
+    requires: [source-map, specs]
     instruction: |
       data-model.md 仅在新增或修改持久化数据、字段、表、关系、索引、迁移时适用。
-      如果不适用，必须写 N/A 原因。
+      如果 source-map.md 标为 Required=no，可不展开完整模板；需要保留文件时只写状态和 N/A 原因。
       适用时必须覆盖：
       - 核心实体与表
       - 新增 DATA ID 前必须通过 ID registry 预留
@@ -113,10 +118,10 @@ artifacts:
     generates: service-contract.md
     description: "服务合同：API、后端能力、异步任务、CLI/工具命令、外部集成、权限、错误和可观测性"
     template: service-contract.md
-    requires: [source-map, specs, change-context]
+    requires: [source-map, specs]
     instruction: |
       service-contract.md 仅在涉及接口、后端能力、服务边界、异步任务、CLI/工具命令或外部集成时适用。
-      如果不适用，必须写 N/A 原因。
+      如果 source-map.md 标为 Required=no，可不展开完整模板；需要保留文件时只写状态和 N/A 原因。
       适用时必须覆盖：
       - API / backend service / async job / scheduled job / CLI or tool command / integration endpoint
       - 新增 API ID 前必须通过 ID registry 预留
@@ -130,16 +135,17 @@ artifacts:
     generates: tasks.md
     description: "实现清单：从 specs、change-context 和 contract artifacts 生成可执行任务和验证证据要求"
     template: tasks.md
-    requires: [specs, change-context, ui-contract, data-model, service-contract]
+    requires: [source-map, specs]
     instruction: |
-      tasks.md 必须先做一致性检查，再列实现任务：
+      tasks.md 必须先做最小闭环一致性检查，再列实现任务：
       - 生成前必须运行或记录 `aisee change author-check <change> --json`
       - author-check 的 blocker 必须清除后才能生成可执行任务
       - 每个 FR 必须能追踪到 specs
-      - 涉及页面的 FR 必须追踪到 ui-contract.md
-      - 涉及接口的 FR 必须追踪到 service-contract.md
-      - 涉及持久化的 FR 必须追踪到 data-model.md
-      - 涉及架构约束或风险的任务必须追踪到 change-context.md
+      - 只检查 source-map.md 中 Required=yes 的按需 artifacts；Required=no 且有原因的不阻塞 tasks
+      - 涉及页面的 FR 必须追踪到 ui-contract.md，除非 ui-contract.md 在 source-map.md 中 Required=no 且原因明确
+      - 涉及接口的 FR 必须追踪到 service-contract.md，除非 service-contract.md 在 source-map.md 中 Required=no 且原因明确
+      - 涉及持久化的 FR 必须追踪到 data-model.md，除非 data-model.md 在 source-map.md 中 Required=no 且原因明确
+      - 涉及架构约束或风险的任务必须追踪到 change-context.md，除非 change-context.md 在 source-map.md 中 Required=no 且原因明确
       - 每个实现或验证任务必须有 TASK ID，验证项必须能关联 TEST ID 或验证证据
       - 新增 TASK / TEST ID 前必须通过 ID registry 预留
       - 不适用 artifact 必须已有 N/A 原因

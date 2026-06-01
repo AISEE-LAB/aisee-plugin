@@ -3,14 +3,14 @@
 ## 生成前一致性检查
 
 - [ ] 已运行 `aisee change author-check {{change-name}} --json`，且无 blocker。
-- [ ] `author-check.missing_artifacts` 已处理，所有 N/A artifact 已写明原因。
+- [ ] `author-check.missing_artifacts` 已处理；source-map.md 中 Required=no 的 artifact 已写明原因。
 - [ ] `author-check.ids.actions.reserve / activate` 已执行，或已在 source-map.md 标注 `[ID-RESERVATION-REQUIRED]`。
 - [ ] 每个 FR 已映射到 specs。
-- [ ] Architecture 相关 ARCH / DEC / CONSTRAINT / RISK 已映射到 change-context.md。
-- [ ] 涉及页面的 FR 已映射到 ui-contract.md。
-- [ ] 涉及接口的 FR 已映射到 service-contract.md。
-- [ ] 涉及持久化的 FR 已映射到 data-model.md。
-- [ ] N/A artifact 已写明原因。
+- [ ] Required=yes 的 Architecture 相关 ARCH / DEC / CONSTRAINT / RISK 已映射到 change-context.md。
+- [ ] Required=yes 的页面 / 交互 / 前端数据需求已映射到 ui-contract.md。
+- [ ] Required=yes 的接口 / 后端 / CLI / job / 集成能力已映射到 service-contract.md。
+- [ ] Required=yes 的持久化数据变化已映射到 data-model.md。
+- [ ] Required=no 的按需 artifact 已在 source-map.md 写明 N/A 原因。
 - [ ] source-map.md 已回填新增 SPEC / API / DATA / TASK / TEST ID 的 owner artifact。
 - [ ] source-map.md 的阻塞项已处理或明确保留风险。
 - [ ] 新增 TASK / TEST ID 已通过 `aisee id reserve` 预留，或已标注 `[ID-RESERVATION-REQUIRED]`。
@@ -19,7 +19,7 @@
 
 - [ ] 1.1 确认 source-map.md 覆盖范围与 proposal.md 一致。
 - [ ] 1.2 确认 specs 覆盖全部本 change 的 FR。
-- [ ] 1.3 确认 change-context.md 的架构约束和风险没有未处理阻塞项。
+- [ ] 1.3 确认 source-map.md 中 Required=yes 的 contracts 已覆盖，Required=no 的 N/A 原因明确。
 
 ## 2. 实现
 

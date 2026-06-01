@@ -26,7 +26,7 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 
 ## 归档前检查
 
-- `aisee change author-check <change> --json` 无 blocker，且 `missing_artifacts` 已处理。
+- `aisee change author-check <change> --json` 无 blocker，且 `missing_artifacts` 已处理；Required=no 的按需 artifact 必须在 `source-map.md` 有明确原因。
 - `aisee change archive-check <change> --json` 无 blocker，或所有 risk 已有接受理由。
 - `aisee gaps --change <change> --json` 为 clear，或 risk 已有接受理由。
 - `aisee context pack --change <change> --for aisee-verify --json` 可生成，且无 archive 阻断项。
@@ -35,7 +35,7 @@ description: OpenSpec archive 前的轻量门禁。用于判断当前 change 是
 - `tasks.md` 的实现任务和验证任务已完成或明确标注 N/A / accepted risk。
 - `source-map.md` 的 ID、代码路径、测试路径和验证证据没有断链。
 - `openspec validate <change>` 已通过，且没有未处理 spec drift finding。
-- app schema 的 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 或 device schema 的 `design.md` / contracts 已有 metadata/evidence 可追踪；业务语义由 OpenSpec validate、review 和人工确认负责。
+- app schema 中 Required=yes 的 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 或 device schema 的 `design.md` / contracts 已有 metadata/evidence 可追踪；Required=no 的 app artifact 以 `source-map.md` N/A 原因为准。业务语义由 OpenSpec validate、review 和人工确认负责。
 - CE P0/P1 review 结果已修复或记录接受理由。
 - 测试、人工验证、截图、日志或设备验证证据已记录在 `tasks.md` 或 schema 指定位置。
 - `aisee change archive-check` 中未关闭 P0/P1、failed validate、failed test evidence 必须视为 blocker。

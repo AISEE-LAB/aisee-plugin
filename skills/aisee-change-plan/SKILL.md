@@ -5,7 +5,7 @@ description: 将已确认的 SRS、UI 内容规格、设计规范、技术架构
 
 # aisee:change-plan — OpenSpec Change 边界规划
 
-将已确认需求映射为边界清晰、可独立交付的 OpenSpec changes。每个输出 change 都应足够小，可以用 `/opsx:new` 创建，并在实现前按所选 schema 的 artifact 顺序补齐内容。对于 app schema v2，通常会包含 `source-map.md`、`specs/`、`change-context.md`、contract artifacts 和 `tasks.md`；device schema 可能包含 `design.md` 或设备侧 contracts；轻量 schema 可能使用不同 artifacts。
+将已确认需求映射为边界清晰、可独立交付的 OpenSpec changes。每个输出 change 都应足够小，可以用 `/opsx:new` 创建，并在实现前按所选 schema 的 artifact 顺序补齐内容。对于 app schema v2，最小闭环是 `proposal.md`、`source-map.md`、`specs/` 和 `tasks.md`；`change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 只在本 change 需要对应契约时 Required=yes。device schema 可能包含 `design.md` 或设备侧 contracts；轻量 schema 可能使用不同 artifacts。
 
 `aisee:change-plan` 不负责业务模块划分。SRS 的模块回答“业务上有哪些模块”，本技能回答“哪些 FR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 应放进同一个可独立交付的 OpenSpec change”。
 

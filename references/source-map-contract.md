@@ -50,6 +50,8 @@ Rules:
 - `Required` 使用 `yes / no`。
 - `Required=no` 时必须写 `Reason`。
 - app 和 device 可以列不同 artifacts。
+- 对 app schema，`proposal.md`、`source-map.md`、`specs/**/*.md`、`tasks.md` 是最小闭环；`change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 按本表 Required=yes/no 决定是否展开。
+- `Required=no` 且有原因时，CLI 不应把缺失的按需 artifact 报为 missing artifact。
 
 ### Implementation Paths
 
