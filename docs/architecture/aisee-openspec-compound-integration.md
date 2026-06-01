@@ -49,7 +49,6 @@ aisee-plugin/
     aisee-spec-migrate/
     aisee-reflect/
     aisee-assets/
-    aisee-change-design/
     aisee-design-assets/
     aisee-svg-assets/
     aisee-image-object/
@@ -259,29 +258,11 @@ aisee:image-object
 
 OpenSpec change 只通过 `ui-contract.md`、`source-map.md` 和 `tasks.md` 引用资产路径和验收约束，不复制整份 StyleSpec 或素材说明。
 
-### 保留 change-design 作为 artifact author
+### 删除 change-design，统一由 change-author 编排
 
-候选来源：
+不要保留独立 `aisee:change-design`。`design.md` 不再是 App/Web change 的默认产物；只有当前 schema 明确生成 `design.md` 时，`aisee:change-author` 才按该 schema 的官方模板直接补齐对应 artifact。
 
-- `aisee-change-plan`
-- `aisee-change-design`
-
-不要让两个 skill 同时负责 change 规划。更清晰的拆法是：
-
-- `aisee:change-plan` 只负责“拆哪些 OpenSpec changes”。
-- `aisee:change-author` 负责“为每个 change 生成 OpenSpec artifacts 初稿”。
-- `aisee:change-design` 只负责“当 schema 明确包含 `design.md` 时，生成、补齐或审查 `design.md`”。
-
-`aisee:change-design` 不应废弃。它现有的价值是：
-
-- 必须读取当前 schema。
-- 必须确认 schema 包含 `design.md` artifact。
-- 必须使用官方 `design.md` 模板。
-- 不得自造 `design.md` 顶层结构。
-- 不得直接生成 specs。
-- 不得替代 tasks。
-
-因此它应成为 `aisee:change-author` 的专用子阶段或 artifact author：
+这样可以避免弱 skill 引入旧 OpenSpec `design.md` 默认流程，也避免和 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 的边界重叠。
 
 ```text
 aisee:change-author
@@ -290,7 +271,7 @@ aisee:change-author
   ├─ specs/**/spec.md
   ├─ tasks.md
   ├─ change-context.md    -> App/Web schema Required=yes 时承接 Architecture 的局部上下文
-  ├─ design.md            -> 仅当 schema 明确包含 design.md 时调用 / 复用 aisee:change-design
+  ├─ design.md            -> 仅当 schema 明确包含 design.md 时按 schema 模板直接生成
   ├─ ui-contract.md       -> App/Web schema Required=yes 时生成
   ├─ service-contract.md  -> App/Web schema Required=yes 时生成
   ├─ data-model.md        -> App/Web schema Required=yes 时生成
@@ -439,14 +420,14 @@ archive-ready
 
 把 `aisee:change-plan` 的结果转成 OpenSpec change artifacts 初稿。
 
-它是 OpenSpec change 产物编排器，不是单个 artifact 的全部实现者。它应读取 schema，判断需要哪些 artifacts，再调用或复用对应的专用 author：
+它是 OpenSpec change 产物编排器。它应读取 schema，判断需要哪些 artifacts，再按 schema 模板直接生成或补齐：
 
 ```text
 change-context.md
   -> app architecture context author
 
 design.md
-  -> 仅当当前 schema 明确包含 design.md 时调用 aisee:change-design
+  -> 仅当当前 schema 明确包含 design.md 时按 schema 模板直接补齐
 
 ui-contract.md / service-contract.md / data-model.md
   -> app domain author
@@ -979,7 +960,7 @@ openspec archive
 ### V3：OpenSpec Authoring
 
 - 新增 `aisee:change-author`。
-- 保留 `aisee:change-design`，并纳入 `change-author` 的 design artifact 子阶段。
+- 删除独立 `aisee:change-design`，由 `aisee:change-author` 在 schema 明确生成 `design.md` 时直接按模板补齐。
 - 按 schema 生成 artifacts 初稿。
 - 增加 artifact DAG 和 source-map 检查。
 - 要求所有上游引用通过 ID 和 source-map 串联。

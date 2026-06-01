@@ -1,6 +1,6 @@
 ---
 name: aisee:change-author
-description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifacts 初稿。用于已确认 change 的 author preflight，并按当前 schema 编排 proposal、source-map、specs、tasks、quick-fix、research、docsite、infra、app 或 device contracts。必须先运行 aisee change author-check；不拆 change 边界、不重新选择 schema、不写代码；仅当当前 schema 明确包含 design.md 时才调用 aisee:change-design。
+description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifacts 初稿。用于已确认 change 的 author preflight，并按当前 schema 编排 proposal、source-map、specs、tasks、quick-fix、research、docsite、infra、app 或 device contracts。必须先运行 aisee change author-check；不拆 change 边界、不重新选择 schema、不写代码；仅当当前 schema 明确包含 design.md 时才按 schema 模板补齐 design artifact。
 ---
 
 # aisee:change-author
@@ -15,7 +15,7 @@ description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifac
 - 当 schema 生成 `source-map.md` 时，通过 ID 和 `source-map.md` 串联上游产物、spec、tasks、代码路径和验证。
 - 当 schema 不生成 `source-map.md` 时，不伪造 source-map；按 schema artifacts 自身承载问题、方案、调研、文档或运维信息。
 - 需要新增正式 ID 时，先通过 `aisee id reserve` 获取；写入后用 `aisee id activate` 激活。
-- 仅当 schema 明确包含 `design.md` 时，调用或复用 `aisee:change-design` 规则。
+- 仅当 schema 明确包含 `design.md` 时，按该 schema 的官方模板直接补齐 design artifact；不要创建独立 design skill 流程。
 
 不负责：
 
@@ -58,7 +58,7 @@ proposal.md -> change scope from confirmed change-plan
 source-map.md -> only when schema generates it; upstream IDs + produced IDs + artifact applicability
 specs/**/*.md -> only when schema generates it; observable behavior and acceptance
 change-context.md -> app architecture context author, only when Required=yes
-design.md -> only when schema generates design.md, use aisee:change-design
+design.md -> only when schema generates design.md, author directly from schema template
 ui-contract.md / service-contract.md / data-model.md -> app domain author, only when Required=yes
 hardware-contract.md / firmware-contract.md / runtime-contract.md / verification-contract.md -> device domain author, when schema generates them
 quick-fix artifacts -> problem.md / solution.md / tasks.md
