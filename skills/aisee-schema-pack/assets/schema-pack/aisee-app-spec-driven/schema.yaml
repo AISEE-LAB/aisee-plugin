@@ -111,9 +111,11 @@ artifacts:
       适用时必须覆盖：
       - 核心实体与表
       - 新增 DATA ID 前必须通过 ID registry 预留
+      - Existing / Changed / New / Deprecated / Unknown 的数据变更范围；Existing 只引用来源，不重写完整数据模型
       - 字段、类型、必填、默认值、约束和说明
       - 关系、唯一约束、索引、数据迁移、回滚和兼容策略
       - 数据所有权、删除/归档、审计字段和敏感数据处理
+      - 本 change 的数据验收证据要求，包括字段约束、兼容回滚、查询索引和敏感数据处理
       - FR / API / CONSTRAINT / RISK 的追踪关系
 
   - id: service-contract
@@ -127,9 +129,12 @@ artifacts:
       适用时必须覆盖：
       - API / backend service / async job / scheduled job / CLI or tool command / integration endpoint
       - 新增 API ID 前必须通过 ID registry 预留
+      - Existing / Changed / New / Deprecated / Unknown 的服务变更范围；Existing 只引用来源，不重写完整契约
       - 请求响应、命令参数、权限、错误、幂等、分页、排序、过滤、重试、超时必须明确
-      - 业务逻辑、状态流转、校验规则、异步任务和通知必须可测试
+      - 业务逻辑、状态流转、校验规则、异步任务和通知必须引用 specs / RULE，不复制需求全文
+      - 数据读写、事务、一致性和失败处理必须引用 data-model.md
       - 可观测性、审计、日志、指标和告警要求必须明确
+      - 本 change 的服务验收证据要求，包括契约完整性、权限错误、数据一致性、幂等重试和可观测性
       - 引用 ui-contract.md 的前端数据需求和 data-model.md 的数据对象时必须保持追踪闭合
       - 不要脱离 source-map.md 或 data-model.md 自造字段或状态
 
