@@ -423,7 +423,7 @@ doc-reviewed
 = CE 文档审核已完成，P0/P1 已处理或接受
 
 implementation-ready
-= validate 通过，tasks/source-map 足够清楚，可以 ce-work
+= validate 通过，当前 schema apply tracks 和 implementation paths 足够清楚，可以 ce-work
 
 implemented
 = 代码已完成，等待 review/test/verify
@@ -603,10 +603,10 @@ aisee:change-plan
   -> 通常不使用 ce-plan；可选 ce-doc-review 审查 change 拆分是否合理
 
 aisee:change-author
-  -> 强烈建议 ce-doc-review，审核 proposal/design/spec/tasks/contracts/source-map 一致性
+  -> 强烈建议 ce-doc-review，审核当前 schema artifacts、apply tracks、contracts 和 source-map（如适用）一致性
 
 aisee:implementation-bridge
-  -> ce-work；tasks/source-map 不清楚时，才按需 ce-plan 并回写
+  -> ce-work；apply tracks 或 implementation paths 不清楚时，才按需 ce-plan 并回写
 
 aisee:verify
   -> 消费 CE review/test/debug 结果

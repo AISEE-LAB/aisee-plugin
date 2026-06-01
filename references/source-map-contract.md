@@ -6,7 +6,7 @@
 
 Aisee CLI 只结构化解析 `source-map.md`，不把其它 OpenSpec artifacts 变成业务语义 parser。
 
-`source-map.md` 可以按 app、device、infra 或 quick-fix 使用不同内容，但应尽量保留以下最小表格。缺少表格时，CLI 必须降级为 L0 metadata scan，不得失败或猜测自由文本语义。
+`source-map.md` 只适用于当前 schema 明确生成 source-map 的 change，可以按 app、device 或其它 source-map schema 使用不同内容，但应尽量保留以下最小表格。缺少表格时，CLI 必须降级为 L0 metadata scan，不得失败或猜测自由文本语义。
 
 ## Required Sections
 
@@ -65,7 +65,7 @@ Rules:
 Rules:
 
 - `Kind` 建议使用 `code / test / config / docs / asset / reference`。
-- `ce-work` 的 `allowed_paths` 只来自这里。
+- 对生成 source-map 的 schema，`ce-work` 的 `allowed_paths` 只来自这里。
 - artifact 文本中提到但未在本表声明的实现路径只能进入 `unmapped_reference_paths` 和 gap，不能自动放行。
 - 没有本表时，CLI 可以从 source-map 全文路径降级抽取。
 

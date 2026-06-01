@@ -75,7 +75,7 @@ CLI flow 的 JSON 只做状态汇总：
 - `checks.archive`：archive-check 的状态、summary 和 issue codes。
 - `required_commands`：下一步排查或推进时建议运行的命令。
 
-这些字段来自现有 artifacts、schema 和 evidence。不要把它们反写为新的规范事实；需要长期保存的结论必须进入当前 OpenSpec artifacts、`tasks.md`、`source-map.md` 或 evidence 文件。
+这些字段来自现有 artifacts、schema 和 evidence。不要把它们反写为新的规范事实；需要长期保存的结论必须进入当前 OpenSpec artifacts、schema apply tracks、source-map（如适用）或 evidence 文件。
 
 ## 推荐路径
 

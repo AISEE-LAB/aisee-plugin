@@ -173,11 +173,11 @@ service-contract.md
 - `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
 - `data-model.md`：只在 Required=yes 且涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
 - `service-contract.md`：只在 Required=yes 且涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
-- `tasks.md`：最后生成，是唯一长期任务清单；app schema 的任务必须追踪到 specs、source-map 和 Required=yes 的适用 contracts；轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。
+- apply tracks：最后生成或补齐，是当前 schema 的唯一长期执行清单；常见是 `tasks.md`，也可能是其它 schema artifact 或 N/A。app schema 的任务必须追踪到 specs、source-map 和 Required=yes 的适用 contracts；轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。
 
 ## Artifact 适用性判断
 
-在 `source-map.md` 先写适用性，再生成对应 artifact：
+仅对生成 `source-map.md` 的 schema，先在 `source-map.md` 写适用性，再生成对应 artifact：
 
 | Artifact | 适用信号 | N/A 合法原因 |
 |---|---|---|
@@ -186,13 +186,13 @@ service-contract.md
 | `data-model.md` | 持久化实体、字段、表、关系、索引、迁移、审计、敏感数据 | 无持久化数据变化，且不改变数据生命周期 |
 | `service-contract.md` | API、后端能力、异步任务、定时任务、CLI、外部集成、权限、错误语义 | UI-only 静态展示或纯内容变更，无服务能力变化 |
 
-Required=no 的 artifact 不能留空原因。必须在 source-map.md 写：
+Required=no 的 artifact 不能留空原因。生成 `source-map.md` 的 schema 必须在 source-map.md 写：
 
 - N/A 原因。
 - 哪些上游 ID 使它不适用。
 - 是否有需要其他 artifact 承接的相关约束。
 
-如果同时创建 N/A 文件，文件只需要包含状态和 N/A 原因，不需要填完整模板。
+不生成 `source-map.md` 的 schema 应在当前主 artifact 或对应 artifact 中写 N/A 原因，不要补假 source-map。如果同时创建 N/A 文件，文件只需要包含状态和 N/A 原因，不需要填完整模板。
 
 ## ID Preflight
 
