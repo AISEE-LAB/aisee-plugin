@@ -540,13 +540,13 @@ description: |
 
 | 任务类型 | 推荐 Schema | 理由 |
 |----------|------------|------|
-| 新功能开发 | `spec-driven` | 标准流程，proposal → specs → design → tasks |
-| Bug Fix（普通） | `spec-driven` | 同上，走完整流程保证质量 |
-| Bug Fix（紧急/Hotfix） | `quick-fix`（如有） | 简化流程，快速出产 |
+| 新功能开发 | `aisee-app-spec-driven` | 承接 SRS / UI Content / Architecture，并细化 UI、服务和数据合同 |
+| Bug Fix（普通） | `aisee-app-spec-driven` 或 `quick-fix` | 涉及契约或跨模块影响时走 app schema；单点低风险修复走 quick-fix |
+| 小修复 / 紧急 Hotfix | `quick-fix`（如有） | 简化流程，只保留问题、方案、任务和验证证据 |
 | PR Code Review | `opsx-collab-pr-loop` | 以外部输入为驱动，可多轮迭代 |
-| 技术调研 | `opsx-collab-pr-loop` | 需要 intake + research plan |
-| 依赖升级（复杂） | `spec-driven` | 需要完整的影响分析 |
-| 架构变更 | `spec-driven` + 额外 config.yaml rules | 需要更严格的 design 要求 |
+| 技术调研 | `quick-research` 或 `opsx-collab-pr-loop` | 单次结论用 quick-research；多轮协作或 PR 循环用 opsx-collab-pr-loop |
+| 依赖升级（复杂） | `aisee-app-spec-driven` 或 `infra-change` | 应按影响面覆盖代码契约、运行环境和回滚方案 |
+| 架构变更 | `aisee-app-spec-driven` + Architecture 输入 | 需要承接架构事实、约束和跨模块影响 |
 
 ### 9.6 废弃 Schema
 

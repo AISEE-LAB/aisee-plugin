@@ -44,7 +44,7 @@ openspec init
 | `aisee-app-spec-driven` | 新功能、普通功能迭代、全栈或前后端分层开发；需要绑定 SRS / UI Content / Architecture / Change Plan 并细化 UI、服务、数据合同 |
 | `aisee-device-spec-driven` | 嵌入式、固件、板级 bring-up、Linux 设备程序、32 位 MCU、RTOS 或 bare-metal 开发；需要细化硬件、固件、运行时和验证合同 |
 | `aisee-docsite-driven` | 文档站、知识库、教程、团队 Wiki、内容导航和信息架构维护；不强制 specs，但归档前必须回写文档站基线 |
-| `quick-fix` | 紧急 Bug Fix、生产 Hotfix |
+| `quick-fix` | 小 bugfix、文案/样式/静态配置小改、已知根因的低风险修复或紧急 Hotfix |
 | `quick-research` | 不需要代码实现的技术调研、可行性分析、技术选型 |
 | `security-audit` | 认证、授权、隐私、加密、外部输入等安全相关变更 |
 | `infra-change` | CI/CD、部署、云资源、网络、服务器配置 |
@@ -88,8 +88,8 @@ openspec/project-docs.md
 - 新功能、普通功能迭代、全栈或前后端分层开发：优先使用 `aisee-app-spec-driven`。
 - 嵌入式、固件、Linux 设备程序、驱动、RTOS、bare-metal、板级 bring-up：优先使用 `aisee-device-spec-driven`。
 - 文档站、知识库、教程、Wiki、内容导航、阅读路径或信息架构维护：优先使用 `aisee-docsite-driven`。
-- 只需要轻量官方流程且不需要 SRS / UI Content / Architecture 追踪的普通 bug：可使用官方 `spec-driven`。
-- 紧急 hotfix：使用 `quick-fix`。
+- 小 bugfix、文案、样式、静态配置小改、已知根因的低风险修复或紧急 hotfix：使用 `quick-fix`。
+- 需要新增业务能力、新 UI/API/DATA 契约、跨模块架构调整或上游 SRS/UI/Architecture 追踪时，不使用 `quick-fix`，改用 `aisee-app-spec-driven`。
 - 无代码实现的调研：使用 `quick-research`。
 - PR review 或多轮外部协作：使用 `opsx-collab-pr-loop`。
 - 安全边界相关变更：使用 `security-audit`。
