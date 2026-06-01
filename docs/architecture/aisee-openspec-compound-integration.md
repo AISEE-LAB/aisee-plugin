@@ -133,7 +133,7 @@ OpenSpec 负责规范状态：
 Compound Engineering 负责工程审核和执行：
 
 - 按需对单个已确认 change 做实现策略补充。
-- 审核 SRS、design、contracts、tasks、source-map 等文档产物。
+- 审核 SRS、当前 schema artifacts、apply tracks、source-map（如适用）等文档产物。
 - 执行代码修改、测试、review、提交、PR。
 - 解决 PR 反馈和 CI 失败。
 - 沉淀工程经验。
@@ -144,10 +144,10 @@ CE 相关 skill 的定位：
 
 ```text
 ce-doc-review
-= 文档审核 gate，审核 SRS / design / contracts / tasks / source-map
+= 文档审核 gate，审核 SRS / 当前 schema artifacts / apply tracks / source-map（如适用）
 
 ce-plan
-= 可选任务细化器，不是长期事实源；有效结论必须回写 tasks.md/source-map.md
+= 可选任务细化器，不是长期事实源；有效结论必须回写当前 schema apply tracks；仅 source-map schema 需要回写 source-map.md
 
 ce-work
 = 按单个 OpenSpec change 工程包执行实现
@@ -500,9 +500,9 @@ verification-contract.md
 输入应是单个已确认 OpenSpec change，输出给 `ce-work` 或按需 `ce-plan` 的工程上下文：
 
 - 当前 change 目标。
-- 相关 specs。
-- `tasks.md`。
-- `source-map.md`。
+- 当前 schema 生成的相关 artifacts。
+- 当前 schema 的 apply tracks（常见是 `tasks.md`，无 apply schema 可为 N/A）。
+- `source-map.md`（仅当前 schema 生成时）。
 - schema/domain 约束。
 - 测试要求。
 - 禁止越界项。
@@ -519,9 +519,9 @@ aisee context pack --change <change> --for ce-work --json
 
 ```text
 - OpenSpec change 是事实源。
-- specs/**/spec.md 是行为契约。
-- tasks.md 是唯一长期任务清单。
-- source-map.md 是代码定位入口。
+- 当前 schema artifacts 是本 change 的规范事实。
+- 当前 schema apply tracks 是唯一长期执行清单；常见是 tasks.md，无 apply schema 可为 N/A。
+- source-map.md 只在当前 schema 生成时作为代码定位和追踪入口；不生成 source-map 的 schema 使用当前 artifacts / apply tracks 的显式路径引用。
 - 不创建平行 plan 文档。
 - 如果实现发现需求/spec 不一致，先回写当前 OpenSpec change。
 ```
@@ -763,7 +763,7 @@ collab   -> opsx-collab-pr-loop
 
 ## ID、Source Map 与 Context Pack
 
-为了避免重复文档和上下文漂移，所有长期产物必须通过稳定 ID 和 source-map 关联。
+为了避免重复文档和上下文漂移，长期产物必须通过稳定 ID 关联。当前 schema 生成 `source-map.md` 时，再用 source-map 记录 change 级追踪关系；不生成 source-map 的 schema 不能为了关联而补假文件。
 
 Aisee CLI 的 JSON 输出应调用时解析，不维护第二份内容数据：
 
@@ -781,14 +781,14 @@ docs/**/*.md / openspec/**/*.md
 = 可删除、可重建的解析缓存，不是事实源
 ```
 
-SRS、UI content、architecture、device-context 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `.aisee/sources.json` 和 `source-map.md` 衔接：
+SRS、UI content、architecture、device-context 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `.aisee/sources.json` 登记；当前 schema 生成 `source-map.md` 时，再通过 source-map 衔接到具体 change：
 
 ```text
 .aisee/sources.json
 = 项目级来源登记，知道所有 Aisee 上游产物在哪里
 
 openspec/changes/<change>/source-map.md
-= change 级追踪关系，只记录当前 change 关联哪些上游 ID 和文件
+= change 级追踪关系；仅当前 schema 生成 source-map 时存在
 ```
 
 ### ID 规则
@@ -936,7 +936,7 @@ openspec archive
 
 - `aisee:change-plan` 只规划 OpenSpec change 边界，不规划具体代码修改。
 - `compound plan / ce-plan` 只作为可选任务细化器，不作为长期任务事实源。
-- `tasks.md` 是唯一长期任务清单。
+- 当前 schema 的 apply tracks 是唯一长期执行清单；常见是 `tasks.md`，但不是所有 schema 都需要 tasks。
 - `ce-work` 的依据是单个 OpenSpec change 工程包。
 - OpenSpec `archive` 只在 change 已实现、已验证、spec 与代码一致后执行。
 - Compound 不直接修改 baseline spec。
@@ -946,7 +946,7 @@ openspec archive
 - `aisee:flow` 在 domain 不明确时应先询问，而不是默认走 app。
 - 每个 schema 决定自己的 artifact 集合、验证规则和 archive guard 检查表。
 - ID 必须通过 `.aisee/id-registry.json` 分配和校验。
-- 跨文档关系优先写入 `source-map.md`，不要在多个文档中复制整段内容。
+- 当前 schema 生成 `source-map.md` 时，跨文档关系优先写入 `source-map.md`；不生成 source-map 的 schema 不应补假 source-map。
 
 ## 推荐落地里程碑
 
@@ -990,7 +990,7 @@ openspec archive
 - 新增 `aisee context pack --change <change> --for ce-work --json`。
 - 约束 Compound 只处理单个 OpenSpec change 的文档审核、工程实现和代码审核。
 - 输出明确的工程上下文和禁止越界项。
-- `ce-plan` 仅在 `tasks.md/source-map.md` 不足时按需使用，并把结论回写。
+- `ce-plan` 仅在当前 schema apply tracks 或实现路径不足时按需使用，并把结论回写当前 schema artifacts；仅 source-map schema 需要回写 `source-map.md`。
 
 ### V5：验证与 Archive 守门
 
@@ -1003,7 +1003,7 @@ openspec archive
 
 - 新增 `aisee:assets` 作为视觉资产入口。
 - 保留 `aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object` 作为专业 skill。
-- 用 `ui-contract.md`、`source-map.md` 和 `tasks.md` 引用视觉资产产物。
+- 用当前 schema 的相关 artifacts 引用视觉资产产物；app schema 通常通过 `ui-contract.md`、`source-map.md` 和 `tasks.md` 串联。
 - 补齐 device/docsite/infra/security 的 context pack 与 archive-guard 检查表。
 
 ## 最终建议

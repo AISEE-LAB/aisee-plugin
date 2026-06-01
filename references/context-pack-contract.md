@@ -173,12 +173,13 @@ Rules:
 
 Rules:
 
-- `read_order` 只能来自当前 change、schema artifact DAG、`source-map.md` 和 project rules。
-- `scope.in/out` 来自 proposal、source-map 和 tasks。
+- `read_order` 只能来自当前 change、schema artifact DAG、`source-map.md`（如适用）和 project rules。
+- `scope.in/out` 来自 proposal、当前 schema artifacts、source-map（如适用）和 apply tracks。
 - `follow_up_candidates` 可记录实现中发现但未纳入当前 change 的问题。
-- `code_paths` 和 `test_paths` 是实现允许路径，必须来自 `source-map.md` 的 `Implementation Paths` 结构化声明；不得自由全项目搜索后加入。
+- 对生成 `source-map.md` 的 schema，`code_paths` 和 `test_paths` 必须来自 `source-map.md` 的 `Implementation Paths` 结构化声明；不得自由全项目搜索后加入。
+- 对不生成 `source-map.md` 的 schema，实现参考只能来自当前 schema artifacts / apply tracks 的显式路径引用，并在 `implementation_references.source` 标记为 `schema-artifacts`；不得把全项目搜索结果加入。
 - OpenSpec artifacts 和 source-map 文本中额外出现的路径只能进入 `implementation_references.referenced_paths`。
-- `implementation_references.unmapped_reference_paths` 表示被 artifact 文本提到但未在 `source-map.md` Implementation Paths 声明的实现路径；`ce-work` 不得把这些路径加入 `allowed_paths`。
+- `implementation_references.unmapped_reference_paths` 表示被 artifact 文本提到但未被当前 schema 的实现定位规则接纳的路径；`ce-work` 不得把这些路径加入 `allowed_paths`。
 - 缺路径时写入 `gaps`，不要猜测。
 
 ## Gap Object
@@ -237,7 +238,7 @@ Required additions:
     }
   },
   "guardrails": [
-    "follow tasks.md",
+    "follow current schema apply tracks",
     "do not create a parallel durable plan",
     "report out-of-scope findings as follow-up candidates"
   ]
@@ -246,8 +247,9 @@ Required additions:
 
 Rules:
 
-- `allowed_paths` 只来自 `source-map.md` 的 `Implementation Paths`。artifact 文本提到但未在 source-map 声明的路径只能作为 `unmapped_reference_paths` 和 gap 输出。
-- 如果 `tasks.md` 太粗、路径缺失或 contract 冲突，`requires_ce_plan` 可以为 `true`，但 `ce-plan` 结论必须回写 `tasks.md` / `source-map.md`。
+- 对生成 `source-map.md` 的 schema，`allowed_paths` 只来自 `source-map.md` 的 `Implementation Paths`。artifact 文本提到但未在 source-map 声明的路径只能作为 `unmapped_reference_paths` 和 gap 输出。
+- 对不生成 `source-map.md` 的 schema，`allowed_paths` 来自当前 schema artifacts / apply tracks 的显式路径引用；缺路径时要求补当前 schema artifact，而不是创建假 source-map。
+- 如果当前 schema apply tracks 太粗、路径缺失或 contract 冲突，`requires_ce_plan` 可以为 `true`，但 `ce-plan` 结论必须回写当前 schema apply tracks；仅 source-map schema 需要回写 `source-map.md`。
 - 不包含完整 SRS / UI Content / Architecture 正文，只包含当前 change 追踪到的 ID、路径和必要摘录。
 - 未纳入当前 change 的问题可以放入 `follow_up_candidates`，不能进入 `suggested_order`。
 

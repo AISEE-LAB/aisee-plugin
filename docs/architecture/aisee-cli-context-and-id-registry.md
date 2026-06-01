@@ -301,12 +301,12 @@ auth:FR-001
 aisee change inspect add-auth-login --json
 ```
 
-解析内容：
+解析内容由当前 schema 决定，CLI 先读取 `openspec/config.yaml`、`change/.openspec.yaml` 和 schema artifact DAG，再扫描已生成 artifact。常见内容包括：
 
 - `proposal.md`
-- `source-map.md`
+- `source-map.md`（仅当前 schema 生成时）
 - `specs/**/spec.md`
-- `tasks.md`
+- `tasks.md`（仅当前 schema 的 apply tracks 或 artifacts 需要时）
 - app schema 中 Required=yes 的 `change-context.md`、`ui-contract.md`、`service-contract.md`、`data-model.md`
 - 含 `design.md` 的 schema 中的 `design.md`
 - `hardware-contract.md`
@@ -320,7 +320,7 @@ CLI 应该 schema-aware，不要把 App/Web schema 硬套到硬件/嵌入式 cha
 
 ### context pack
 
-调用时衔接 OpenSpec change、ID Registry、sources registry、source-map 和 evidence，为不同 skill 或 CE 能力生成最小上下文包。
+调用时衔接 OpenSpec change、ID Registry、sources registry、schema artifacts、可选 source-map 和 evidence，为不同 skill 或 CE 能力生成最小上下文包。
 
 ```bash
 aisee context pack --change add-auth-login --for ce-doc-review --json
@@ -332,24 +332,25 @@ aisee context pack --change add-auth-login --for aisee-verify --json
 默认行为：
 
 ```text
-1. 读取 .aisee/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
-2. 读取 .aisee/id-registry.json，获取 ID 分配和生命周期。
-3. 读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件和 artifact。
-4. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema 和 artifact 路径。
-5. 对 OpenSpec artifacts 只做 metadata scan：存在性、路径、heading、ID、路径引用、checkbox 和 hash；不解释 artifact 业务语义。
-6. 优先消费 OpenSpec CLI / validate / schema 的结构化输出；没有可用输出时，不用 Aisee 自己替代 validate。
-7. 解析 Aisee 自己管理的补充信息：source-map、sources registry、ID registry、review/test/verification evidence。
-8. 输出 JSON。
+1. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema、artifact DAG、apply tracks 和是否需要 source-map。
+2. 读取 .aisee/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
+3. 读取 .aisee/id-registry.json，获取 ID 分配和生命周期。
+4. 如当前 schema 生成 source-map，读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件、artifact 和 implementation paths。
+5. 对当前 schema 声明的 OpenSpec artifacts 做 metadata scan：存在性、路径、heading、ID、路径引用、checkbox 和 hash；不解释 artifact 业务语义。
+6. 对不生成 source-map 的 schema，只从当前 schema artifacts / apply tracks 的显式路径引用中生成实现参考，不把全项目搜索结果当作 allowed paths。
+7. 优先消费 OpenSpec CLI / validate / schema 的结构化输出；没有可用输出时，不用 Aisee 自己替代 validate。
+8. 解析 Aisee 自己管理的补充信息：sources registry、ID registry、source-map（如适用）、review/test/verification evidence。
+9. 输出 JSON。
 ```
 
 JSON 是当前 Markdown / OpenSpec / Aisee 补充信息的上下文视图，不是新生成的事实源。默认只包含：
 
 ```text
 parsed
-= 从 sources、ID registry、source-map、evidence 和 OpenSpec metadata scan 得到的事实
+= 从 sources、ID registry、schema artifacts、source-map（如适用）、evidence 和 OpenSpec metadata scan 得到的事实
 
 derived
-= 根据 source-map、ID registry、文件关系和校验规则推导
+= 根据 schema DAG、source-map（如适用）、ID registry、文件关系和校验规则推导
 ```
 
 默认不包含 AI 生成摘要。需要摘要或压缩内容时必须显式开启：
@@ -530,7 +531,7 @@ aisee trace <id> --json
 aisee context pack --change <change> --for ce-work --json
 ```
 
-输出给 CE 的薄交接块：
+输出给 CE 的薄交接块是运行时上下文，不是新文档。内容随当前 schema 调整：
 
 ```md
 # Implementation Brief
@@ -538,17 +539,18 @@ aisee context pack --change <change> --for ce-work --json
 ## Authoritative Source
 
 - Change: `openspec/changes/<change-id>`
-- Tasks: `openspec/changes/<change-id>/tasks.md`
-- Source Map: `openspec/changes/<change-id>/source-map.md`
-- Specs: `openspec/changes/<change-id>/specs/**/spec.md`
+- Schema: `<current-schema>`
+- Apply Tracks: `<schema apply.tracks or N/A>`
+- Source Map: `openspec/changes/<change-id>/source-map.md` or `N/A`
+- Generated Artifacts: `<current schema artifacts>`
 
 ## Execution Rules
 
-- 按 `tasks.md` 执行。
+- 按当前 schema 的 apply tracks 执行；无 apply schema 不强制 tasks。
 - 不创建新的长期任务清单。
 - 不扩大 change 范围。
 - 如发现需求/spec 不一致，先回写当前 OpenSpec change。
-- 完成后更新 `tasks.md` 和验证记录。
+- 完成后更新当前 schema 的 apply tracks 和验证记录。
 
 ## Recommended Compound Skill
 
@@ -590,16 +592,16 @@ openspec validate <change>
 
 ## Compound Engineering 的使用位置
 
-Compound 不应和 OpenSpec `tasks.md` 争夺任务事实源。
+Compound 不应和当前 schema 的 apply tracks 争夺任务事实源。
 
 建议规则：
 
 ```text
-tasks.md
-= 唯一长期任务清单
+schema apply tracks
+= 唯一长期执行清单；常见是 tasks.md，也可能是其它 schema artifact 或 N/A
 
 ce:plan
-= 可选任务细化器；结论必须回写 tasks.md/source-map.md
+= 可选任务细化器；结论必须回写当前 schema apply tracks；仅 source-map schema 需要回写 source-map.md
 
 ce:work
 = 按单个 OpenSpec change 工程包执行
@@ -610,7 +612,7 @@ ce:work
 ```text
 需求 / 规范阶段:
   ce-doc-review
-  审核 SRS、source-map、specs、tasks 和 Required=yes 的 contracts
+  审核 SRS、当前 schema artifacts、apply tracks、source-map（如适用）和 Required=yes 的 contracts
 
 实现阶段:
   ce-work
