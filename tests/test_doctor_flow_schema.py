@@ -93,6 +93,38 @@ apply:
     write(change / "tasks.md", "# Tasks\n\n- [ ] Implement src/auth/session.py.\n")
 
 
+def create_quick_research_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: quick-research\n")
+    write(root / "openspec" / "changes" / ".gitkeep", "")
+    write(root / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
+    write(
+        root / "openspec" / "schemas" / "quick-research" / "schema.yaml",
+        """name: quick-research
+version: 1
+artifacts:
+  - id: question
+    generates: question.md
+    template: question.md
+    requires: []
+  - id: findings
+    generates: findings.md
+    template: findings.md
+    requires: [question]
+  - id: recommendation
+    generates: recommendation.md
+    template: recommendation.md
+    requires: [findings]
+""",
+    )
+    change = root / "openspec" / "changes" / "research-cache"
+    write(change / ".openspec.yaml", "schema: quick-research\n")
+    write(change / "question.md", "# Question\n")
+    write(change / "findings.md", "# Findings\n")
+    write(change / "recommendation.md", "# Recommendation\n")
+    write(root / "docs" / "verification" / "research-cache-openspec-validate.md", "passed\n")
+
+
 def test_doctor_reports_missing_openspec_as_blocked(tmp_path: Path) -> None:
     data = run_json(tmp_path, "doctor", "--json")
 
@@ -140,3 +172,22 @@ def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Pa
     assert data["stage"] == "implementation-ready"
     assert "ce-work" in data["recommended_path"]
     assert data["doctor"]["status"] == "ok"
+    assert data["schema"]["name"] == "aisee-app-spec-driven"
+    assert data["schema"]["source_map_required"] is True
+    assert data["schema"]["tasks_required"] is True
+    assert data["inputs"]["source_map"] == "present"
+    assert data["checks"]["verify"]["status"] == "risk"
+    assert any("context pack --change add-auth --for ce-work" in item for item in data["required_commands"])
+
+
+def test_flow_inspect_reports_archive_ready_for_quick_research(tmp_path: Path) -> None:
+    create_quick_research_project(tmp_path)
+
+    data = run_json(tmp_path, "flow", "inspect", "--change", "research-cache", "--json")
+
+    assert data["stage"] == "archive-ready"
+    assert data["schema"]["name"] == "quick-research"
+    assert data["schema"]["source_map_required"] is False
+    assert data["schema"]["tasks_required"] is False
+    assert data["checks"]["archive"]["status"] == "archive-ready"
+    assert data["recommended_path"] == ["openspec archive"]
