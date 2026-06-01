@@ -1,30 +1,30 @@
 ---
 name: aisee:verify
-description: 验证当前 OpenSpec change 的文档、ID、source-map、tasks、contracts、CE review/test 结果和实现状态是否一致。用于实现前后运行 author-check、gaps、context pack 和 change inspect，检查缺口、断链、drift、schema artifact 完整性和验证证据。它输出问题清单和修复建议，不负责 archive 放行审批。
+description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、source-map、ID、review/test evidence、OpenSpec validate 和实现状态是否一致。用于实现前后运行 author-check、gaps、inspect、verify-check 和 context pack，输出 schema-aware 问题清单与修复建议；不把 app schema 的 source-map/contracts 要求套到 quick-fix、quick-research、docsite、infra、security 或其它轻量 schema。
 ---
 
 # aisee:verify
 
-`aisee:verify` 是当前 change 的一致性诊断器，不是 archive 放行器，也不是 OpenSpec parser。OpenSpec artifact 合法性必须以 `openspec validate` 和 OpenSpec schema 机制为准。
+`aisee:verify` 是当前 change 的 schema-aware 一致性诊断器。它不创建事实源，不替代 OpenSpec parser，也不做 archive 放行审批；OpenSpec artifact 合法性以 `openspec validate` 和当前 schema 为准。
 
 ## 职责
 
-- 运行或建议运行 `openspec validate`。
-- 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change verify-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
-- 检查 schema artifact metadata、artifact 缺失和 Aisee 补充信息断链。
-- 检查 ID、`source-map.md`、tasks checkbox、review/test evidence 与 OpenSpec validate 结果的衔接。
-- 检查实现后是否出现 spec drift。
-- 消费 `ce-doc-review`、`ce-code-review`、`ce-test-*` 结果。
-- 输出问题清单和修复建议。
+- 识别当前 change 使用的 schema，并只检查该 schema 声明的 artifacts、requires、apply tracks 和验证证据。
+- 运行或建议运行 `openspec validate <change>`。
+- 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change inspect <change> --json`、`aisee change verify-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 对需要 `source-map.md` 的 schema，检查 ID、source-map、artifact applicability、代码路径、测试路径和 evidence 是否闭合。
+- 对不生成 `source-map.md` 的 schema，只检查 schema artifacts、tasks、OpenSpec validate、review/test/manual evidence 和当前 change 明确引用的路径。
+- 消费已有 `ce-doc-review`、`ce-code-review`、`ce-test-*`、人工验证记录和监控/预览证据。
+- 输出 BLOCKER / RISK / INFO findings、修复建议和 archive-guard 前置状态。
 
 ## 不负责
 
 - 创建、拆分或重新规划 change。
-- 替代 `ce-code-review` 或重新做完整代码审查。
-- 替代测试工具或重新跑完整测试矩阵。
-- 修改 artifacts、代码或 baseline specs。
+- 替代 `ce-code-review`、`ce-doc-review` 或测试工具。
+- 修改 artifacts、代码、baseline specs 或 evidence。
 - 判断是否可以执行 `openspec archive`；这是 `aisee:archive-guard` 的职责。
-- 替代 OpenSpec 解析 proposal/spec/tasks/design/contracts 的业务语义。
+- 重新解析 OpenSpec proposal/spec/tasks/design/contracts 的业务语义。
+- 为轻量 schema 强制补 app schema 才需要的 `source-map.md`、`ui-contract.md`、`service-contract.md`、`data-model.md` 或 `change-context.md`。
 
 ## 输入入口
 
@@ -44,34 +44,55 @@ aisee context pack --change <change> --for aisee-verify --json
 openspec validate <change>
 ```
 
-如果 CLI 不可用，仍然只从当前 change artifacts、schema、`source-map.md` 指向的路径和已有 review/test evidence 读取；不要自由扩大全项目范围。
+如果 CLI 不可用，只读取当前 change 目录、当前 schema、schema 声明的 artifacts、已有 review/test/manual evidence，以及当前 artifacts 明确引用的路径。只有 schema 生成 `source-map.md` 时才读取 source-map。
+
+## Schema 上下文
+
+先从 `change inspect`、change metadata 或 schema 文件确认：
+
+- `schema_name`：当前 schema 名称。
+- `schema_artifacts`：schema 声明的 artifact id 与生成文件。
+- `source_map_required`：schema 是否生成 `source-map.md`。
+- `apply_tracks`：schema apply 阶段跟踪的文件，通常是 `tasks.md`。
+- `required_contracts`：仅 app/device 等 source-map schema 中 Required=yes 的按需 artifacts。
+
+若 CLI 对不生成 `source-map.md` 的 schema 报 `SOURCE_MAP_MISSING`，先标记为 tooling/schema mismatch RISK，不要直接当成 change BLOCKER；除非当前 schema 明确生成 `source-map.md`。
 
 ## 输入处理规则
 
-- `author-check.status=blocked`：直接输出 fail，引用 `author-check.blockers`，不要继续推断实现状态。
-- `gaps.result.status=blocked`：直接输出 fail，要求回到对应 artifact 修复。
-- `change inspect.ids.registry.missing / temporary / inactive` 非空：至少输出 RISK；inactive 或 removed ID 输出 BLOCKER。
-- `aisee change verify-check` 是 verify 的机器门禁入口；`context pack.facts.derived.checks` 是补充结构化检查入口。不要把 verify 报告当成新事实源。
+- `author-check.status=blocked`：输出 fail，引用 `author-check.blockers`，不要继续推断实现状态。
+- `gaps.result.status=blocked`：输出 fail，要求回到对应 artifact 修复。
+- `change inspect.ids.registry.missing / temporary / inactive` 非空：app/device/source-map schema 至少输出 RISK；inactive 或 removed ID 输出 BLOCKER。非 source-map schema 只检查当前 artifacts 明确声明的 ID。
+- `verify-check` 是机器门禁入口；`context pack.facts.derived.checks` 是补充结构化检查入口。verify 报告不是新事实源。
 - `context pack.evidence.details` 可用于读取 validate/test/review 的轻量解析结果；路径数组仍是 evidence 原始入口。
-- `openspec validate` 未运行时，输出 RISK；运行失败且无接受理由时输出 BLOCKER。
-- 已有 `ce-doc-review`、`ce-code-review`、`ce-test-*` 结果只作为 evidence；verify 不替代它们。
-- 未关闭的 P0 必须输出 BLOCKER；未关闭的 P1 至少输出 RISK。标记为 accepted risk / 接受风险的 finding 可视为已关闭，但需要 archive-guard 再判断是否可接受。
-- 标记为 N/A 的 artifact 必须写明原因；缺少原因时输出 RISK。
+- `openspec validate` 未运行时输出 RISK；运行失败且无接受理由时输出 BLOCKER。
+- 已有 CE review/test 结果只作为 evidence；verify 不替代它们。
+- 未关闭的 P0 必须输出 BLOCKER；未关闭的 P1 至少输出 RISK。accepted risk 可视为已处理，但 archive-guard 仍需判断是否可接受。
+- 标记为 N/A 的 artifact 必须写明原因；缺少原因时输出 RISK。只检查当前 schema 会生成或当前 change 实际保留的 artifact。
+
+## Schema 最低门槛
+
+| Schema 类型 | 必查内容 | 不强制要求 |
+|---|---|---|
+| `aisee-app-spec-driven` | proposal、source-map、specs、tasks、Required=yes contracts、ID registry、代码/测试/evidence 追踪 | Required=no contracts 展开全文 |
+| `aisee-device-spec-driven` | proposal、source-map、device specs/tasks、硬件/固件/验证证据追踪 | app-only UI/service/data contracts |
+| `quick-fix` | problem、solution、tasks、修复范围、测试或人工验证、回滚/监控记录 | SRS、specs、source-map、contracts |
+| `quick-research` | question、findings、recommendation、依据链接或实验记录、结论是否回答原问题 | 代码实现、apply、测试矩阵、source-map |
+| `aisee-docsite-driven` | proposal、doc-change、tasks、构建/链接/预览验证、Archive Updates | specs、contracts、source-map |
+| `infra-change` | proposal、impact-assessment、rollback-plan、tasks、预检/回滚/变更后验证证据 | app contracts、UI/data specs |
+| `security-audit` | proposal、threat-model、security specs/design、tasks、安全 review/test evidence、Critical/High 风险处理 | 非安全相关的冗余 UI/data contract |
 
 ## 检查项
 
-按以下维度输出 findings：
-
 | 维度 | 检查内容 |
 |---|---|
-| Schema artifacts | schema 声明的 artifacts metadata 是否存在；N/A artifact 是否写明原因 |
-| ID / source-map | 上游 ID、产出 ID、owner artifact、代码路径、测试路径是否闭合 |
-| OpenSpec validate | `openspec validate` 是否通过；失败项是否处理 |
-| Artifacts metadata | heading、ID、路径引用、checkbox、evidence 入口是否可追踪 |
-| Tasks | tasks 是否覆盖实现、验证、证据记录；状态是否真实 |
-| Implementation drift | 代码或配置是否偏离 specs/contracts/source-map |
-| Review / test evidence | CE P0/P1、测试失败、人工验证缺口是否处理或记录接受理由 |
-| Archive readiness signals | 是否存在会阻止 archive-guard 的 blocker |
+| Schema artifacts | schema 声明的 artifacts 是否存在；requires 顺序是否满足；N/A 是否有原因 |
+| Source-map / ID | 仅在 schema 需要时检查上游 ID、产出 ID、owner artifact、代码路径、测试路径和 evidence 闭合 |
+| OpenSpec validate | `openspec validate` 是否通过；失败项是否处理或有接受理由 |
+| Tasks / apply tracks | tasks 是否覆盖实现、验证、证据记录；checkbox 状态是否真实；apply tracks 是否与 schema 一致 |
+| Implementation drift | 代码、配置、文档或站点结构是否偏离当前 change artifacts |
+| Review / test evidence | CE P0/P1、测试失败、人工验证缺口、构建/预览/监控证据是否处理或记录接受理由 |
+| Archive readiness signals | 是否存在会阻止 archive-guard 的 blocker 或未说明风险 |
 
 ## Severity
 
@@ -88,11 +109,20 @@ openspec validate <change>
 
 pass / fail / pass-with-risk
 
+## Schema Context
+
+- Schema:
+- Source-map required: yes / no
+- Required artifacts:
+- Required contracts:
+- Skipped artifacts and reasons:
+
 ## Inputs
 
 - Author check:
 - Gaps:
 - Change inspect:
+- Verify check:
 - Context pack:
 - OpenSpec validate:
 
