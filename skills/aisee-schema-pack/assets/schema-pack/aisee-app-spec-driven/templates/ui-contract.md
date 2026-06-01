@@ -7,18 +7,36 @@ N/A 原因：
 > 如果状态为 N/A，写明原因后即可停止，不需要填写后续表格。
 > 本文只描述页面内容结构、状态、操作、权限可见性、前端数据需求，以及本 change 必须遵循的设计规范引用。不要在这里重新定义或复制完整视觉设计、组件库、配色、排版或像素级布局；这些仍以 Design Spec / Design Assets 为事实源。
 
+## 来源与范围
+
+| 来源 | 路径 / 来源 ID | 关联上游 ID | 本 change 用途 | 备注 |
+|---|---|---|---|---|
+| UI Content | docs/ui-content/... | {{scope}}:PAGE-001 / {{scope}}:FLOW-001 | 页面内容、字段、操作、状态、权限可见性 | |
+| Design Spec | docs/design-spec/... | PAT-001 / {{scope}}:PAGE-001 | 组件库策略、tokens、Design Read、响应式、可访问性、验收规则 | 只引用，不复制全文 |
+| Design Assets / dev-visual-brief | docs/design-assets/... | {{scope}}:PAGE-001 | 参考图、素材路径、视觉验收重点 | 只引用路径和适用约束 |
+| Architecture / change-context | change-context.md | {{scope}}:CONSTRAINT-001 | 平台、前端边界、性能或技术约束 | |
+
+## UI 变更范围
+
+| 状态 | UI 对象 ID | 名称 | 来源 | 本 change 处理 | 是否需要实现 |
+|---|---|---|---|---|---|
+| Existing / Changed / New / Deprecated / Unknown | {{scope}}:PAGE-001 / {{scope}}:FLOW-001 / {{scope}}:STATE-001 | | UI Content / source-map / code / screenshot | 复用 / 修改 / 新增 / 下线 / 待确认 | yes / no |
+
+> Existing 只引用来源，不重写完整页面规格；Changed / New / Deprecated 必须展开本 change 影响。
+
 ## 设计依据与实现约束
 
 | 来源 | 路径 / 来源 ID | 适用页面 | 对实现有约束力的内容 | 验收方式 |
 |---|---|---|---|---|
 | Design Spec | docs/design/... | {{scope}}:PAGE-001 | 组件库 / tokens / 布局规则 / 响应式规则 / 可访问性 / 动效 / N/A | 视觉走查 / 截图对比 / 组件用法检查 / N/A |
 | Design Assets | assets/... | {{scope}}:PAGE-001 | logo / 图标 / 插图 / 图片 / SVG / 素材状态 / N/A | 资产路径存在 / 渲染检查 / N/A |
+| dev-visual-brief | docs/design-assets/briefs/dev-visual-brief.md | {{scope}}:PAGE-001 / section / state | 参考图映射 / extraction confidence / 视觉验收重点 / N/A | 浏览器截图对比 / 人工走查 / N/A |
 
 ## 页面清单
 
-| 页面完整 ID | 名称 | 类型 | 关联 FR / FLOW | 入口 | 完成后去向 |
-|---|---|---|---|---|---|
-| {{scope}}:PAGE-001 | | 列表页 / 详情页 / 表单页 / 设置页 / 结果页 / 弹窗 | {{scope}}:FR-001 | | |
+| 页面完整 ID | 名称 | 类型 | 变更状态 | 关联 FR / FLOW | 入口 | 完成后去向 |
+|---|---|---|---|---|---|---|
+| {{scope}}:PAGE-001 | | 列表页 / 详情页 / 表单页 / 设置页 / 结果页 / 弹窗 | New / Changed / Existing / Deprecated | {{scope}}:FR-001 | | |
 
 ## 页面内容结构
 
@@ -30,6 +48,8 @@ N/A 原因：
 - 操作：
 - 权限可见性：
 - 完成后去向：
+- 设计规范引用：Design Spec / dev-visual-brief / N/A
+- 不展开原因（Existing 或 N/A 时填写）：
 
 ## 页面状态
 
@@ -46,9 +66,9 @@ N/A 原因：
 
 ## 前端数据需求
 
-| 页面 / 元素 | 需要的数据 | 来源能力 | 关联 ID | 备注 |
-|---|---|---|---|---|
-| {{scope}}:PAGE-001 | | {{scope}}:API-001 / 本地状态 / 配置 | {{scope}}:FR-001 | |
+| 页面 / 元素 | 需要的数据 | 来源能力 | 状态 / 权限影响 | 关联 ID | 备注 |
+|---|---|---|---|---|---|
+| {{scope}}:PAGE-001 | | {{scope}}:API-001 / 本地状态 / 配置 | loading / empty / error / permission | {{scope}}:FR-001 | |
 
 ## 交互与流程
 
@@ -64,6 +84,16 @@ N/A 原因：
 
 ## UI 追踪矩阵
 
-| 上游 ID | 页面 | 元素 / 操作 | 状态 | 依赖能力 | 是否完整 |
+| 上游 ID | 页面 | 元素 / 操作 | 状态 | 设计 / 视觉引用 | 依赖能力 | 是否完整 |
+|---|---|---|---|---|---|---|
+| {{scope}}:FR-001 | {{scope}}:PAGE-001 | | {{scope}}:STATE-001 | Design Spec / dev-visual-brief / N/A | {{scope}}:API-001 / N/A | 是 / 否 |
+
+## UI 验收证据
+
+| 验收项 | 适用页面 / 状态 | 依据 | 证据要求 | 是否阻塞 |
 |---|---|---|---|---|
-| {{scope}}:FR-001 | {{scope}}:PAGE-001 | | {{scope}}:STATE-001 | {{scope}}:API-001 / N/A | 是 / 否 |
+| 页面内容与操作完整 | {{scope}}:PAGE-001 | UI Content / specs | 截图 / 手工走查 / 测试 | yes / no |
+| 组件库与 token 使用 | {{scope}}:PAGE-001 | Design Spec | 代码审查 / 视觉走查 | yes / no |
+| 参考图 / dev-visual-brief 匹配 | {{scope}}:PAGE-001 | dev-visual-brief / Design Assets | 浏览器截图对比 / N/A | yes / no |
+| 响应式与可访问性 | PC / H5 / App / Wechat | Design Spec | 截图 / 对比度 / 键盘访问 / N/A | yes / no |
+| 状态完整性 | loading / empty / error / permission / success | UI Content / Design Spec | 截图 / 测试 / 人工验证 | yes / no |
