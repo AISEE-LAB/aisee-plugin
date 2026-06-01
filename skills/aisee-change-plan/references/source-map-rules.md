@@ -1,6 +1,8 @@
 # aisee:change-plan — Source-map Seed 规则
 
-每个 planned change 必须包含 source-map seed。seed 不是最终 artifact 内容，只是后续 `source-map.md` 和 schema artifacts 的初始追踪线索。
+只有所选 schema 生成 `source-map.md` 时，planned change 才必须包含 source-map seed。seed 不是最终 artifact 内容，只是后续 `source-map.md` 和 schema artifacts 的初始追踪线索。
+
+不生成 `source-map.md` 的轻量 schema（如 `quick-fix`、`quick-research`、`infra-change`、`aisee-docsite-driven`）不需要 source-map seed；在 change-plan 中写 `Source-map seed: N/A — schema does not generate source-map.md`。
 
 ## 通用规则
 
