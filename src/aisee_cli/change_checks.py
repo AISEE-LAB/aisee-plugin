@@ -9,6 +9,14 @@ from aisee_cli.context_pack import build_context_pack
 from aisee_cli.output import issue, summarize_issues
 
 
+SCHEMA_EVIDENCE_REQUIREMENTS = {
+    "aisee-docsite-driven": ("docsite", ("build", "links", "preview", "manual")),
+    "infra-change": ("infra", ("rollback", "post_change")),
+    "security-audit": ("security", ("reviews", "sast", "dependency_scan", "penetration_test", "tests")),
+    "quick-fix": ("quick_fix", ("tests", "manual_verification", "monitoring", "rollback")),
+}
+
+
 def build_verify_check(project_root: Path, change: str) -> dict[str, Any]:
     pack = build_context_pack(project_root, change, "aisee-verify")
     task_state = pack["facts"]["derived"]["task_state"]
@@ -26,6 +34,7 @@ def build_verify_check(project_root: Path, change: str) -> dict[str, Any]:
     if verification_required and not evidence_has_verification(evidence):
         warnings.append(issue("TEST_EVIDENCE_MISSING", "risk", "no test or verification evidence was found", "tasks.md"))
     append_evidence_issues(evidence, blockers, warnings, archive_mode=False)
+    append_schema_evidence_issues(pack, blockers, warnings, archive_mode=False)
     warnings.extend(na_artifact_issues(pack))
 
     issues = blockers + warnings
@@ -52,13 +61,18 @@ def build_archive_check(project_root: Path, change: str) -> dict[str, Any]:
     task_state = pack["facts"]["derived"]["task_state"]
     tasks_required = schema_requires_tasks(pack)
     blockers = list(verify["blockers"])
-    warnings = list(verify["warnings"])
+    warnings = [
+        warning
+        for warning in verify["warnings"]
+        if warning.get("code") != "SCHEMA_EVIDENCE_MISSING"
+    ]
 
     if tasks_required and task_state["open"]:
         blockers.append(issue("TASKS_OPEN", "blocker", "tasks.md still has open tasks", "tasks.md"))
     if pack["evidence"].get("openspec_validate") is None:
         warnings.append(issue("VALIDATE_EVIDENCE_MISSING", "risk", "openspec validate evidence was not found", "openspec"))
     append_archive_review_blockers(pack["evidence"], blockers)
+    append_schema_evidence_issues(pack, blockers, warnings, archive_mode=True)
 
     issues = blockers + warnings
     return {
@@ -88,7 +102,63 @@ def schema_requires_verification_evidence(pack: dict[str, Any]) -> bool:
     if not schema.get("tasks_required"):
         return False
     schema_name = str(schema.get("name") or "")
+    if schema_name in SCHEMA_EVIDENCE_REQUIREMENTS:
+        return False
     return schema_name != "quick-research"
+
+
+def append_schema_evidence_issues(
+    pack: dict[str, Any],
+    blockers: list[dict[str, Any]],
+    warnings: list[dict[str, Any]],
+    *,
+    archive_mode: bool,
+) -> None:
+    schema = pack["facts"]["parsed"].get("schema", {})
+    schema_name = str(schema.get("name") or "")
+    requirement = SCHEMA_EVIDENCE_REQUIREMENTS.get(schema_name)
+    if not requirement:
+        return
+
+    domain, categories = requirement
+    evidence = pack["evidence"]
+    evidence_paths = [
+        path
+        for category in categories
+        for path in evidence.get(domain, {}).get(category, [])
+    ]
+    if not evidence_paths:
+        target = blockers if archive_mode else warnings
+        severity = "blocker" if archive_mode else "risk"
+        target.append(
+            issue(
+                "SCHEMA_EVIDENCE_MISSING",
+                severity,
+                f"{schema_name} requires evidence for {domain}: {', '.join(categories)}",
+                "docs/verification",
+            )
+        )
+        return
+
+    for item in parsed_domain_evidence(evidence, domain, categories):
+        status = item.get("status")
+        path = str(item.get("path") or "docs/verification")
+        if status == "failed":
+            blockers.append(issue("SCHEMA_EVIDENCE_FAILED", "blocker", f"{schema_name} evidence reports failure", path))
+        elif status == "unknown":
+            warnings.append(issue("SCHEMA_EVIDENCE_UNKNOWN", "risk", f"{schema_name} evidence has unknown status", path))
+
+
+def parsed_domain_evidence(evidence: dict[str, Any], domain: str, categories: tuple[str, ...]) -> list[dict[str, Any]]:
+    details = evidence.get("details") if isinstance(evidence.get("details"), dict) else {}
+    domain_details = details.get("domain") if isinstance(details.get("domain"), dict) else {}
+    category_details = domain_details.get(domain) if isinstance(domain_details.get(domain), dict) else {}
+    items: list[dict[str, Any]] = []
+    for category in categories:
+        for item in category_details.get(category, []):
+            if isinstance(item, dict):
+                items.append(item)
+    return items
 
 
 def normalize_gap(gap: dict[str, Any]) -> dict[str, str]:
@@ -104,7 +174,7 @@ def evidence_has_verification(evidence: dict[str, Any]) -> bool:
     return any(
         evidence.get(key)
         for key in ("ce_code_review", "tests", "manual_verification")
-    )
+    ) or any(evidence.get("quick_fix", {}).get(key) for key in ("monitoring", "rollback"))
 
 
 def append_evidence_issues(

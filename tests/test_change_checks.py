@@ -245,6 +245,117 @@ artifacts:
     write(change / "recommendation.md", "# Recommendation\n\n有条件支持，后续另起实现 change。\n")
 
 
+def create_docsite_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: aisee-docsite-driven\n")
+    write(
+        root / "openspec" / "schemas" / "aisee-docsite-driven" / "schema.yaml",
+        """name: aisee-docsite-driven
+version: 1
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    template: proposal.md
+    requires: []
+  - id: doc-change
+    generates: doc-change.md
+    template: doc-change.md
+    requires: [proposal]
+  - id: tasks
+    generates: tasks.md
+    template: tasks.md
+    requires: [doc-change]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+""",
+    )
+    change = root / "openspec" / "changes" / "update-docs"
+    write(change / ".openspec.yaml", "schema: aisee-docsite-driven\n")
+    write(change / "proposal.md", "# Proposal\n")
+    write(change / "doc-change.md", "# Doc Change\n")
+    write(change / "tasks.md", "# Tasks\n\n- [x] 更新文档页面。\n- [x] 完成 Archive Gate。\n")
+
+
+def create_infra_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: infra-change\n")
+    write(
+        root / "openspec" / "schemas" / "infra-change" / "schema.yaml",
+        """name: infra-change
+version: 1
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    template: proposal.md
+    requires: []
+  - id: impact-assessment
+    generates: impact-assessment.md
+    template: impact-assessment.md
+    requires: [proposal]
+  - id: rollback-plan
+    generates: rollback-plan.md
+    template: rollback-plan.md
+    requires: [proposal]
+  - id: tasks
+    generates: tasks.md
+    template: tasks.md
+    requires: [impact-assessment, rollback-plan]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+""",
+    )
+    change = root / "openspec" / "changes" / "update-ci"
+    write(change / ".openspec.yaml", "schema: infra-change\n")
+    write(change / "proposal.md", "# Proposal\n")
+    write(change / "impact-assessment.md", "# Impact\n")
+    write(change / "rollback-plan.md", "# Rollback\n")
+    write(change / "tasks.md", "# Tasks\n\n- [x] 更新 CI 配置。\n")
+
+
+def create_security_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: security-audit\n")
+    write(
+        root / "openspec" / "schemas" / "security-audit" / "schema.yaml",
+        """name: security-audit
+version: 1
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    template: proposal.md
+    requires: []
+  - id: threat-model
+    generates: threat-model.md
+    template: threat-model.md
+    requires: [proposal]
+  - id: specs
+    generates: specs/**/*.md
+    template: spec.md
+    requires: [threat-model]
+  - id: design
+    generates: design.md
+    template: design.md
+    requires: [proposal]
+  - id: tasks
+    generates: tasks.md
+    template: tasks.md
+    requires: [specs, design]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+""",
+    )
+    change = root / "openspec" / "changes" / "secure-login"
+    write(change / ".openspec.yaml", "schema: security-audit\n")
+    write(change / "proposal.md", "# Proposal\n")
+    write(change / "threat-model.md", "# Threat Model\n")
+    write(change / "specs" / "security.md", "## ADDED Requirements\n")
+    write(change / "design.md", "# Design\n")
+    write(change / "tasks.md", "# Tasks\n\n- [x] 修复认证风险。\n")
+
+
 def test_change_inspect_uses_current_schema_artifacts(tmp_path: Path) -> None:
     create_device_project(tmp_path)
 
@@ -371,3 +482,37 @@ def test_quick_research_verify_and_archive_do_not_require_tasks_or_tests(tmp_pat
     assert "TASKS_MISSING" not in {item["code"] for item in verify["issues"]}
     assert "TEST_EVIDENCE_MISSING" not in {item["code"] for item in verify["issues"]}
     assert archive["status"] == "archive-ready"
+
+
+def test_docsite_archive_requires_domain_evidence(tmp_path: Path) -> None:
+    create_docsite_project(tmp_path)
+    write(tmp_path / "docs" / "verification" / "update-docs-openspec-validate.md", "passed\n")
+
+    missing = run_json(tmp_path, "change", "archive-check", "update-docs", "--json")
+    assert missing["status"] == "blocked"
+    assert any(item["code"] == "SCHEMA_EVIDENCE_MISSING" for item in missing["blockers"])
+
+    write(tmp_path / "docs" / "verification" / "update-docs-build.md", "passed\n")
+    ready = run_json(tmp_path, "change", "archive-check", "update-docs", "--json")
+    assert ready["status"] == "archive-ready"
+
+
+def test_infra_archive_requires_rollback_or_post_change_evidence(tmp_path: Path) -> None:
+    create_infra_project(tmp_path)
+    write(tmp_path / "docs" / "verification" / "update-ci-openspec-validate.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "archive-check", "update-ci", "--json")
+
+    assert data["status"] == "blocked"
+    assert any(item["code"] == "SCHEMA_EVIDENCE_MISSING" for item in data["blockers"])
+
+
+def test_security_failed_schema_evidence_blocks_archive(tmp_path: Path) -> None:
+    create_security_project(tmp_path)
+    write(tmp_path / "docs" / "verification" / "secure-login-openspec-validate.md", "passed\n")
+    write(tmp_path / "docs" / "verification" / "secure-login-sast.md", "FAILED: high risk finding\n")
+
+    data = run_json(tmp_path, "change", "archive-check", "secure-login", "--json")
+
+    assert data["status"] == "blocked"
+    assert any(item["code"] == "SCHEMA_EVIDENCE_FAILED" for item in data["blockers"])

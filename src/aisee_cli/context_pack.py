@@ -778,17 +778,60 @@ def build_evidence(root: Path, change: str) -> dict[str, Any]:
     verification_files = []
     if verification_dir.exists():
         verification_files = [rel(root, path) for path in sorted(verification_dir.glob(f"*{change}*")) if path.is_file()]
+    classified = classify_evidence(review_files, verification_files)
     return {
         "openspec_validate": first_matching(verification_files, ("validate", "openspec")),
         "ce_doc_review": [path for path in review_files if "doc" in path],
         "ce_code_review": [path for path in review_files if "code" in path],
         "tests": [path for path in verification_files if "test" in path],
         "manual_verification": [path for path in verification_files if "manual" in path or "verify" in path],
-        "details": build_evidence_details(root, review_files, verification_files),
+        "docsite": classified["docsite"],
+        "infra": classified["infra"],
+        "security": classified["security"],
+        "quick_fix": classified["quick_fix"],
+        "details": build_evidence_details(root, review_files, verification_files, classified),
     }
 
 
-def build_evidence_details(root: Path, review_files: list[str], verification_files: list[str]) -> dict[str, Any]:
+def classify_evidence(review_files: list[str], verification_files: list[str]) -> dict[str, dict[str, list[str]]]:
+    return {
+        "docsite": {
+            "build": matching_paths(verification_files, ("build", "site-build")),
+            "links": matching_paths(verification_files, ("link", "links")),
+            "preview": matching_paths(verification_files, ("preview",)),
+            "manual": matching_paths(verification_files, ("manual", "proofread", "review")),
+        },
+        "infra": {
+            "precheck": matching_paths(verification_files, ("precheck", "pre-check", "preflight")),
+            "rollback": matching_paths(verification_files, ("rollback",)),
+            "post_change": matching_paths(verification_files, ("post-change", "postchange", "post-change-verify", "deployment-verify")),
+        },
+        "security": {
+            "reviews": matching_paths(review_files, ("security", "sec", "audit")),
+            "sast": matching_paths(verification_files, ("sast", "static-analysis")),
+            "dependency_scan": matching_paths(verification_files, ("dependency", "deps", "cve", "vulnerability", "vuln")),
+            "penetration_test": matching_paths(verification_files, ("pentest", "penetration")),
+            "tests": matching_paths(verification_files, ("security-test", "security-tests", "auth-test")),
+        },
+        "quick_fix": {
+            "tests": matching_paths(verification_files, ("test",)),
+            "manual_verification": matching_paths(verification_files, ("manual", "verify")),
+            "monitoring": matching_paths(verification_files, ("monitor", "monitoring", "metrics", "observe")),
+            "rollback": matching_paths(verification_files, ("rollback",)),
+        },
+    }
+
+
+def matching_paths(paths: list[str], terms: tuple[str, ...]) -> list[str]:
+    return [path for path in paths if any(term in path.lower() for term in terms)]
+
+
+def build_evidence_details(
+    root: Path,
+    review_files: list[str],
+    verification_files: list[str],
+    classified: dict[str, dict[str, list[str]]],
+) -> dict[str, Any]:
     validate_path = first_matching(verification_files, ("validate", "openspec"))
     return {
         "openspec_validate": parse_status_file(root, validate_path) if validate_path else None,
@@ -799,6 +842,13 @@ def build_evidence_details(root: Path, review_files: list[str], verification_fil
             for path in verification_files
             if "manual" in path.lower() or "verify" in path.lower()
         ],
+        "domain": {
+            domain: {
+                category: [parse_status_file(root, path) for path in paths]
+                for category, paths in categories.items()
+            }
+            for domain, categories in classified.items()
+        },
         "accepted_risks": collect_accepted_risks(root, review_files + verification_files),
     }
 
@@ -856,6 +906,10 @@ def first_priority(line: str) -> str | None:
     for priority in ("P0", "P1", "P2", "P3"):
         if priority in upper:
             return priority
+    if "CRITICAL" in upper:
+        return "P0"
+    if "HIGH" in upper:
+        return "P1"
     return None
 
 
