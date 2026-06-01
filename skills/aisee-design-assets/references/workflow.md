@@ -11,11 +11,16 @@
 3. 涉及通用图标或组件风格时，读取 `references/icon-library.md`，只生成图标占位和图标清单。
 4. 按 `references/image-generation.md` 选择内置 `image_gen` 或 CLI fallback。
 5. 内置模式生成后按需裁切、缩放或移动到项目本地。
-6. 生成 2-4 张候选参考图。
+6. 生成参考图：
+   - 单页面 / 单状态视觉方向：生成 2-4 张候选。
+   - 长页面 / Landing / 多 section：按 section 生成清晰参考图，不合并成单张超长图。
+   - App / 小程序 / H5 多状态：按页面或关键状态生成，不把列表、详情、表单、空状态压缩在一张图里。
 7. 保存到 `docs/design-assets/references/`，更新 `index.md` / `index.json`。
 8. 让用户选择主参考图，或基于反馈重做。
 
 候选说明包含视觉方向、适用场景、差异点和风险。
+
+当任务主要是视觉质量、重设计、图片转视觉 brief 或用户上传参考图时，必须同时读取 `references/image-first.md`，先完成参考图分析，再输出 StyleSpec 草稿、Figma brief 或 dev-visual-brief。
 
 ## Structure-locked redraw
 
@@ -44,7 +49,7 @@
 ## 从参考图提取设计规范
 
 1. 明确来源参考图。
-2. 识别颜色、构图、层级、图形语言、素材类型和禁用项。
+2. 识别颜色、构图、层级、图形语言、素材类型、组件形态、布局节奏、可实现性和禁用项。
 3. 输出 Markdown StyleSpec；需要结构化复用时同时输出 JSON。
 4. 保存到 `docs/design-assets/specs/`，更新索引。
 

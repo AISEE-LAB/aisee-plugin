@@ -103,6 +103,7 @@ find . -maxdepth 3 \( -iname '*style*spec*.md' -o -iname '*style*spec*.json' -o 
 按用户意图选择最小流程，并只读取相关 reference：
 
 - 生成参考图、保结构重绘、从规范生成新图：读 `references/workflow.md`
+- 视觉质量优先、用户上传参考图/截图、图片转视觉 brief 或 image-first 工作流：读 `references/image-first.md`
 - 图片生成、编辑、透明图、CLI fallback：读 `references/image-generation.md`
 - 提取或生成 StyleSpec 草稿：读 `references/style-spec.md`
 - 规划、提取、生成或复核素材：读 `references/asset-manifest.md`
@@ -116,13 +117,14 @@ find . -maxdepth 3 \( -iname '*style*spec*.md' -o -iname '*style*spec*.json' -o 
 
 常见闭环：
 
-1. 只有描述且要视觉方向：生成参考图。
-2. 有参考图且要沉淀风格线索：生成 StyleSpec 草稿；需要长期规范时交给 `aisee:design-spec`。
+1. 只有描述且要视觉方向：按 image-first 判断是否生成参考图。
+2. 有参考图/截图且要沉淀风格线索：先分析参考图，再生成 StyleSpec 草稿；需要长期规范时交给 `aisee:design-spec`。
 3. 有 `aisee:design-spec` 或 StyleSpec 且要新页面视觉：基于规范生成新参考图。
-4. 有参考图/规范且要素材：生成素材清单，再生成或提取素材。
-5. 有已有图片且要修改：进入编辑流程。
-6. 需要进入 Figma MCP 或前端开发：生成对应 brief。
-7. 要从已有扁平图片中分离对象、生成 mask、交互式框选/点选、导出透明对象、移除对象并补背景或生成图层包：交给专用对象处理 skill/工具；本 skill 只负责把产物登记到设计资产索引。
+4. 有长页面、Landing、多状态或多端视觉任务：按页面 / section / 关键状态分图生成或分析，不压成单张超长图。
+5. 有参考图/规范且要素材：生成素材清单，再生成或提取素材。
+6. 有已有图片且要修改：进入编辑流程。
+7. 需要进入 Figma MCP 或前端开发：生成对应 brief；前端只拿 `dev-visual-brief` 做视觉输入，不让本 skill 写代码。
+8. 要从已有扁平图片中分离对象、生成 mask、交互式框选/点选、导出透明对象、移除对象并补背景或生成图层包：交给专用对象处理 skill/工具；本 skill 只负责把产物登记到设计资产索引。
 
 ## Phase 2 — 输入门禁
 
@@ -137,7 +139,7 @@ find . -maxdepth 3 \( -iname '*style*spec*.md' -o -iname '*style*spec*.json' -o 
 - 输出目录：`docs/design-assets/`
 - 规范格式：Markdown；需要机器复用时追加 JSON
 - 透明范围：只对用户指定的独立素材生成透明版
-- 候选数量：参考图 2-4 张，素材每项 1 个主版本
+- 候选数量：单页视觉方向参考图 2-4 张；长页面按 section 分图；素材每项 1 个主版本
 
 ## Phase 3 — 执行
 
