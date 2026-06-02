@@ -12,7 +12,7 @@
 
 | Input | Path / Source | Status | Notes |
 |---|---|---|---|
-| Hardware SRS | docs/requirements/...-hw-srs.md | confirmed / draft | |
+| Hardware SRS | aisee/docs/requirements/...-hw-srs.md | confirmed / draft | |
 | Project Structure | docs/project-structure.md | confirmed / missing / N/A | |
 | Clock Contract | docs/clock-contract.md | confirmed / missing / N/A | |
 | Memory / Device Contract | docs/memory-device-contract.md | confirmed / missing / N/A | |

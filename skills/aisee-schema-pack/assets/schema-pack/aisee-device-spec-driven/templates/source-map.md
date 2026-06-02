@@ -4,10 +4,10 @@
 
 | 来源 | 路径 / 描述 | 状态 | 备注 |
 |---|---|---|---|
-| Hardware SRS | docs/requirements/...-hw-srs.md | 已确认 / 缺失 / N/A | 需求、约束、硬件适配取舍的来源 |
-| Hardware Architecture | docs/architecture/...-hw-architecture.md | 已确认 / 缺失 / N/A | 全局架构、资源分配、预算和规则来源 |
+| Hardware SRS | aisee/docs/requirements/...-hw-srs.md | 已确认 / 缺失 / N/A | 需求、约束、硬件适配取舍的来源 |
+| Hardware Architecture | aisee/docs/architecture/...-hw-architecture.md | 已确认 / 缺失 / N/A | 全局架构、资源分配、预算和规则来源 |
 | Module Architecture | docs/modules/... | 已确认 / 缺失 / N/A | 模块数 >= 5 时应引用 |
-| Hardware Change Plan | docs/change-plan/...-hw-change-plan.md | 已确认 / 缺失 / N/A | 本 change 边界、依赖和 source-map seed 来源 |
+| Hardware Change Plan | aisee/docs/change-plan/...-hw-change-plan.md | 已确认 / 缺失 / N/A | 本 change 边界、依赖和 source-map seed 来源 |
 | Project Structure Contract | docs/project-structure.md | 已确认 / 缺失 / N/A | 工程目录、厂商库、构建入口 |
 | Clock Contract | docs/clock-contract.md | 已确认 / 缺失 / N/A | 系统时钟、外设时钟、项目相关时序 |
 | Memory / Device Contract | docs/memory-device-contract.md | 已确认 / 缺失 / N/A | 型号、Flash/RAM/storage、启动文件、linker/scatter、下载/部署配置 |

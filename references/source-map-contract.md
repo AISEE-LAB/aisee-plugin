@@ -18,7 +18,7 @@ JSON 字段名保持向后兼容：`Affected Paths Index` 解析后仍输出为 
 
 | Source | Path / Description | Source ID | Status | Notes |
 |---|---|---|---|---|
-| SRS | docs/requirements/auth-srs.md | SRC-001 | confirmed | |
+| SRS | aisee/docs/requirements/auth-srs.md | SRC-001 | confirmed | |
 
 Rules:
 

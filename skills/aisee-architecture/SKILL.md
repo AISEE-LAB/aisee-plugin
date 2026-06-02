@@ -67,7 +67,7 @@ description: 在 aisee:change-plan 之前生成跨工程域技术架构文档，
 - `CONSTRAINT`：技术约束、平台约束、集成约束、运行环境限制。
 - `RISK`：技术风险、阻塞项、冲突或需要验证的风险。
 
-正式 ID 必须来自 `.aisee/id-registry.json`。新增架构项前，使用：
+正式 ID 必须来自 `aisee/registry/id-registry.json`。新增架构项前，使用：
 
 ```bash
 aisee id reserve --scope <scope> --type ARCH --count <N> --json
@@ -95,7 +95,7 @@ cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat AGENTS.md 2>/dev/null | head -160
 cat CLAUDE.md 2>/dev/null | head -80
-cat .aisee/id-registry.json 2>/dev/null || true
+cat aisee/registry/id-registry.json 2>/dev/null || true
 find . -maxdepth 3 \( -name package.json -o -name pnpm-lock.yaml -o -name yarn.lock -o -name package-lock.json -o -name pyproject.toml -o -name requirements.txt -o -name Gemfile -o -name go.mod -o -name Cargo.toml -o -name pom.xml -o -name build.gradle -o -name composer.json -o -name prisma -o -name drizzle -o -name migrations -o -name schema.sql -o -name openapi.yaml -o -name openapi.json \) 2>/dev/null | head -80
 find . -maxdepth 4 \( -iname 'CMakeLists.txt' -o -iname 'Makefile' -o -iname '*.ioc' -o -iname '*.dts' -o -iname '*.dtsi' -o -iname 'platformio.ini' -o -iname 'west.yml' -o -iname 'Kconfig' -o -iname '*.ld' -o -iname '*.sv' -o -iname '*.v' -o -iname '*.xdc' -o -iname '*.sdc' \) 2>/dev/null | head -80
 find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*stack*' -o -iname '*design*' -o -iname '*hardware*' -o -iname '*firmware*' -o -iname '*rtos*' -o -iname '*driver*' \) 2>/dev/null | head -80
@@ -213,12 +213,12 @@ find docs -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*
 默认保存：
 
 ```bash
-mkdir -p docs/architecture
+mkdir -p aisee/docs/architecture
 ```
 
 文件：
 
-`docs/architecture/<YYYY-MM-DD>-<slug>-architecture.md`
+`aisee/docs/architecture/<YYYY-MM-DD>-<slug>-architecture.md`
 
 如果用户只要求分析，可以只在聊天中输出。
 
@@ -228,7 +228,7 @@ mkdir -p docs/architecture
 
 完成后输出：
 
-> 技术架构文档已生成：`docs/architecture/{filename}.md`
+> 技术架构文档已生成：`aisee/docs/architecture/{filename}.md`
 >
 > 技术栈状态：已确定 / 部分确定 / 未确定
 > 识别：{A} 个架构决策、{N} 个架构边界、{M} 个可复用能力、{K} 个共享技术前置、{R} 个风险、{Q} 个阻塞决策。

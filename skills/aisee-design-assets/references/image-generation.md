@@ -72,7 +72,7 @@ Preserve the original brand identity, layout structure, visual style, color syst
 OPENAI_API_KEY
 OPENAI_BASE_URL
 AISEE_IMAGEGEN_CONFIG
-.aisee/design-assets/openai.local.json
+aisee/config/design-assets/openai.local.json
 ```
 
 默认配置文件格式见 `assets/openai-config-template.json`。
@@ -82,7 +82,7 @@ AISEE_IMAGEGEN_CONFIG
 ```text
 --base-url > OPENAI_BASE_URL > config.base_url
 OPENAI_API_KEY > config.api_key
---config > AISEE_IMAGEGEN_CONFIG > .aisee/design-assets/openai.local.json
+--config > AISEE_IMAGEGEN_CONFIG > aisee/config/design-assets/openai.local.json
 ```
 
 约束：
@@ -126,7 +126,7 @@ python <skill-dir>/scripts/image_gen.py generate \
   --size 1536x1024 \
   --quality high \
   --output-format png \
-  --out docs/design-assets/references/reference-001.png
+  --out aisee/docs/design-assets/references/reference-001.png
 ```
 
 编辑：
@@ -134,9 +134,9 @@ python <skill-dir>/scripts/image_gen.py generate \
 ```bash
 python <skill-dir>/scripts/image_gen.py edit \
   --model gpt-image-2 \
-  --image docs/design-assets/references/reference-001.png \
+  --image aisee/docs/design-assets/references/reference-001.png \
   --prompt "<只描述要改的内容，同时写清保留项>" \
-  --out docs/design-assets/edits/reference-001-edit-001.png
+  --out aisee/docs/design-assets/edits/reference-001-edit-001.png
 ```
 
 局部编辑：
@@ -159,7 +159,7 @@ python <skill-dir>/scripts/image_gen.py edit \
 ```bash
 python <skill-dir>/scripts/remove_chroma_key.py \
   --input tmp/imagegen/input-green.png \
-  --out docs/design-assets/assets/transparent/output-transparent.png \
+  --out aisee/docs/design-assets/assets/transparent/output-transparent.png \
   --auto-key border \
   --soft-matte \
   --transparent-threshold 12 \
@@ -186,7 +186,7 @@ python <skill-dir>/scripts/image_gen.py generate \
   --background transparent \
   --output-format png \
   --quality high \
-  --out docs/design-assets/assets/transparent/asset-001.png
+  --out aisee/docs/design-assets/assets/transparent/asset-001.png
 ```
 
 通用 UI 图标不走透明素材生图流程，优先使用 SVG 图标库。小型透明 UI 素材通常使用 `256x256` 或 `512x512`；只有复杂插画、角色、营销视觉或大面积背景装饰才使用 `1024+`。

@@ -9,7 +9,7 @@ N/A 原因：
 
 ## 来源与范围
 
-- Architecture 来源：docs/architecture/... / N/A
+- Architecture 来源：aisee/docs/architecture/... / N/A
 - 关联上游 ID：{{scope}}:ARCH-001 / {{scope}}:DEC-001 / {{scope}}:CONSTRAINT-001 / {{scope}}:RISK-001 / N/A
 - 本 change 适用原因：
 - 不在本文重复的内容：全局技术栈 / 完整模块架构 / 页面内容 / 接口字段 / 数据表字段 / 实现任务

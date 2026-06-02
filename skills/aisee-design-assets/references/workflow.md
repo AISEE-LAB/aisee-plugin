@@ -15,7 +15,7 @@
    - 单页面 / 单状态视觉方向：生成 2-4 张候选。
    - 长页面 / Landing / 多 section：按 section 生成清晰参考图，不合并成单张超长图。
    - App / 小程序 / H5 多状态：按页面或关键状态生成，不把列表、详情、表单、空状态压缩在一张图里。
-7. 保存到 `docs/design-assets/references/`，更新 `index.md` / `index.json`。
+7. 保存到 `aisee/docs/design-assets/references/`，更新 `index.md` / `index.json`。
 8. 让用户选择主参考图，或基于反馈重做。
 
 候选说明包含视觉方向、适用场景、差异点和风险。
@@ -51,7 +51,7 @@
 1. 明确来源参考图。
 2. 识别颜色、构图、层级、图形语言、素材类型、组件形态、布局节奏、可实现性和禁用项。
 3. 输出 Markdown StyleSpec；需要结构化复用时同时输出 JSON。
-4. 保存到 `docs/design-assets/specs/`，更新索引。
+4. 保存到 `aisee/docs/design-assets/specs/`，更新索引。
 
 ## 基于规范生成新设计图
 
@@ -67,7 +67,7 @@
 3. 确认用途、尺寸、透明需求和来源依据。
 4. 通用图标优先映射图标库；不要用图片模型重画常见操作、导航和状态图标。
 5. 生成、编辑或提取素材。
-6. 保存到 `docs/design-assets/assets/`，更新 `manifests/asset-manifest.md`。
+6. 保存到 `aisee/docs/design-assets/assets/`，更新 `manifests/asset-manifest.md`。
 
 ## 图片编辑
 

@@ -10,6 +10,7 @@ from typing import Any
 
 
 DEFAULT_CONFIG_PATHS = (
+    "aisee/config/image-object/config.json",
     ".aisee/image-object/config.json",
     ".aisee-image-object.json",
 )

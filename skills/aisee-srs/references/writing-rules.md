@@ -71,7 +71,7 @@
 - 只记录用户可观察业务行为、角色权限、状态、流程、入口、兼容要求的影响。
 - 不写 API endpoint、数据库表字段、ORM、代码模块、迁移脚本或实现方案。
 - 每条受影响 FR 必须在 FR 正文和 Section 7 中标注“变更类型”和“影响基线”。
-- 影响基线来源优先级：`openspec/specs/` > active change artifacts > `docs/spec-migration/` > 历史 SRS > 用户明确说明 > 从代码推断（低可信，必须标注）。
+- 影响基线来源优先级：`openspec/specs/` > active change artifacts > `aisee/docs/spec-migration/` > 历史 SRS > 用户明确说明 > 从代码推断（低可信，必须标注）。
 
 ### Section 6：Open Questions
 

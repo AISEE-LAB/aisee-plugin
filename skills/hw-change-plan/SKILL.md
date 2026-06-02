@@ -12,8 +12,8 @@ description: 将已确认的硬件 SRS、整体架构、工程事实和模块文
 ## Inputs
 
 必需：
-- `docs/requirements/*-hw-srs.md`
-- `docs/architecture/*-hw-architecture.md`
+- `aisee/docs/requirements/*-hw-srs.md`
+- `aisee/docs/architecture/*-hw-architecture.md`
 
 可选：
 - `docs/modules/*.md`
@@ -44,7 +44,7 @@ description: 将已确认的硬件 SRS、整体架构、工程事实和模块文
 
 保存到：
 
-`docs/change-plan/<YYYY-MM-DD>-<slug>-hw-change-plan.md`
+`aisee/docs/change-plan/<YYYY-MM-DD>-<slug>-hw-change-plan.md`
 
 输出必须包含：
 - Summary
@@ -64,8 +64,8 @@ description: 将已确认的硬件 SRS、整体架构、工程事实和模块文
 PowerShell:
 
 ```powershell
-Get-Content -ErrorAction Stop docs/requirements/*-hw-srs.md
-Get-Content -ErrorAction Stop docs/architecture/*-hw-architecture.md
+Get-Content -ErrorAction Stop aisee/docs/requirements/*-hw-srs.md
+Get-Content -ErrorAction Stop aisee/docs/architecture/*-hw-architecture.md
 Get-Content -ErrorAction SilentlyContinue docs/modules/*.md
 Get-Content -ErrorAction SilentlyContinue docs/project-structure.md
 Get-Content -ErrorAction SilentlyContinue docs/clock-contract.md
@@ -77,8 +77,8 @@ cmd /c openspec schemas --json 2>nul
 POSIX shell:
 
 ```bash
-cat docs/requirements/*-hw-srs.md
-cat docs/architecture/*-hw-architecture.md
+cat aisee/docs/requirements/*-hw-srs.md
+cat aisee/docs/architecture/*-hw-architecture.md
 cat docs/modules/*.md 2>/dev/null
 cat docs/project-structure.md 2>/dev/null
 cat docs/clock-contract.md 2>/dev/null

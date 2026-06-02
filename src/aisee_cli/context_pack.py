@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.paths import id_registry_path, sources_path as aisee_sources_path
 from aisee_cli.source_map import parse_source_map
 
 
@@ -24,7 +25,7 @@ CONTEXT_SCHEMA_VERSION = "1.0"
 ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-(?:NEW-)?\d+\b")
 PATH_PATTERN = re.compile(
     r"(?<![\w./-])"
-    r"((?:src|app|apps|lib|libs|packages|tests|test|docs|openspec|assets|config)"
+    r"((?:src|app|apps|lib|libs|packages|tests|test|aisee/docs|docs|openspec|assets|config)"
     r"/[A-Za-z0-9_./@:+-]+)"
 )
 CHECKBOX_PATTERN = re.compile(r"^\s*-\s+\[(?P<mark>[ xX~-])\]\s*(?P<title>.*)$")
@@ -440,7 +441,7 @@ def inspect_project_rules(root: Path) -> dict[str, Any]:
 
 
 def inspect_id_registry(root: Path, ids: list[str]) -> dict[str, Any]:
-    path = root / ".aisee" / "id-registry.json"
+    path = id_registry_path(root)
     result: dict[str, Any] = {
         "available": path.exists(),
         "checked": path.exists(),
@@ -498,18 +499,18 @@ def inspect_id_registry(root: Path, ids: list[str]) -> dict[str, Any]:
 
 
 def inspect_sources(root: Path, source_map_text: str) -> list[dict[str, Any]]:
-    sources_path = root / ".aisee" / "sources.json"
+    registry_path = aisee_sources_path(root)
     sources: list[dict[str, Any]] = []
-    if sources_path.exists():
+    if registry_path.exists():
         try:
-            data = json.loads(read_text(sources_path))
+            data = json.loads(read_text(registry_path))
             if isinstance(data, list):
                 sources.extend(item for item in data if isinstance(item, dict))
             elif isinstance(data, dict):
                 for key, value in data.items():
                     sources.append({"id": key, "value": value})
         except json.JSONDecodeError:
-            sources.append({"path": rel(root, sources_path), "status": "invalid-json"})
+            sources.append({"path": rel(root, registry_path), "status": "invalid-json"})
 
     for path in sorted(extract_paths(source_map_text)):
         if path.startswith("docs/"):
@@ -587,9 +588,9 @@ def build_gaps(
     has_change_ids = bool(id_registry.get("queried_ids"))
     id_owner_artifact = "source-map.md" if source_map_required else "schema artifacts"
     if not id_registry["available"] and (source_map_required or has_change_ids):
-        gaps.append(gap("ID_REGISTRY_GAP", "risk", ".aisee/id-registry.json is missing", ".aisee/id-registry.json"))
+        gaps.append(gap("ID_REGISTRY_GAP", "risk", "Aisee ID registry is missing", "aisee/registry/id-registry.json"))
     elif id_registry.get("error"):
-        gaps.append(gap("ID_REGISTRY_INVALID", "blocker", str(id_registry["error"]), ".aisee/id-registry.json"))
+        gaps.append(gap("ID_REGISTRY_INVALID", "blocker", str(id_registry["error"]), "aisee/registry/id-registry.json"))
     else:
         temporary_ids = id_registry.get("temporary_ids", [])
         if temporary_ids:
@@ -608,7 +609,7 @@ def build_gaps(
                 gap(
                     "ID_UNREGISTERED_REFERENCE",
                     "risk",
-                    "Change references IDs that are not registered in .aisee/id-registry.json",
+                    "Change references IDs that are not registered in the Aisee ID registry",
                     id_owner_artifact,
                     missing_ids,
                 )

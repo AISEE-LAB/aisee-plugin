@@ -19,7 +19,7 @@
       "id": 3,
       "name": "large-monorepo-batched-migration",
       "prompt": "为一个大型 monorepo 建立 OpenSpec baseline。包含 web、admin、api、worker、mobile 多个 package，模块超过 30 个。请快速迁移到 OpenSpec 管理。",
-      "expected_output": "判断范围过大，输出分批迁移策略和 docs/spec-migration/ 索引。目标 specs 按业务域和 package 边界组合规划，单批最多生成少量 spec，不生成巨型 everything/spec.md，不按 frontend/backend/database 技术层机械拆分。",
+      "expected_output": "判断范围过大，输出分批迁移策略和 aisee/docs/spec-migration/ 索引。目标 specs 按业务域和 package 边界组合规划，单批最多生成少量 spec，不生成巨型 everything/spec.md，不按 frontend/backend/database 技术层机械拆分。",
       "files": []
     }
   ]

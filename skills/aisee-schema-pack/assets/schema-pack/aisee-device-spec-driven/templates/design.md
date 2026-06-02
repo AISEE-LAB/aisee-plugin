@@ -39,7 +39,7 @@
 
 | 约束来源 | 约束内容 | 对本 change 的影响 | 是否满足 |
 |---|---|---|---|
-| docs/architecture/... | | | 是 / 否 |
+| aisee/docs/architecture/... | | | 是 / 否 |
 | docs/project-structure.md | | | 是 / 否 / N/A |
 | docs/clock-contract.md | | | 是 / 否 / N/A |
 | docs/memory-device-contract.md | | | 是 / 否 / N/A |

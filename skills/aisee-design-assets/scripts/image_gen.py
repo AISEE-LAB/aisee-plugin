@@ -30,8 +30,8 @@ DEFAULT_QUALITY = "medium"
 DEFAULT_OUTPUT_FORMAT = "png"
 DEFAULT_CONCURRENCY = 5
 DEFAULT_DOWNSCALE_SUFFIX = "-web"
-DEFAULT_OUTPUT_PATH = "docs/design-assets/references/imagegen-output.png"
-DEFAULT_CONFIG_PATH = ".aisee/design-assets/openai.local.json"
+DEFAULT_OUTPUT_PATH = "aisee/docs/design-assets/references/imagegen-output.png"
+DEFAULT_CONFIG_PATH = "aisee/config/design-assets/openai.local.json"
 DEFAULT_USER_AGENT = "aisee-design-assets/1.0"
 GPT_IMAGE_MODEL_PREFIX = "gpt-image-"
 

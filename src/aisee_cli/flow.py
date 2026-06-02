@@ -15,7 +15,7 @@ def build_flow(project_root: Path, *, change: str | None = None) -> dict[str, An
     root = project_root.resolve()
     doctor = build_doctor(root)
     if doctor["status"] == "blocked":
-        return flow_result("uninitialized", ["aisee doctor", "aisee-init", "aisee-schema-pack"], ["doctor has blockers"], doctor, change)
+        return flow_result("uninitialized", ["aisee doctor", "aisee:init", "aisee-schema-pack"], ["doctor has blockers"], doctor, change)
 
     if not change:
         sources = doctor["aisee"]["sources"]

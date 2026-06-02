@@ -50,7 +50,7 @@ def test_cli_id_reserve_creates_registry_and_increments(tmp_path: Path) -> None:
     assert next_data["status"] == "ok"
     assert next_data["next"]["id"] == "auth:FR-001"
     assert next_data["writes"] is False
-    assert not (tmp_path / ".aisee" / "id-registry.json").exists()
+    assert not (tmp_path / "aisee" / "registry" / "id-registry.json").exists()
 
     data = run_aisee(
         tmp_path,
@@ -68,7 +68,7 @@ def test_cli_id_reserve_creates_registry_and_increments(tmp_path: Path) -> None:
     assert data["status"] == "ok"
     assert [item["id"] for item in data["reserved"]] == ["auth:FR-001", "auth:FR-002"]
 
-    registry = json.loads((tmp_path / ".aisee" / "id-registry.json").read_text(encoding="utf-8"))
+    registry = json.loads((tmp_path / "aisee" / "registry" / "id-registry.json").read_text(encoding="utf-8"))
     assert registry["scopes"]["auth"]["counters"]["FR"] == 2
     assert registry["scopes"]["auth"]["ids"]["auth:FR-001"]["status"] == "reserved"
 
@@ -79,7 +79,7 @@ def test_cli_id_next_uses_existing_counter(tmp_path: Path) -> None:
     data = run_aisee(tmp_path, "id", "next", "--scope", "auth", "--type", "FR", "--json")
 
     assert data["next"]["id"] == "auth:FR-003"
-    registry = json.loads((tmp_path / ".aisee" / "id-registry.json").read_text(encoding="utf-8"))
+    registry = json.loads((tmp_path / "aisee" / "registry" / "id-registry.json").read_text(encoding="utf-8"))
     assert registry["scopes"]["auth"]["counters"]["FR"] == 2
 
 

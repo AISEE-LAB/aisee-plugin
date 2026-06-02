@@ -1,7 +1,7 @@
 # Memory Rules
 
 > 项目本地记忆规则。
-> 本文件应写入项目根目录下的 `.memory/rules.md`，与 `.memory/index.md` 配套使用。
+> 本文件应写入项目根目录下的 `aisee/memory/rules.md`，与 `aisee/memory/index.md` 配套使用。
 
 ## 目录结构
 
@@ -9,16 +9,18 @@
 
 ```text
 {project-root}/
-└── .memory/
-    ├── index.md           ← 入口文件；始终先读它
-    ├── arch/              ← 架构决策，长期保留
-    │   └── YYYY-MM-DD-{slug}.md
-    ├── pref/              ← 用户偏好，如风格、工具、习惯
-    │   └── {topic}.md
-    ├── ctx/               ← 上下文快照，约 30 天过期
-    │   └── YYYY-MM-DD-{slug}.md
-    └── stack/             ← 技术栈笔记，如版本、配置、已知问题
-        └── {technology}.md
+└── aisee/
+    └── memory/
+        ├── index.md       ← 入口文件；始终先读它
+        ├── rules.md       ← 写入与读取规则
+        ├── arch/          ← 架构决策，长期保留
+        │   └── YYYY-MM-DD-{slug}.md
+        ├── pref/          ← 用户偏好，如风格、工具、习惯
+        │   └── {topic}.md
+        ├── ctx/           ← 上下文快照，约 30 天过期
+        │   └── YYYY-MM-DD-{slug}.md
+        └── stack/         ← 技术栈笔记，如版本、配置、已知问题
+            └── {technology}.md
 ```
 
 ## 命名规则
@@ -59,10 +61,10 @@ Slug 规则：小写、只用连字符、无空格、无特殊字符。
 
 ## 执行规则
 
-1. 始终先读 `.memory/index.md`，不要直接扫描整个 `.memory/` 树。
+1. 始终先读 `aisee/memory/index.md`，不要直接扫描整个 `aisee/memory/` 树。
 2. 只加载当前任务相关的具体记忆文件。
-3. 写入前确认 `.memory/` 位于项目根目录；不存在则在项目根目录创建。
-4. 先写 memory 文件，再更新 `.memory/index.md`。
+3. 写入前确认 `aisee/memory/` 位于项目根目录；不存在则在项目根目录创建。
+4. 先写 memory 文件，再更新 `aisee/memory/index.md`。
 5. 不要把项目记忆写到项目根目录之外的位置。
 6. 无法判断项目根目录时，停止并询问用户，不要退回到全局路径。
 

@@ -13,7 +13,7 @@
 **场景模式**：{new-build / enhancement / inventory}
 **ID Scope**：{scope}
 
-> 正式 PAGE / FLOW / STATE ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式 PAGE / FLOW / STATE ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 

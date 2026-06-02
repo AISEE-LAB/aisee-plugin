@@ -41,7 +41,7 @@
 - `aisee:image-object` 提供原图、mask、cutout、bbox、对象备注、品牌保留要求和输出目标。
 - `aisee:design-assets` 负责把这些输入转成受控图片编辑提示词、参考图/素材生成规范、候选图产出和设计资产索引登记。
 - 深度优化后的候选图回写到当前 workspace 的 `enhanced/`，并记录到 `source.json.enhanced`。
-- 如果候选图要进入项目素材库，再由 `aisee:design-assets` 更新 `docs/design-assets/` 索引。
+- 如果候选图要进入项目素材库，再由 `aisee:design-assets` 更新 `aisee/docs/design-assets/` 索引。
 
 handoff 原则：
 
@@ -62,7 +62,7 @@ handoff 原则：
 ```json
 {
   "task": "image-object-enhance",
-  "workspace": "docs/image-objects/product-card-hero",
+  "workspace": "aisee/docs/image-objects/product-card-hero",
   "source": "source.png",
   "object": "cutouts/obj_001-product.png",
   "mask": "masks/mask_002-refined.png",

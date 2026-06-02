@@ -36,7 +36,7 @@ Aisee CLI is an OpenSpec context companion, not an OpenSpec parser.
 
 - OpenSpec 负责 schema、artifact 合法性、spec delta、baseline、validate 和 archive。
 - Aisee CLI 不复刻 OpenSpec parser，不替代 `openspec validate`，不判断 OpenSpec artifact 的业务语义是否合法。
-- Aisee CLI 只解析 OpenSpec 不管理但 workflow 需要的补充信息：`.aisee/id-registry.json`、`.aisee/sources.json`、`source-map.md`、review/test/verification evidence、AGENTS 项目规则入口，以及文件 metadata。
+- Aisee CLI 只解析 OpenSpec 不管理但 workflow 需要的补充信息：`aisee/registry/id-registry.json`、`aisee/registry/sources.json`、`source-map.md`、review/test/verification evidence、AGENTS 项目规则入口，以及文件 metadata。
 - 对 OpenSpec artifacts，Aisee CLI 默认只做 metadata scan：路径、存在性、hash、heading、ID 引用、路径引用、checkbox 状态和 evidence 入口。
 - 当 OpenSpec CLI 提供可用 JSON 输出时，Aisee CLI 应优先消费 OpenSpec CLI 输出；缺少结构化输出时才做保守 metadata scan。
 
@@ -105,7 +105,7 @@ aisee bootstrap --apply
 - 调用 `openspec init`。
 - 安装或同步 Aisee schema pack。
 - 执行 Aisee 项目记忆初始化。
-- 创建或修复 `AGENTS.md`、`openspec/project.md`、`.memory/`。
+- 创建或修复 `AGENTS.md`、`openspec/project.md`、`aisee/memory/`。
 - 安装或修复 Codex hooks。
 - 检查 Compound Engineering plugin 是否可用。
 - 检查 `ce-doc-review`、`ce-work`、`ce-code-review` 等 skill 是否存在。
@@ -141,7 +141,7 @@ aisee schemas install
 SRS、UI content、architecture、device-context、design-assets 等通常不在 OpenSpec change 目录内，仅依赖 change schema 无法发现这些上游产物。因此需要项目级来源登记：
 
 ```text
-.aisee/sources.json
+aisee/registry/sources.json
 ```
 
 它不是内容副本，只记录来源、scope、模板和 parser。
@@ -156,7 +156,7 @@ SRS、UI content、architecture、device-context、design-assets 等通常不在
       {
         "scope": "auth",
         "type": "srs",
-        "path": "docs/requirements/auth-srs.md",
+        "path": "aisee/docs/requirements/auth-srs.md",
         "template": "aisee-srs",
         "parser": "srs"
       }
@@ -165,7 +165,7 @@ SRS、UI content、architecture、device-context、design-assets 等通常不在
       {
         "scope": "auth",
         "type": "ui-content",
-        "path": "docs/ui-content/auth-ui.md",
+        "path": "aisee/docs/ui-content/auth-ui.md",
         "template": "aisee-ui-content",
         "parser": "ui-content"
       }
@@ -174,7 +174,7 @@ SRS、UI content、architecture、device-context、design-assets 等通常不在
       {
         "scope": "auth",
         "type": "architecture",
-        "path": "docs/architecture/auth-architecture.md",
+        "path": "aisee/docs/architecture/auth-architecture.md",
         "template": "aisee-architecture",
         "parser": "architecture"
       }
@@ -186,7 +186,7 @@ SRS、UI content、architecture、device-context、design-assets 等通常不在
 推荐命令：
 
 ```bash
-aisee sources add --scope auth --type srs --path docs/requirements/auth-srs.md --template aisee-srs
+aisee sources add --scope auth --type srs --path aisee/docs/requirements/auth-srs.md --template aisee-srs
 aisee sources list --json
 aisee sources check --json
 ```
@@ -204,13 +204,13 @@ aisee index --json
 建议扫描范围：
 
 ```text
-.aisee/sources.json
-.aisee/id-registry.json
-docs/requirements/**
-docs/ui-content/**
-docs/architecture/**
-docs/design-assets/**
-docs/svg-assets/**
+aisee/registry/sources.json
+aisee/registry/id-registry.json
+aisee/docs/requirements/**
+aisee/docs/ui-content/**
+aisee/docs/architecture/**
+aisee/docs/design-assets/**
+aisee/docs/svg-assets/**
 openspec/changes/**
 openspec/specs/**
 docs/reviews/**
@@ -220,7 +220,7 @@ docs/verification/**
 输出文件建议放在 cache 目录：
 
 ```text
-.aisee/cache/context-index.json
+aisee/cache/context-index.json
 ```
 
 规则：
@@ -250,7 +250,7 @@ aisee get device-sampling:FW-002 --json
   "scope": "auth",
   "title": "用户手机号验证码登录",
   "source": {
-    "path": "docs/requirements/auth-srs.md",
+    "path": "aisee/docs/requirements/auth-srs.md",
     "heading": "FR-001 用户手机号验证码登录",
     "line_start": 42,
     "line_end": 58,
@@ -333,8 +333,8 @@ aisee context pack --change add-auth-login --for aisee-verify --json
 
 ```text
 1. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema、artifact DAG、apply tracks 和是否需要 source-map。
-2. 读取 .aisee/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
-3. 读取 .aisee/id-registry.json，获取 ID 分配和生命周期。
+2. 读取 aisee/registry/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
+3. 读取 aisee/registry/id-registry.json，获取 ID 分配和生命周期。
 4. 如当前 schema 生成 source-map，读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件、artifact、Affected Paths Index 和 Expected Evidence Index；缺少结构化路径索引时只允许从 source-map 本文 metadata fallback，并输出 risk。
 5. 对当前 schema 声明的 OpenSpec artifacts 做 metadata scan：存在性、路径、heading、ID、路径引用、checkbox 和 hash；不解释 artifact 业务语义。
 6. 对不生成 source-map 的 schema，只从当前 schema artifacts / apply tracks 的显式路径引用中生成实现参考，不把全项目搜索结果当作 allowed paths。
@@ -469,9 +469,9 @@ aisee context pack --change <change> --for aisee-verify --json
   "stage": "context-ready",
   "domain_hint": "app",
   "known_inputs": {
-    "srs": "docs/requirements/auth-srs.md",
-    "ui_content": "docs/ui-content/auth-ui.md",
-    "architecture": "docs/architecture/auth-architecture.md"
+    "srs": "aisee/docs/requirements/auth-srs.md",
+    "ui_content": "aisee/docs/ui-content/auth-ui.md",
+    "architecture": "aisee/docs/architecture/auth-architecture.md"
   },
   "missing": [
     "change-plan",
@@ -717,7 +717,7 @@ device-sampling:FW-001
 建议路径：
 
 ```text
-.aisee/id-registry.json
+aisee/registry/id-registry.json
 ```
 
 职责：
@@ -746,7 +746,7 @@ device-sampling:FW-001
           "number": 1,
           "status": "active",
           "title": "用户手机号验证码登录",
-          "owner": "docs/requirements/auth-srs.md",
+          "owner": "aisee/docs/requirements/auth-srs.md",
           "created_at": "2026-05-28T10:00:00+08:00",
           "updated_at": "2026-05-28T10:00:00+08:00"
         },
@@ -755,7 +755,7 @@ device-sampling:FW-001
           "number": 2,
           "status": "deprecated",
           "title": "用户密码登录",
-          "owner": "docs/requirements/auth-srs.md",
+          "owner": "aisee/docs/requirements/auth-srs.md",
           "replaced_by": ["auth:FR-004"],
           "reason": "登录方式拆分后废弃",
           "created_at": "2026-05-28T10:02:00+08:00",
@@ -791,7 +791,7 @@ removed     删除但禁止复用
 ```bash
 aisee id next --scope auth --type FR --json
 aisee id reserve --scope auth --type FR --count 3 --json
-aisee id activate auth:FR-005 --owner docs/requirements/auth-srs.md --title "用户扫码登录"
+aisee id activate auth:FR-005 --owner aisee/docs/requirements/auth-srs.md --title "用户扫码登录"
 aisee id deprecate auth:FR-002 --replaced-by auth:FR-004 --reason "登录方式拆分"
 aisee id check --json
 ```
@@ -813,13 +813,13 @@ aisee id check --json
 ### id-registry、sources 与 cache 分工
 
 ```text
-.aisee/id-registry.json
+aisee/registry/id-registry.json
 = ID 分配和生命周期事实源
 
-.aisee/sources.json
+aisee/registry/sources.json
 = change 外部 Aisee 产物的来源登记事实源，只记录路径、scope、模板和 parser
 
-.aisee/cache/context-index.json
+aisee/cache/context-index.json
 = 可删除、可重建的解析缓存，用于加速查询；不是事实源
 ```
 
@@ -916,7 +916,7 @@ Cache 只加速这些回答，不保存权威内容。
 - `aisee trace <id> --json`
 - `aisee change inspect <change> --json`
 - `aisee context pack --change <change> --for ce-work --json`
-- `.aisee/id-registry.json`
+- `aisee/registry/id-registry.json`
 - `aisee id reserve / activate / check`
 
 暂缓：
@@ -941,13 +941,13 @@ OpenSpec
 Compound Engineering
   消费 CLI 生成的 context pack 做审核、实现、测试和交付
 
-.aisee/id-registry.json
+aisee/registry/id-registry.json
   管 ID 分配和生命周期
 
-.aisee/sources.json
+aisee/registry/sources.json
   管 change 外部 Aisee 产物的来源登记
 
-.aisee/cache/context-index.json
+aisee/cache/context-index.json
   作为可重建缓存加速查询，不作为事实源
 ```
 

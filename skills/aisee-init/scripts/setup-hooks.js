@@ -2,7 +2,7 @@
 /**
  * Installs aisee-init project hooks for Codex.
  *
- * The installer copies hook scripts into the target project under .aisee/hooks/
+ * The installer copies hook scripts into the target project under aisee/hooks/
  * so runtime config never depends on where this skill is installed.
  */
 'use strict';
@@ -102,7 +102,7 @@ function nodeCommand(scriptPath, env = {}) {
 }
 
 function installHookScripts(root, sourceDir) {
-  const targetDir = path.join(root, '.aisee', 'hooks');
+  const targetDir = path.join(root, 'aisee', 'hooks');
   ensureDir(targetDir);
 
   for (const file of REQUIRED_HOOKS) {

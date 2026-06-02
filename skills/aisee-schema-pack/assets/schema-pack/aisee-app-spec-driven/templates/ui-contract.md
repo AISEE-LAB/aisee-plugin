@@ -11,9 +11,9 @@ N/A 原因：
 
 | 来源 | 路径 / 来源 ID | 关联上游 ID | 本 change 用途 | 备注 |
 |---|---|---|---|---|
-| UI Content | docs/ui-content/... | {{scope}}:PAGE-001 / {{scope}}:FLOW-001 | 页面内容、字段、操作、状态、权限可见性 | |
-| Design Spec | docs/design-spec/... | PAT-001 / {{scope}}:PAGE-001 | 组件库策略、tokens、Design Read、响应式、可访问性、验收规则 | 只引用，不复制全文 |
-| Design Assets / dev-visual-brief | docs/design-assets/... | {{scope}}:PAGE-001 | 参考图、素材路径、视觉验收重点 | 只引用路径和适用约束 |
+| UI Content | aisee/docs/ui-content/... | {{scope}}:PAGE-001 / {{scope}}:FLOW-001 | 页面内容、字段、操作、状态、权限可见性 | |
+| Design Spec | aisee/docs/design-spec/... | PAT-001 / {{scope}}:PAGE-001 | 组件库策略、tokens、Design Read、响应式、可访问性、验收规则 | 只引用，不复制全文 |
+| Design Assets / dev-visual-brief | aisee/docs/design-assets/... | {{scope}}:PAGE-001 | 参考图、素材路径、视觉验收重点 | 只引用路径和适用约束 |
 | Architecture / change-context | change-context.md | {{scope}}:CONSTRAINT-001 | 平台、前端边界、性能或技术约束 | |
 
 ## UI 变更范围
@@ -30,7 +30,7 @@ N/A 原因：
 |---|---|---|---|---|
 | Design Spec | docs/design/... | {{scope}}:PAGE-001 | 组件库 / tokens / 布局规则 / 响应式规则 / 可访问性 / 动效 / N/A | 视觉走查 / 截图对比 / 组件用法检查 / N/A |
 | Design Assets | assets/... | {{scope}}:PAGE-001 | logo / 图标 / 插图 / 图片 / SVG / 素材状态 / N/A | 资产路径存在 / 渲染检查 / N/A |
-| dev-visual-brief | docs/design-assets/briefs/dev-visual-brief.md | {{scope}}:PAGE-001 / section / state | 参考图映射 / extraction confidence / 视觉验收重点 / N/A | 浏览器截图对比 / 人工走查 / N/A |
+| dev-visual-brief | aisee/docs/design-assets/briefs/dev-visual-brief.md | {{scope}}:PAGE-001 / section / state | 参考图映射 / extraction confidence / 视觉验收重点 / N/A | 浏览器截图对比 / 人工走查 / N/A |
 
 ## 页面清单
 

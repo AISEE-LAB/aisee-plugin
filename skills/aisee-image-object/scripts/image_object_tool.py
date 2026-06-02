@@ -572,7 +572,7 @@ def build_parser() -> argparse.ArgumentParser:
     inpaint.add_argument("--radius", type=int, default=3)
     inpaint.add_argument("--device", default="cpu", help="LaMa/IOPaint 设备，如 cpu、mps、cuda")
     inpaint.add_argument("--iopaint-bin", default=None, help="独立 Python 3.10/3.11 环境中的 iopaint 可执行文件")
-    inpaint.add_argument("--config", default=None, help="运行配置 JSON，默认查找 .aisee/image-object/config.json")
+    inpaint.add_argument("--config", default=None, help="运行配置 JSON，默认查找 aisee/config/image-object/config.json")
     inpaint.add_argument("--fallback-opencv", action="store_true", help="LaMa 不可用时自动 fallback 到 OpenCV")
     inpaint.set_defaults(func=cmd_inpaint_background)
 

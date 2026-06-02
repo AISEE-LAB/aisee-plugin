@@ -112,7 +112,7 @@ Logo 应遵循：
 ## 输出目录
 
 ```text
-docs/svg-assets/logos/<brand-slug>/
+aisee/docs/svg-assets/logos/<brand-slug>/
 ├── concepts/
 ├── final/
 ├── guidelines/

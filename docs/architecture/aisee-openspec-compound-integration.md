@@ -111,7 +111,7 @@ Aisee CLI 是 Aisee/OpenSpec/Compound 之间的上下文总线，也是 OpenSpec
 - `aisee trace <id>`：查询 ID 上下游关系。
 - `aisee change inspect <change>`：衔接单个 OpenSpec change，返回 schema/artifact metadata、ID、路径和 evidence。
 - `aisee context pack --change <change> --for <target>`：调用时汇总 OpenSpec metadata、sources、ID registry、source-map 和 evidence，生成给 Aisee skill 或 CE skill 的最小上下文包。
-- `aisee id reserve/activate/check`：维护 `.aisee/id-registry.json`。
+- `aisee id reserve/activate/check`：维护 `aisee/registry/id-registry.json`。
 
 Aisee CLI 不替代 OpenSpec CLI。它只负责来源登记、ID/路径/证据追踪、metadata scan、查询、初始化编排和 AI 友好 JSON 输出。JSON 是当前 OpenSpec/Aisee/CE 事实的上下文视图，不是第二份事实源。OpenSpec artifacts 的合法性仍以 `openspec validate` 和 OpenSpec schema 机制为准。详细设计见 [aisee-cli-context-and-id-registry.md](aisee-cli-context-and-id-registry.md)。
 
@@ -206,12 +206,12 @@ openspec archive
 
 ## 保持独立的接入 Skill
 
-不再保留独立 setup skill。该能力会与 `aisee:flow`、`aisee-init`、`aisee-schema-pack` 和 `aisee doctor` 重叠，不能解决独立问题域。
+不再保留独立 setup skill。该能力会与 `aisee:flow`、`aisee:init`、`aisee-schema-pack` 和 `aisee doctor` 重叠，不能解决独立问题域。
 
 接入阶段分工：
 
 - `aisee doctor`：检查 OpenSpec、Aisee、schema pack、sources、ID registry 和 hooks 等基础状态。
-- `aisee-init`：初始化或审计 `AGENTS.md`、`openspec/project.md`、`.memory/` 和 Codex hooks。
+- `aisee:init`：初始化或审计 `AGENTS.md`、`openspec/project.md`、`aisee/memory/` 和 Codex hooks。
 - `aisee-schema-pack`：安装、审计和维护 Aisee schema pack。
 - `aisee:flow`：在基础设施缺失时提示上述入口，但不执行初始化或 schema 安装。
 
@@ -286,7 +286,7 @@ aisee:change-author
 
 保留独立。它用于既有项目反向整理 baseline specs，触发条件和风险不同于新需求规划。
 
-### aisee-reflect
+### aisee:reflect
 
 保留独立。它用于会话复盘和知识沉淀，不应进入每次需求规划主链。
 
@@ -341,9 +341,9 @@ aisee:change-plan
 
 ## Known Inputs
 
-- SRS: `docs/requirements/auth-srs.md`
-- UI Content: `docs/ui-content/auth-ui.md`
-- Architecture: `docs/architecture/auth-architecture.md`
+- SRS: `aisee/docs/requirements/auth-srs.md`
+- UI Content: `aisee/docs/ui-content/auth-ui.md`
+- Architecture: `aisee/docs/architecture/auth-architecture.md`
 
 ## Missing / Blocking
 
@@ -370,7 +370,7 @@ aisee:change-plan
 
 ```text
 uninitialized
-= 项目未准备好，先运行 aisee doctor，并按缺口进入 aisee-init 或 aisee-schema-pack
+= 项目未准备好，先运行 aisee doctor，并按缺口进入 aisee:init 或 aisee-schema-pack
 
 idea
 = 只有模糊想法，先 aisee:srs
@@ -609,7 +609,7 @@ ce-debug
 
 ```text
 aisee:flow
-aisee-init
+aisee:init
 aisee-schema-pack
 aisee:srs
 aisee:ui-content
@@ -740,23 +740,23 @@ collab   -> opsx-collab-pr-loop
 Aisee CLI 的 JSON 输出应调用时解析，不维护第二份内容数据：
 
 ```text
-docs/**/*.md / openspec/**/*.md
-= 内容事实源
+aisee/docs/**/*.md / openspec/**/*.md
+= Aisee 上游产物与 OpenSpec 内容事实源
 
-.aisee/id-registry.json
+aisee/registry/id-registry.json
 = ID 分配和生命周期事实源
 
-.aisee/sources.json
+aisee/registry/sources.json
 = change 外部 Aisee 产物的来源登记事实源
 
-.aisee/cache/context-index.json
+aisee/cache/context-index.json
 = 可删除、可重建的解析缓存，不是事实源
 ```
 
-SRS、UI content、architecture、device-context 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `.aisee/sources.json` 登记；当前 schema 生成 `source-map.md` 时，再通过 source-map 衔接到具体 change：
+SRS、UI content、architecture、device-context 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `aisee/registry/sources.json` 登记；当前 schema 生成 `source-map.md` 时，再通过 source-map 衔接到具体 change：
 
 ```text
-.aisee/sources.json
+aisee/registry/sources.json
 = 项目级来源登记，知道所有 Aisee 上游产物在哪里
 
 openspec/changes/<change>/source-map.md
@@ -788,11 +788,11 @@ device-sampling:FW-001
 <!-- aisee:id auth:FR-001 -->
 ```
 
-ID 分配和生命周期由 `.aisee/id-registry.json` 管理，禁止人工或 AI 随手编新编号。Aisee CLI 负责：
+ID 分配和生命周期由 `aisee/registry/id-registry.json` 管理，禁止人工或 AI 随手编新编号。Aisee CLI 负责：
 
 ```bash
 aisee id reserve --scope auth --type FR --count 3 --json
-aisee id activate auth:FR-005 --owner docs/requirements/auth-srs.md --title "用户扫码登录"
+aisee id activate auth:FR-005 --owner aisee/docs/requirements/auth-srs.md --title "用户扫码登录"
 aisee id check --json
 ```
 
@@ -918,7 +918,7 @@ openspec archive
 - 硬件/嵌入式不默认生成 UI content。
 - `aisee:flow` 在 domain 不明确时应先询问，而不是默认走 app。
 - 每个 schema 决定自己的 artifact 集合、验证规则和 archive guard 检查表。
-- ID 必须通过 `.aisee/id-registry.json` 分配和校验。
+- ID 必须通过 `aisee/registry/id-registry.json` 分配和校验。
 - 当前 schema 生成 `source-map.md` 时，跨文档关系优先写入 `source-map.md`；不生成 source-map 的 schema 不应补假 source-map。
 
 ## 推荐落地里程碑
@@ -927,7 +927,7 @@ openspec archive
 
 - 新增 `aisee doctor --json`。
 - 新增 `aisee bootstrap --plan`。
-- 新增 `.aisee/id-registry.json`。
+- 新增 `aisee/registry/id-registry.json`。
 - 新增 `aisee id reserve / activate / check`。
 - 新增 `aisee index / get / trace` 的只读原型。
 
@@ -943,7 +943,7 @@ openspec archive
 ### V2：Workflow State Orchestrator
 
 - 新增 `aisee:flow`，定位为 workflow state orchestrator，而不是简单路由器。
-- 不再合并 `aisee-init` 与 `aisee-schema-pack`；二者保持独立，避免形成弱入口 skill。
+- 不再合并 `aisee:init` 与 `aisee-schema-pack`；二者保持独立，避免形成弱入口 skill。
 - 明确 domain 路由规则。
 - 明确 workflow stage、状态卡格式和跳步拦截规则。
 - `aisee:flow` 优先调用 Aisee CLI 获取 doctor/index/gaps/context pack 结果。

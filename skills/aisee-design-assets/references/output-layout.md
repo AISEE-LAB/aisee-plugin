@@ -5,7 +5,7 @@
 所有最终结果必须保存到目标项目本地：
 
 ```text
-docs/design-assets/
+aisee/docs/design-assets/
 ├── index.md
 ├── index.json
 ├── references/
@@ -78,15 +78,15 @@ background-hero-001-edit-001.png
 Figma MCP 使用：
 
 ```text
-docs/design-assets/briefs/figma-brief.md
-docs/design-assets/briefs/figma-brief.json
+aisee/docs/design-assets/briefs/figma-brief.md
+aisee/docs/design-assets/briefs/figma-brief.json
 ```
 
 前端开发使用：
 
 ```text
-docs/design-assets/briefs/dev-visual-brief.md
-docs/design-assets/briefs/dev-visual-brief.json
+aisee/docs/design-assets/briefs/dev-visual-brief.md
+aisee/docs/design-assets/briefs/dev-visual-brief.json
 ```
 
 brief 文件只描述视觉交付输入和来源关系。页面内容、流程、字段、交互、权限和 API 仍以 `aisee:ui-content`、SRS 或实现需求为准。

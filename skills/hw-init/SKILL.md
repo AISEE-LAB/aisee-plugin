@@ -39,7 +39,7 @@ hw:srs -> hw:architecture -> hw:change-plan -> /opsx:new ... -> /opsx:apply
 
 创建或校验工程骨架。必须满足：
 - 当前处于 OpenSpec change，例如 `initialize-hardware-project`
-- 已有 `docs/architecture/*-hw-architecture.md`
+- 已有 `aisee/docs/architecture/*-hw-architecture.md`
 - `tasks.md` 或当前用户请求明确要求使用 `hw:init generate-skeleton`
 
 生成或修改的文件必须由该 OpenSpec change 追踪。
@@ -59,7 +59,7 @@ hw:srs -> hw:architecture -> hw:change-plan -> /opsx:new ... -> /opsx:apply
 - `openspec/changes/<change>/firmware-contract.md`
 - `openspec/changes/<change>/runtime-contract.md`
 - `openspec/changes/<change>/tasks.md`
-- `docs/architecture/*-hw-architecture.md`
+- `aisee/docs/architecture/*-hw-architecture.md`
 - 可选 `docs/modules/*.md`
 
 可选参数：
@@ -91,7 +91,7 @@ MCU 存储与型号契约生成时读取：
 ## Output
 
 `scan-existing` 输出：
-- 聊天中的只读扫描摘要，或用户明确要求时写入 `docs/requirements/<YYYY-MM-DD>-<slug>-scan.md`
+- 聊天中的只读扫描摘要，或用户明确要求时写入 `aisee/docs/requirements/<YYYY-MM-DD>-<slug>-scan.md`
 - 不创建长期工程契约，除非用户明确要求且不修改项目文件
 
 `generate-skeleton` 输出：
@@ -101,7 +101,7 @@ MCU 存储与型号契约生成时读取：
 - `docs/project-structure.md`
 - MCU/RTOS 项目的 `docs/clock-contract.md`
 - MCU/RTOS 项目的 `docs/memory-device-contract.md`
-- `docs/requirements/<YYYY-MM-DD>-<slug>-init.md`
+- `aisee/docs/requirements/<YYYY-MM-DD>-<slug>-init.md`
 
 ## Phase 0 - Confirm OpenSpec Tracking
 
@@ -188,7 +188,7 @@ MCU/RTOS 项目必须生成：
 仅 `generate-skeleton` 执行。
 
 必须先读取：
-- `docs/architecture/*-hw-architecture.md`
+- `aisee/docs/architecture/*-hw-architecture.md`
 - OpenSpec change artifacts
 - 可选 `docs/modules/*.md`
 
@@ -203,7 +203,7 @@ MCU/RTOS 项目必须生成：
 
 生成：
 
-`docs/requirements/<YYYY-MM-DD>-<slug>-init.md`
+`aisee/docs/requirements/<YYYY-MM-DD>-<slug>-init.md`
 
 报告必须包含：
 - 当前 OpenSpec change 名称

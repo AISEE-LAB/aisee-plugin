@@ -7,7 +7,7 @@
 默认位置：
 
 ```text
-docs/image-objects/<image-slug>/
+aisee/docs/image-objects/<image-slug>/
 ```
 
 `<image-slug>` 使用源图文件名规范化得到：
@@ -21,7 +21,7 @@ docs/image-objects/<image-slug>/
 
 ```text
 assets/raw/Product Card Hero.jpg
-→ docs/image-objects/product-card-hero/
+→ aisee/docs/image-objects/product-card-hero/
 ```
 
 如果用户指定输出目录，仍然要求该目录只对应一张源图。
@@ -29,7 +29,7 @@ assets/raw/Product Card Hero.jpg
 ## 标准目录
 
 ```text
-docs/image-objects/product-card-hero/
+aisee/docs/image-objects/product-card-hero/
 ├── source.png
 ├── source.json
 ├── masks/
@@ -101,9 +101,9 @@ brief 只写本次任务需要的内容：
 同一 workspace 内只能有一张 `source.png`。如果用户一次处理多张图片，为每张图片创建独立目录：
 
 ```text
-docs/image-objects/product-card-hero/
-docs/image-objects/product-card-detail/
-docs/image-objects/product-card-icon/
+aisee/docs/image-objects/product-card-hero/
+aisee/docs/image-objects/product-card-detail/
+aisee/docs/image-objects/product-card-icon/
 ```
 
-跨图复用或进入项目级素材库时，不在本 workspace 内混放；由 `aisee:design-assets` 把最终产物登记到 `docs/design-assets/` 索引。
+跨图复用或进入项目级素材库时，不在本 workspace 内混放；由 `aisee:design-assets` 把最终产物登记到 `aisee/docs/design-assets/` 索引。

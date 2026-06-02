@@ -28,7 +28,7 @@
 - 图标默认使用 `currentColor`，多色图标使用少量明确颜色
 - 不使用 `<script>`、事件属性、外链资源、`foreignObject`
 - 不嵌入 base64 位图，除非用户明确要求
-- 文件保存到 `docs/svg-assets/generated/`
+- 文件保存到 `aisee/docs/svg-assets/generated/`
 - 文件名使用 kebab-case，例如 `settings-gear.svg`、`empty-state-search.svg`
 
 ## 质量门槛
@@ -49,8 +49,8 @@
 
 ```bash
 python <skill-dir>/scripts/validate_svg.py \
-  --input docs/svg-assets/generated/icon.svg \
-  --report docs/svg-assets/reports/icon.validate.json
+  --input aisee/docs/svg-assets/generated/icon.svg \
+  --report aisee/docs/svg-assets/reports/icon.validate.json
 ```
 
 校验有 warning 时可以交付，但要说明影响；有 error 或 risk 时不要标记为可直接 inline 使用。

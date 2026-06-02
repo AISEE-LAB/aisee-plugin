@@ -1,6 +1,6 @@
 # Source Map: {{change-name}} / Source and ID Routing
 
-> 完整 ID 格式：`<scope>:<TYPE>-<number>`。文档中可以显示短 ID，但跨文档引用必须使用完整 ID。正式 ID 必须来自 `.aisee/id-registry.json`；未注册、废弃、拆分或合并的 ID 必须标注。工具不可用时只能使用 `{{scope}}:<TYPE>-NEW-001` 形式的临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 完整 ID 格式：`<scope>:<TYPE>-<number>`。文档中可以显示短 ID，但跨文档引用必须使用完整 ID。正式 ID 必须来自 `aisee/registry/id-registry.json`；未注册、废弃、拆分或合并的 ID 必须标注。工具不可用时只能使用 `{{scope}}:<TYPE>-NEW-001` 形式的临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 > Source Map 只记录来源、ID、artifact 适用性、追踪关系、候选影响路径和预期证据类型；不写 contract 细节、不写实现步骤、不写最终验证结论。
 
 ## ID Registry 状态
@@ -8,7 +8,7 @@
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
 | 已运行 author preflight | yes / no | `aisee change author-check {{change-name}} --json` | |
-| 已读取 `.aisee/id-registry.json` | yes / no | `aisee id check --json` | |
+| 已读取 `aisee/registry/id-registry.json` | yes / no | `aisee id check --json` | |
 | 已为新增 ID 执行 reserve | yes / no / N/A | `aisee id reserve --scope {{scope}} --type <TYPE> --count <N> --json` | |
 | 已为写入 artifact 的 ID 执行 activate | yes / no / N/A | `aisee id activate <id> --owner <path> --title "<title>"` | |
 | 存在未注册 ID | yes / no | `author-check.ids.registry.missing` / `aisee trace <id> --json` | |
@@ -39,11 +39,11 @@
 
 | 来源 | 路径 / 描述 | sources.json ID | 状态 | 备注 |
 |---|---|---|---|---|
-| SRS | docs/requirements/... | SRC-001 | 已确认 / 缺失 / N/A | |
-| UI Content | docs/ui-content/... | SRC-002 | 已确认 / 缺失 / N/A | |
+| SRS | aisee/docs/requirements/... | SRC-001 | 已确认 / 缺失 / N/A | |
+| UI Content | aisee/docs/ui-content/... | SRC-002 | 已确认 / 缺失 / N/A | |
 | Design Spec / Assets | docs/design/... / assets/... | SRC-003 / N/A | 已确认 / 缺失 / N/A | |
-| Architecture | docs/architecture/... | SRC-004 | 已确认 / 缺失 / N/A | |
-| Change Plan | docs/change-plan/... | SRC-005 | 已确认 / 缺失 / N/A | |
+| Architecture | aisee/docs/architecture/... | SRC-004 | 已确认 / 缺失 / N/A | |
+| Change Plan | aisee/docs/change-plan/... | SRC-005 | 已确认 / 缺失 / N/A | |
 | Issue / 用户输入 |  | SRC-006 / N/A | 已确认 / 缺失 / N/A | |
 
 ## 上游输入 ID

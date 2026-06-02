@@ -1,7 +1,7 @@
 # Memory Index
 
 > 项目记忆入口。
-> 项目记忆规则：`.memory/rules.md`
+> 项目记忆规则：`aisee/memory/rules.md`
 > 先读本索引，再只加载当前任务相关条目。
 
 ## 架构决策（arch/）

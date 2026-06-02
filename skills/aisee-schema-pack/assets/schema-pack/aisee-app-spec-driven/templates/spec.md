@@ -2,7 +2,7 @@
 
 ### Requirement: {{scope}}:SPEC-001 {{requirement-name}}
 
-> SPEC ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:SPEC-NEW-001` 并在 `source-map.md` 标注 `[ID-RESERVATION-REQUIRED]`。
+> SPEC ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:SPEC-NEW-001` 并在 `source-map.md` 标注 `[ID-RESERVATION-REQUIRED]`。
 
 系统必须……
 

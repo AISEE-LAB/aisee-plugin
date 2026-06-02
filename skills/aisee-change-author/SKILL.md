@@ -70,7 +70,7 @@ final check -> aisee change author-check + aisee gaps
 
 ## ID 规则
 
-- 正式 ID 必须来自 `.aisee/id-registry.json`，不得由 AI 直接发明。
+- 正式 ID 必须来自 `aisee/registry/id-registry.json`，不得由 AI 直接发明。
 - 生成或修改 artifacts 前，先读取 `author-check.ids.actions`。
 - 新增 `FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK / SPEC / API / DATA / TASK / TEST` 前，先使用 `aisee id reserve --scope <scope> --type <TYPE> --count <N> --json`。
 - 写入 artifact 后，使用 `aisee id activate <full-id> --owner <path> --title "<title>"` 激活。

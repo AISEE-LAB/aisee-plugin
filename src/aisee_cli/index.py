@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from aisee_cli.output import issue, status_from_issues, summarize_issues
+from aisee_cli.paths import context_index_path
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.sources import load_sources, sources_path, validate_sources
 
@@ -18,16 +19,16 @@ INDEX_SCHEMA_VERSION = "1.0"
 ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-(?:NEW-)?\d+\b")
 PATH_PATTERN = re.compile(
     r"(?<![\w./-])"
-    r"((?:src|app|apps|lib|libs|packages|tests|test|docs|openspec|assets|config)"
+    r"((?:src|app|apps|lib|libs|packages|tests|test|aisee/docs|docs|openspec|assets|config)"
     r"/[A-Za-z0-9_./@:+-]+)"
 )
 HEADING_PATTERN = re.compile(r"^(?P<level>#{1,6})\s+(?P<title>.+)$")
-SCAN_DIRS = ("docs", "openspec", "skills", "references")
+SCAN_DIRS = ("aisee/docs", "docs", "openspec", "skills", "references")
 TEXT_SUFFIXES = {".md", ".yaml", ".yml", ".json", ".txt"}
 
 
 def index_path(root: Path) -> Path:
-    return root / ".aisee" / "cache" / "context-index.json"
+    return context_index_path(root)
 
 
 def build_index(root: Path, *, write_cache: bool) -> dict[str, Any]:
@@ -178,6 +179,6 @@ def find_duplicate_sources(source_entries: Any) -> list[dict[str, str]]:
             str(item.get("path") or ""),
         )
         if key in seen:
-            issues.append(issue("SOURCE_DUPLICATE", "risk", f"duplicate source: {'/'.join(key)}", ".aisee/sources.json"))
+            issues.append(issue("SOURCE_DUPLICATE", "risk", f"duplicate source: {'/'.join(key)}", "sources registry"))
         seen.add(key)
     return issues

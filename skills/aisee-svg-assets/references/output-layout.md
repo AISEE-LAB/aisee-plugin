@@ -3,7 +3,7 @@
 默认目录：
 
 ```text
-docs/svg-assets/
+aisee/docs/svg-assets/
 ├── index.md
 ├── index.json
 ├── generated/

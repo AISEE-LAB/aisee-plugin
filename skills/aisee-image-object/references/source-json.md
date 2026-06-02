@@ -52,7 +52,7 @@ GUI 中用户给选中素材添加的要求文字写入对象的 `name`、`inten
 ```json
 {
   "schema_version": "0.1",
-  "workspace": "docs/image-objects/product-card-hero",
+  "workspace": "aisee/docs/image-objects/product-card-hero",
   "source": {
     "path": "source.png",
     "original_path": "assets/raw/product-card-hero.jpg",

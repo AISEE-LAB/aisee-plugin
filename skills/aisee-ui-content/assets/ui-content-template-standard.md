@@ -13,7 +13,7 @@
 **场景模式**：new-build
 **ID Scope**：{scope}
 
-> 正式 PAGE / FLOW / STATE ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式 PAGE / FLOW / STATE ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 
@@ -23,7 +23,7 @@
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已读取 `.aisee/id-registry.json` | yes / no | `aisee id check --json` | |
+| 已读取 `aisee/registry/id-registry.json` | yes / no | `aisee id check --json` | |
 | 已为新增 PAGE / FLOW / STATE 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
 | 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
 

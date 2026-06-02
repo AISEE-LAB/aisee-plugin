@@ -8,12 +8,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.paths import id_registry_path
+from aisee_cli.project import rel
+
 
 REGISTRY_VERSION = 1
 VALID_STATUSES = {"reserved", "active", "deprecated", "merged", "split", "removed"}
 ID_PATTERN = re.compile(r"^(?P<scope>[A-Za-z][A-Za-z0-9_-]*):(?P<type>[A-Z]+)-(?P<number>\d+)$")
 ID_REFERENCE_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-\d+\b")
 SCAN_DIRS = (
+    "aisee/docs",
     "docs",
     "openspec",
     "skills",
@@ -178,11 +182,12 @@ def check_registry(project_root: Path) -> dict[str, Any]:
     root = project_root.resolve()
     path = registry_path(root)
     if not path.exists():
+        path_label = rel(root, path)
         return {
             "status": "missing",
-            "registry": path.relative_to(root).as_posix(),
+            "registry": path_label,
             "issues": [
-                issue("REGISTRY_MISSING", "blocker", ".aisee/id-registry.json is missing", ".aisee/id-registry.json"),
+                issue("REGISTRY_MISSING", "blocker", f"{path_label} is missing", path_label),
             ],
             "summary": {"blocker": 1, "risk": 0, "info": 0, "total": 1},
         }
@@ -218,11 +223,12 @@ def trace_id(project_root: Path, full_id: str) -> dict[str, Any]:
     })
 
     issues: list[dict[str, str]] = []
+    registry_label = rel(root, path)
     if entry is None:
         severity = "risk" if references else "info"
-        issues.append(issue("ID_NOT_REGISTERED", severity, f"{full_id} is not registered", ".aisee/id-registry.json"))
+        issues.append(issue("ID_NOT_REGISTERED", severity, f"{full_id} is not registered", registry_label))
     elif entry.get("status") != "active":
-        issues.append(issue("ID_NOT_ACTIVE", "info", f"{full_id} status is {entry.get('status')}", ".aisee/id-registry.json"))
+        issues.append(issue("ID_NOT_ACTIVE", "info", f"{full_id} status is {entry.get('status')}", registry_label))
     if entry is not None and entry.get("status") == "active" and not references:
         issues.append(issue("ID_NO_REFERENCES", "risk", f"{full_id} is active but has no scanned references", str(entry.get("owner") or "")))
 
@@ -259,7 +265,7 @@ def load_registry(project_root: Path) -> dict[str, Any]:
     except json.JSONDecodeError as error:
         raise ValueError(f"invalid JSON in {path}: {error}") from error
     if not isinstance(raw, dict):
-        raise ValueError(".aisee/id-registry.json must be a JSON object")
+        raise ValueError(f"{rel(project_root, path)} must be a JSON object")
     return normalize_registry(raw)
 
 
@@ -272,19 +278,20 @@ def save_registry(project_root: Path, registry: dict[str, Any]) -> None:
 
 def validate_registry(root: Path, registry: dict[str, Any]) -> list[dict[str, Any]]:
     issues: list[dict[str, Any]] = []
+    registry_label = rel(root, registry_path(root))
     registered_ids: set[str] = set()
     scopes = registry.get("scopes", {})
     if not isinstance(scopes, dict):
-        return [issue("REGISTRY_SCHEMA_INVALID", "blocker", "scopes must be an object", ".aisee/id-registry.json")]
+        return [issue("REGISTRY_SCHEMA_INVALID", "blocker", "scopes must be an object", registry_label)]
 
     for scope, scope_data in scopes.items():
         if not isinstance(scope_data, dict):
-            issues.append(issue("REGISTRY_SCOPE_INVALID", "blocker", f"scope {scope} must be an object", ".aisee/id-registry.json"))
+            issues.append(issue("REGISTRY_SCOPE_INVALID", "blocker", f"scope {scope} must be an object", registry_label))
             continue
         counters = scope_data.get("counters", {})
         ids = scope_data.get("ids", {})
         if not isinstance(counters, dict) or not isinstance(ids, dict):
-            issues.append(issue("REGISTRY_SCOPE_INVALID", "blocker", f"scope {scope} must contain counters and ids objects", ".aisee/id-registry.json"))
+            issues.append(issue("REGISTRY_SCOPE_INVALID", "blocker", f"scope {scope} must contain counters and ids objects", registry_label))
             continue
 
         max_numbers: dict[str, int] = {}
@@ -292,33 +299,33 @@ def validate_registry(root: Path, registry: dict[str, Any]) -> list[dict[str, An
             registered_ids.add(full_id)
             parsed = try_parse_id(full_id)
             if parsed is None:
-                issues.append(issue("ID_FORMAT_INVALID", "blocker", f"invalid ID format: {full_id}", ".aisee/id-registry.json"))
+                issues.append(issue("ID_FORMAT_INVALID", "blocker", f"invalid ID format: {full_id}", registry_label))
                 continue
             if parsed["scope"] != scope:
-                issues.append(issue("ID_SCOPE_MISMATCH", "blocker", f"{full_id} is stored under scope {scope}", ".aisee/id-registry.json"))
+                issues.append(issue("ID_SCOPE_MISMATCH", "blocker", f"{full_id} is stored under scope {scope}", registry_label))
             if not isinstance(entry, dict):
-                issues.append(issue("ID_ENTRY_INVALID", "blocker", f"{full_id} entry must be an object", ".aisee/id-registry.json"))
+                issues.append(issue("ID_ENTRY_INVALID", "blocker", f"{full_id} entry must be an object", registry_label))
                 continue
             if entry.get("type") != parsed["type"] or entry.get("number") != parsed["number"]:
-                issues.append(issue("ID_ENTRY_MISMATCH", "blocker", f"{full_id} entry type or number does not match the ID", ".aisee/id-registry.json"))
+                issues.append(issue("ID_ENTRY_MISMATCH", "blocker", f"{full_id} entry type or number does not match the ID", registry_label))
             if entry.get("status") not in VALID_STATUSES:
-                issues.append(issue("ID_STATUS_INVALID", "blocker", f"{full_id} has invalid status: {entry.get('status')}", ".aisee/id-registry.json"))
+                issues.append(issue("ID_STATUS_INVALID", "blocker", f"{full_id} has invalid status: {entry.get('status')}", registry_label))
             if entry.get("status") == "active":
                 owner = str(entry.get("owner") or "")
                 if not owner:
-                    issues.append(issue("ID_OWNER_MISSING", "risk", f"{full_id} is active without owner", ".aisee/id-registry.json"))
+                    issues.append(issue("ID_OWNER_MISSING", "risk", f"{full_id} is active without owner", registry_label))
                 elif not (root / owner).exists():
                     issues.append(issue("ID_OWNER_NOT_FOUND", "risk", f"{full_id} owner does not exist: {owner}", owner))
             if entry.get("status") in {"deprecated", "merged", "split"}:
                 for replacement in entry.get("replaced_by", []):
                     if try_parse_id(str(replacement)) is None:
-                        issues.append(issue("ID_REPLACEMENT_INVALID", "blocker", f"{full_id} has invalid replacement ID: {replacement}", ".aisee/id-registry.json"))
+                        issues.append(issue("ID_REPLACEMENT_INVALID", "blocker", f"{full_id} has invalid replacement ID: {replacement}", registry_label))
             max_numbers[parsed["type"]] = max(max_numbers.get(parsed["type"], 0), parsed["number"])
 
         for id_type, max_number in max_numbers.items():
             counter = counters.get(id_type)
             if not isinstance(counter, int) or counter < max_number:
-                issues.append(issue("ID_COUNTER_BEHIND", "blocker", f"{scope}:{id_type} counter is behind allocated IDs", ".aisee/id-registry.json"))
+                issues.append(issue("ID_COUNTER_BEHIND", "blocker", f"{scope}:{id_type} counter is behind allocated IDs", registry_label))
 
     inactive_statuses = {"deprecated", "merged", "split", "removed"}
     for full_id, owner_path in scan_id_references(root):
@@ -434,7 +441,7 @@ def short_id(id_type: str, number: int) -> str:
 
 
 def registry_path(project_root: Path) -> Path:
-    return project_root / ".aisee" / "id-registry.json"
+    return id_registry_path(project_root)
 
 
 def timestamp() -> str:

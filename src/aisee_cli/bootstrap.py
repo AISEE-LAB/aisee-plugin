@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from aisee_cli.doctor import build_doctor
+from aisee_cli.paths import id_registry_path, sources_path
+from aisee_cli.project import rel
 
 
 def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
@@ -13,15 +15,16 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
     doctor = build_doctor(root)
     actions = []
     if not (root / "AGENTS.md").exists():
-        actions.append(action("create", "AGENTS.md", "Create project AI-agent rules entrypoint."))
-    if not (root / "openspec" / "config.yaml").exists():
-        actions.append(action("initialize", "openspec/config.yaml", "Run OpenSpec init or create project config."))
-    if not (root / "openspec" / "changes").exists():
-        actions.append(action("create", "openspec/changes", "Create OpenSpec active changes directory."))
-    if not (root / ".aisee" / "sources.json").exists():
-        actions.append(action("create", ".aisee/sources.json", "Create empty sources registry."))
-    if not (root / ".aisee" / "id-registry.json").exists():
-        actions.append(action("create", ".aisee/id-registry.json", "Create empty ID lifecycle registry."))
+        actions.append(action("create", "AGENTS.md", "Run aisee:init to create the project AI-agent rules entrypoint."))
+    openspec_initialized = (root / "openspec" / "config.yaml").exists() and (root / "openspec" / "changes").exists()
+    if not openspec_initialized:
+        actions.append(action("run", "openspec init", "Run OpenSpec CLI initialization; do not create OpenSpec internals by hand."))
+    sources = sources_path(root)
+    if not sources.exists():
+        actions.append(action("create", rel(root, sources), "Create empty sources registry."))
+    registry = id_registry_path(root)
+    if not registry.exists():
+        actions.append(action("create", rel(root, registry), "Create empty ID lifecycle registry."))
     if not (root / "openspec" / "schemas").exists():
         actions.append(action("install", "openspec/schemas", "Install selected schema pack with aisee schemas install."))
 

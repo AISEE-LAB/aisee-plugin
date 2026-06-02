@@ -75,28 +75,45 @@ function taskExcerpt(filePath, maxTasks = 15) {
     .slice(0, maxTasks);
 }
 
+function schemaName(changeDir, cwd) {
+  const changeConfig = path.join(changeDir, '.openspec.yaml');
+  const projectConfig = path.join(cwd, 'openspec', 'config.yaml');
+  for (const filePath of [changeConfig, projectConfig]) {
+    if (!fs.existsSync(filePath)) continue;
+    const match = fs.readFileSync(filePath, 'utf8').match(/^\s*schema\s*:\s*([A-Za-z0-9_.:-]+)/m);
+    if (match) return match[1];
+  }
+  return 'unknown';
+}
+
 function specSummaries(cwd) {
   return activeChanges(cwd).map(changeDir => {
     const change = path.basename(changeDir);
+    const schema = schemaName(changeDir, cwd);
     const proposal = sectionExcerpt(
       path.join(changeDir, 'proposal.md'),
       /^#+\s*(what|scope|做什么|功能范围|范围)/i
     );
-    const design = sectionExcerpt(
-      path.join(changeDir, 'design.md'),
-      /^#+\s*(architecture|design|方案|架构)/i,
+    const sourceMap = sectionExcerpt(
+      path.join(changeDir, 'source-map.md'),
+      /^#+\s*(upstream|sources|id trace|affected paths|artifact applicability|来源|影响路径|适用性)/i,
       6
     );
+    const designPath = path.join(changeDir, 'design.md');
+    const design = fs.existsSync(designPath)
+      ? sectionExcerpt(designPath, /^#+\s*(architecture|design|方案|架构)/i, 6)
+      : '';
     const tasks = taskExcerpt(path.join(changeDir, 'tasks.md'));
-    return { change, proposal, design, tasks };
-  }).filter(summary => summary.proposal || summary.design || summary.tasks.length);
+    return { change, schema, proposal, sourceMap, design, tasks };
+  }).filter(summary => summary.proposal || summary.sourceMap || summary.design || summary.tasks.length);
 }
 
 function buildInjection(prompt, summaries) {
   const specText = summaries.map(summary => {
-    const parts = [`Change：${summary.change}`];
+    const parts = [`Change：${summary.change}`, `Schema：${summary.schema}`];
     if (summary.proposal) parts.push(`Proposal 范围：${summary.proposal}`);
-    if (summary.design) parts.push(`Design 摘要：${summary.design}`);
+    if (summary.sourceMap) parts.push(`Source Map 摘要：${summary.sourceMap}`);
+    if (summary.design) parts.push(`Design 摘要（仅因当前 schema/artifact 存在 design.md）：${summary.design}`);
     if (summary.tasks.length) parts.push(`Tasks：\n${summary.tasks.map(task => `- ${task}`).join('\n')}`);
     return parts.join('\n');
   }).join('\n\n');

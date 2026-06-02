@@ -1,5 +1,5 @@
 {
-  "skill_name": "aisee-init",
+  "skill_name": "aisee:init",
   "evals": [
     {
       "id": 1,
@@ -11,15 +11,15 @@
     {
       "id": 2,
       "name": "audit-detects-outdated-propose-workflow",
-      "prompt": "审计一个项目的 AGENTS.md。文件中写着 aisee:srs -> aisee:change-plan -> propose -> design -> tasks -> apply，并且没有提到 docs/ui-content 或 docs/architecture。",
-      "expected_output": "报告旧状态机与当前 aisee 链路不一致，建议改为 /opsx:new --schema aisee-app-spec-driven + aisee:change-author 的逐步创建流程，并补充 docs/requirements、docs/ui-content、docs/architecture、docs/change-plan 的职责说明。不得把 docs/architecture 说成 design.md 或 openspec/project.md 的替代品。",
+      "prompt": "审计一个项目的 AGENTS.md。文件中写着 aisee:srs -> aisee:change-plan -> propose -> design -> tasks -> apply，并且没有提到 aisee/docs/ui-content 或 aisee/docs/architecture。",
+      "expected_output": "报告旧状态机与当前 aisee 链路不一致，建议改为 /opsx:new --schema aisee-app-spec-driven + aisee:change-author 的逐步创建流程，并补充 aisee/docs/requirements、aisee/docs/ui-content、aisee/docs/architecture、aisee/docs/change-plan 的职责说明。不得把 aisee/docs/architecture 说成 design.md 或 openspec/project.md 的替代品。",
       "files": []
     },
     {
       "id": 3,
       "name": "init-templates-avoid-non-codex-artifacts",
-      "prompt": "检查 aisee-init 是否还会生成非 Codex 规则文件或非 Codex hook 配置，并审计 AGENTS.md 是否完整包含 OpenSpec artifacts 加载顺序。",
-      "expected_output": "应明确 aisee-init 只生成 AGENTS.md、openspec/project.md、.memory 和 Codex hooks，不生成非 Codex 规则文件或非 Codex hook 配置。AGENTS.md 必须要求先读取 .openspec.yaml / openspec/config.yaml 判断当前 schema，再按 schema 的 artifact 依赖顺序读取文件；aisee-app-spec-driven 的 artifact 清单只能作为默认 schema 示例。",
+      "prompt": "检查 aisee:init 是否还会生成非 Codex 规则文件或非 Codex hook 配置，并审计 AGENTS.md 是否完整包含 OpenSpec artifacts 加载顺序。",
+      "expected_output": "应明确 aisee:init 只生成 AGENTS.md、openspec/project.md、aisee/memory 和 Codex hooks，不生成非 Codex 规则文件或非 Codex hook 配置。AGENTS.md 必须要求先读取 .openspec.yaml / openspec/config.yaml 判断当前 schema，再按 schema 的 artifact 依赖顺序读取文件；aisee-app-spec-driven 的 artifact 清单只能作为默认 schema 示例。",
       "files": []
     }
   ]

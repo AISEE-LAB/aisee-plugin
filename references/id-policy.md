@@ -19,7 +19,7 @@ device-sampling:FW-001
 规则：
 
 - ID 只能由 Aisee CLI 分配。
-- `.aisee/id-registry.json` 记录 ID 生命周期。
+- `aisee/registry/id-registry.json` 记录 ID 生命周期。
 - counters 只增不减。
 - 删除过的 ID 不复用。
 - 跨文档引用使用完整 ID。

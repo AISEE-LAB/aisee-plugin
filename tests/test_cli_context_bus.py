@@ -112,7 +112,7 @@ def test_sources_add_and_check(tmp_path: Path) -> None:
     assert added["changed"] is True
     assert checked["status"] == "ok"
     assert checked["sources"][0]["path"] == "docs/requirements/auth-srs.md"
-    assert (tmp_path / ".aisee" / "sources.json").exists()
+    assert (tmp_path / "aisee" / "registry" / "sources.json").exists()
 
 
 def test_index_writes_rebuildable_cache(tmp_path: Path) -> None:
@@ -125,7 +125,7 @@ def test_index_writes_rebuildable_cache(tmp_path: Path) -> None:
     assert data["project_rules"]["primary"] == "AGENTS.md"
     assert "auth:FR-001" in data["ids"]
     assert any(item["path"] == "docs/requirements/auth-srs.md" for item in data["documents"])
-    cache = tmp_path / ".aisee" / "cache" / "context-index.json"
+    cache = tmp_path / "aisee" / "cache" / "context-index.json"
     assert cache.exists()
     cached = json.loads(cache.read_text(encoding="utf-8"))
     assert cached["meta"]["cache_is_fact_source"] is False

@@ -4,8 +4,8 @@
     {
       "id": 1,
       "name": "generate-inline-icon-with-validation-and-index",
-      "prompt": "帮我生成一个用于前端 inline 的搜索空状态 SVG 图标，保存到 docs/svg-assets/generated/search-empty.svg，并更新 SVG 索引。",
-      "expected_output": "应选择 generate 模式，生成包含 viewBox 的安全 SVG，优先使用 currentColor 或少量明确颜色；运行 validate_svg.py 并输出 reports/search-empty.validate.json；更新 docs/svg-assets/index.md 和 index.json；最终说明是否适合 inline SVG、Figma 导入或图标库复用。",
+      "prompt": "帮我生成一个用于前端 inline 的搜索空状态 SVG 图标，保存到 aisee/docs/svg-assets/generated/search-empty.svg，并更新 SVG 索引。",
+      "expected_output": "应选择 generate 模式，生成包含 viewBox 的安全 SVG，优先使用 currentColor 或少量明确颜色；运行 validate_svg.py 并输出 reports/search-empty.validate.json；更新 aisee/docs/svg-assets/index.md 和 index.json；最终说明是否适合 inline SVG、Figma 导入或图标库复用。",
       "files": []
     },
     {
@@ -19,7 +19,7 @@
       "id": 3,
       "name": "bitmap-trace-uses-vtracer-and-reports-method",
       "prompt": "把 assets/app-mark.png 转成 SVG，适合当图标用。",
-      "expected_output": "应选择 trace 模式，先检查 vtracer 依赖；使用 scripts/trace_bitmap.py 输出到 docs/svg-assets/traced/，保存 trace report 和 validate report；交付时说明实际使用 python-vtracer 还是 vtracer-cli，并提醒复杂位图不承诺照片级精确还原。",
+      "expected_output": "应选择 trace 模式，先检查 vtracer 依赖；使用 scripts/trace_bitmap.py 输出到 aisee/docs/svg-assets/traced/，保存 trace report 和 validate report；交付时说明实际使用 python-vtracer 还是 vtracer-cli，并提醒复杂位图不承诺照片级精确还原。",
       "files": []
     },
     {

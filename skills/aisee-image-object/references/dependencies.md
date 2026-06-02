@@ -75,8 +75,8 @@ python3.11 -m venv .venv-aisee-lama
 然后复制模板：
 
 ```bash
-mkdir -p .aisee/image-object
-cp aisee-image-object/assets/config-template.json .aisee/image-object/config.json
+mkdir -p aisee/config/image-object
+cp aisee-image-object/assets/config-template.json aisee/config/image-object/config.json
 ```
 
 把 `iopaint_bin` 改成实际路径：
@@ -102,14 +102,14 @@ export AISEE_IMAGE_OBJECT_LAMA_DEVICE="cpu"
 
 1. CLI 参数：`--iopaint-bin`、`--device`
 2. 环境变量：`AISEE_IMAGE_OBJECT_IOPAINT_BIN`、`AISEE_IMAGE_OBJECT_LAMA_DEVICE`
-3. 配置文件：`.aisee/image-object/config.json`
+3. 配置文件：`aisee/config/image-object/config.json`，旧项目兼容读取 `.aisee/image-object/config.json`
 4. 当前 `PATH` 中的 `iopaint`
 
 执行：
 
 ```bash
 python aisee-image-object/scripts/image_object_tool.py inpaint-background \
-  --workspace docs/image-objects/product-card-hero \
+  --workspace aisee/docs/image-objects/product-card-hero \
   --mask mask_001 \
   --method lama
 ```

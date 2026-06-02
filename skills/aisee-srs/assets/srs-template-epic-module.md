@@ -35,7 +35,7 @@ Epic 模式下，每份模块文档使用本模板。
 
 ## 3. 功能需求
 
-> 每条需求使用来自 `.aisee/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker。
+> 每条需求使用来自 `aisee/registry/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker。
 
 ### 3.{N} {能力模块名称}
 
@@ -122,6 +122,6 @@ Epic 模式下，每份模块文档使用本模板。
 **下一步**：将本文档路径传入 `aisee:change-plan`，进行 Change 边界规划：
 
 \`\`\`
-aisee:change-plan docs/requirements/{slug}/{module-file}.md
+aisee:change-plan aisee/docs/requirements/{slug}/{module-file}.md
 \`\`\`
 ```

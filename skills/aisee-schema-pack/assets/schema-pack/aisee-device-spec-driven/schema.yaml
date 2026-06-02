@@ -33,7 +33,7 @@ artifacts:
     requires: [proposal]
     instruction: |
       source-map.md 是本 schema 的追踪核心，必须：
-      - 列出上游来源：docs/requirements/*-hw-srs.md、docs/architecture/*-hw-architecture.md、docs/modules/*.md、docs/change-plan/*-hw-change-plan.md
+      - 列出上游来源：aisee/docs/requirements/*-hw-srs.md、aisee/docs/architecture/*-hw-architecture.md、docs/modules/*.md、aisee/docs/change-plan/*-hw-change-plan.md
       - 如存在初始化输出，列出 docs/project-structure.md、docs/clock-contract.md、docs/memory-device-contract.md
       - 列出硬件来源：原理图、PCB、Pinout、BOM、数据手册、Reference Manual、errata、BSP/SDK/HAL、vendor sample、map/build/flash log
       - 列出外部系统来源：cloud API、MQTT/topic spec、protocol spec、mobile app/gateway contract、manufacturing test spec、security policy、compliance requirement、field failure report

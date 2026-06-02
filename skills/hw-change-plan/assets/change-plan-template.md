@@ -4,8 +4,8 @@ Use this structure directly. Do not wrap the whole output in a Markdown code fen
 
 # Hardware Change Plan: <Project Name>
 
-**Source SRS**: docs/requirements/...-hw-srs.md
-**Source Architecture**: docs/architecture/...-hw-architecture.md
+**Source SRS**: aisee/docs/requirements/...-hw-srs.md
+**Source Architecture**: aisee/docs/architecture/...-hw-architecture.md
 **Schema**: aisee-device-spec-driven
 **Created**: <date>
 

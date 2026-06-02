@@ -37,6 +37,14 @@ function countMarkdownFiles(dirPath) {
   }
 }
 
+function existingPath(cwd, preferred, legacy) {
+  const preferredPath = path.join(cwd, preferred);
+  if (fs.existsSync(preferredPath)) return preferredPath;
+  const legacyPath = path.join(cwd, legacy);
+  if (fs.existsSync(legacyPath)) return legacyPath;
+  return preferredPath;
+}
+
 function extractProjectMeta(content) {
   if (!content) return null;
   const keep = [];
@@ -74,24 +82,29 @@ function buildContext(cwd) {
     ].join('\n'));
   }
 
-  const memoryRulesPath = path.join(cwd, '.memory', 'rules.md');
-  const memoryIndexPath = path.join(cwd, '.memory', 'index.md');
+  const memoryRulesPath = existingPath(cwd, path.join('aisee', 'memory', 'rules.md'), path.join('.memory', 'rules.md'));
+  const memoryIndexPath = existingPath(cwd, path.join('aisee', 'memory', 'index.md'), path.join('.memory', 'index.md'));
   if (fs.existsSync(memoryRulesPath) || fs.existsSync(memoryIndexPath)) {
     const memoryFiles = [
-      fs.existsSync(memoryRulesPath) && '.memory/rules.md',
-      fs.existsSync(memoryIndexPath) && '.memory/index.md'
+      fs.existsSync(memoryRulesPath) && path.relative(cwd, memoryRulesPath),
+      fs.existsSync(memoryIndexPath) && path.relative(cwd, memoryIndexPath)
     ].filter(Boolean).join('、');
     blocks.push(`项目记忆入口：${memoryFiles}。先读规则和索引，再只加载本任务相关条目。`);
   }
 
   const knowledge = [
-    ['docs/requirements', 'SRS 与 FR 来源，仅用于追溯，不能替代 openspec/'],
-    ['docs/ui-content', '页面内容、元素、状态和交互来源'],
-    ['docs/architecture', '技术架构事实、决策、项目约束、共享前置和风险来源'],
-    ['docs/change-plan', 'change 边界规划结果，后续仍需创建 OpenSpec artifacts'],
+    ['aisee/docs/requirements', 'SRS 与 FR 来源，仅用于追溯，不能替代 openspec/'],
+    ['aisee/docs/ui-content', '页面内容、元素、状态和交互来源'],
+    ['aisee/docs/architecture', '技术架构事实、决策、项目约束、共享前置和风险来源'],
+    ['aisee/docs/change-plan', 'change 边界规划结果，后续仍需创建 OpenSpec artifacts'],
+    ['aisee/docs/reflect', '会话反思与 memory 候选'],
+    ['docs/requirements', 'legacy SRS 与 FR 来源，仅用于追溯，不能替代 openspec/'],
+    ['docs/ui-content', 'legacy 页面内容、元素、状态和交互来源'],
+    ['docs/architecture', 'legacy 技术架构事实、决策、项目约束、共享前置和风险来源'],
+    ['docs/change-plan', 'legacy change 边界规划结果，后续仍需创建 OpenSpec artifacts'],
     ['docs/learnings', '团队复盘与模式库'],
     ['docs/solutions', '历史解决方案'],
-    ['docs/reflect', '会话反思与 memory 候选']
+    ['docs/reflect', 'legacy 会话反思与 memory 候选']
   ]
     .map(([dir, label]) => [dir, label, countMarkdownFiles(path.join(cwd, dir))])
     .filter(([, , count]) => count > 0)

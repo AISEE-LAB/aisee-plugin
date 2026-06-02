@@ -12,7 +12,7 @@
 **作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}
 **ID Scope**：{scope}
 
-> 正式 ID 必须来自 `.aisee/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式 ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 
 ---
 
@@ -48,7 +48,7 @@
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已读取 `.aisee/id-registry.json` | yes / no | `aisee id check --json` | |
+| 已读取 `aisee/registry/id-registry.json` | yes / no | `aisee id check --json` | |
 | 已为新增 FR / NFR / RULE / FLOW / STATE 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
 | 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
 
@@ -90,7 +90,7 @@
 
 ## 3. 功能需求
 
-> 每条需求使用来自 `.aisee/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker，便于 `aisee:change-plan` 引用和追踪。
+> 每条需求使用来自 `aisee/registry/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker，便于 `aisee:change-plan` 引用和追踪。
 
 ### 3.1 {能力模块名称}
 
@@ -211,6 +211,6 @@
 **下一步**：将本文档路径传入 `aisee:change-plan`，进行 Change 边界规划：
 
 \`\`\`
-aisee:change-plan docs/requirements/{filename}.md
+aisee:change-plan aisee/docs/requirements/{filename}.md
 \`\`\`
 ```

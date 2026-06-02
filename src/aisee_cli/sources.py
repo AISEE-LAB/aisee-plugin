@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from aisee_cli.output import issue, status_from_issues, summarize_issues
+from aisee_cli.paths import sources_path
 from aisee_cli.project import rel
 
 
@@ -22,10 +23,6 @@ VALID_TYPES = {
     "data-context",
     "verification",
 }
-
-
-def sources_path(root: Path) -> Path:
-    return root / ".aisee" / "sources.json"
 
 
 def list_sources(root: Path) -> dict[str, Any]:
@@ -46,8 +43,9 @@ def list_sources(root: Path) -> dict[str, Any]:
 def check_sources(root: Path) -> dict[str, Any]:
     result = list_sources(root)
     if result["status"] == "missing":
+        path_label = result["path"]
         result["issues"] = [
-            issue("SOURCES_MISSING", "risk", ".aisee/sources.json is missing", ".aisee/sources.json"),
+            issue("SOURCES_MISSING", "risk", f"{path_label} is missing", path_label),
         ]
         result["summary"] = summarize_issues(result["issues"])
         result["status"] = status_from_issues(result["issues"])
@@ -141,12 +139,14 @@ def load_sources(root: Path) -> tuple[dict[str, Any], list[dict[str, str]]]:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as error:
+        path_label = rel(root, path)
         return {"version": REGISTRY_VERSION, "sources": []}, [
-            issue("SOURCES_INVALID_JSON", "blocker", f"invalid JSON in .aisee/sources.json: {error}", ".aisee/sources.json")
+            issue("SOURCES_INVALID_JSON", "blocker", f"invalid JSON in {path_label}: {error}", path_label)
         ]
     if not isinstance(raw, dict):
+        path_label = rel(root, path)
         return {"version": REGISTRY_VERSION, "sources": []}, [
-            issue("SOURCES_SCHEMA_INVALID", "blocker", ".aisee/sources.json must be a JSON object", ".aisee/sources.json")
+            issue("SOURCES_SCHEMA_INVALID", "blocker", f"{path_label} must be a JSON object", path_label)
         ]
     return normalize_sources(raw), []
 
@@ -170,12 +170,13 @@ def normalize_sources(data: dict[str, Any]) -> dict[str, Any]:
 
 def validate_sources(root: Path, sources: Any) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
+    sources_label = rel(root, sources_path(root))
     if not isinstance(sources, list):
-        return [issue("SOURCES_SCHEMA_INVALID", "blocker", "sources must be a list", ".aisee/sources.json")]
+        return [issue("SOURCES_SCHEMA_INVALID", "blocker", "sources must be a list", sources_label)]
 
     seen: set[tuple[str, str, str]] = set()
     for index, item in enumerate(sources):
-        owner = f".aisee/sources.json#{index}"
+        owner = f"{sources_label}#{index}"
         if not isinstance(item, dict):
             issues.append(issue("SOURCE_ENTRY_INVALID", "blocker", "source entry must be an object", owner))
             continue

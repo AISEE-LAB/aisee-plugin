@@ -1,6 +1,6 @@
 # aisee:change-plan — Output Template
 
-输出必须保存到 `docs/change-plan/`，并向用户返回保存路径和 `/opsx:new` 命令。
+输出必须保存到 `aisee/docs/change-plan/`，并向用户返回保存路径和 `/opsx:new` 命令。
 
 ## 输出顺序
 
@@ -140,13 +140,13 @@ Assumption 格式：
 保存到：
 
 ```text
-docs/change-plan/<YYYY-MM-DD>-<requirement-slug>.md
+aisee/docs/change-plan/<YYYY-MM-DD>-<requirement-slug>.md
 ```
 
 保存后输出：
 
 ```text
-Change plan 已保存：docs/change-plan/{filename}.md
+Change plan 已保存：aisee/docs/change-plan/{filename}.md
 {N} 个 changes · {M} 个 phases · {Y} 个可并行
 ```
 

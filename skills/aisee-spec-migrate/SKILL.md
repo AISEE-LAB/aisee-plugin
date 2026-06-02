@@ -114,7 +114,7 @@ find docs -maxdepth 3 -type f 2>/dev/null | head -120
 
 读取 `assets/migration-index-template.md`，生成：
 
-`docs/spec-migration/<YYYY-MM-DD>-<slug>/00-index.md`
+`aisee/docs/spec-migration/<YYYY-MM-DD>-<slug>/00-index.md`
 
 内容包括：
 - 迁移范围
@@ -161,7 +161,7 @@ openspec/specs/<capability>/spec.md
 
 如果证据不足：
 - 不生成该 Requirement，写入 Open Questions。
-- 或生成带 `[EVIDENCE-GAP]` 的草案，只在 `docs/spec-migration/` 中保留，不写入 `openspec/specs/`。
+- 或生成带 `[EVIDENCE-GAP]` 的草案，只在 `aisee/docs/spec-migration/` 中保留，不写入 `openspec/specs/`。
 
 ---
 
@@ -171,7 +171,7 @@ openspec/specs/<capability>/spec.md
 
 ```bash
 find openspec/specs -name '*.md' -maxdepth 4 -print
-rg -n "### Requirement:|SHALL|MUST|#### Scenario:" openspec/specs docs/spec-migration 2>/dev/null
+rg -n "### Requirement:|SHALL|MUST|#### Scenario:" openspec/specs aisee/docs/spec-migration 2>/dev/null
 ```
 
 如果写入了某个 capability，例如 `auth`，必须运行：
@@ -194,7 +194,7 @@ openspec validate
 
 完成后输出：
 
-> Spec 基线迁移已整理：`docs/spec-migration/{slug}/00-index.md`
+> Spec 基线迁移已整理：`aisee/docs/spec-migration/{slug}/00-index.md`
 >
 > 写入 / 建议写入：{N} 个 baseline spec，覆盖 {M} 个能力，发现 {C} 个冲突、{Q} 个待确认项。
 >
@@ -215,7 +215,7 @@ openspec validate
 - 不生成巨型单文件 spec。
 - 不按文件类型、技术层或数据库表机械拆 spec。
 - 不把低可信度推断写入正式 baseline。
-- 不把 `docs/spec-migration/` 当作 OpenSpec 规范来源；最终规范必须落在 `openspec/specs/`。
+- 不把 `aisee/docs/spec-migration/` 当作 OpenSpec 规范来源；最终规范必须落在 `openspec/specs/`。
 - 如果缺少 OpenSpec 初始化，先让用户运行 `openspec init` 或 `aisee:init`。
 
 ---

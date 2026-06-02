@@ -13,7 +13,7 @@
 - [ ] 每个验收场景、烧录/部署风险、资源风险、连接风险、安全风险、生产风险、运维风险和边界场景已映射到 verification-contract.md。
 - [ ] N/A artifact 已写明原因。
 - [ ] source-map.md 的阻塞项已处理或明确保留风险。
-- [ ] 本 change 未违反 docs/architecture 中的架构规则。
+- [ ] 本 change 未违反 aisee/docs/architecture 中的架构规则。
 - [ ] 涉及工程初始化时，已包含 hw:init generate-skeleton 任务。
 
 ## 1. Change 类型选择

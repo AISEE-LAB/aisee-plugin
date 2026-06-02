@@ -1,6 +1,6 @@
 # Spec Migration Index 模板
 
-用于生成 `docs/spec-migration/<YYYY-MM-DD>-<slug>/00-index.md`。
+用于生成 `aisee/docs/spec-migration/<YYYY-MM-DD>-<slug>/00-index.md`。
 
 ```markdown
 # OpenSpec Baseline Migration：{project/module}

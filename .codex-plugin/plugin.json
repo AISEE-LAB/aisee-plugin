@@ -28,7 +28,7 @@
     ],
     "defaultPrompt": [
       "aisee:flow 判断当前项目下一步",
-      "aisee:setup 审计 OpenSpec/Aisee/Compound 配置",
+      "aisee:init 审计 AGENTS.md、OpenSpec 项目配置和 Codex hooks",
       "aisee:srs 帮我整理这个需求"
     ]
   }

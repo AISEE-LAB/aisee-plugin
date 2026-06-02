@@ -31,7 +31,7 @@
 ```bash
 python <skill-dir>/scripts/validate_svg.py \
   --input path/to/file.svg \
-  --report docs/svg-assets/reports/file.validate.json
+  --report aisee/docs/svg-assets/reports/file.validate.json
 ```
 
 ## 优化命令
@@ -39,8 +39,8 @@ python <skill-dir>/scripts/validate_svg.py \
 ```bash
 python <skill-dir>/scripts/optimize_svg.py \
   --input path/to/file.svg \
-  --out docs/svg-assets/optimized/file.svg \
-  --report docs/svg-assets/reports/file.optimize.json
+  --out aisee/docs/svg-assets/optimized/file.svg \
+  --report aisee/docs/svg-assets/reports/file.optimize.json
 ```
 
 `optimize_svg.py` 默认拒绝带已知安全风险的输入；如果用户明确要保留风险内容用于隔离分析，才使用 `--allow-unsafe`，并且不要把结果标记为可 inline。

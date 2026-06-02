@@ -14,13 +14,15 @@ from aisee_cli.project import rel
 def get_id(project_root: Path, full_id: str) -> dict[str, Any]:
     parsed = parse_id(full_id)
     root = project_root.resolve()
-    registry_available = registry_path(root).exists()
+    registry_file = registry_path(root)
+    registry_available = registry_file.exists()
     registry = load_registry(root) if registry_available else {"version": 1, "scopes": {}}
     entry = lookup_entry(registry, full_id)
     index = build_index(root, write_cache=False)
     references = index["ids"].get(full_id, [])
     primary = choose_primary_source(entry, references)
-    issues = build_lookup_issues(full_id, entry, references, registry_available)
+    registry_label = rel(root, registry_file)
+    issues = build_lookup_issues(full_id, entry, references, registry_available, registry_label)
     relations = build_relations(references)
 
     return {
@@ -31,7 +33,7 @@ def get_id(project_root: Path, full_id: str) -> dict[str, Any]:
         "number": parsed["number"],
         "registry": {
             "available": registry_available,
-            "path": rel(root, registry_path(root)),
+            "path": registry_label,
             "entry": entry,
         },
         "source": primary,
@@ -120,15 +122,16 @@ def build_lookup_issues(
     entry: dict[str, Any] | None,
     references: list[dict[str, Any]],
     registry_available: bool,
+    registry_label: str,
 ) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
     if not registry_available:
-        issues.append(issue("ID_REGISTRY_MISSING", "risk", ".aisee/id-registry.json is missing", ".aisee/id-registry.json"))
+        issues.append(issue("ID_REGISTRY_MISSING", "risk", f"{registry_label} is missing", registry_label))
     if entry is None:
         severity = "risk" if references else "info"
-        issues.append(issue("ID_NOT_REGISTERED", severity, f"{full_id} is not registered", ".aisee/id-registry.json"))
+        issues.append(issue("ID_NOT_REGISTERED", severity, f"{full_id} is not registered", registry_label))
     elif entry.get("status") != "active":
-        issues.append(issue("ID_NOT_ACTIVE", "info", f"{full_id} status is {entry.get('status')}", ".aisee/id-registry.json"))
+        issues.append(issue("ID_NOT_ACTIVE", "info", f"{full_id} status is {entry.get('status')}", registry_label))
     if entry is not None and entry.get("status") == "active" and not references:
         issues.append(issue("ID_NO_REFERENCES", "risk", f"{full_id} is active but has no scanned references", str(entry.get("owner") or "")))
     return issues

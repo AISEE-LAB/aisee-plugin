@@ -45,9 +45,9 @@ command -v vtracer >/dev/null && echo "vtracer-cli=present" || true
 ```bash
 python <skill-dir>/scripts/trace_bitmap.py \
   --input input.png \
-  --out docs/svg-assets/traced/input.svg \
+  --out aisee/docs/svg-assets/traced/input.svg \
   --preset icon-color \
-  --report docs/svg-assets/reports/input.trace.json
+  --report aisee/docs/svg-assets/reports/input.trace.json
 ```
 
 常用 preset：
@@ -61,17 +61,17 @@ python <skill-dir>/scripts/trace_bitmap.py \
 
 ```bash
 python <skill-dir>/scripts/validate_svg.py \
-  --input docs/svg-assets/traced/input.svg \
-  --report docs/svg-assets/reports/input.validate.json
+  --input aisee/docs/svg-assets/traced/input.svg \
+  --report aisee/docs/svg-assets/reports/input.validate.json
 ```
 
 必要时优化：
 
 ```bash
 python <skill-dir>/scripts/optimize_svg.py \
-  --input docs/svg-assets/traced/input.svg \
-  --out docs/svg-assets/optimized/input.svg \
-  --report docs/svg-assets/reports/input.optimize.json
+  --input aisee/docs/svg-assets/traced/input.svg \
+  --out aisee/docs/svg-assets/optimized/input.svg \
+  --report aisee/docs/svg-assets/reports/input.optimize.json
 ```
 
 ## 结果判断

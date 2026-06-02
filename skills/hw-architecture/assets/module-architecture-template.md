@@ -5,7 +5,7 @@
 
 **Module ID**: FW-xxx
 **Owner Area**: hardware / firmware / runtime / algorithm / protocol / display / power
-**Parent Architecture**: docs/architecture/...-hw-architecture.md
+**Parent Architecture**: aisee/docs/architecture/...-hw-architecture.md
 
 ## 1. Responsibility
 
