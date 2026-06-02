@@ -36,7 +36,8 @@ aisee-plugin/
     aisee
   skills/
     aisee-flow/
-    aisee-setup/
+    aisee-init/
+    aisee-schema-pack/
     aisee-srs/
     aisee-ui-content/
     aisee-architecture/
@@ -69,7 +70,7 @@ Schema pack 的唯一维护源位于 `skills/aisee-schema-pack/assets/schema-pac
 
 ```text
 aisee-core:
-  flow / setup / srs / architecture / change-plan / change-author / verify / archive-guard / reflect
+  flow / init / schema-pack / srs / architecture / change-plan / change-author / verify / archive-guard / reflect
 
 aisee-app:
   ui-content / app schema / ui-contract / service-contract / data-model / frontend handoff
@@ -204,24 +205,16 @@ aisee:archive-guard
 openspec archive
 ```
 
-## 需要合并的 Skill
+## 保持独立的接入 Skill
 
-### 合并为 aisee:setup
+不再保留独立 setup skill。该能力会与 `aisee:flow`、`aisee-init`、`aisee-schema-pack` 和 `aisee doctor` 重叠，不能解决独立问题域。
 
-候选来源：
+接入阶段分工：
 
-- `aisee-init`
-- `aisee-schema-pack`
-
-统一职责：
-
-- 初始化或审计 OpenSpec 项目结构。
-- 创建或修复 `AGENTS.md`、`openspec/project.md`、`.memory/`。
-- 安装或审计 schema pack。
-- 配置 hooks。
-- 检查 OpenSpec 状态机和项目规则边界。
-
-注意：内部可以继续保留 init 和 schema pack 的 references/scripts，不要求把所有内容塞进一个文件。
+- `aisee doctor`：检查 OpenSpec、Aisee、schema pack、sources、ID registry 和 hooks 等基础状态。
+- `aisee-init`：初始化或审计 `AGENTS.md`、`openspec/project.md`、`.memory/` 和 Codex hooks。
+- `aisee-schema-pack`：安装、审计和维护 Aisee schema pack。
+- `aisee:flow`：在基础设施缺失时提示上述入口，但不执行初始化或 schema 安装。
 
 ### 合并为 aisee:assets
 
@@ -383,7 +376,7 @@ aisee:change-plan
 
 ```text
 uninitialized
-= 项目未准备好，先 aisee:setup
+= 项目未准备好，先运行 aisee doctor，并按缺口进入 aisee-init 或 aisee-schema-pack
 
 idea
 = 只有模糊想法，先 aisee:srs
@@ -622,7 +615,8 @@ ce-debug
 
 ```text
 aisee:flow
-aisee:setup
+aisee-init
+aisee-schema-pack
 aisee:srs
 aisee:ui-content
 aisee:architecture
@@ -677,7 +671,8 @@ Web 后端关注 API、数据库、权限、队列、缓存；嵌入式关注驱
 
 ```text
 aisee-core
-  setup
+  init
+  schema-pack
   srs
   architecture
   change-plan
@@ -952,7 +947,7 @@ openspec archive
 ### V2：Workflow State Orchestrator
 
 - 新增 `aisee:flow`，定位为 workflow state orchestrator，而不是简单路由器。
-- 合并 `aisee:init` 与 `aisee-schema-pack` 为 `aisee:setup`。
+- 不再合并 `aisee-init` 与 `aisee-schema-pack`；二者保持独立，避免形成弱入口 skill。
 - 明确 domain 路由规则。
 - 明确 workflow stage、状态卡格式和跳步拦截规则。
 - `aisee:flow` 优先调用 Aisee CLI 获取 doctor/index/gaps/context pack 结果。
