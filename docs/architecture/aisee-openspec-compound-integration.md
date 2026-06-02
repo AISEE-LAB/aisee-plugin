@@ -49,7 +49,6 @@ aisee-plugin/
     aisee-archive-guard/
     aisee-spec-migrate/
     aisee-reflect/
-    aisee-assets/
     aisee-design-assets/
     aisee-svg-assets/
     aisee-image-object/
@@ -78,7 +77,7 @@ aisee-app:
 aisee-device:
   device-context / hardware-contract / firmware-contract / runtime-contract / verification-contract
 
-aisee-assets:
+aisee-visual-assets:
   design-assets / svg-assets / image-object
 
 aisee-bridge:
@@ -216,22 +215,17 @@ openspec archive
 - `aisee-schema-pack`：安装、审计和维护 Aisee schema pack。
 - `aisee:flow`：在基础设施缺失时提示上述入口，但不执行初始化或 schema 安装。
 
-### 合并为 aisee:assets
+### 保持独立的资产类 Skill
 
-候选来源：
+不再保留独立资产入口 skill。视觉资产路由本身不是一个稳定产物，会与三个专业 skill 的 description 重叠。
 
-- `aisee-design-assets`
-- `aisee-svg-assets`
-- `aisee-image-object`
+资产类能力保持独立：
 
-统一职责：
+- `aisee:design-assets`：参考图、StyleSpec 草稿、视觉素材计划、Figma brief 和开发视觉 brief。
+- `aisee:svg-assets`：SVG 图标、logo、装饰图形、位图矢量化、SVG 优化与校验。
+- `aisee:image-object`：对象分割、去背景、mask、透明切图、背景修补和图层包。
 
-- 视觉参考图生成。
-- StyleSpec / 设计规范整理。
-- SVG 图标、logo、装饰图形生成与校验。
-- 图片对象分割、透明切图、背景处理。
-
-注意：`aisee:assets` 应做路由，图片生成、SVG、对象处理仍可使用不同 references/scripts。
+OpenSpec change 只引用资产路径、StyleSpec 路径和必要验证任务；不要把完整视觉文档复制进 change artifacts。
 
 资产类 skill 不进入每个 OpenSpec change 的必经流程。它们只在 App/Web、品牌、视觉、前端素材相关 change 中按需触发：
 
@@ -628,7 +622,9 @@ aisee:verify
 aisee:archive-guard
 aisee:spec-migrate
 aisee:reflect
-aisee:assets
+aisee:design-assets
+aisee:svg-assets
+aisee:image-object
 ```
 
 如果 agent 指专职子代理，建议只新增三个：
@@ -978,7 +974,7 @@ openspec archive
 
 ### V6：Assets 与多 domain 扩展
 
-- 新增 `aisee:assets` 作为视觉资产入口。
+- 不新增独立资产入口 skill。
 - 保留 `aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object` 作为专业 skill。
 - 用当前 schema 的相关 artifacts 引用视觉资产产物；app schema 通常通过 `ui-contract.md`、`source-map.md` 和 `tasks.md` 串联。
 - 补齐 device/docsite/infra/security 的 context pack 与 archive-guard 检查表。
