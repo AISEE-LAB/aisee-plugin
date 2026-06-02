@@ -31,9 +31,9 @@
     },
     {
       "id": 5,
-      "name": "embedded-firmware-domain-context",
+      "name": "pure-embedded-boundary",
       "prompt": "为一个 STM32 设备固件需求生成 architecture，供 change-plan 使用。需求是新增 I2C 温湿度传感器采集，周期性读取数据并通过 UART 输出诊断日志。项目使用 FreeRTOS，CMake 构建，J-Link 调试；板级引脚和 I2C 总线配置还未确认。",
-      "expected_output": "应识别为 embedded/firmware/rtos/driver 技术域，输出工具链状态、RTOS/任务、I2C 外设、UART 日志、板级引脚/总线配置缺口、验证/调试上下文和硬件/固件/运行时/驱动/验证等建议 artifact 类型。不得输出 Web/API/DB 契约、接口 endpoint、寄存器表、引脚表或具体实现代码。",
+      "expected_output": "应说明当前 aisee:architecture 主流程面向软件项目，纯嵌入式/固件/RTOS/驱动架构不应强行生成软件 architecture。可以记录软件可见的设备状态、诊断日志、上位机或后台协作约束，并提示进入后续专用硬件流程；不得输出 RTOS 任务设计、I2C 外设细节、寄存器表、引脚表、驱动结构、固件实现代码或硬件/固件类 artifact hints。",
       "files": []
     }
   ]

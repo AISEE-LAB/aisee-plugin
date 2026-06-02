@@ -15,29 +15,30 @@
 
 - 不要规划 change 边界，不要命名 change，不要输出 phase、依赖图或 `/opsx:*` 命令。
 - 不要做技术栈 / 工具链选型；缺失时标注 `[STACK-CONTEXT-MISSING]` 或 `[STACK-DECISION-REQUIRED]`。
-- 不要输出数据库表结构、API endpoint、request/response 字段、CLI 参数完整契约、Job 详细调度策略、寄存器表、引脚表、时序表、ORM 代码或实现步骤。
+- 不要输出数据库表结构、API endpoint、request/response 字段、CLI 参数完整契约、Job 详细调度策略、ORM 代码或实现步骤。
+- 不要输出硬件架构、固件设计、引脚、寄存器、RTOS 任务、驱动结构、BOM、PCB 或制造细节。
 - 给 `aisee:change-plan` 的提示只能是事实、约束和原因，不是边界规划结果。
 - 架构决策必须区分“已确认”和“待确认”；没有可信来源时只能写入待确认决策、阻塞项或 Open Questions。
 
 ## 来源规则
 
 - 每条关键技术事实都要有来源和可信度：high / medium / low。
-- `high`：来自 `openspec/project.md`、代码、schema、配置、官方架构文档、硬件/固件配置。
+- `high`：来自 `openspec/project.md`、代码、schema、配置、官方架构文档。
 - `medium`：来自 SRS、UI Content、Design Spec、用户明确说明。
 - `low`：从命名或上下文推断，必须标注为假设。
 
 ## 全局工程约定
 
 - 全局工程约定只记录已有事实或待决策缺口。
-- 不要在 architecture 中创造新的 API、数据、CLI、Job、硬件或固件详细契约。
+- 不要在 architecture 中创造新的 API、数据、CLI、Job、设备协作、硬件或固件详细契约。
 - 全局工程约定缺失时使用 `[TECH-CONVENTION-MISSING]`，不要替项目制定新约定。
 
 ## Domain Blocks
 
 - 只保留与当前需求相关的 domain block。
-- 软件域不要输出硬件/固件块，除非是 hybrid。
-- 嵌入式域不要输出 Web/API/DB 块，除非确实涉及服务端或上位机。
-- hybrid 域可以同时保留 software 和 embedded block，但每块都必须有来源和影响说明。
+- 当前主流程只输出软件域块。
+- 带设备的软件需求可以输出 Device Collaboration Context，但只写软件可见的设备状态、上报、告警、协作边界和可靠性约束。
+- 纯硬件、嵌入式、固件、RTOS、驱动或板级架构不在当前主流程展开，写入 Open Questions 或后续专用硬件流程提示。
 
 ## Schema Artifact Hints
 

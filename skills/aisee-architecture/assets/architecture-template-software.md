@@ -1,6 +1,6 @@
 # aisee:architecture — Software Domain Blocks
 
-用于 software / web / backend / cli / job / integration / data 技术域。只保留与当前需求相关的块，不要机械输出全部块。
+用于 app / web / mini-program / desktop / backend-service / cli-tool / job-async / integration / data / hybrid-software 技术域。只保留与当前需求相关的块，不要机械输出全部块。
 
 ```markdown
 ## 12. Domain Context Blocks（按需）
@@ -48,4 +48,10 @@
 | 项 | 当前事实 | 来源 | 对 change-plan 的影响 | 后续 artifact 提示 |
 |----|----------|------|------------------------|--------------------|
 | 单元测试 / E2E / 合约测试 / 集成测试 / 回归测试 | {fact or 未确认} | {source} | {impact} | {suggested artifact type} |
+
+### 12.8 Device Collaboration Context（按需）
+
+| 项 | 当前事实 | 来源 | 对 change-plan 的影响 | 后续 artifact 提示 |
+|----|----------|------|------------------------|--------------------|
+| 设备状态 / 数据上报 / 告警 / 上位机协作 / IoT 运行环境 / 可靠性约束 | {fact or 未确认} | {source} | {impact} | {suggested artifact type} |
 ```

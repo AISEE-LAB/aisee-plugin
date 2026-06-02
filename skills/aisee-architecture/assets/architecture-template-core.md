@@ -1,6 +1,6 @@
 # aisee:architecture — Core 模板
 
-所有技术域都必须使用。用于生成跨工程域通用部分：范围、技术域、来源、架构概览、全局工程约定、架构决策、架构边界、可复用能力、共享前置、耦合点、运行环境限制、风险和 Open Questions。
+所有软件技术域都必须使用。用于生成通用部分：范围、技术域、来源、架构概览、全局工程约定、架构决策、架构边界、可复用能力、共享前置、耦合点、运行环境限制、风险和 Open Questions。
 
 ```markdown
 # 技术架构文档：{需求 / 功能 / 产品名}
@@ -10,7 +10,7 @@
 **状态**：草稿
 **创建日期**：{date}
 **来源输入**：{SRS / UI 内容规格 / 设计规范 / 项目目录 / 用户输入}
-**技术域**：{software / web / backend / cli / job / integration / data / hardware / embedded / firmware / rtos / driver / hybrid}
+**技术域**：{app / web / mini-program / desktop / backend-service / cli-tool / job-async / integration / data / hybrid-software}
 **ID Scope**：{scope}
 
 > 正式 ARCH / DEC / CONSTRAINT / RISK ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
@@ -22,7 +22,7 @@
 ### 1.1 本文覆盖
 - 需求 / 模块：{name}
 - 覆盖 FR：{FR-xxx or 无}
-- 覆盖平台 / 运行环境：{platforms / runtime / board}
+- 覆盖平台 / 运行环境：{platforms / runtime}
 - 用途：为 `aisee:change-plan` 提供技术事实、架构决策、工程约定、约束和 schema artifact hints
 
 ### 1.2 不在范围
@@ -56,9 +56,8 @@
 | 队列 / 异步 / 调度 | {tech or 未确认} | {source} | high/medium/low | {note} |
 | 缓存 / 文件 / 通知 | {tech or 未确认} | {source} | high/medium/low | {note} |
 | 部署 / 运行环境 | {tech or 未确认} | {source} | high/medium/low | {note} |
-| MCU / SoC / FPGA / Board | {tech or 未确认} | {source} | high/medium/low | {note} |
-| RTOS / Bare-metal / Linux | {tech or 未确认} | {source} | high/medium/low | {note} |
-| 编译 / 构建 / 烧录 / 调试 | {toolchain or 未确认} | {source} | high/medium/low | {note} |
+| 测试 / 可观测性 | {tech or 未确认} | {source} | high/medium/low | {note} |
+| 设备协作 / 上位机 / IoT | {tech or 未确认} | {source} | high/medium/low | 只记录软件可见协作约束 |
 
 ---
 
@@ -93,7 +92,7 @@
 | CLI 输出 / 退出码 / 配置优先级 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
 | Job 幂等 / 重试 / 可观测性 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
 | 命名 / 错误码 / 日志等级 / 断言 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
-| 时钟单位 / 中断 / 内存对齐 / 外设初始化 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
+| 设备状态 / 上报 / 告警协作 | {convention or 未发现可信来源} | {source} | high/medium/low | {scope} | {suggested artifact type} |
 
 ---
 
@@ -135,16 +134,16 @@
 | 数据访问 / 状态机 | {fact} | {source} | {reuse note} | {risk} |
 | 队列 / 异步 / 调度 | {fact} | {source} | {reuse note} | {risk} |
 | 文件 / 通知 / 审计 / 日志 | {fact} | {source} | {reuse note} | {risk} |
-| 构建 / 烧录 / 调试 / 测试夹具 | {fact} | {source} | {reuse note} | {risk} |
-| 驱动 / HAL / BSP / 外设抽象 | {fact} | {source} | {reuse note} | {risk} |
+| 测试 / 可观测性 | {fact} | {source} | {reuse note} | {risk} |
+| 设备协作 / 上位机 / IoT | {fact} | {source} | {reuse note} | {risk} |
 
 ---
 
 ## 9. 共享技术前置
 
-| 前置项 | 为什么是共享前置 | 影响 FR / 页面 / 模块 / 硬件能力 | 来源 | 阻塞程度 |
+| 前置项 | 为什么是共享前置 | 影响 FR / 页面 / 模块 / 设备协作能力 | 来源 | 阻塞程度 |
 |--------|------------------|----------------------------------|------|----------|
-| {prereq} | {reason} | {FR/PAGE/module/HW/FW} | {source} | blocker/risk/info |
+| {prereq} | {reason} | {FR/PAGE/module/device-collaboration} | {source} | blocker/risk/info |
 
 ---
 
@@ -152,7 +151,7 @@
 
 | 耦合点 | 涉及范围 | 原因 | 给 change-plan 的影响 |
 |--------|----------|------|------------------------|
-| {coupling} | {FR/PAGE/module/data/job/integration/HW/FW/RT/driver} | {reason} | {impact note} |
+| {coupling} | {FR/PAGE/module/data/job/integration/device-collaboration} | {reason} | {impact note} |
 
 ---
 
@@ -163,7 +162,7 @@
 | PC Web / Admin | {limit or 无} | {scope} | {note} |
 | H5 / App / 微信小程序 | {limit or 无} | {scope} | {note} |
 | Desktop / CLI / Server | {limit or 无} | {scope} | {note} |
-| MCU / SoC / Board / RTOS / Linux | {limit or 无} | {scope} | {note} |
+| 设备协作 / 上位机 / IoT | {limit or 无} | {scope} | {note} |
 
 ---
 

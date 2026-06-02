@@ -7,5 +7,5 @@
 
 | 技术范围 | 为什么需要后续契约 | 建议 artifact 类型 | 适用 domain / schema | 备注 |
 |----------|--------------------|--------------------|----------------------|------|
-| {scope} | {reason} | ui-contract / service-contract / data-model / cli-contract / job-contract / integration-contract / security-contract / observability-contract / config-contract / migration-contract / hardware-contract / firmware-contract / runtime-contract / driver-contract / verification-contract / other | {domain/schema or 待确认} | {note} |
+| {scope} | {reason} | ui-contract / service-contract / data-model / cli-contract / job-contract / integration-contract / security-contract / observability-contract / config-contract / migration-contract / device-collaboration-contract / verification-contract / other | {domain/schema or 待确认} | {note} |
 ```
