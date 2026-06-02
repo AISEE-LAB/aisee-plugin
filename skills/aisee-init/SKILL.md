@@ -55,43 +55,16 @@ openspec init
 
 ## 目录布局与迁移
 
-新项目只创建和写入 `aisee/` 布局：
+新项目只创建和写入 `aisee/` 布局；旧 `.aisee/`、`.memory/` 和历史 `docs/*` 产物目录只允许作为 fallback 读取。
 
-```text
-aisee/
-  registry/
-  cache/
-  docs/
-  memory/
-  hooks/
-  config/
-```
+迁移默认只提示，不自动执行。只有用户明确要求迁移时，才按 [layout-migration.md](references/layout-migration.md) 执行交互式人工协助迁移。
 
-旧项目兼容路径只允许读取 fallback：
+关键约束：
 
-- `.aisee/sources.json`、`.aisee/id-registry.json`、`.aisee/cache/context-index.json`
-- `.memory/rules.md`、`.memory/index.md`
-- `docs/requirements/`、`docs/ui-content/`、`docs/architecture/`、`docs/change-plan/`、`docs/reflect/`
-
-迁移规则：
-
-- 如果新旧路径都存在，以 `aisee/` 为准，旧路径只能提示“可能过期”。
-- `aisee:init` 审计时只报告迁移建议，不自动移动、删除或合并旧文件。
-- `aisee doctor` 只检查并报告 legacy-only / dual-path 风险。
-- `aisee bootstrap --plan` 只输出迁移计划；`bootstrap --apply` 当前不执行迁移。
-- 真正迁移前必须由用户确认旧文件是当前有效内容，再按文件级别移动到 `aisee/`。
-
-用户明确要求执行迁移时，按交互式人工协助处理：
-
-- 执行前列出源路径、目标路径、冲突情况和将要进行的文件操作，等待用户确认。
-- 只迁移 Aisee 产物；不移动 OpenSpec baseline/change、不修改业务代码。
-- legacy-only 可移动到对应 canonical 路径；目录迁移只搬文件，保持相对结构，不搬空目录。
-- dual-path 必须先比较内容；不自动合并、不覆盖 canonical，不删除旧路径，除非用户确认处理方式。
-- registry 文件不自动合并 JSON；如需合并，先说明策略并取得确认。
-- cache 不迁移，忽略或删除后由 `aisee index` 重建。
-- hooks 不搬旧文件，改为重新运行 hook 安装。
-- memory 可从 `.memory/*` 迁移到 `aisee/memory/*`；若新 memory 已存在，先比较再确认。
-- 迁移后运行 `aisee doctor --json`，并按影响范围运行最小测试或检查。
+- 执行前列出源路径、目标路径、冲突情况和文件操作，等待用户确认。
+- 只迁移 Aisee 产物；不移动 OpenSpec baseline/change，不修改业务代码。
+- 新旧同时存在时，不自动合并、不覆盖 canonical、不删除旧路径。
+- cache 不迁移；hooks 通过重新安装修复；registry 和 memory 合并必须单独确认策略。
 
 模板填充规则：
 
@@ -164,6 +137,7 @@ Hook 职责：
 - 是否明确 `aisee/docs/architecture/` 提供技术架构事实、决策和约束，不能替代 `openspec/project.md` 的项目级技术栈来源。
 - 若存在旧路径 `.aisee/`、`.memory/` 或 `docs/requirements/` 等历史目录，标记 `[MIGRATION]`，说明只兼容读取，不自动迁移。
 - 若新旧路径同时存在，标记 `[CONFLICT]`，说明 `aisee/` 为准，旧路径可能过期。
+- 若用户要求执行迁移，先读取 [layout-migration.md](references/layout-migration.md)。
 
 ### Hooks
 
