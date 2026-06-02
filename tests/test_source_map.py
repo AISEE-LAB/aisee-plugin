@@ -28,14 +28,14 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
 |---|---|---|---|---|---|
 | FR | auth:FR-001 | 登录 | SRS | covered | specs / tasks |
 
-## Implementation Paths
+## Affected Paths Index
 
 | Kind | Path | IDs | Mode | Notes |
 |---|---|---|---|---|
 | code | src/auth/session.py | auth:API-001 | modify | |
 | test | tests/auth/test_session.py | auth:TEST-001 | add | |
 
-## Verification Evidence
+## Expected Evidence Index
 
 | Type | Path / Command | Status | IDs | Notes |
 |---|---|---|---|---|
@@ -90,3 +90,29 @@ def test_parse_source_map_falls_back_to_metadata_scan(tmp_path: Path) -> None:
     assert parsed["parse_level"] == "metadata"
     assert parsed["implementation_paths"][0]["notes"] == "fallback path scan"
     assert "SOURCE_MAP_UNSTRUCTURED" in {item["code"] for item in parsed["issues"]}
+
+
+def test_parse_source_map_keeps_legacy_section_heading_compatibility(tmp_path: Path) -> None:
+    change = tmp_path / "openspec" / "changes" / "add-auth"
+    write(
+        change / "source-map.md",
+        """# Source Map
+
+## Implementation Paths
+
+| Kind | Path | IDs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/auth/session.py | auth:API-001 | modify | |
+
+## Verification Evidence
+
+| Type | Path / Command | Status | IDs | Notes |
+|---|---|---|---|---|
+| test | docs/verification/add-auth-test-results.md | passed | auth:TEST-001 | |
+""",
+    )
+
+    parsed = parse_source_map(change)
+
+    assert parsed["implementation_paths"][0]["path"] == "src/auth/session.py"
+    assert parsed["verification_evidence"][0]["path"] == "docs/verification/add-auth-test-results.md"

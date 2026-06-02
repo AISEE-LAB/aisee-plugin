@@ -631,7 +631,7 @@ def build_gaps(
         if not code_paths and not test_paths:
             owner_artifact = "source-map.md" if source_map_required else "tasks.md"
             message = (
-                "No code or test paths were declared by source-map Implementation Paths"
+                "No code or test paths were declared by source-map Affected Paths Index"
                 if source_map_required
                 else "No code or test paths were referenced by schema artifacts"
             )
@@ -648,7 +648,7 @@ def build_gaps(
                 gap(
                     "SOURCE_MAP_UNMAPPED_PATH",
                     "risk",
-                    "artifact text references implementation paths not declared in source-map Implementation Paths",
+                    "artifact text references execution paths not declared in source-map Affected Paths Index",
                     "source-map.md",
                     unmapped_reference_paths,
                 )
@@ -757,7 +757,7 @@ def build_guardrails(target: str, source_map_required: bool) -> list[str]:
             "Follow tasks.md; do not create a parallel durable plan.",
         ])
         if source_map_required:
-            common.append("Use only source-map Implementation Paths for executable paths; treat other path references as gaps or follow-up findings.")
+            common.append("Use source-map Affected Paths Index for executable paths; metadata fallback is a risk, and other path references remain gaps or follow-up findings.")
         else:
             common.append("Use executable paths explicitly referenced by current schema artifacts; treat unrelated paths as out of scope.")
     elif target == "aisee-verify":
@@ -969,7 +969,7 @@ def ce_plan_reason(
         return "tasks.md has no executable tasks"
     if not code_paths and not test_paths:
         if source_map_required:
-            return "source-map Implementation Paths do not identify code or test paths"
+            return "source-map Affected Paths Index does not identify code or test paths"
         return "schema artifacts do not identify code or test paths"
     return "tasks/source-map need implementation refinement" if source_map_required else "tasks/artifacts need implementation refinement"
 

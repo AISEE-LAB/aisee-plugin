@@ -13,6 +13,20 @@ PATH_PATTERN = re.compile(
     r"((?:src|app|apps|lib|libs|packages|tests|test|docs|openspec|assets|config)"
     r"/[A-Za-z0-9_./@:+-]+)"
 )
+IMPLEMENTATION_PATH_SECTION_TOKENS = (
+    "Affected Paths Index",
+    "影响路径索引",
+    "候选影响路径",
+    "Implementation Paths",
+    "实现路径",
+    "代码路径",
+)
+EVIDENCE_SECTION_TOKENS = (
+    "Expected Evidence Index",
+    "预期证据索引",
+    "Verification Evidence",
+    "验证证据",
+)
 
 
 def parse_source_map(change_path: Path) -> dict[str, Any]:
@@ -179,7 +193,7 @@ def extract_artifact_applicability(tables: dict[str, list[dict[str, str]]]) -> l
 def extract_implementation_paths(tables: dict[str, list[dict[str, str]]], text: str) -> list[dict[str, Any]]:
     rows = []
     for title, table in tables.items():
-        if any(token in title for token in ("Implementation Paths", "实现路径", "代码路径")):
+        if any(token in title for token in IMPLEMENTATION_PATH_SECTION_TOKENS):
             for row in table:
                 path = row.get("path") or ""
                 if not path:
@@ -209,7 +223,7 @@ def extract_implementation_paths(tables: dict[str, list[dict[str, str]]], text: 
 def extract_evidence(tables: dict[str, list[dict[str, str]]]) -> list[dict[str, Any]]:
     rows = []
     for title, table in tables.items():
-        if any(token in title for token in ("Verification Evidence", "验证证据")):
+        if any(token in title for token in EVIDENCE_SECTION_TOKENS):
             for row in table:
                 text = " ".join(row.values())
                 rows.append({
@@ -243,7 +257,7 @@ def build_issues(
     if not tables:
         issues.append(source_map_issue("SOURCE_MAP_UNSTRUCTURED", "risk", "source-map.md has no parseable tables; falling back to metadata scan"))
     if not implementation_paths:
-        issues.append(source_map_issue("SOURCE_MAP_PATHS_MISSING", "risk", "source-map.md has no implementation paths"))
+        issues.append(source_map_issue("SOURCE_MAP_PATHS_MISSING", "risk", "source-map.md has no affected paths index"))
     for row in applicability:
         if row["required"] == "no" and not row["reason"]:
             issues.append(source_map_issue("SOURCE_MAP_NA_REASON_MISSING", "risk", f"{row['artifact']} is not required without reason"))

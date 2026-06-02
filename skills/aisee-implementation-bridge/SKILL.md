@@ -79,7 +79,7 @@ aisee context pack --change <change> --for ce-work --json
 - `facts.derived.scope`：in/out scope 与 follow-up candidates。
 - `facts.derived.traceability`：上游 ID、产出 ID、ID links。
 - `facts.parsed.schema.source_map_required` / `tasks_required` / `archive_tracks`：当前 schema 的实现前置。
-- `facts.derived.code_paths` / `test_paths`：允许读取和修改入口；source-map schema 来自 Implementation Paths，轻量 schema 来自当前 schema artifacts 中明确引用的执行路径。
+- `facts.derived.code_paths` / `test_paths`：允许读取和修改入口；source-map schema 优先来自 `Affected Paths Index`，缺表时只能使用 source-map metadata fallback 且必须保留 risk；轻量 schema 来自当前 schema artifacts 中明确引用的执行路径。
 - `facts.derived.implementation_references.source`：路径来源，可能是 `source-map` 或 `schema-artifacts`。
 - `facts.derived.implementation_references.unmapped_reference_paths`：source-map schema 中 artifacts 提到但未在 source-map 声明的路径，只能作为缺口处理，不能交给 `ce-work` 自动修改。
 - `facts.derived.execution`：执行顺序、是否需要先 ce-plan、禁止越界项。

@@ -131,7 +131,7 @@ Rules:
 - `CLAUDE.md` 只能作为 legacy fallback。
 - `schema.artifacts` 来自当前 change schema 或 OpenSpec CLI 输出，不得硬编码 app/device artifact。
 - `artifacts` 只承诺 metadata scan 和原文入口；不要把 contract 内容解析成业务语义。
-- `source_map` 作为 Aisee companion artifact，可包含 `upstream_sources`、`id_trace`、`artifact_applicability`、`implementation_paths`、`verification_evidence`、`out_of_scope` 和 parse issues。
+- `source_map` 作为 Aisee companion artifact，可包含 `upstream_sources`、`id_trace`、`artifact_applicability`、`implementation_paths`、`verification_evidence`、`out_of_scope` 和 parse issues。字段名保持 JSON 兼容：`implementation_paths` 来自 `Affected Paths Index`，`verification_evidence` 来自 `Expected Evidence Index`。
 - `sources` 只包含 `.aisee/sources.json` 和 `source-map.md` 明确引用的上游来源。
 - `id_registry` 只报告当前状态，不分配新 ID。
 
@@ -176,7 +176,7 @@ Rules:
 - `read_order` 只能来自当前 change、schema artifact DAG、`source-map.md`（如适用）和 project rules。
 - `scope.in/out` 来自 proposal、当前 schema artifacts、source-map（如适用）和 apply tracks。
 - `follow_up_candidates` 可记录实现中发现但未纳入当前 change 的问题。
-- 对生成 `source-map.md` 的 schema，`code_paths` 和 `test_paths` 必须来自 `source-map.md` 的 `Implementation Paths` 结构化声明；不得自由全项目搜索后加入。
+- 对生成 `source-map.md` 的 schema，`code_paths` 和 `test_paths` 优先来自 `source-map.md` 的 `Affected Paths Index` 结构化声明。缺少结构化表时，只能从 `source-map.md` 本文做 metadata fallback，并输出 risk；不得自由全项目搜索后加入。
 - 对不生成 `source-map.md` 的 schema，实现参考只能来自当前 schema artifacts / apply tracks 的显式路径引用，并在 `implementation_references.source` 标记为 `schema-artifacts`；不得把全项目搜索结果加入。
 - OpenSpec artifacts 和 source-map 文本中额外出现的路径只能进入 `implementation_references.referenced_paths`。
 - `implementation_references.unmapped_reference_paths` 表示被 artifact 文本提到但未被当前 schema 的实现定位规则接纳的路径；`ce-work` 不得把这些路径加入 `allowed_paths`。
@@ -247,7 +247,7 @@ Required additions:
 
 Rules:
 
-- 对生成 `source-map.md` 的 schema，`allowed_paths` 只来自 `source-map.md` 的 `Implementation Paths`。artifact 文本提到但未在 source-map 声明的路径只能作为 `unmapped_reference_paths` 和 gap 输出。
+- 对生成 `source-map.md` 的 schema，`allowed_paths` 来自 `source-map.md` 的 `Affected Paths Index`；缺表时可从 `source-map.md` 本文 metadata fallback 并输出 risk。artifact 文本提到但未在 source-map 声明的路径只能作为 `unmapped_reference_paths` 和 gap 输出。
 - 对不生成 `source-map.md` 的 schema，`allowed_paths` 来自当前 schema artifacts / apply tracks 的显式路径引用；缺路径时要求补当前 schema artifact，而不是创建假 source-map。
 - 如果当前 schema apply tracks 太粗、路径缺失或 contract 冲突，`requires_ce_plan` 可以为 `true`，但 `ce-plan` 结论必须回写当前 schema apply tracks；仅 source-map schema 需要回写 `source-map.md`。
 - 不包含完整 SRS / UI Content / Architecture 正文，只包含当前 change 追踪到的 ID、路径和必要摘录。
