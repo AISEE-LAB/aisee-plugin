@@ -22,9 +22,9 @@
       "expected_output": "应识别输入章节中大部分不是 SRS 模块，不能把 UI 页面、API 设计、数据库设计、测试计划或上线计划当作功能模块。应把模块候选收敛到退款处理、退款报表、退款状态查看等业务能力，并把接口、数据库、测试和上线内容作为后续 Architecture/change artifact 提示或 Open Questions。"
     },
     {
-      "name": "embedded-device-requirement",
+      "name": "pure-device-request-boundary",
       "prompt": "整理一个嵌入式设备 SRS：设备需要周期性采集温湿度，超过阈值时本地蜂鸣提醒，并把状态通过串口给上位机。现场维护人员需要能判断传感器异常。现在先写需求，不要写固件实现。",
-      "expected_output": "应识别为 embedded/hardware 需求域，SRS 应描述设备能力、输入输出业务含义、阈值提醒、异常状态、维护人员可观察行为和验收方向；不得输出引脚表、寄存器、RTOS 任务、驱动结构、固件代码或硬件架构。Section 8 应提示 Architecture 和硬件/固件/验证类 change artifacts 可能需要补充。"
+      "expected_output": "应说明当前 aisee:srs 主流程面向软件需求，纯嵌入式/固件需求不应强行生成软件 SRS；可以记录软件可见的设备能力、输入输出业务含义、阈值提醒、异常状态、维护人员可观察行为和验收方向作为约束，并提示后续进入专用硬件流程；不得输出引脚表、寄存器、RTOS 任务、驱动结构、固件代码、硬件架构或硬件类 change artifacts。"
     }
   ]
 }

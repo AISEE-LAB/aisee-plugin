@@ -27,10 +27,10 @@
 ### 1.3 需求域
 | 项 | 内容 |
 |----|------|
-| 需求域 | software / backend / cli / job / hardware / embedded / hybrid |
-| 交付形态 | {Web / App / 小程序 / 桌面 / 后端服务 / CLI / Job / 设备 / 固件 / 混合系统} |
+| 需求域 | app / web / mini-program / desktop / backend-service / cli-tool / job-async / hybrid-software |
+| 交付形态 | {Web / App / 小程序 / 桌面 / 后端服务 / CLI / Job / 多端 / 设备协作软件} |
 | 域识别依据 | {用户说明 / 项目上下文 / 假设} |
-| 下游重点 | UI Content / Design Spec / Architecture / service contract / cli contract / job contract / hardware contract / firmware contract / verification contract |
+| 下游重点 | UI Content / Design Spec / Architecture / service contract / cli contract / job contract / 设备约束说明 |
 
 ### 1.4 术语与缩写
 | 术语 | 定义 |
@@ -76,7 +76,7 @@
 | CLI / 工具 | 是/否 | {谁在什么场景调用} | 需要 / 不需要 cli contract |
 | 异步任务 / 定时任务 / 导入导出 | 是/否 | {业务处理目的} | 需要 / 不需要 job contract |
 | 通知 / 消息 / 外部系统协作 | 是/否 | {触发和接收场景} | 需要 / 不需要 service/job contract |
-| 设备 / 硬件 / 固件 / 嵌入式能力 | 是/否 | {设备或操作者可观察的能力、输入输出、状态或故障行为} | 需要 / 不需要 hardware / firmware / runtime / verification contract |
+| 设备协作 / 上位机 / IoT 状态 | 是/否 | {软件侧需要感知或展示的设备能力、状态、告警、输入输出业务含义} | 需要 / 不需要 Architecture；纯硬件 / 固件细节进入专用流程 |
 
 ### 2.5 现有基线影响
 
@@ -94,7 +94,7 @@
 
 ### 3.1 {能力模块名称}
 
-> 模块名称必须来自业务能力、用户任务、设备能力或状态生命周期；不要直接使用输入文档章节、页面类型、技术层或任务阶段。
+> 模块名称必须来自业务能力、用户任务或状态生命周期；设备相关内容只能作为软件可见约束或协作能力，不要直接使用输入文档章节、页面类型、技术层或任务阶段。
 
 #### FR-001 {需求标题}
 <!-- aisee:id {scope}:FR-001 -->
