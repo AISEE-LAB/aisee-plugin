@@ -1,5 +1,25 @@
 # Aisee、OpenSpec 与 Compound Engineering 融合方案
 
+## 维护边界
+
+本文是 Aisee、OpenSpec 与 Compound Engineering 的高层架构和历史决策快照，不作为逐项同步清单维护。
+
+只在以下情况更新本文：
+
+- Aisee、OpenSpec、Compound Engineering 的职责边界发生变化。
+- 总体流程阶段、事实源策略或 `aisee/` 目录布局发生变化。
+- 是否继续使用 OpenSpec、是否引入迁移命令、是否改变 context pack / ID / source-map 的核心策略发生变化。
+
+以下细节由对应文件维护，本文不重复展开：
+
+- CLI 行为和初始化/迁移策略：[aisee-cli-context-and-id-registry.md](aisee-cli-context-and-id-registry.md)
+- context pack 契约：[../../references/context-pack-contract.md](../../references/context-pack-contract.md)
+- ID 规则：[../../references/id-policy.md](../../references/id-policy.md)
+- source-map 契约：[../../references/source-map-contract.md](../../references/source-map-contract.md)
+- skill 行为：各 `skills/*/SKILL.md`
+- schema 事实：`skills/aisee-schema-pack/assets/schema-pack/`
+- 项目内 agent 规则：`AGENTS.md`
+
 ## 背景
 
 当前 `aisee*` 能力以多个独立 skill 的形式存在，覆盖需求澄清、UI 内容规格、技术架构、OpenSpec change 规划、schema pack、项目初始化、视觉资产、对象级图片处理和会话复盘等工作。
@@ -221,6 +241,9 @@ openspec archive
 - 旧 `.aisee/`、`.memory/` 和历史 `docs/*` 目录只作为兼容读取 fallback。
 - `aisee doctor` 报告 legacy-only / dual-path 风险。
 - `aisee bootstrap --plan` 输出迁移建议；`bootstrap --apply` 当前不执行迁移。
+- 用户明确要求迁移后，agent 可以协助执行文件级迁移，但必须先列出源路径、目标路径、冲突情况和操作清单并等待确认。
+- dual-path 不自动合并、不覆盖 canonical、不删除旧路径；registry、memory 合并必须单独确认策略。
+- cache 不迁移，hooks 通过重新安装修复，不搬旧 hook。
 
 ### 保持独立的资产类 Skill
 

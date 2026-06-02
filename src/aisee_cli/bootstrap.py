@@ -24,13 +24,13 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
         actions.append(action(
             "migrate",
             f"{item['legacy']} -> {item['canonical']}",
-            "Move this legacy Aisee artifact into the canonical aisee/ layout after confirming it is current; bootstrap does not move files automatically.",
+            "Prompt the user first. If the user explicitly asks to migrate, move this legacy Aisee artifact into the canonical aisee/ layout after confirming it is current; bootstrap does not move files automatically.",
         ))
     for item in layout["dual"]:
         actions.append(action(
             "review",
             item["legacy"],
-            f"{item['canonical']} is authoritative; review or remove this legacy path after confirming it is stale.",
+            f"Prompt the user first. {item['canonical']} is authoritative; compare before changing, and only remove or archive this legacy path after the user confirms it is stale.",
         ))
     sources = sources_path(root)
     if not sources.exists():

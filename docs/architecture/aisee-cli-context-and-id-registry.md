@@ -114,8 +114,15 @@ aisee bootstrap --apply
 
 - 新项目只写入 `aisee/`。
 - 旧项目允许 fallback 读取 `.aisee/`、`.memory/` 和历史 `docs/*` 产物目录。
-- 如果只有旧路径，输出 `migrate` 建议，但不搬文件。
-- 如果新旧路径同时存在，以 `aisee/` 为准，输出 `review` 建议，提示旧路径可能过期。
+- 如果只有旧路径，输出 `migrate` 建议，但不搬文件；用户明确要求后，agent 才能按文件级迁移协助执行。
+- 如果新旧路径同时存在，以 `aisee/` 为准，输出 `review` 建议；agent 必须先比较并提示用户，不能自动合并、覆盖或删除旧路径。
+
+迁移执行边界：
+
+- 执行前列出源路径、目标路径、冲突情况和文件操作，等待用户确认。
+- 只迁移 Aisee 产物；不移动 OpenSpec baseline/change，不修改业务代码。
+- cache 不迁移，重新生成即可；hooks 通过重新安装修复，不搬旧 hook。
+- registry 和 memory 如需合并，必须先说明策略并取得用户确认。
 
 高影响操作必须确认：
 

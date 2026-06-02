@@ -81,6 +81,18 @@ aisee/
 - `aisee bootstrap --plan` 只输出迁移计划；`bootstrap --apply` 当前不执行迁移。
 - 真正迁移前必须由用户确认旧文件是当前有效内容，再按文件级别移动到 `aisee/`。
 
+用户明确要求执行迁移时，按交互式人工协助处理：
+
+- 执行前列出源路径、目标路径、冲突情况和将要进行的文件操作，等待用户确认。
+- 只迁移 Aisee 产物；不移动 OpenSpec baseline/change、不修改业务代码。
+- legacy-only 可移动到对应 canonical 路径；目录迁移只搬文件，保持相对结构，不搬空目录。
+- dual-path 必须先比较内容；不自动合并、不覆盖 canonical，不删除旧路径，除非用户确认处理方式。
+- registry 文件不自动合并 JSON；如需合并，先说明策略并取得确认。
+- cache 不迁移，忽略或删除后由 `aisee index` 重建。
+- hooks 不搬旧文件，改为重新运行 hook 安装。
+- memory 可从 `.memory/*` 迁移到 `aisee/memory/*`；若新 memory 已存在，先比较再确认。
+- 迁移后运行 `aisee doctor --json`，并按影响范围运行最小测试或检查。
+
 模板填充规则：
 
 - 输出内容使用中文。
