@@ -22,6 +22,7 @@
 |------|----------|
 | FR / NFR / RULE | SRS 中的完整 ID |
 | PAGE / FLOW / STATE | UI Content 中的完整 ID，或 `N/A` |
+| DESIGN | Design Spec / Design Assets / dev-visual-brief 引用，或 `N/A` |
 | ARCH / DEC / CONSTRAINT / RISK | Architecture 中的完整 ID，或 `N/A` |
 | SPEC | `TBD in change-author` |
 | API | `TBD in service-contract` |
@@ -35,7 +36,9 @@
 - `data-model.md`
 - `service-contract.md`
 
-其中 `proposal.md`、`source-map.md`、`specs/**/*.md` 和 `tasks.md` 是 app 最小闭环，不通过 Required=no 跳过。上述四个 app contract 只有 Required=yes 时才需要在 change-author 阶段展开；Required=no 必须写具体原因。
+其中 `proposal.md`、`source-map.md`、`specs/**/*.md` 和 `tasks.md` 是 app 最小闭环，不通过 Required=no 跳过。`change-context.md`、`ui-contract.md`、`data-model.md` 和 `service-contract.md` 是按需 artifact / 契约，只有 Required=yes 时才需要在 change-author 阶段展开；Required=no 必须写具体原因。
+
+对于既有系统或二次开发，seed 应提示本 change 涉及对象是 `Existing / Changed / New / Deprecated / Unknown`。Existing 只引用来源，不要求后续 artifact 重写完整规格。
 
 ## Device Schema Seed
 

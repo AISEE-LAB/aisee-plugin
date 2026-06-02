@@ -34,7 +34,7 @@
 - 输入文档章节：背景、目标、范围、假设、风险、路线图、上线计划
 - 技术层：前端、后端、数据库、API、缓存、队列、部署、可观测性
 - UI 页面类型：列表页、详情页、弹窗、设置页，除非该页面本身就是一个可独立交付的用户场景
-- schema artifact：design.md、ui-contract.md、data-model.md、service-contract.md、hardware-contract.md
+- schema artifact 或上游交接文档：design.md、change-context.md、ui-contract.md、data-model.md、service-contract.md、hardware-contract.md、Design Spec、Design Assets
 - 实施阶段：初始化、搭框架、写测试、联调、发布
 
 如果这些内容包含真实需求，提取背后的用户场景、业务能力、设备能力或风险前置。
