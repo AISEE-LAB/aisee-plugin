@@ -396,6 +396,16 @@ def test_archive_check_blocks_open_tasks_and_fail_flag(tmp_path: Path) -> None:
     assert any(item["code"] == "TASKS_OPEN" for item in data["blockers"])
 
 
+def test_archive_check_blocks_missing_validate_evidence(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "archive-check", "add-auth", "--json")
+
+    assert data["status"] == "blocked"
+    assert any(item["code"] == "VALIDATE_EVIDENCE_MISSING" for item in data["blockers"])
+
+
 def test_context_pack_adds_doc_review_focus_and_evidence(tmp_path: Path) -> None:
     create_change_project(tmp_path, task_mark="x")
     write(tmp_path / "docs" / "reviews" / "add-auth-doc-review.md", "# Review\n")
@@ -437,7 +447,10 @@ def test_review_p1_is_risk_for_verify_and_blocker_for_archive(tmp_path: Path) ->
 
 def test_accepted_review_finding_allows_archive_ready(tmp_path: Path) -> None:
     create_change_project(tmp_path, task_mark="x")
-    write(tmp_path / "docs" / "reviews" / "add-auth-code-review.md", "- P1 accepted risk: legacy endpoint remains unchanged\n")
+    write(
+        tmp_path / "docs" / "reviews" / "add-auth-code-review.md",
+        "- P1 accepted risk: legacy endpoint remains unchanged; owner: platform; reason: backward compatibility; impact: existing endpoint only; follow-up: remove in next auth cleanup\n",
+    )
     write(tmp_path / "docs" / "verification" / "add-auth-openspec-validate.md", "passed\n")
     write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
 
@@ -446,6 +459,18 @@ def test_accepted_review_finding_allows_archive_ready(tmp_path: Path) -> None:
     assert data["status"] == "archive-ready"
     assert data["summary"]["blocker"] == 0
     assert data["evidence"]["details"]["accepted_risks"][0]["text"].startswith("- P1 accepted risk")
+
+
+def test_incomplete_accepted_risk_blocks_archive(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(tmp_path / "docs" / "reviews" / "add-auth-code-review.md", "- P1 accepted risk: legacy endpoint remains unchanged\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-openspec-validate.md", "passed\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "archive-check", "add-auth", "--json")
+
+    assert data["status"] == "blocked"
+    assert any(item["code"] == "ACCEPTED_RISK_INCOMPLETE" for item in data["blockers"])
 
 
 def test_na_artifact_without_reason_is_verify_risk(tmp_path: Path) -> None:

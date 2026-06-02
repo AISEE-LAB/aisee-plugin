@@ -213,7 +213,7 @@ def test_flow_ignores_ce_work_gaps_for_no_apply_schema(tmp_path: Path) -> None:
 
     data = run_json(tmp_path, "flow", "inspect", "--change", "research-cache", "--json")
 
-    assert data["status"] == "risk"
+    assert data["status"] == "blocked"
     assert data["stage"] == "verified"
     assert data["recommended_path"] == ["aisee:archive-guard"]
     assert data["checks"]["gaps"]["status"] == "blocked"

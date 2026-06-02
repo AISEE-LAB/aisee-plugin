@@ -70,8 +70,9 @@ def build_archive_check(project_root: Path, change: str) -> dict[str, Any]:
     if tasks_required and task_state["open"]:
         blockers.append(issue("TASKS_OPEN", "blocker", "tasks.md still has open tasks", "tasks.md"))
     if pack["evidence"].get("openspec_validate") is None:
-        warnings.append(issue("VALIDATE_EVIDENCE_MISSING", "risk", "openspec validate evidence was not found", "openspec"))
+        blockers.append(issue("VALIDATE_EVIDENCE_MISSING", "blocker", "openspec validate evidence was not found", "openspec"))
     append_archive_review_blockers(pack["evidence"], blockers)
+    append_accepted_risk_issues(pack["evidence"], blockers)
     append_schema_evidence_issues(pack, blockers, warnings, archive_mode=True)
 
     issues = blockers + warnings
@@ -227,6 +228,39 @@ def append_archive_review_blockers(evidence: dict[str, Any], blockers: list[dict
             if finding.get("priority") == "P1":
                 path = str(finding.get("path") or review.get("path") or "docs/reviews")
                 blockers.append(issue("REVIEW_P1_OPEN", "blocker", "open P1 review finding must be resolved or accepted", path))
+
+
+def append_accepted_risk_issues(evidence: dict[str, Any], blockers: list[dict[str, Any]]) -> None:
+    details = evidence.get("details") if isinstance(evidence.get("details"), dict) else {}
+    for risk in details.get("accepted_risks", []):
+        if not isinstance(risk, dict):
+            continue
+        text = str(risk.get("text") or "")
+        missing = missing_accepted_risk_fields(text)
+        if missing:
+            blockers.append(
+                issue(
+                    "ACCEPTED_RISK_INCOMPLETE",
+                    "blocker",
+                    f"accepted risk is missing required fields: {', '.join(missing)}",
+                    str(risk.get("path") or "docs/reviews"),
+                )
+            )
+
+
+def missing_accepted_risk_fields(text: str) -> list[str]:
+    lowered = text.lower()
+    fields = {
+        "owner": ("owner:", "负责人", "责任人"),
+        "reason": ("reason:", "理由", "原因"),
+        "impact": ("impact:", "影响"),
+        "follow-up": ("follow-up:", "followup:", "后续", "处理方式"),
+    }
+    return [
+        name
+        for name, markers in fields.items()
+        if not any(marker in lowered or marker in text for marker in markers)
+    ]
 
 
 def na_artifact_issues(pack: dict[str, Any]) -> list[dict[str, str]]:
