@@ -1,21 +1,33 @@
-"""User-level recent image project records."""
+"""Recent image project records."""
 
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 
-RECENT_PATH = Path.home() / ".aisee" / "image-object" / "recent.json"
+DEFAULT_RECENT_PATH = Path("aisee/cache/image-object/recent.json")
+LEGACY_RECENT_PATH = Path.home() / ".aisee" / "image-object" / "recent.json"
 MAX_RECENT = 12
 
 
+def recent_path() -> Path:
+    env_path = os.getenv("AISEE_IMAGE_OBJECT_RECENT_PATH")
+    if env_path:
+        return Path(env_path)
+    return Path.cwd() / DEFAULT_RECENT_PATH
+
+
 def load_recent_records() -> list[dict[str, Any]]:
-    if not RECENT_PATH.exists():
+    path = recent_path()
+    if not path.exists() and not os.getenv("AISEE_IMAGE_OBJECT_RECENT_PATH"):
+        path = LEGACY_RECENT_PATH
+    if not path.exists():
         return []
     try:
-        data = json.loads(RECENT_PATH.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return []
     if not isinstance(data, list):
@@ -40,8 +52,9 @@ def save_recent_record(*, workspace: str | Path, image: str | Path = "") -> None
         if item.get("workspace") != workspace_text and item.get("image") != image_text
     ]
     records.insert(0, {"workspace": workspace_text, "image": image_text})
-    RECENT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    RECENT_PATH.write_text(
+    path = recent_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
         json.dumps(records[:MAX_RECENT], ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
