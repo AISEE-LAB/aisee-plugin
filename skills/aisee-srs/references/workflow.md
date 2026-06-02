@@ -62,7 +62,7 @@ Baseline-aware 模式不得：
 
 - 当前主支持域：`app`、`web`、`mini-program`、`desktop`、`backend-service`、`cli-tool`、`job-async`。
 - 对带设备的软件需求，只记录业务可见的设备能力、状态、告警、输入输出信号业务含义、安全可靠性约束和验收方向。
-- 硬件架构、嵌入式固件设计、PCB/BOM、驱动、RTOS 任务、寄存器、引脚、制造和 device-context 细节属于后续专用流程，不进入当前 SRS 主线。
+- 硬件架构、嵌入式固件设计、PCB/BOM、驱动、RTOS 任务、寄存器、引脚和制造细节属于后续专用硬件流程，不进入当前 SRS 主线。
 
 ## Phase 3 — 确认门禁
 

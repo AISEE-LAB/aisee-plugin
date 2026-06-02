@@ -88,7 +88,6 @@ aisee id reserve --scope <scope> --type STATE --count <N> --json
 cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat AGENTS.md 2>/dev/null | head -120
-cat CLAUDE.md 2>/dev/null | head -60
 cat aisee/registry/id-registry.json 2>/dev/null || true
 ls aisee/docs/ui-content/ 2>/dev/null | head -20
 find openspec/specs -maxdepth 3 -type f 2>/dev/null | head -40

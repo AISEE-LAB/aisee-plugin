@@ -168,7 +168,7 @@ aisee schemas install
 
 登记 change 外部的 Aisee 产物来源。
 
-SRS、UI content、architecture、device-context、design-assets 等通常不在 OpenSpec change 目录内，仅依赖 change schema 无法发现这些上游产物。因此需要项目级来源登记：
+SRS、UI content、architecture、design-assets 和硬件 architecture 等通常不在 OpenSpec change 目录内，仅依赖 change schema 无法发现这些上游产物。因此需要项目级来源登记：
 
 ```text
 aisee/registry/sources.json
@@ -363,7 +363,7 @@ aisee context pack --change add-auth-login --for aisee-verify --json
 
 ```text
 1. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema、artifact DAG、apply tracks 和是否需要 source-map。
-2. 读取 aisee/registry/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
+2. 读取 aisee/registry/sources.json，发现 SRS / UI content / architecture / design-assets / 硬件 architecture 等 change 外部产物。
 3. 读取 aisee/registry/id-registry.json，获取 ID 分配和生命周期。
 4. 如当前 schema 生成 source-map，读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件、artifact、Affected Paths Index 和 Expected Evidence Index；缺少结构化路径索引时只允许从 source-map 本文 metadata fallback，并输出 risk。
 5. 对当前 schema 声明的 OpenSpec artifacts 做 metadata scan：存在性、路径、heading、ID、路径引用、checkbox 和 hash；不解释 artifact 业务语义。
@@ -869,7 +869,7 @@ Sources 负责回答：
 ```text
 SRS 在哪里？
 UI content 在哪里？
-architecture / device-context 在哪里？
+architecture / design-assets / 硬件 architecture 在哪里？
 这些外部产物使用哪个模板和 parser？
 ```
 
@@ -908,7 +908,7 @@ Cache 只加速这些回答，不保存权威内容。
 3. aisee:srs 写 SRS，使用预留 ID
 4. aisee index
 5. aisee id check
-6. aisee:ui-content / aisee:device-context
+6. aisee:ui-content / aisee:architecture（软件）或 hw:architecture（硬件）
 7. aisee:change-plan
 8. aisee:change-author
 9. aisee context pack --change <change> --for ce-doc-review

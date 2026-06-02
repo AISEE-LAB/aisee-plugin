@@ -62,11 +62,10 @@ cat openspec/config.yaml 2>/dev/null || echo "No config found"
 openspec list --json 2>/dev/null || ls openspec/changes/ 2>/dev/null || echo "No existing changes found"
 ls openspec/changes/archive/ 2>/dev/null | head -20
 cat AGENTS.md 2>/dev/null | head -120
-cat CLAUDE.md 2>/dev/null | head -80
 cat aisee/registry/id-registry.json 2>/dev/null || true
 ```
 
-`AGENTS.md` 是主入口；`CLAUDE.md` 只作为旧项目兼容。
+`AGENTS.md` 是主入口；`CLAUDE.md` 只作为旧项目兼容 fallback，不主动作为新项目上下文读取。
 
 ## 阶段 2 — 识别输入模式
 

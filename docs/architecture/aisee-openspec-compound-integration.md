@@ -63,7 +63,6 @@ aisee-plugin/
     aisee-srs/
     aisee-ui-content/
     aisee-architecture/
-    aisee-device-context/
     aisee-change-plan/
     aisee-change-author/
     aisee-implementation-bridge/
@@ -99,7 +98,7 @@ aisee-app:
   ui-content / app schema / ui-contract / service-contract / data-model / frontend handoff
 
 aisee-device:
-  device-context / hardware-contract / firmware-contract / runtime-contract / verification-contract
+  hw-srs / hw-architecture / hw-change-plan / device schema / hardware-contract / firmware-contract / runtime-contract / verification-contract
 
 aisee-visual-assets:
   design-assets / svg-assets / image-object
@@ -129,7 +128,7 @@ Aisee CLI 是 Aisee/OpenSpec/Compound 之间的上下文总线，也是 OpenSpec
 
 - `aisee doctor`：检查 OpenSpec、Aisee、Compound 能力是否可用。
 - `aisee bootstrap --plan/--apply`：生成或执行项目初始化计划。
-- `aisee sources`：登记 SRS、UI 内容、architecture、device-context 等 change 外部产物来源。
+- `aisee sources`：登记 SRS、UI 内容、architecture、design-assets、硬件 architecture 等 change 外部产物来源。
 - `aisee index`：建立可删除、可重建的解析缓存，用于加速查询；不是内容事实源。
 - `aisee get <id>`：根据稳定 ID 查询需求、页面、硬件约束、固件行为、任务等详情。
 - `aisee trace <id>`：查询 ID 上下游关系。
@@ -207,7 +206,7 @@ openspec archive
   ↓
 aisee:srs
   ↓
-aisee:ui-content 或 aisee:device-context
+aisee:ui-content 或 hw:architecture（硬件链路）
   ↓
 aisee:architecture
   ↓
@@ -598,7 +597,7 @@ aisee:srs
 aisee:ui-content
   -> 可选 ce-doc-review，审核页面状态、权限、异常流和跨页面流程
 
-aisee:architecture / aisee:device-context
+aisee:architecture / hw:architecture
   -> 可选 ce-doc-review，审核技术约束、硬件/固件/运行时约束缺口
 
 aisee:change-plan
@@ -648,7 +647,6 @@ aisee-schema-pack
 aisee:srs
 aisee:ui-content
 aisee:architecture
-aisee:device-context
 aisee:change-plan
 aisee:change-author
 aisee:implementation-bridge
@@ -719,7 +717,9 @@ aisee-app
   frontend bridge
 
 aisee-device
-  device-context
+  hw-srs
+  hw-architecture
+  hw-change-plan
   hardware-contract
   firmware-contract
   runtime-contract
@@ -787,7 +787,7 @@ aisee/cache/context-index.json
 = 可删除、可重建的解析缓存，不是事实源
 ```
 
-SRS、UI content、architecture、device-context 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `aisee/registry/sources.json` 登记；当前 schema 生成 `source-map.md` 时，再通过 source-map 衔接到具体 change：
+SRS、UI content、architecture、design-assets 和硬件 architecture 等不在 OpenSpec change 目录内，不能只靠 change schema 发现。必须通过 `aisee/registry/sources.json` 登记；当前 schema 生成 `source-map.md` 时，再通过 source-map 衔接到具体 change：
 
 ```text
 aisee/registry/sources.json
@@ -913,11 +913,11 @@ openspec archive
 ```text
 aisee:flow
   ↓ 判定 domain = device
-aisee:srs
+hw:srs
   ↓
-aisee:device-context
+hw:architecture
   ↓
-aisee:change-plan --schema aisee-device-spec-driven
+hw:change-plan --schema aisee-device-spec-driven
   ↓
 aisee:change-author
   ↓

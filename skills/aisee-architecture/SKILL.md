@@ -1,6 +1,6 @@
 ---
 name: aisee:architecture
-description: 在 aisee:change-plan 之前生成软件项目技术架构文档，提取 App、小程序、Web、桌面、后端/API、CLI、Job、集成、数据和设备协作软件场景的技术栈状态、架构概览、全局工程约定、架构决策、现有边界、可复用能力、共享技术前置、技术耦合点、平台限制、技术风险和 schema artifact hints。用于用户要求“做架构”“生成架构文档”“分析技术架构”“补技术约束”“change-plan 前看技术边界”“现有项目技术栈扫描”“生成 architecture/tech-context”“判断技术栈是否已定”“为规划 change 边界提供技术输入”时触发。不要用于规划 change 边界、命名 change、做技术选型、写 API/DB/CLI/Job 详细契约、硬件/固件设计或实现方案。
+description: 在 aisee:change-plan 之前生成软件项目技术架构文档，提取 App、小程序、Web、桌面、后端/API、CLI、Job、集成、数据和设备协作软件场景的技术栈状态、架构概览、全局工程约定、架构决策、现有边界、可复用能力、共享技术前置、技术耦合点、平台限制、技术风险和 schema artifact hints。用于用户要求“做架构”“生成架构文档”“分析技术架构”“补技术约束”“change-plan 前看技术边界”“现有项目技术栈扫描”“判断技术栈是否已定”“为规划 change 边界提供技术输入”时触发。不要用于规划 change 边界、命名 change、做技术选型、写 API/DB/CLI/Job 详细契约、硬件/固件设计或实现方案。
 ---
 
 # aisee:architecture — 技术架构文档
