@@ -67,12 +67,13 @@ aisee/docs/spec-migration/<YYYY-MM-DD>-<slug>/00-index.md
 
 ```bash
 openspec --version
-openspec templates --schema spec-driven --json
+openspec schema list 2>/dev/null || true
 ```
 
 用途：
 
-- `templates --schema ... --json` 返回的 `specs.path` 是 change delta spec 的官方模板。只有用户明确要求通过 bootstrap change 迁移时，才读取并使用该模板。
+- 直接写入 `openspec/specs/` 的 baseline spec 不依赖 change schema，也不使用 schema artifact 模板。
+- 只有用户明确要求通过 bootstrap change 迁移时，才读取当前选定 schema 的 delta spec 模板。schema 必须来自用户指定、`aisee:change-plan` 输出、OpenSpec change metadata 或项目配置；不要硬编码 `spec-driven`。
 - `openspec/specs/` 下的 baseline 静态 spec 不使用 change delta 模板；它必须通过当前 `openspec validate <capability>` 校验。若校验提示与本技能说明不一致，以当前 CLI 校验提示为准。
 
 默认写入：
@@ -85,7 +86,7 @@ openspec/specs/<capability>/spec.md
 格式规则：
 
 - 直接写入 `openspec/specs/` 的 baseline 使用 OpenSpec 静态 spec 格式；生成后必须用 `openspec validate <capability>` 验证。
-- 只有在用户明确要求通过 bootstrap change 迁移时，才在 `openspec/changes/<change>/specs/` 使用当前 schema 的 delta `specs.path` 模板。
+- 只有在用户明确要求通过 bootstrap change 迁移时，才在 `openspec/changes/<change>/specs/` 使用当前选定 schema 的 delta `specs.path` 模板。
 - 每条 Requirement 必须满足当前 OpenSpec 校验器的强制规则，包括 `SHALL` / `MUST` 和至少一个 Scenario。
 - Scenario 必须满足当前 OpenSpec 校验器识别的格式；不要凭记忆或旧模板猜测格式。
 - 不把实现细节写成需求；写用户可观察行为、系统契约和业务约束。
