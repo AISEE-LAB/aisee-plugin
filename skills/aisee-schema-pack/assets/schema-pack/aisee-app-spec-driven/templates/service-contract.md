@@ -1,4 +1,4 @@
-# Service Contract: {{change-name}}
+# Service Contract: {{change-name}} / Service Contract Scope
 
 状态：适用 / N/A
 

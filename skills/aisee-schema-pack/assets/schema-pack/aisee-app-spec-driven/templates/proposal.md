@@ -1,4 +1,4 @@
-# Proposal: {{change-name}}
+# Proposal: {{change-name}} / Change Brief
 
 > proposal.md 是 change brief，只说明为什么做、做什么、不做什么、做到什么程度算完成。不复制 SRS、UI Content、Architecture、contracts 或 tasks 的正文。
 

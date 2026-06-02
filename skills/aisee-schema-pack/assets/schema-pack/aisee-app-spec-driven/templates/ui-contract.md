@@ -1,4 +1,4 @@
-# UI Contract: {{change-name}}
+# UI Contract: {{change-name}} / UI Contract Scope
 
 状态：适用 / N/A
 

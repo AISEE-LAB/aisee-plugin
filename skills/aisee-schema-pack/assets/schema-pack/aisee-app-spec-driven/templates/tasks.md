@@ -1,4 +1,4 @@
-# Tasks: {{change-name}}
+# Tasks: {{change-name}} / Implementation Checklist
 
 > tasks.md 是实现与验证清单，不承载需求、契约、ID 注册、来源追踪或归档判断。需求写入 specs，约束写入 contract artifacts，追踪写入 source-map.md。
 

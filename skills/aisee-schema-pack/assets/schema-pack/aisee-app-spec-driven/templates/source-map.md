@@ -1,4 +1,4 @@
-# Source Map: {{change-name}}
+# Source Map: {{change-name}} / Source and ID Routing
 
 > 完整 ID 格式：`<scope>:<TYPE>-<number>`。文档中可以显示短 ID，但跨文档引用必须使用完整 ID。正式 ID 必须来自 `.aisee/id-registry.json`；未注册、废弃、拆分或合并的 ID 必须标注。工具不可用时只能使用 `{{scope}}:<TYPE>-NEW-001` 形式的临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
 > Source Map 只记录来源、ID、artifact 适用性、追踪关系、候选影响路径和预期证据类型；不写 contract 细节、不写实现步骤、不写最终验证结论。
