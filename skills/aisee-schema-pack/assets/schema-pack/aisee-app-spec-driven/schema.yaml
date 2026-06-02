@@ -98,8 +98,7 @@ artifacts:
       - 页面内容结构、区块、操作、状态反馈和权限可见性
       - 前端需要的数据与来源能力
       - 引用 Design Spec / Design Assets / dev-visual-brief 中对本 change 生效的组件库、token、资产、布局、响应式、可访问性、动效和视觉验收约束
-      - 本 change 的 UI 验收证据要求，包括内容完整性、状态完整性、组件一致性、响应式/可访问性和必要的截图对比
-      - FR / NFR / RULE / PAGE / FLOW / STATE / API / DATA / CONSTRAINT 的追踪关系
+      - 轻量覆盖检查；跨文档追踪关系写入 source-map.md，验证证据写入 source-map.md 或 tasks.md
       - 不要在 ui-contract.md 重新定义或复制完整视觉规范、组件库、配色、排版或像素布局；这些仍以 Design Spec / Design Assets 为事实源
 
   - id: data-model
@@ -117,8 +116,7 @@ artifacts:
       - 字段、类型、必填、默认值、约束和说明
       - 关系、唯一约束、索引、数据迁移、回滚和兼容策略
       - 数据所有权、删除/归档、审计字段和敏感数据处理
-      - 本 change 的数据验收证据要求，包括字段约束、兼容回滚、查询索引和敏感数据处理
-      - FR / API / CONSTRAINT / RISK 的追踪关系
+      - 轻量覆盖检查；跨文档追踪关系写入 source-map.md，验证证据写入 source-map.md 或 tasks.md
 
   - id: service-contract
     generates: service-contract.md
@@ -136,30 +134,26 @@ artifacts:
       - 业务逻辑、状态流转、校验规则、异步任务和通知必须引用 specs / RULE，不复制需求全文
       - 数据读写、事务、一致性和失败处理必须引用 data-model.md
       - 可观测性、审计、日志、指标和告警要求必须明确
-      - 本 change 的服务验收证据要求，包括契约完整性、权限错误、数据一致性、幂等重试和可观测性
+      - 轻量覆盖检查；跨文档追踪关系写入 source-map.md，验证证据写入 source-map.md 或 tasks.md
       - 引用 ui-contract.md 的前端数据需求和 data-model.md 的数据对象时必须保持追踪闭合
       - 不要脱离 source-map.md 或 data-model.md 自造字段或状态
 
   - id: tasks
     generates: tasks.md
-    description: "实现清单：从 specs、change-context 和 contract artifacts 生成可执行任务和验证证据要求"
+    description: "实现与验证清单：按 specs、source-map 和 Required=yes 的 artifacts 生成可执行任务与证据要求"
     template: tasks.md
     requires: [source-map, specs]
     instruction: |
-      tasks.md 必须先做最小闭环一致性检查，再列实现任务：
-      - 生成前必须运行或记录 `aisee change author-check <change> --json`
-      - author-check 的 blocker 必须清除后才能生成可执行任务
-      - 每个 FR 必须能追踪到 specs
-      - 只检查 source-map.md 中 Required=yes 的按需 artifacts；Required=no 且有原因的不阻塞 tasks
-      - 涉及页面的 FR 必须追踪到 ui-contract.md，除非 ui-contract.md 在 source-map.md 中 Required=no 且原因明确
-      - 涉及接口的 FR 必须追踪到 service-contract.md，除非 service-contract.md 在 source-map.md 中 Required=no 且原因明确
-      - 涉及持久化的 FR 必须追踪到 data-model.md，除非 data-model.md 在 source-map.md 中 Required=no 且原因明确
-      - 涉及架构约束或风险的任务必须追踪到 change-context.md，除非 change-context.md 在 source-map.md 中 Required=no 且原因明确
-      - 每个实现或验证任务必须有 TASK ID，验证项必须能关联 TEST ID 或验证证据
-      - 新增 TASK / TEST ID 前必须通过 ID registry 预留
-      - 不适用 artifact 必须已有 N/A 原因
-      - 任务按实现和验证顺序排列，最后必须包含验收场景验证
-      - 收尾必须记录 `aisee change author-check`、`aisee gaps`、`aisee:verify` 和 `aisee:archive-guard` 状态
+      tasks.md 是唯一长期任务清单，只记录执行顺序、任务状态和验证证据；不得承载需求、契约、ID 注册、来源追踪或归档判断。
+      tasks.md 必须保持轻量：
+      - 执行前只确认 source-map.md 与 proposal.md 范围一致
+      - 确认 specs 覆盖本 change 的 FR / NFR / RULE
+      - 确认 Required=yes 的 change-context / ui-contract / service-contract / data-model 已完成
+      - 确认 Required=no 的按需 artifact 已在 source-map.md 写明 N/A 原因
+      - 确认无阻塞项；保留风险已写入 source-map.md
+      - 实现任务必须引用已有 specs / contract / source-map ID，不重新描述需求、页面、接口或数据模型
+      - 验证任务必须关联 TEST ID，并记录证据命令或证据路径
+      - 完成确认只记录任务和验证是否完成；归档判断交给 aisee:archive-guard
 
 apply:
   requires: [tasks]

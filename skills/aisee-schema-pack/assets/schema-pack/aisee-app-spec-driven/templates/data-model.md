@@ -74,17 +74,10 @@ N/A 原因：
 |---|---|---|---|---|
 | {{scope}}:DATA-001.field | public / internal / sensitive / secret | 脱敏 / 加密 / 最小化 / 审计 / 删除 / N/A | {{scope}}:CONSTRAINT-001 / N/A | 测试 / 代码审查 / 人工验证 |
 
-## 数据追踪矩阵
+## 覆盖检查
 
-| 上游 ID | DATA | 字段 / 关系 / 索引 | service-contract 引用 | CONSTRAINT / RISK | 是否完整 |
-|---|---|---|---|---|---|
-| {{scope}}:FR-001 | {{scope}}:DATA-001 | | {{scope}}:API-001 | {{scope}}:CONSTRAINT-001 / N/A | 是 / 否 |
-
-## 数据验收证据
-
-| 验收项 | 适用对象 | 依据 | 证据要求 | 是否阻塞 |
-|---|---|---|---|---|
-| 字段和约束完整 | {{scope}}:DATA-001 | data-model.md / specs | migration / schema diff / 测试 | yes / no |
-| 兼容和回滚可行 | {{scope}}:DATA-001 | change-context.md | 回滚演练 / 迁移脚本检查 / N/A | yes / no |
-| 查询和索引满足能力 | {{scope}}:DATA-001 | service-contract.md | 查询计划 / 测试 / 代码审查 | yes / no |
-| 敏感数据处理正确 | {{scope}}:DATA-001.field | 数据治理与安全 | 测试 / 代码审查 / 人工验证 / N/A | yes / no |
+- [ ] 覆盖相关上游 ID：{{scope}}:FR-001 / {{scope}}:DATA-001 / {{scope}}:CONSTRAINT-001 / N/A。
+- [ ] 已引用必要的 service-contract / change-context / N/A。
+- [ ] 字段、关系、约束、索引、迁移、回滚和兼容策略已覆盖本 change 影响。
+- [ ] 敏感数据、审计、保留周期、删除/归档和数据所有权已处理或写明 N/A。
+- [ ] 需要的验证证据已登记到 source-map.md 或 tasks.md。

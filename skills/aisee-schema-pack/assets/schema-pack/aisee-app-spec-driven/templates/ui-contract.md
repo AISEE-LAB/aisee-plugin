@@ -82,18 +82,10 @@ N/A 原因：
 |---|---|---|---|---|
 | {{scope}}:STATE-001 | {{scope}}:PAGE-001 / {{scope}}:FLOW-001 | | | |
 
-## UI 追踪矩阵
+## 覆盖检查
 
-| 上游 ID | 页面 | 元素 / 操作 | 状态 | 设计 / 视觉引用 | 依赖能力 | 是否完整 |
-|---|---|---|---|---|---|---|
-| {{scope}}:FR-001 | {{scope}}:PAGE-001 | | {{scope}}:STATE-001 | Design Spec / dev-visual-brief / N/A | {{scope}}:API-001 / N/A | 是 / 否 |
-
-## UI 验收证据
-
-| 验收项 | 适用页面 / 状态 | 依据 | 证据要求 | 是否阻塞 |
-|---|---|---|---|---|
-| 页面内容与操作完整 | {{scope}}:PAGE-001 | UI Content / specs | 截图 / 手工走查 / 测试 | yes / no |
-| 组件库与 token 使用 | {{scope}}:PAGE-001 | Design Spec | 代码审查 / 视觉走查 | yes / no |
-| 参考图 / dev-visual-brief 匹配 | {{scope}}:PAGE-001 | dev-visual-brief / Design Assets | 浏览器截图对比 / N/A | yes / no |
-| 响应式与可访问性 | PC / H5 / App / Wechat | Design Spec | 截图 / 对比度 / 键盘访问 / N/A | yes / no |
-| 状态完整性 | loading / empty / error / permission / success | UI Content / Design Spec | 截图 / 测试 / 人工验证 | yes / no |
+- [ ] 覆盖相关上游 ID：{{scope}}:FR-001 / {{scope}}:PAGE-001 / {{scope}}:FLOW-001 / N/A。
+- [ ] 已引用必要的 Design Spec / Design Assets / dev-visual-brief / N/A。
+- [ ] 已引用必要的 service-contract / data-model / N/A。
+- [ ] 页面、操作、状态、权限可见性和前端数据需求已覆盖本 change 影响。
+- [ ] 需要的验证证据已登记到 source-map.md 或 tasks.md。

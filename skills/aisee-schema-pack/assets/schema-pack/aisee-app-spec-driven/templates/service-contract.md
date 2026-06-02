@@ -94,18 +94,10 @@ N/A 原因：
 - 审计记录：
 - 隐私 / 脱敏：
 
-## 服务追踪矩阵
+## 覆盖检查
 
-| 上游 ID | 能力 ID | PAGE / FLOW | DATA | CONSTRAINT / RISK | 验收场景 | 是否完整 |
-|---|---|---|---|---|---|---|
-| {{scope}}:FR-001 | {{scope}}:API-001 | {{scope}}:PAGE-001 / N/A | {{scope}}:DATA-001 / N/A | {{scope}}:CONSTRAINT-001 / N/A | specs/... | 是 / 否 |
-
-## 服务验收证据
-
-| 验收项 | 适用能力 | 依据 | 证据要求 | 是否阻塞 |
-|---|---|---|---|---|
-| 契约完整性 | {{scope}}:API-001 | service-contract.md / specs | 接口测试 / CLI 输出 / job 运行记录 / 人工验证 | yes / no |
-| 权限与错误语义 | {{scope}}:API-001 | specs / change-context.md | 测试 / 日志 / 人工验证 | yes / no |
-| 数据读写一致性 | {{scope}}:API-001 | data-model.md | 测试 / 数据检查 / 回滚验证 | yes / no |
-| 幂等、重试、超时 | {{scope}}:API-001 | change-context.md | 测试 / 运行记录 / N/A | yes / no |
-| 可观测性与审计 | {{scope}}:API-001 | change-context.md / 安全约束 | 日志 / 指标 / 审计记录 / N/A | yes / no |
+- [ ] 覆盖相关上游 ID：{{scope}}:FR-001 / {{scope}}:RULE-001 / {{scope}}:API-001 / N/A。
+- [ ] 已引用必要的 ui-contract / data-model / change-context / N/A。
+- [ ] 请求、响应、命令参数、权限、错误、幂等、分页、排序、过滤、重试和超时已覆盖本 change 影响。
+- [ ] 数据读写、事务、一致性和失败处理已与 data-model.md 对齐，或已写明 N/A。
+- [ ] 需要的验证证据已登记到 source-map.md 或 tasks.md。
