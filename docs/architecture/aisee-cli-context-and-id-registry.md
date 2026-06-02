@@ -1,5 +1,21 @@
 # Aisee CLI、上下文索引与 ID Registry 设计方案
 
+## 维护边界
+
+本文维护 Aisee CLI 的职责边界、命令族、JSON 输出设计原则，以及它与 OpenSpec、Aisee skills、Compound Engineering 的接口关系。
+
+本文不作为字段级契约清单维护。字段、解析规则和校验细节以以下文件为准：
+
+- context pack 核心输出契约：[../../references/context-pack-contract.md](../../references/context-pack-contract.md)
+- context pack target 规则：[../../references/context-pack-targets.md](../../references/context-pack-targets.md)
+- context pack gaps 规则：[../../references/context-pack-gaps.md](../../references/context-pack-gaps.md)
+- ID 分配和生命周期规则：[../../references/id-policy.md](../../references/id-policy.md)
+- source-map 解析契约：[../../references/source-map-contract.md](../../references/source-map-contract.md)
+- schema artifact 事实：`skills/aisee-schema-pack/assets/schema-pack/`
+- CLI 实际行为：`src/aisee_cli/` 与 `tests/`
+
+只有 CLI 职责、命令分层、事实源策略、迁移策略或与 OpenSpec/Compound 的边界变化时，才需要更新本文。
+
 ## 背景
 
 在 Aisee、OpenSpec 与 Compound Engineering 串通之后，最大的效率瓶颈不再是“能不能生成文档”，而是：
@@ -420,7 +436,7 @@ aisee-verify:
   全部 artifact 摘要 / ID 关系 / gaps / validate 结果 / review 结果
 ```
 
-字段级 JSON 契约维护在 `references/context-pack-contract.md`。关键约定：
+字段级 JSON 契约分散维护在 `references/context-pack-contract.md`、`references/context-pack-targets.md` 和 `references/context-pack-gaps.md`。关键约定：
 
 - 所有 target 共享 `schema_version`、`target`、`change`、`facts.parsed`、`facts.derived`、`gaps`、`guardrails`、`evidence`。
 - `ce-work` 必须包含 `read_order`、`scope`、`traceability`、`code_paths`、`test_paths`、`task_state`、`execution.allowed_paths`、`execution.requires_ce_plan`。

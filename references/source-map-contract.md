@@ -1,5 +1,7 @@
 # Source Map Contract
 
+本文是 `source-map.md` 结构化解析规则的维护源。
+
 `source-map.md` 是 Aisee 的 OpenSpec companion artifact。OpenSpec 负责管理它是否属于 change、是否存在和是否归档；Aisee CLI 负责解析其中的路由语义。
 
 ## Boundary

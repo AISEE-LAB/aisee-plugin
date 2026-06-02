@@ -1,5 +1,7 @@
 # ID Policy
 
+本文是 Aisee ID 格式、分配规则和生命周期状态的维护源。
+
 完整 ID 使用：
 
 ```text

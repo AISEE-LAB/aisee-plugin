@@ -13,7 +13,9 @@
 以下细节由对应文件维护，本文不重复展开：
 
 - CLI 行为和初始化/迁移策略：[aisee-cli-context-and-id-registry.md](aisee-cli-context-and-id-registry.md)
-- context pack 契约：[../../references/context-pack-contract.md](../../references/context-pack-contract.md)
+- context pack 核心契约：[../../references/context-pack-contract.md](../../references/context-pack-contract.md)
+- context pack target 规则：[../../references/context-pack-targets.md](../../references/context-pack-targets.md)
+- context pack gaps 规则：[../../references/context-pack-gaps.md](../../references/context-pack-gaps.md)
 - ID 规则：[../../references/id-policy.md](../../references/id-policy.md)
 - source-map 契约：[../../references/source-map-contract.md](../../references/source-map-contract.md)
 - skill 行为：各 `skills/*/SKILL.md`
@@ -75,6 +77,8 @@ aisee-plugin/
   references/
     compound-bridge.md
     context-pack-contract.md
+    context-pack-targets.md
+    context-pack-gaps.md
     id-policy.md
   scripts/
     context-parser/
@@ -864,7 +868,7 @@ aisee context pack --change <change> --for aisee-verify --json
 
 这让 Aisee skill 和 CE skill 都消费同一个结构化上下文，减少复制、遗漏和误读。
 
-字段级契约见 `references/context-pack-contract.md`。核心约束：
+字段级契约见 `references/context-pack-contract.md`、`references/context-pack-targets.md` 和 `references/context-pack-gaps.md`。核心约束：
 
 - `--change` 是唯一入口。
 - `facts.parsed` 来自当前文件和模板直接解析。
@@ -967,7 +971,7 @@ openspec archive
 - 添加 `.codex-plugin/plugin.json`。
 - 把现有 `aisee*` skill 纳入插件目录。
 - 补齐主要 skill 的 `agents/openai.yaml`。
-- 增加 `references/compound-bridge.md`、`references/context-pack-contract.md`、`references/id-policy.md`。
+- 增加 `references/compound-bridge.md`、`references/context-pack-contract.md`、`references/context-pack-targets.md`、`references/context-pack-gaps.md`、`references/id-policy.md`。
 - 验证插件可被 Codex 加载。
 
 ### V2：Workflow State Orchestrator
