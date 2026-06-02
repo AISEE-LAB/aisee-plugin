@@ -25,11 +25,12 @@ artifacts:
     instruction: |
       proposal.md 必须明确：
       - 背景、问题、目标和非目标
-      - 本 change 覆盖的上游完整 ID，包括 FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK
+      - 上下文读取顺序：source-map.md、specs、Required=yes 的 artifacts、tasks.md
+      - 本 change 覆盖的上游完整 ID 摘要，包括 FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK；完整路由由 source-map.md 维护
       - 正式 ID 必须来自 .aisee/id-registry.json；未分配 ID 时只使用临时占位符并标注 [ID-RESERVATION-REQUIRED]
-      - 成功标准必须可验证
+      - 成功标准必须是可验证结果，不写验证执行记录
       - 不要复制 SRS、UI Content 或 Architecture 全文
-      - 不要写实现细节、接口字段或数据库字段；这些分别进入 contract artifacts
+      - 不要写实现细节、接口字段、数据库字段或任务步骤；这些分别进入 contract artifacts 和 tasks.md
 
   - id: source-map
     generates: source-map.md
