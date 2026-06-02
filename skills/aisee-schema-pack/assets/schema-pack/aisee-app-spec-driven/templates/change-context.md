@@ -4,45 +4,48 @@
 
 N/A 原因：
 
-> 如果状态为 N/A，写明原因后即可停止，不需要填写后续表格。
-> 本文只承接本 change 相关的 Architecture 决策、约束和风险，不重写全局 Architecture，不写接口字段、数据表字段、页面视觉布局或实现步骤。
+> 如果状态为 N/A，写明原因后即可停止，不需要填写后续内容。
+> 本文是 Architecture 到本 change 的轻量交接，只记录实现本 change 必须知道的架构约束、局部决策、风险和转交事项。不重写全局 Architecture，不写页面、接口、表字段或实现步骤。
 
-## 架构来源
+## 来源与范围
 
-| 来源 ID | 类型 | 标题 / 摘要 | 来源文件 | 对本 change 的影响 |
-|---|---|---|---|---|
-| {{scope}}:ARCH-001 | ARCH / DEC / CONSTRAINT / RISK | | docs/architecture/... | |
+- Architecture 来源：docs/architecture/... / N/A
+- 关联上游 ID：{{scope}}:ARCH-001 / {{scope}}:DEC-001 / {{scope}}:CONSTRAINT-001 / {{scope}}:RISK-001 / N/A
+- 本 change 适用原因：
+- 不在本文重复的内容：全局技术栈 / 完整模块架构 / 页面内容 / 接口字段 / 数据表字段 / 实现任务
 
-## 本 Change 技术边界
+## 承接的架构约束
 
-| 边界项 | 结论 | 来源 ID | 影响 artifact |
-|---|---|---|---|
-| 前端 / 客户端边界 | | {{scope}}:DEC-001 | ui-contract.md |
-| 服务 / 后端边界 | | {{scope}}:DEC-001 | service-contract.md |
-| 数据归属 | | {{scope}}:CONSTRAINT-001 | data-model.md |
-| 同步 / 异步策略 | | {{scope}}:DEC-002 | service-contract.md / tasks.md |
-| 权限 / 安全边界 | | {{scope}}:CONSTRAINT-002 | ui-contract.md / service-contract.md |
-| 集成边界 | | {{scope}}:ARCH-002 | service-contract.md |
+- {{scope}}:CONSTRAINT-001：
+  - 对本 change 的影响：
+  - 必须遵守：
+  - 不适用或允许偏差：
 
-## 局部决策
+## 本 Change 局部决策
 
-| 决策 ID | 决策 | 依据 | 影响 | 是否需要回写 Architecture |
-|---|---|---|---|---|
-| {{scope}}:DEC-NEW-001 [ID-RESERVATION-REQUIRED] | | proposal.md / source-map.md / specs | | 是 / 否 |
-
-## 约束传递
-
-| 约束 ID | 必须传递到 | 具体要求 | 验证方式 |
-|---|---|---|---|
-| {{scope}}:CONSTRAINT-001 | service-contract.md / data-model.md / tasks.md | | |
-| {{scope}}:CONSTRAINT-NEW-001 [ID-RESERVATION-REQUIRED] |  |  |  |
+- {{scope}}:DEC-NEW-001 [ID-RESERVATION-REQUIRED]：
+  - 决策：
+  - 依据：
+  - 影响：
+  - 是否需要回写 Architecture：是 / 否
 
 ## 风险与阻塞
 
-| 风险 ID | 风险 / 阻塞 | 影响 | 处理方式 | 状态 |
-|---|---|---|---|---|
-| {{scope}}:RISK-001 | | | 规避 / 接受 / 待确认 | Open / Accepted / Closed |
-| {{scope}}:RISK-NEW-001 [ID-RESERVATION-REQUIRED] | | | 规避 / 接受 / 待确认 | Open / Accepted / Closed |
+- {{scope}}:RISK-001：
+  - 影响：
+  - 处理方式：规避 / 接受 / 待确认
+  - 状态：Open / Accepted / Closed
+
+## 转交事项
+
+- ui-contract.md：
+  - {{scope}}:CONSTRAINT-001 / N/A：
+- service-contract.md：
+  - {{scope}}:CONSTRAINT-001 / N/A：
+- data-model.md：
+  - {{scope}}:CONSTRAINT-001 / N/A：
+- tasks.md：
+  - {{scope}}:CONSTRAINT-001 / {{scope}}:RISK-001 / N/A：
 
 ## 禁止假设
 

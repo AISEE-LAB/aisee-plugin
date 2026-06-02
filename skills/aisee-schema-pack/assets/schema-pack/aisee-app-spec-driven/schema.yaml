@@ -69,19 +69,19 @@ artifacts:
 
   - id: change-context
     generates: change-context.md
-    description: "Change 技术上下文：本 change 如何承接 Architecture 的架构边界、决策、约束和风险"
+    description: "Change 架构交接：本 change 从 Architecture 承接的约束、局部决策、风险和转交事项"
     template: change-context.md
     requires: [source-map, specs]
     instruction: |
       change-context.md 仅在涉及 Architecture 决策、技术约束、平台限制、集成边界或风险时适用。
       如果 source-map.md 标为 Required=no，可不展开完整模板；需要保留文件时只写状态和 N/A 原因。
-      适用时必须只描述本 change 相关的技术上下文：
+      适用时必须只描述本 change 必须承接的架构交接：
       - 读取 proposal.md、source-map.md 和 specs
       - 承接 Architecture 中与本 change 相关的 ARCH / DEC / CONSTRAINT / RISK
       - 新增局部 DEC / CONSTRAINT / RISK ID 前必须通过 ID registry 预留
-      - 记录本 change 的局部技术决策、约束、阻塞项和允许偏差
-      - 说明哪些约束必须进入 ui-contract.md、service-contract.md、data-model.md 或 tasks.md
-      - 不要重写全局 Architecture，不要展开页面字段、接口请求响应或表字段
+      - 记录本 change 的局部决策、允许偏差、风险和阻塞项
+      - 说明哪些约束或风险需要转交给 ui-contract.md、service-contract.md、data-model.md 或 tasks.md
+      - 不要重写全局 Architecture、完整技术栈或模块架构，不要展开页面字段、接口请求响应、表字段或实现步骤
 
   - id: ui-contract
     generates: ui-contract.md
