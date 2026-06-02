@@ -205,7 +205,7 @@ def build_next_actions(missing_artifacts: list[dict[str, Any]], id_actions: dict
     for item in missing_artifacts:
         actions.append(f"create {item['generates']}")
     if blockers:
-        actions.append("resolve blockers before authoring tasks.md")
+        actions.append("resolve blockers before authoring remaining artifacts")
     if not actions:
         actions.append("continue authoring or run openspec validate")
     return actions

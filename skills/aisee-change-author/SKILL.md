@@ -1,6 +1,6 @@
 ---
 name: aisee:change-author
-description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifacts 初稿。用于已确认 change 的 author preflight，并按当前 schema 编排 proposal、source-map、specs、tasks、quick-fix、research、docsite、infra、app 或 device contracts。必须先运行 aisee change author-check；不拆 change 边界、不重新选择 schema、不写代码；仅当当前 schema 明确包含 design.md 时才按 schema 模板补齐 design artifact。
+description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifacts 初稿。用于已确认 change 的 author preflight，并按当前 schema 编排 proposal、source-map、specs、tasks、quick-fix、research、docsite、infra、app 或 device 契约 artifacts。必须先运行 aisee change author-check；不拆 change 边界、不重新选择 schema、不写代码；仅当当前 schema 明确包含 design.md 时才按 schema 模板补齐 design artifact。
 ---
 
 # aisee:change-author
@@ -64,7 +64,7 @@ hardware-contract.md / firmware-contract.md / runtime-contract.md / verification
 quick-fix artifacts -> problem.md / solution.md / tasks.md
 research artifacts -> question.md / findings.md / recommendation.md or loop/* artifacts
 docsite / infra artifacts -> only when selected schema generates them
-tasks.md -> single durable task list + verification evidence requirements
+tasks.md -> single durable implementation and verification checklist
 final check -> aisee change author-check + aisee gaps
 ```
 
@@ -123,7 +123,7 @@ final check -> aisee change author-check + aisee gaps
 | `ui-contract.md` | UI Content、Design Spec / Assets、specs、change-context、source-map | 必要时新增局部 `PAGE / FLOW / STATE` | 重新制定或复制完整视觉规范、组件库选择、像素布局 |
 | `data-model.md` | specs、change-context、service data needs | `DATA` | API 协议、UI 内容、迁移执行任务 |
 | `service-contract.md` | specs、ui data needs、data-model、change-context | `API` | 代码实现步骤、数据库物理迁移脚本 |
-| `tasks.md` | specs、change-context、适用 contracts、source-map | `TASK / TEST` | 新增需求、替代 source-map 或 project tasks |
+| `tasks.md` | specs、source-map、Required=yes 的适用 artifacts / contracts | `TASK / TEST` | 新增需求、替代 source-map、ID 注册、来源追踪或归档判断 |
 
 对于不生成 `source-map.md` 的轻量 schema，按 schema 模板写对应 artifact，不使用上表中的 app artifact 假设：
 
@@ -173,7 +173,7 @@ service-contract.md
 - `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
 - `data-model.md`：只在 Required=yes 且涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
 - `service-contract.md`：只在 Required=yes 且涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
-- apply tracks：最后生成或补齐，是当前 schema 的唯一长期执行清单；常见是 `tasks.md`，也可能是其它 schema artifact 或 N/A。app schema 的任务必须追踪到 specs、source-map 和 Required=yes 的适用 contracts；轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。
+- apply tracks：最后生成或补齐，是当前 schema 的唯一长期执行清单；常见是 `tasks.md`，也可能是其它 schema artifact 或 N/A。app schema 的 `tasks.md` 只记录实现顺序、任务状态和验证证据，任务项必须引用 specs、source-map 和 Required=yes 的适用 artifacts，但不重复契约细节。轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。
 
 ## Artifact 适用性判断
 
@@ -191,6 +191,8 @@ Required=no 的 artifact 不能留空原因。生成 `source-map.md` 的 schema 
 - N/A 原因。
 - 哪些上游 ID 使它不适用。
 - 是否有需要其他 artifact 承接的相关约束。
+
+既有系统或二次开发场景下，Required=yes 的 artifact 应按 Existing / Changed / New / Deprecated / Unknown 标注影响。Existing 只引用现有来源，不重写完整规格；Changed / New 才补充本 change 的差异内容。
 
 不生成 `source-map.md` 的 schema 应在当前主 artifact 或对应 artifact 中写 N/A 原因，不要补假 source-map。如果同时创建 N/A 文件，文件只需要包含状态和 N/A 原因，不需要填完整模板。
 
