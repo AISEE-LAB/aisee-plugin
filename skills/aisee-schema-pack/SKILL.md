@@ -41,7 +41,7 @@ openspec init
 
 | Schema | 适用场景 |
 |---|---|
-| `aisee-app-spec-driven` | 新功能、普通功能迭代、全栈或前后端分层开发；需要绑定 SRS / UI Content / Architecture / Change Plan 并细化 UI、服务、数据合同 |
+| `aisee-app-spec-driven` | 新功能、普通功能迭代、全栈或前后端分层开发；需要绑定 SRS / UI Content / Architecture / Change Plan 并细化 UI、服务、数据契约 |
 | `aisee-device-spec-driven` | 嵌入式、固件、板级 bring-up、Linux 设备程序、32 位 MCU、RTOS 或 bare-metal 开发；需要细化硬件、固件、运行时和验证合同 |
 | `aisee-docsite-driven` | 文档站、知识库、教程、团队 Wiki、内容导航和信息架构维护；不强制 specs，但归档前必须回写文档站基线 |
 | `quick-fix` | 小 bugfix、文案/样式/静态配置小改、已知根因的低风险修复或紧急 Hotfix |
@@ -119,7 +119,7 @@ openspec/project-docs.md
 - 每个 schema 独立目录：`openspec/schemas/<schema-name>/schema.yaml` + `templates/`。
 - 模板放在 `templates/`，但 `schema.yaml` 的 `template` 字段只写文件名。
 - 项目级长期基线模板放在 `baseline-templates/`，不要放入 `templates/`。
-- 依赖图从轻到重：输入/提案 → 分析/设计 → tasks → apply。
+- 依赖图从轻到重：proposal → source-map / specs → 按需 artifacts → tasks → apply。
 - 只有会产生实现的 schema 才写 `apply`。
 - 不要把 schema pack 内容写进 `aisee-init`。
 

@@ -540,7 +540,7 @@ description: |
 
 | 任务类型 | 推荐 Schema | 理由 |
 |----------|------------|------|
-| 新功能开发 | `aisee-app-spec-driven` | 承接 SRS / UI Content / Architecture，并细化 UI、服务和数据合同 |
+| 新功能开发 | `aisee-app-spec-driven` | 承接 SRS / UI Content / Architecture，并细化 UI、服务和数据契约 |
 | Bug Fix（普通） | `aisee-app-spec-driven` 或 `quick-fix` | 涉及契约或跨模块影响时走 app schema；单点低风险修复走 quick-fix |
 | 小修复 / 紧急 Hotfix | `quick-fix`（如有） | 简化流程，只保留问题、方案、任务和验证证据 |
 | PR Code Review | `opsx-collab-pr-loop` | 以外部输入为驱动，可多轮迭代 |

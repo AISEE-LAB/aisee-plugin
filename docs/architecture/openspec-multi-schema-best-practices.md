@@ -106,7 +106,7 @@ Schema 名称的**使用优先级**（选择哪个 Schema）：
 
 | 任务类型 | 推荐 Schema | 理由 |
 |----------|------------|------|
-| 新功能开发 | `aisee-app-spec-driven` | 承接 SRS / UI Content / Architecture，并细化 UI、服务和数据合同 |
+| 新功能开发 | `aisee-app-spec-driven` | 承接 SRS / UI Content / Architecture，并细化 UI、服务和数据契约 |
 | 普通 Bug Fix | `aisee-app-spec-driven` 或 `quick-fix` | 涉及契约或跨模块影响时走 app schema；单点低风险修复走 quick-fix |
 | 小修复 / 紧急 Hotfix | `quick-fix`（自定义） | 只保留问题、方案、任务和验证证据，避免为低风险修复引入重流程 |
 | PR Code Review | `opsx-collab-pr-loop` | 以外部输入为驱动 |
