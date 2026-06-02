@@ -12,14 +12,13 @@
 - **WHEN** 
 - **THEN** 
 
-#### Acceptance Notes
+#### Context References
 
-- 覆盖上游 ID：
-- 关联页面 / 流程 / 状态：
-- 关联架构约束：
-- 关联接口 / 服务能力：
-- 关联数据：
-- 关联测试：
+> 这里只写引用，不写页面、接口、数据、架构或测试细节；完整追踪由 source-map.md 维护。
+
+- Source IDs：{{scope}}:FR-001 / {{scope}}:RULE-001 / N/A
+- Related artifacts：ui-contract.md / service-contract.md / data-model.md / change-context.md / N/A
+- Notes：
 
 ## MODIFIED Requirements
 

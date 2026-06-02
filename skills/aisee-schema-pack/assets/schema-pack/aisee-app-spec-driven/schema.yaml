@@ -65,7 +65,8 @@ artifacts:
       - 使用 SHALL/MUST 或 Given/When/Then 场景表达行为
       - SPEC ID 必须来自 .aisee/id-registry.json；未分配时使用临时占位符并标注 [ID-RESERVATION-REQUIRED]
       - 覆盖 source-map.md 中本 change 的 FR / NFR / RULE / FLOW / STATE
-      - 可以引用 PAGE / API / DATA / CONSTRAINT ID 作为追踪信息，但不要写布局、接口字段或数据库字段
+      - Context References 只能写 Source IDs 和相关 artifact 引用；完整追踪由 source-map.md 维护
+      - 可以引用 PAGE / API / DATA / CONSTRAINT ID 作为上下文，但不要写布局、接口字段、数据库字段、设计规范、代码路径或任务步骤
       - 发现需求缺口时标注 [SPEC-GAP]，不要自行新增业务需求
 
   - id: change-context
