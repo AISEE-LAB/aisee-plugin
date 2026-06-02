@@ -404,7 +404,7 @@ doc-reviewed
 = CE 文档审核已完成，P0/P1 已处理或接受
 
 implementation-ready
-= validate 通过，当前 schema apply tracks 和 implementation paths 足够清楚，可以 ce-work
+= validate 通过，当前 schema apply tracks 和 Affected Paths Index / implementation references 足够清楚，可以 ce-work
 
 implemented
 = 代码已完成，等待 review/test/verify
@@ -587,7 +587,7 @@ aisee:change-author
   -> 强烈建议 ce-doc-review，审核当前 schema artifacts、apply tracks、contracts 和 source-map（如适用）一致性
 
 aisee:implementation-bridge
-  -> ce-work；apply tracks 或 implementation paths 不清楚时，才按需 ce-plan 并回写
+  -> ce-work；apply tracks 或 Affected Paths Index / implementation references 不清楚时，才按需 ce-plan 并回写
 
 aisee:verify
   -> 消费 CE review/test/debug 结果
@@ -850,6 +850,7 @@ aisee context pack --change <change> --for aisee-verify --json
 - `facts.derived` 来自 source-map、ID registry、schema DAG 和文件关系推导。
 - `generated` 默认为空；显式 `--with-summary` 才允许出现。
 - `ce-work` 只消费当前 change 的实现上下文，不能自由扩大范围。
+- source-map schema 的执行路径优先来自 `Affected Paths Index`；缺表时只允许 source-map metadata fallback 并保留 risk。
 - `aisee-verify` 可诊断 drift 和 evidence 缺口，但不做 archive 放行审批。
 
 ## 推荐端到端流程

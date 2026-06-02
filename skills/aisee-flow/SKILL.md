@@ -70,7 +70,10 @@ aisee context pack --change <change> --for aisee-verify --json
 CLI flow 的 JSON 只做状态汇总：
 
 - `schema`：当前 change schema，以及 `source_map_required`、`tasks_required`、`archive_tracks`。
-- `inputs`：source-map 状态、task_state、implementation references、evidence 计数。
+- `inputs`：source-map 状态、parse level、source-map issues、task_state、implementation references、execution、evidence 计数。
+- `checks.author`：author-check 的状态、schema 有效性、blocker/warning codes。
+- `checks.gaps`：context pack gaps 的 blocker/risk/info 计数和 issue codes。
+- `checks.implementation_gaps`：过滤掉当前 schema 不适用的实现阶段 gap 后，用于判断能否进入 `implementation-bridge` / `ce-work`。
 - `checks.verify`：verify-check 的状态、summary 和 issue codes。
 - `checks.archive`：archive-check 的状态、summary 和 issue codes。
 - `required_commands`：下一步排查或推进时建议运行的命令。
@@ -100,7 +103,9 @@ idea
 - 没有明确 change：不要进入 `aisee:change-author`、`implementation-bridge`、`verify` 或 `archive-guard`。
 - `author-check.status=blocked`：推荐回到 `aisee:change-author` 或 schema artifact 修复。
 - `gaps.result.status=blocked`：不要进入 `ce-work` 或 archive。
-- `context pack --for ce-work` 中 `requires_ce_plan=true`：推荐先用 `ce-plan` 临时细化，但结论必须回写当前 schema 的 apply tracks；只有 schema 生成 `source-map.md` 时才要求回写 source-map。
+- 无 apply / no implementation schema 不应因为 `ce-work` context pack 的 `TASK_GAP` 或 `IMPLEMENTATION_PATHS_GAP` 被误导回实现阶段；以当前 schema 的 archive/verify gate 为准。
+- `context pack --for ce-work` 中 `requires_ce_plan=true`：推荐先用 `aisee:implementation-bridge` 输出缺口，再用 `ce-plan` 临时细化；结论必须回写当前 schema 的 apply tracks，只有 schema 生成 `source-map.md` 时才要求回写 source-map。
+- source-map schema 的执行路径优先来自 `Affected Paths Index`；metadata fallback 只能作为 risk，不应静默放行。
 - `aisee:verify` 有 BLOCKER：不要进入 `aisee:archive-guard`。
 - `aisee:archive-guard` 未给出“可以 archive”：不要建议执行 `openspec archive`。
 - `ce-plan`、Implementation Brief、verify report 都不是长期事实源；长期结论必须回写 OpenSpec artifacts。

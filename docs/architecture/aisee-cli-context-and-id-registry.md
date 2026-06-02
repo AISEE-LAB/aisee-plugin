@@ -40,7 +40,7 @@ Aisee CLI is an OpenSpec context companion, not an OpenSpec parser.
 - 对 OpenSpec artifacts，Aisee CLI 默认只做 metadata scan：路径、存在性、hash、heading、ID 引用、路径引用、checkbox 状态和 evidence 入口。
 - 当 OpenSpec CLI 提供可用 JSON 输出时，Aisee CLI 应优先消费 OpenSpec CLI 输出；缺少结构化输出时才做保守 metadata scan。
 
-`source-map.md` 是例外中的重点：它是 Aisee 自己定义的 OpenSpec companion 路由表，因此 Aisee CLI 可以结构化解析它。解析范围维护在 [source-map-contract.md](../../references/source-map-contract.md)，只覆盖 upstream sources、ID trace、artifact applicability、implementation paths、verification evidence 和 out-of-scope/follow-up，不扩展到其它 OpenSpec artifact 的业务语义。
+`source-map.md` 是例外中的重点：它是 Aisee 自己定义的 OpenSpec companion 路由表，因此 Aisee CLI 可以结构化解析它。解析范围维护在 [source-map-contract.md](../../references/source-map-contract.md)，只覆盖 upstream sources、ID trace、artifact applicability、Affected Paths Index、Expected Evidence Index 和 out-of-scope/follow-up，不扩展到其它 OpenSpec artifact 的业务语义。
 
 ## 设计原则
 
@@ -335,7 +335,7 @@ aisee context pack --change add-auth-login --for aisee-verify --json
 1. 读取 openspec/config.yaml 与 change/.openspec.yaml，识别当前 change schema、artifact DAG、apply tracks 和是否需要 source-map。
 2. 读取 .aisee/sources.json，发现 SRS / UI content / architecture / device-context 等 change 外部产物。
 3. 读取 .aisee/id-registry.json，获取 ID 分配和生命周期。
-4. 如当前 schema 生成 source-map，读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件、artifact 和 implementation paths。
+4. 如当前 schema 生成 source-map，读取 openspec/changes/<change>/source-map.md，获取当前 change 关联的上游 ID、文件、artifact、Affected Paths Index 和 Expected Evidence Index；缺少结构化路径索引时只允许从 source-map 本文 metadata fallback，并输出 risk。
 5. 对当前 schema 声明的 OpenSpec artifacts 做 metadata scan：存在性、路径、heading、ID、路径引用、checkbox 和 hash；不解释 artifact 业务语义。
 6. 对不生成 source-map 的 schema，只从当前 schema artifacts / apply tracks 的显式路径引用中生成实现参考，不把全项目搜索结果当作 allowed paths。
 7. 优先消费 OpenSpec CLI / validate / schema 的结构化输出；没有可用输出时，不用 Aisee 自己替代 validate。
@@ -443,10 +443,12 @@ aisee gaps --change add-auth-login --json
 ```bash
 aisee doctor --json
 aisee index --json
-aisee gaps --json
 aisee flow inspect --json
 aisee flow next --json
-aisee context pack --change <change> --for flow --json
+aisee flow inspect --change <change> --json
+aisee gaps --change <change> --json
+aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for aisee-verify --json
 ```
 
 职责：
