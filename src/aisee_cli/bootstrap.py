@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from aisee_cli.doctor import build_doctor
-from aisee_cli.paths import id_registry_path, sources_path
+from aisee_cli.paths import id_registry_path, inspect_layout, sources_path
 from aisee_cli.project import rel
 
 
@@ -19,6 +19,19 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
     openspec_initialized = (root / "openspec" / "config.yaml").exists() and (root / "openspec" / "changes").exists()
     if not openspec_initialized:
         actions.append(action("run", "openspec init", "Run OpenSpec CLI initialization; do not create OpenSpec internals by hand."))
+    layout = inspect_layout(root)
+    for item in layout["legacy_only"]:
+        actions.append(action(
+            "migrate",
+            f"{item['legacy']} -> {item['canonical']}",
+            "Move this legacy Aisee artifact into the canonical aisee/ layout after confirming it is current; bootstrap does not move files automatically.",
+        ))
+    for item in layout["dual"]:
+        actions.append(action(
+            "review",
+            item["legacy"],
+            f"{item['canonical']} is authoritative; review or remove this legacy path after confirming it is stale.",
+        ))
     sources = sources_path(root)
     if not sources.exists():
         actions.append(action("create", rel(root, sources), "Create empty sources registry."))
@@ -33,6 +46,7 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
         "writes": False,
         "doctor_status": doctor["status"],
         "actions": actions,
+        "layout": layout,
         "meta": {
             "command": "aisee bootstrap --plan --json",
             "apply_supported": False,

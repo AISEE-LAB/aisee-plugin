@@ -215,6 +215,13 @@ openspec archive
 - `aisee-schema-pack`：安装、审计和维护 Aisee schema pack。
 - `aisee:flow`：在基础设施缺失时提示上述入口，但不执行初始化或 schema 安装。
 
+目录迁移由检查和计划提示驱动，不做隐式搬迁：
+
+- 新项目只创建 `aisee/` 布局。
+- 旧 `.aisee/`、`.memory/` 和历史 `docs/*` 目录只作为兼容读取 fallback。
+- `aisee doctor` 报告 legacy-only / dual-path 风险。
+- `aisee bootstrap --plan` 输出迁移建议；`bootstrap --apply` 当前不执行迁移。
+
 ### 保持独立的资产类 Skill
 
 不再保留独立资产入口 skill。视觉资产路由本身不是一个稳定产物，会与三个专业 skill 的 description 重叠。

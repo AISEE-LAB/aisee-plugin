@@ -110,6 +110,13 @@ aisee bootstrap --apply
 - 检查 Compound Engineering plugin 是否可用。
 - 检查 `ce-doc-review`、`ce-work`、`ce-code-review` 等 skill 是否存在。
 
+当前阶段 `bootstrap --apply` 不执行自动迁移。Aisee 目录迁移只在 `doctor` 和 `bootstrap --plan` 中提示：
+
+- 新项目只写入 `aisee/`。
+- 旧项目允许 fallback 读取 `.aisee/`、`.memory/` 和历史 `docs/*` 产物目录。
+- 如果只有旧路径，输出 `migrate` 建议，但不搬文件。
+- 如果新旧路径同时存在，以 `aisee/` 为准，输出 `review` 建议，提示旧路径可能过期。
+
 高影响操作必须确认：
 
 - 覆盖或修改 `AGENTS.md`、旧项目兼容用 `CLAUDE.md`、`openspec/project.md`。

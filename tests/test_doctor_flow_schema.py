@@ -57,8 +57,8 @@ def create_open_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(root / "openspec" / "changes" / ".gitkeep", "")
-    write(root / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
-    write(root / ".aisee" / "sources.json", '{"version":1,"sources":[]}\n')
+    write(root / "aisee" / "registry" / "id-registry.json", '{"version":1,"scopes":{}}\n')
+    write(root / "aisee" / "registry" / "sources.json", '{"version":1,"sources":[]}\n')
     write(
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
@@ -99,7 +99,7 @@ def create_quick_research_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: quick-research\n")
     write(root / "openspec" / "changes" / ".gitkeep", "")
-    write(root / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
+    write(root / "aisee" / "registry" / "id-registry.json", '{"version":1,"scopes":{}}\n')
     write(
         root / "openspec" / "schemas" / "quick-research" / "schema.yaml",
         """name: quick-research
@@ -144,6 +144,28 @@ def test_bootstrap_plan_is_read_only(tmp_path: Path) -> None:
     assert data["writes"] is False
     assert any(item["path"] == "AGENTS.md" for item in data["actions"])
     assert not (tmp_path / "AGENTS.md").exists()
+
+
+def test_doctor_and_bootstrap_report_legacy_aisee_layout(tmp_path: Path) -> None:
+    write(tmp_path / "AGENTS.md", "# Rules\n")
+    write(tmp_path / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
+    write(tmp_path / "openspec" / "changes" / ".gitkeep", "")
+    write(tmp_path / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
+    write(tmp_path / ".aisee" / "sources.json", '{"version":1,"sources":[]}\n')
+    write(tmp_path / ".memory" / "index.md", "# Memory Index\n")
+
+    doctor = run_json(tmp_path, "doctor", "--json")
+    bootstrap = run_json(tmp_path, "bootstrap", "--plan", "--json")
+
+    assert doctor["status"] == "risk"
+    assert any(item["code"] == "AISEE_LEGACY_PATH" for item in doctor["issues"])
+    assert {item["name"] for item in doctor["aisee"]["layout"]["legacy_only"]} >= {
+        "sources",
+        "id_registry",
+        "memory_index",
+    }
+    assert any(item["kind"] == "migrate" and ".aisee/sources.json" in item["path"] for item in bootstrap["actions"])
+    assert any(item["kind"] == "migrate" and ".memory/index.md" in item["path"] for item in bootstrap["actions"])
 
 
 def test_bootstrap_apply_is_explicitly_blocked(tmp_path: Path) -> None:

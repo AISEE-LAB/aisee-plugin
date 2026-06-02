@@ -8,6 +8,7 @@ from typing import Any
 from aisee_cli.id_registry import check_registry
 from aisee_cli.index import index_path
 from aisee_cli.output import issue, status_from_issues, summarize_issues
+from aisee_cli.paths import inspect_layout
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.schema_pack import list_schema_packs
 from aisee_cli.sources import check_sources
@@ -27,6 +28,22 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
     if not openspec_changes.exists():
         issues.append(issue("OPENSPEC_CHANGES_MISSING", "blocker", "openspec/changes is missing", "openspec/changes"))
 
+    layout = inspect_layout(root)
+    for item in layout["legacy_only"]:
+        issues.append(issue(
+            "AISEE_LEGACY_PATH",
+            "risk",
+            f"{item['legacy']} is used as a legacy fallback; migrate it to {item['canonical']}",
+            item["legacy"],
+        ))
+    for item in layout["dual"]:
+        issues.append(issue(
+            "AISEE_DUAL_PATH",
+            "risk",
+            f"both {item['canonical']} and legacy {item['legacy']} exist; {item['canonical']} is authoritative and legacy may be stale",
+            item["legacy"],
+        ))
+
     sources = check_sources(root)
     registry = check_registry(root)
     schemas = list_schema_packs(root)
@@ -43,6 +60,7 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
             "initialized": openspec_config.exists() and openspec_changes.exists(),
         },
         "aisee": {
+            "layout": layout,
             "sources": sources,
             "id_registry": registry,
             "schemas": schemas,

@@ -53,6 +53,34 @@ openspec init
 5. 若 `aisee/memory/index.md` 不存在，用 `assets/memory-index-template.md` 初始化 `aisee/memory/arch`、`aisee/memory/pref`、`aisee/memory/ctx`、`aisee/memory/stack`。
 6. 运行 `scripts/setup-hooks.js --codex` 安装 hooks。
 
+## 目录布局与迁移
+
+新项目只创建和写入 `aisee/` 布局：
+
+```text
+aisee/
+  registry/
+  cache/
+  docs/
+  memory/
+  hooks/
+  config/
+```
+
+旧项目兼容路径只允许读取 fallback：
+
+- `.aisee/sources.json`、`.aisee/id-registry.json`、`.aisee/cache/context-index.json`
+- `.memory/rules.md`、`.memory/index.md`
+- `docs/requirements/`、`docs/ui-content/`、`docs/architecture/`、`docs/change-plan/`、`docs/reflect/`
+
+迁移规则：
+
+- 如果新旧路径都存在，以 `aisee/` 为准，旧路径只能提示“可能过期”。
+- `aisee:init` 审计时只报告迁移建议，不自动移动、删除或合并旧文件。
+- `aisee doctor` 只检查并报告 legacy-only / dual-path 风险。
+- `aisee bootstrap --plan` 只输出迁移计划；`bootstrap --apply` 当前不执行迁移。
+- 真正迁移前必须由用户确认旧文件是当前有效内容，再按文件级别移动到 `aisee/`。
+
 模板填充规则：
 
 - 输出内容使用中文。
@@ -122,6 +150,8 @@ Hook 职责：
 - 是否说明 `aisee/docs/requirements/`、`aisee/docs/ui-content/`、`aisee/docs/architecture/`、`aisee/docs/change-plan/` 的职责。
 - 若已有规划产物，hook 或配置是否能提示这些目录，但不把它们提升为 OpenSpec artifacts 的替代品。
 - 是否明确 `aisee/docs/architecture/` 提供技术架构事实、决策和约束，不能替代 `openspec/project.md` 的项目级技术栈来源。
+- 若存在旧路径 `.aisee/`、`.memory/` 或 `docs/requirements/` 等历史目录，标记 `[MIGRATION]`，说明只兼容读取，不自动迁移。
+- 若新旧路径同时存在，标记 `[CONFLICT]`，说明 `aisee/` 为准，旧路径可能过期。
 
 ### Hooks
 
