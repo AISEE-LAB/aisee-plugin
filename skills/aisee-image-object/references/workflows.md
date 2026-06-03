@@ -1,5 +1,9 @@
 # aisee:image-object 工作流
 
+## 基于图片提取素材
+
+通用素材提取流程见 `asset-extraction.md`。当用户从已有图片、截图、海报、参考图或产品图中提取可复用素材时，先建立单图 workspace，再按候选清单逐个生成 region、mask、cutout、export 或 enhanced，不把提取执行交给 `aisee:design-assets`。
+
 ## 去背景到透明素材
 
 1. `init` 创建 workspace，复制原图为 `source.png`。
@@ -39,7 +43,7 @@
 它可以与 `aisee:design-assets` 协作，但职责要分清：
 
 - `aisee:image-object` 提供原图、mask、cutout、bbox、对象备注、品牌保留要求和输出目标。
-- `aisee:design-assets` 负责把这些输入转成受控图片编辑提示词、参考图/素材生成规范、候选图产出和设计资产索引登记。
+- `aisee:design-assets` 负责把这些输入转成受控图片编辑提示词、参考约束和设计资产索引登记；候选图仍回写当前 image-object workspace。
 - 深度优化后的候选图回写到当前 workspace 的 `enhanced/`，并记录到 `source.json.enhanced`。
 - 如果候选图要进入项目素材库，再由 `aisee:design-assets` 更新 `aisee/docs/design-assets/` 索引。
 
@@ -47,6 +51,8 @@ handoff 原则：
 
 - 优先传递最小必要输入，不把整个 workspace、全部缩略图或 `preview-cache/` 作为默认上下文。
 - 局部优化必须带 mask/bbox/scope；没有明确 scope 时先让用户确认修改范围。
+- 基于对话提炼区域描述时，必须同时写自然语言区域说明和可定位引用，例如 `region_id`、`mask_id`、`object_id` 或 bbox。
+- 自然语言说明用于告诉 image gen “要优化什么”，可定位引用用于限制“只能改哪里”；两者缺一不可。
 - region 本身可以直接作为素材输入；只有需要去背景、修边或重绘时才继续生成透明版本、mask 或 enhanced 候选。
 - 同一张图的候选可以多轮生成，但每轮都产生新的 `enh_###`，不要覆盖上一轮候选。
 
@@ -66,6 +72,12 @@ handoff 原则：
   "source": "source.png",
   "object": "cutouts/obj_001-product.png",
   "mask": "masks/mask_002-refined.png",
+  "scope": {
+    "description": "产品主体右侧边缘有半透明残留和轻微白边，需要只优化边缘过渡",
+    "region_id": "region_002",
+    "mask_id": "mask_002",
+    "bbox": [412, 168, 734, 820]
+  },
   "input_refs": [
     "cutouts/obj_001-product.png",
     "masks/mask_002-refined.png"

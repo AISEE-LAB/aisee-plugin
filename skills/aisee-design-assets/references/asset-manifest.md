@@ -7,8 +7,8 @@
 - `illustration`：插画、场景图、人物/物体视觉
 - `overlay`：光效、纹理、装饰层
 - `layout-layer`：卡片底板、容器背景、视觉框架层
-- `transparent`：需要 alpha 通道的独立 PNG
-- `edit`：基于已有图修改后的版本
+- `transparent-generated`：生成型透明 PNG，不来自既有图片对象提取
+- `extracted-object`：由 `aisee:image-object` 从已有图片提取的对象、cutout、export 或图层包
 
 ## 生成前必须明确
 
@@ -16,6 +16,7 @@
 - 依赖的参考图或 StyleSpec
 - 尺寸或比例
 - 是否透明
+- 是生成型素材，还是需要从已有图片提取
 - 是否允许文字、Logo、UI 控件
 - 输出目录
 - 是否属于通用图标；通用图标优先记录库名和语义，不走生图
@@ -49,9 +50,9 @@
 - 是否符合用途
 - 是否与参考图或 StyleSpec 一致
 - 图标是否优先来自图标库，语义和风格是否一致
-- 透明边缘是否干净
-- 是否存在背景残留、绿边、毛边或错误阴影
-- 是否需要重做或人工微调
+- 生成型透明素材是否存在背景残留、绿边、毛边或错误阴影
+- 提取型素材是否有 `aisee:image-object` workspace、cutout/export 路径、mask 来源和边缘复核结论
+- 是否需要重做、转交 `aisee:image-object` 或人工微调
 
 ## Manifest 字段
 

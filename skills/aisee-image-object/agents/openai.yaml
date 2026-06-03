@@ -1,4 +1,4 @@
 interface:
   display_name: "aisee:image-object"
-  short_description: "对象级图片处理、mask、cutout、导出和单图 workspace 管理"
-  default_prompt: "使用 $aisee:image-object 从图片中分离对象、去背景、生成透明切图并导出素材变体。"
+  short_description: "对象级图片处理、素材提取、mask、cutout、导出和单图 workspace 管理"
+  default_prompt: "使用 $aisee:image-object 从图片中提取素材、分离对象、去背景、生成透明切图并导出素材变体。"

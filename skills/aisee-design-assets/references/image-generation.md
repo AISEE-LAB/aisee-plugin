@@ -15,7 +15,7 @@
 
 - 内置 `image_gen` 不可用
 - 用户明确要求脚本、API、模型、base_url 或本地 CLI
-- 需要固定模型、精确尺寸、输出格式、本地图片路径编辑、mask 或批量
+- 需要固定模型、精确尺寸、输出格式、图生图视觉变体或批量
 - 需要原生透明 PNG
 
 不要仅因为要保存到固定路径或常规尺寸就放弃内置工具；内置工具生成后把选中结果复制或移动到项目本地即可。不要把 CLI 结果描述成内置 `image_gen` 结果。
@@ -26,7 +26,7 @@
 
 - 文生图参考图
 - 图生图和保结构重绘
-- 有 mask 输入时的局部编辑
+- 与 `aisee:image-object` 协作时的受控编辑候选
 - 固定模型、尺寸、格式或批量生成
 
 它不负责：
@@ -39,7 +39,7 @@
 - 本地背景修补
 - 图层包或单图对象状态文件
 
-遇到对象分离、抠图、对象图层、背景修补或交互式框选/点选时，转给专用对象处理 skill/工具；本 skill 只接收结果并登记到设计资产目录。
+遇到对象分离、抠图、对象图层、背景修补、素材提取或交互式框选/点选时，转给 `aisee:image-object`；本 skill 只接收结果并登记到设计资产目录。
 
 ## UI 效果图编辑
 
@@ -47,22 +47,24 @@
 
 如果 CLI text-to-image 或 CLI edit 出现明显业务结构漂移，不继续堆 prompt，改用内置 `image_gen`、Figma MCP、确定性图像处理或页面重绘。
 
-## 图生图和局部编辑
+## 图生图视觉变体
 
-图生图或局部编辑默认是受控修改，不是重新设计。除非用户明确要求重设风格，否则：
+图生图视觉变体默认是受控修改，不是重新设计。除非用户明确要求重设风格，否则：
 
 - 保护 Logo、品牌色、品牌字体、品牌图形、吉祥物、IP 形象等品牌元素。
 - 保持导航、卡片、按钮、模块位置、留白节奏和信息层级。
 - 保持线条粗细、圆角、阴影、材质、插画风格、摄影风格、色彩系统和图标风格。
-- 未遮罩区域默认保持不变，尤其是文字、Logo、产品名和关键数据。
+- 不应变动区域默认保持不变，尤其是文字、Logo、产品名和关键数据。
 
-只在编辑任务中加入最小保留约束：
+只在视觉变体或保结构重绘任务中加入最小保留约束：
 
 ```text
 Preserve the original brand identity, layout structure, visual style, color system, typography hierarchy, and icon style. Only modify the requested area or elements. Keep unmasked areas unchanged.
 ```
 
 涉及 Logo、品牌标识、真实产品图或文字密集 UI 时，不要求模型重画这些细节；优先保留原像素、确定性贴图、Figma 或前端实现。
+
+如果任务需要 mask、bbox、对象 cutout、背景修补或从已有图片提取素材，先进入 `aisee:image-object` 建立 workspace；本 skill 只能根据 image-object 的 handoff brief 生成受控编辑提示词或登记最终候选。
 
 ## API 配置
 
@@ -129,7 +131,7 @@ python <skill-dir>/scripts/image_gen.py generate \
   --out aisee/docs/design-assets/references/reference-001.png
 ```
 
-编辑：
+图生图视觉变体：
 
 ```bash
 python <skill-dir>/scripts/image_gen.py edit \
@@ -139,7 +141,7 @@ python <skill-dir>/scripts/image_gen.py edit \
   --out aisee/docs/design-assets/edits/reference-001-edit-001.png
 ```
 
-局部编辑：
+来自 `aisee:image-object` 的局部编辑 handoff：
 
 ```bash
 python <skill-dir>/scripts/image_gen.py edit \
@@ -150,7 +152,7 @@ python <skill-dir>/scripts/image_gen.py edit \
   --out output.png
 ```
 
-脚本只保留 Images API 的 `generate`、`edit` 和 `generate-batch` 子命令；多轮意图、版本关系和追溯信息由本 skill 的索引、manifest 或 brief 记录。
+这种调用必须由 `aisee:image-object` 提供 source、mask、bbox、保护约束和目标路径。脚本只保留 Images API 的 `generate`、`edit` 和 `generate-batch` 子命令；多轮意图、版本关系和追溯信息由本 skill 的索引、manifest、brief 或 image-object 的 `source.json` 记录。
 
 ## 透明素材
 
