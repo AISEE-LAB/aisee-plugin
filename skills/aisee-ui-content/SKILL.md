@@ -105,6 +105,8 @@ cat aisee/registry/sources.json 2>/dev/null || true
 
 先按 Phase 0 读取来源上下文，再按需读取 [workflow.md](references/workflow.md) 执行输入门禁、平台识别、场景识别、对象识别、输出模式选择、生成和保存。
 
+CHECKPOINT: 生成 UI 内容规格前必须确认目标平台、场景模式、输出模式、主要页面/流程范围和来源依据。平台或页面范围不明确时先问；用户要求继续时，把未确认项写入 Open Questions，不要自行补页面或交互。
+
 Reference loading：
 
 - 需要追问时读取 `references/question-bank.md`。

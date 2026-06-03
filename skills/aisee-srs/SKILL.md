@@ -103,6 +103,8 @@ rg --files aisee/docs/requirements 2>/dev/null | head -20
 
 先按 Phase 0 读取项目上下文，再按需读取 [workflow.md](references/workflow.md) 执行范围锚定、需求探讨、确认门禁、输出模式选择、SRS 生成和保存。
 
+CHECKPOINT: 生成 SRS 前必须先输出需求摘要、范围、非目标、关键假设、Open Questions 和 ID 状态，等待用户确认。未确认时不得写入最终 SRS；如果用户要求继续但仍有缺口，把缺口写入 `[ASSUMPTION]` 或 Open Questions，不要静默补需求。
+
 Reference loading：
 
 - 需求追问前读取 `references/question-bank.md` 和 `references/domain-rules.md`。

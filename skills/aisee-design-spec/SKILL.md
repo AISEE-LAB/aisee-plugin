@@ -116,6 +116,8 @@ rg --files | rg '(theme|token|design.*system|style.*spec|\.module\.css$|(^|/)tai
 
 不要替用户做不可逆的设计策略决策。证据不足时标注 `[DESIGN-DECISION-REQUIRED]`。
 
+CHECKPOINT: 在生成设计规范前，必须确认或显式标注设计策略 `adopt / extend / rewrite`、规范范围、目标平台、设计来源和关键假设。策略会影响组件库采用、token、视觉语言或重写范围时，先暂停让用户确认；用户要求继续但证据不足时，只能写 `[DESIGN-DECISION-REQUIRED]`，不得把推断写成既定规范。
+
 ---
 
 ## Phase 3 — Design Read 与设计参数
