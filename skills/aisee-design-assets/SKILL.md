@@ -99,11 +99,13 @@ python3 aisee-design-assets/scripts/gpt_image2_prompt_library.py build
 静默收集已有资产上下文：
 
 ```bash
-find aisee/docs/design-assets -maxdepth 3 -type f 2>/dev/null | head -80
-find aisee/docs/design-spec -maxdepth 3 -type f 2>/dev/null | head -80
-find docs/designs -maxdepth 4 -type f 2>/dev/null | head -80
-find . -maxdepth 3 \( -iname '*style*spec*.md' -o -iname '*style*spec*.json' -o -iname '*design*asset*index*.md' -o -iname '*asset*manifest*.md' \) 2>/dev/null | head -80
+rg --files aisee/docs/design-assets 2>/dev/null | head -80
+rg --files aisee/docs/design-spec 2>/dev/null | head -80
+rg --files docs/designs 2>/dev/null | head -80
+rg --files | rg '(style.*spec.*\.(md|json)|design.*asset.*index.*\.md|asset.*manifest.*\.md)' | head -80
 ```
+
+扫描必须遵守 `.gitignore`。优先使用 `rg --files`；如果 `rg` 不可用，fallback `find` 必须显式排除 `.git`、依赖目录、构建产物、缓存目录和生成产物，并只查设计资产需要的文件类型。
 
 若存在既有索引，先读取它们，避免重复命名和覆盖。
 

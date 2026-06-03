@@ -89,11 +89,13 @@ cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat AGENTS.md 2>/dev/null | head -120
 cat aisee/registry/id-registry.json 2>/dev/null || true
-find openspec/specs -maxdepth 3 -type f 2>/dev/null | head -40
-find openspec/changes -maxdepth 2 \( -name proposal.md -o -name source-map.md -o -path '*/specs/*' \) 2>/dev/null | head -60
-find aisee/docs/spec-migration aisee/docs/requirements -maxdepth 3 -type f 2>/dev/null | head -60
-ls aisee/docs/requirements/ 2>/dev/null | head -20
+rg --files openspec/specs 2>/dev/null | head -40
+rg --files openspec/changes 2>/dev/null | rg '(^|/)(proposal\.md|source-map\.md)$|/specs/' | head -60
+rg --files aisee/docs/spec-migration aisee/docs/requirements 2>/dev/null | head -60
+rg --files aisee/docs/requirements 2>/dev/null | head -20
 ```
+
+扫描必须遵守 `.gitignore`。优先使用 `rg --files`；如果 `rg` 不可用，fallback `find` 必须显式排除 `.git`、依赖目录、构建产物、缓存目录和生成产物，并只查 SRS 需要的文件类型。
 
 用这些上下文理解项目边界、现有业务行为、术语和当前 specs，避免重复询问项目已经回答的问题。如果没有项目上下文，正常继续；`aisee:srs` 允许在 `openspec-init` 前运行。
 

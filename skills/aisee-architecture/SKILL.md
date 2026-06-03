@@ -89,10 +89,12 @@ cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat AGENTS.md 2>/dev/null | head -160
 cat aisee/registry/id-registry.json 2>/dev/null || true
-find . -maxdepth 3 \( -name package.json -o -name pnpm-lock.yaml -o -name yarn.lock -o -name package-lock.json -o -name pyproject.toml -o -name requirements.txt -o -name Gemfile -o -name go.mod -o -name Cargo.toml -o -name pom.xml -o -name build.gradle -o -name composer.json -o -name prisma -o -name drizzle -o -name migrations -o -name schema.sql -o -name openapi.yaml -o -name openapi.json \) 2>/dev/null | head -80
-find docs aisee/docs openspec -maxdepth 3 \( -iname '*architecture*' -o -iname '*tech*' -o -iname '*stack*' -o -iname '*design*' -o -iname '*api*' -o -iname '*schema*' \) 2>/dev/null | head -80
-find openspec/specs openspec/changes -maxdepth 3 -type f 2>/dev/null | head -80
+rg --files | rg '(^|/)(package\.json|pnpm-lock\.yaml|yarn\.lock|package-lock\.json|pyproject\.toml|requirements\.txt|Gemfile|go\.mod|Cargo\.toml|pom\.xml|build\.gradle|composer\.json|schema\.sql|openapi\.ya?ml|openapi\.json)$|(^|/)(prisma|drizzle|migrations)(/|$)' | head -80
+rg --files docs aisee/docs openspec 2>/dev/null | rg '(architecture|tech|stack|design|api|schema)' | head -80
+rg --files openspec/specs openspec/changes 2>/dev/null | head -80
 ```
+
+扫描必须遵守 `.gitignore`。优先使用 `rg --files`；如果 `rg` 不可用，fallback `find` 必须显式排除 `.git`、依赖目录、构建产物、缓存目录和生成产物，并只查架构分析需要的文件类型。
 
 只读与输入需求相关的目录和文件。查找路由、页面、控制器、服务、模型、schema、migration、API contract、权限中间件、任务队列、测试目录和既有架构文档。不要因为文件名猜测项目事实；关键结论必须标注来源。
 

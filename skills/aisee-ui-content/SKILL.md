@@ -90,10 +90,12 @@ cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat AGENTS.md 2>/dev/null | head -120
 cat aisee/registry/id-registry.json 2>/dev/null || true
 ls aisee/docs/ui-content/ 2>/dev/null | head -20
-find openspec/specs -maxdepth 3 -type f 2>/dev/null | head -40
-find openspec/changes -name source-map.md 2>/dev/null | head -20
+rg --files openspec/specs 2>/dev/null | head -40
+rg --files openspec/changes 2>/dev/null | rg '(^|/)source-map\.md$' | head -20
 cat aisee/registry/sources.json 2>/dev/null || true
 ```
+
+扫描必须遵守 `.gitignore`。优先使用 `rg --files`；如果 `rg` 不可用，fallback `find` 必须显式排除 `.git`、依赖目录、构建产物、缓存目录和生成产物，并只查 UI 内容规格需要的文件类型。
 
 使用这些信息识别已有平台、产品类型、命名习惯、现有 UI 事实来源和文档路径。不要因为缺少 OpenSpec 上下文而停止；只要输入需求足够明确即可继续。
 

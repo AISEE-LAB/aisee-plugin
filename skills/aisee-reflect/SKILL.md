@@ -59,7 +59,7 @@ rg --files \
   -g 'aisee/memory/**/*.md' \
   | sort
 
-find aisee/docs/reflect -maxdepth 3 -type f 2>/dev/null | sort | tail -20
+rg --files aisee/docs/reflect 2>/dev/null | sort | tail -20
 ```
 
 如果 `rg` 不可用，fallback `find` 必须显式排除 `.git`、依赖目录、构建产物和缓存目录，并只查本技能需要的文件类型。
