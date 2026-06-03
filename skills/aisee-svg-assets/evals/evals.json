@@ -28,6 +28,13 @@
       "prompt": "检查并优化这个 SVG：里面有 onload 和外链图片，想直接放到网页 inline。",
       "expected_output": "应选择 validate/optimize 模式，明确检测脚本、事件属性、外链、foreignObject 等风险；优化脚本默认不得把不安全输入标记为可 inline；如果输出报告为 failed，应说明不能直接用于 inline SVG，并给出清理或隔离处理建议。",
       "files": []
+    },
+    {
+      "id": 5,
+      "name": "image-object-request-routes-away-from-svg",
+      "prompt": "把这张产品图抠出来、去背景、修一下边缘，然后导出透明 PNG，同时给我一个 SVG。",
+      "expected_output": "应识别主要任务是对象分离、去背景和图片编辑，转向 aisee:image-object；不得承诺从复杂产品照片直接生成可维护 SVG。只有在用户额外确认需要简单矢量图标或 logo-like mark 时，才把 SVG 作为单独后续任务处理。",
+      "files": []
     }
   ]
 }

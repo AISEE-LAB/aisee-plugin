@@ -45,4 +45,6 @@ python <skill-dir>/scripts/optimize_svg.py \
 
 `optimize_svg.py` 默认拒绝带已知安全风险的输入；如果用户明确要保留风险内容用于隔离分析，才使用 `--allow-unsafe`，并且不要把结果标记为可 inline。
 
+CHECKPOINT: 使用 `--allow-unsafe`、保留 base64、保留外链、覆盖原 SVG 或把 failed/warnings 结果接入产品前，必须说明风险并等待用户确认。
+
 如果项目已有 `svgo`，也可以使用，但不要强制新增依赖。使用 `svgo` 后仍要运行本 skill 的校验脚本形成统一报告。

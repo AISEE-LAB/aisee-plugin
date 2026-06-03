@@ -18,6 +18,7 @@
 - 大量渐变和阴影
 - 文字截图
 - 完整 UI 页面截图
+- 对象分离、去背景、mask、背景修补
 
 ## 依赖策略
 
@@ -39,6 +40,10 @@ cargo install vtracer
 python -c "import vtracer; print('python-vtracer=present')" 2>/dev/null || true
 command -v vtracer >/dev/null && echo "vtracer-cli=present" || true
 ```
+
+CHECKPOINT: 如果本机没有 VTracer，不要静默安装。先说明需要安装 `vtracer` 的原因、安装方式和影响，等待用户确认后再执行 `pip install vtracer` 或 `cargo install vtracer`。
+
+如果用户真正要的是对象抠图、去背景、mask 或修图，不进入 trace；应转 `aisee:image-object`。如果用户要基于图片生成新的位图素材或参考图，应转 `aisee:design-assets`。
 
 ## 转换命令
 
@@ -80,3 +85,4 @@ python <skill-dir>/scripts/optimize_svg.py \
 - 复杂照片、纹理和截图可能生成体积很大的 SVG；这种结果只能作为草稿或进一步设计输入。
 - 如果输出缺少 `viewBox`、含外链、含 base64 或 XML 不合法，不要进入索引的 `passed` 状态。
 - 对含文字的位图，不承诺转成可编辑文字；必要时建议手工重建文字层。
+- 对疑似商标、付费素材、个人头像或敏感图片，只能在用户确认有权处理后继续；不要在报告中记录敏感来源细节。
