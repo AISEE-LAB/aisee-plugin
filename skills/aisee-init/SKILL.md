@@ -108,7 +108,7 @@ node <skill-dir>/scripts/setup-hooks.js
 Hook 职责：
 
 - `SessionStart` → `session-inject.js`：注入 OpenSpec、活跃 change 和 memory 入口摘要。
-- `UserPromptSubmit` → `spec-drift.js`：发现疑似越过当前 spec 的需求，注入自检上下文。
+- `UserPromptSubmit` → `spec-drift.js`：发现疑似越过当前 spec 的需求，注入轻量自检上下文；优先匹配用户提到的 change，最多摘要 3 个 active changes，不阻断。
 - `UserPromptSubmit` / `PreToolUse` → `prompt-scan.js`：发现明显密钥并阻断。
 
 兼容性要求：
@@ -119,6 +119,7 @@ Hook 职责：
 - `UserPromptSubmit` 阻断使用顶层 `decision: "block"`。
 - `PreToolUse` 阻断使用 `hookSpecificOutput.permissionDecision: "deny"`，并保留旧式 `decision: "block"` 兼容。
 - 注入上下文使用 `hookSpecificOutput.additionalContext`，不要依赖普通 stdout。
+- `spec-drift.js` 只读当前 schema 常见 artifacts 的轻量摘要和 `tasks.md`，不把 `design.md` 当默认事实源；多 active changes 且用户未指定 change 时，应提醒先确认目标 change。
 
 ## AUDIT 清单
 

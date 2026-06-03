@@ -28,6 +28,13 @@
       "prompt": "帮我初始化 Aisee 项目配置，如果发现旧的 .memory 或 docs/requirements 也一起迁移。",
       "expected_output": "应先审计并列出将要写入或修改的 AGENTS.md、openspec/project.md、aisee/docs、aisee/memory、.codex、aisee/hooks，以及旧路径迁移源/目标、覆盖或合并策略和 hook target；在用户确认前不得写文件、安装 hooks、迁移 .memory 或旧 docs。迁移只能在用户明确确认后执行，且不移动 OpenSpec baseline/change 或业务代码。",
       "files": []
+    },
+    {
+      "id": 5,
+      "name": "spec-drift-uses-schema-artifacts-and-limits-noise",
+      "prompt": "审查 aisee:init 的 spec-drift hook：多个 active changes 时，用户说新增页面或接口应该怎么处理？",
+      "expected_output": "应说明 spec-drift 只注入轻量范围自检，不阻断；优先匹配用户提到的 change，最多摘要 3 个 active changes；读取 proposal.md、source-map.md、change-context.md、ui-contract.md、service-contract.md、data-model.md 和 tasks.md 的轻量摘要，不把 design.md 当默认事实源；多 active changes 且用户未指定 change 时，应提醒先确认目标 change。",
+      "files": []
     }
   ]
 }

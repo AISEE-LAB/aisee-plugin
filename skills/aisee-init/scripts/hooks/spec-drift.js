@@ -9,6 +9,9 @@ const fs = require('fs');
 const path = require('path');
 
 const THRESHOLD = 3;
+const MAX_CHANGE_SUMMARIES = 3;
+const MAX_TASKS = 8;
+const MAX_EXCERPT_CHARS = 420;
 
 const SIGNALS = [
   { pattern: /另外|顺便|还需要|我还想|能不能加|新增|补充一个|加一个|追加/, weight: 3 },
@@ -20,10 +23,49 @@ const SIGNALS = [
 ];
 
 const IGNORE_PATTERNS = [
-  /^(yes|no|ok|好|不|是|否|继续|确认|生成|执行|done|完成)[\s.!。]*$/i,
+  /^(yes|no|ok|好|不|是|否|继续|确认|生成|执行|提交|done|完成|commit)[\s.!。]*$/i,
   /^(thanks|谢谢|thank you|好的)/i,
   /fix (the )?(bug|error|issue|typo)/i,
-  /运行|测试|部署|install|npm|pnpm|yarn|git/i
+  /运行|测试|部署|install|npm|pnpm|yarn|git|提交|commit|push/i
+];
+
+const ARTIFACT_EXCERPTS = [
+  {
+    file: 'proposal.md',
+    label: 'Proposal 范围',
+    heading: /^#+\s*(what|scope|做什么|功能范围|范围)/i,
+    lines: 8
+  },
+  {
+    file: 'source-map.md',
+    label: 'Source Map 摘要',
+    heading: /^#+\s*(upstream|sources|id trace|affected paths|artifact applicability|来源|影响路径|适用性)/i,
+    lines: 6
+  },
+  {
+    file: 'change-context.md',
+    label: 'Change Context 摘要',
+    heading: /^#+\s*(context|scope|constraints|上下文|范围|约束)/i,
+    lines: 5
+  },
+  {
+    file: 'ui-contract.md',
+    label: 'UI Contract 摘要',
+    heading: /^#+\s*(ui|pages|states|actions|页面|状态|操作)/i,
+    lines: 5
+  },
+  {
+    file: 'service-contract.md',
+    label: 'Service Contract 摘要',
+    heading: /^#+\s*(api|service|contract|接口|服务|契约)/i,
+    lines: 5
+  },
+  {
+    file: 'data-model.md',
+    label: 'Data Model 摘要',
+    heading: /^#+\s*(data|model|entities|schema|数据|模型|实体)/i,
+    lines: 5
+  }
 ];
 
 function scorePrompt(prompt) {
@@ -63,7 +105,7 @@ function sectionExcerpt(filePath, headingPattern, maxLines = 8) {
     if (out.length >= maxLines) break;
   }
 
-  return out.join(' ').slice(0, 500);
+  return out.join(' ').slice(0, MAX_EXCERPT_CHARS);
 }
 
 function taskExcerpt(filePath, maxTasks = 15) {
@@ -86,44 +128,66 @@ function schemaName(changeDir, cwd) {
   return 'unknown';
 }
 
-function specSummaries(cwd) {
-  return activeChanges(cwd).map(changeDir => {
-    const change = path.basename(changeDir);
-    const schema = schemaName(changeDir, cwd);
-    const proposal = sectionExcerpt(
-      path.join(changeDir, 'proposal.md'),
-      /^#+\s*(what|scope|做什么|功能范围|范围)/i
-    );
-    const sourceMap = sectionExcerpt(
-      path.join(changeDir, 'source-map.md'),
-      /^#+\s*(upstream|sources|id trace|affected paths|artifact applicability|来源|影响路径|适用性)/i,
-      6
-    );
-    const designPath = path.join(changeDir, 'design.md');
-    const design = fs.existsSync(designPath)
-      ? sectionExcerpt(designPath, /^#+\s*(architecture|design|方案|架构)/i, 6)
-      : '';
-    const tasks = taskExcerpt(path.join(changeDir, 'tasks.md'));
-    return { change, schema, proposal, sourceMap, design, tasks };
-  }).filter(summary => summary.proposal || summary.sourceMap || summary.design || summary.tasks.length);
+function selectedChanges(prompt, changes) {
+  const lowerPrompt = prompt.toLowerCase();
+  const matched = changes.filter(changeDir => lowerPrompt.includes(path.basename(changeDir).toLowerCase()));
+  if (matched.length) return { changes: matched.slice(0, MAX_CHANGE_SUMMARIES), truncated: matched.length > MAX_CHANGE_SUMMARIES };
+  return {
+    changes: changes.slice(0, MAX_CHANGE_SUMMARIES),
+    truncated: changes.length > MAX_CHANGE_SUMMARIES
+  };
 }
 
-function buildInjection(prompt, summaries) {
-  const specText = summaries.map(summary => {
+function artifactExcerpts(changeDir) {
+  return ARTIFACT_EXCERPTS
+    .map(({ file, label, heading, lines }) => {
+      const text = sectionExcerpt(path.join(changeDir, file), heading, lines);
+      return text ? { label, text } : null;
+    })
+    .filter(Boolean);
+}
+
+function specSummaries(cwd, prompt) {
+  const allChanges = activeChanges(cwd);
+  const selection = selectedChanges(prompt, allChanges);
+  const summaries = selection.changes.map(changeDir => {
+    const change = path.basename(changeDir);
+    const schema = schemaName(changeDir, cwd);
+    const artifacts = artifactExcerpts(changeDir);
+    const tasks = taskExcerpt(path.join(changeDir, 'tasks.md'), MAX_TASKS);
+    return { change, schema, artifacts, tasks };
+  }).filter(summary => summary.artifacts.length || summary.tasks.length);
+
+  return {
+    activeChangeNames: allChanges.map(changeDir => path.basename(changeDir)),
+    truncated: selection.truncated,
+    summaries
+  };
+}
+
+function buildInjection(prompt, data) {
+  const specText = data.summaries.map(summary => {
     const parts = [`Change：${summary.change}`, `Schema：${summary.schema}`];
-    if (summary.proposal) parts.push(`Proposal 范围：${summary.proposal}`);
-    if (summary.sourceMap) parts.push(`Source Map 摘要：${summary.sourceMap}`);
-    if (summary.design) parts.push(`Design 摘要（仅因当前 schema/artifact 存在 design.md）：${summary.design}`);
+    for (const artifact of summary.artifacts) parts.push(`${artifact.label}：${artifact.text}`);
     if (summary.tasks.length) parts.push(`Tasks：\n${summary.tasks.map(task => `- ${task}`).join('\n')}`);
     return parts.join('\n');
   }).join('\n\n');
 
+  const activeList = data.activeChangeNames.length
+    ? `活跃 changes：${data.activeChangeNames.map(name => `openspec/changes/${name}/`).join('、')}`
+    : '';
+  const truncationNote = data.truncated
+    ? '活跃 change 较多且用户未明确指定 change；只展示部分摘要。回答前先确认目标 change，避免把多个 change 混在一起。'
+    : '';
+
   return [
     '[OpenSpec 范围自检]',
     '用户请求可能引入当前 OpenSpec 范围之外的内容。回答前先判断请求是否仍属于现有 change。',
+    activeList,
+    truncationNote,
     '',
     '当前 spec 摘要：',
-    specText,
+    specText || '未找到可摘要的 proposal/source-map/contract/tasks。先读取目标 change 的 schema 和 artifacts，不要凭 hook 摘要做结论。',
     '',
     `用户请求：${prompt}`,
     '',
@@ -160,8 +224,8 @@ process.stdin.on('end', () => {
 
   if (!prompt || shouldIgnore(prompt) || scorePrompt(prompt) < THRESHOLD) process.exit(0);
 
-  const summaries = specSummaries(cwd);
-  if (!summaries.length) process.exit(0);
+  const data = specSummaries(cwd, prompt);
+  if (!data.activeChangeNames.length) process.exit(0);
 
-  outputAdditionalContext(eventName, buildInjection(prompt, summaries));
+  outputAdditionalContext(eventName, buildInjection(prompt, data));
 });
