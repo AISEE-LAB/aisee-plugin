@@ -109,7 +109,7 @@ Hook 职责：
 
 - `SessionStart` → `session-inject.js`：注入 OpenSpec、活跃 change、memory 和 Aisee docs 入口摘要；只提供路径和轻量提示，不作为事实源。
 - `UserPromptSubmit` → `spec-drift.js`：发现疑似越过当前 spec 的需求，注入轻量自检上下文；优先匹配用户提到的 change，最多摘要 3 个 active changes，不阻断。
-- `UserPromptSubmit` / `PreToolUse` → `prompt-scan.js`：发现明显密钥并阻断。
+- `UserPromptSubmit` / `PreToolUse` → `prompt-scan.js`：发现明显密钥、token、private key、JWT 或高置信 `.env` secret 赋值时阻断。
 
 兼容性要求：
 
@@ -121,6 +121,7 @@ Hook 职责：
 - 注入上下文使用 `hookSpecificOutput.additionalContext`，不要依赖普通 stdout。
 - `session-inject.js` 必须限制注入体积：active changes 最多直接列 8 个，知识库入口最多列 10 个；canonical `aisee/` 路径优先，legacy 路径只作 fallback 或迁移提示。
 - `spec-drift.js` 只读当前 schema 常见 artifacts 的轻量摘要和 `tasks.md`，不把 `design.md` 当默认事实源；多 active changes 且用户未指定 change 时，应提醒先确认目标 change。
+- `prompt-scan.js` 只做高置信 secret 阻断；允许明显占位符、示例值和模板变量通过，不替代完整 secret scanning。
 
 ## AUDIT 清单
 

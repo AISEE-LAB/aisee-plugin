@@ -42,6 +42,20 @@
       "prompt": "审查 aisee:init 的 session-inject hook：如果项目里同时有 aisee/docs/requirements 和 docs/requirements，并且 active changes 很多，会怎么注入？",
       "expected_output": "应说明 session-inject 只注入路径和轻量提示，不作为事实源；active changes 最多直接列 8 个并提示剩余数量；知识库入口最多列 10 个；canonical aisee/ 路径优先，legacy docs/ 或 .memory 只作为 fallback 或迁移提示，不应同时把 canonical 与 legacy 当同等事实源注入。",
       "files": []
+    },
+    {
+      "id": 7,
+      "name": "prompt-scan-blocks-high-confidence-secrets",
+      "prompt": "审查 aisee:init 的 prompt-scan hook：用户 prompt 或 PreToolUse 输入里出现 OpenAI key、GitHub token、AWS key、Slack token、npm token、Google API key、Stripe key、JWT、private key 或 .env secret 赋值时应该怎么处理？",
+      "expected_output": "应说明 prompt-scan 会在 UserPromptSubmit 或 PreToolUse/PermissionRequest 中阻断高置信 secret；UserPromptSubmit 使用顶层 decision=block，PreToolUse/PermissionRequest 同时返回 hookSpecificOutput.permissionDecision=deny；提示用户移除敏感内容后重新提交。",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "prompt-scan-allows-placeholders",
+      "prompt": "审查 prompt-scan 是否会误挡 OPENAI_API_KEY=your-api-key 或 DATABASE_URL=<database-url> 这类模板占位符。",
+      "expected_output": "应说明 prompt-scan 允许明显占位符、示例值和模板变量通过，例如 your-api-key、<database-url>、${TOKEN}、placeholder、dummy、fake、xxxxxxxx；它只做高置信 secret 阻断，不替代完整 secret scanning。",
+      "files": []
     }
   ]
 }
