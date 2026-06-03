@@ -29,19 +29,20 @@ function findSchemaPackDir() {
   const candidates = [
     process.env.AISEE_SCHEMA_PACK_DIR,
     path.join(__dirname, '..', 'assets', 'schema-pack'),
+    path.join(process.cwd(), 'skills', 'aisee-schema-pack', 'assets', 'schema-pack'),
     path.join(process.cwd(), 'aisee-schema-pack', 'assets', 'schema-pack'),
     path.join(process.cwd(), 'aisee-opsx-schema', 'assets', 'schema-pack'),
+    path.join(os.homedir(), '.agents', 'skills', 'aisee-schema-pack', 'assets', 'schema-pack'),
+    path.join(os.homedir(), '.agents', 'skills', 'aisee-opsx-schema', 'assets', 'schema-pack'),
     path.join(os.homedir(), '.codex', 'skills', 'aisee-schema-pack', 'assets', 'schema-pack'),
-    path.join(os.homedir(), '.codex', 'skills', 'aisee-opsx-schema', 'assets', 'schema-pack'),
-    path.join(os.homedir(), '.claude', 'skills', 'aisee-schema-pack', 'assets', 'schema-pack'),
-    path.join(os.homedir(), '.claude', 'skills', 'aisee-opsx-schema', 'assets', 'schema-pack')
+    path.join(os.homedir(), '.codex', 'skills', 'aisee-opsx-schema', 'assets', 'schema-pack')
   ].filter(Boolean);
 
   for (const dir of candidates) {
     if (fs.existsSync(dir) && listSchemas(dir).length > 0) return dir;
   }
 
-  throw new Error('找不到 schema-pack。请设置 AISEE_SCHEMA_PACK_DIR 指向 schema 包目录。');
+  throw new Error('找不到 schema-pack。请设置 AISEE_SCHEMA_PACK_DIR 指向 schema 包目录，或从包含 skills/aisee-schema-pack/ 的仓库根目录运行。');
 }
 
 function listSchemas(packDir) {
