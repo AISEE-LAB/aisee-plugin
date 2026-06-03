@@ -86,6 +86,8 @@ rg --files docs openspec aisee/docs 2>/dev/null | head -160
 
 先按 Phase 0 预检和扫描，再按需读取 [workflow.md](references/workflow.md) 执行证据读取、能力边界建模、迁移索引生成、baseline specs 生成和校验。
 
+CHECKPOINT: 写入 `openspec/specs/`、创建 baseline spec、修改 `openspec/specs/project.md` 或生成可应用补丁前，必须先输出迁移范围、证据来源、目标 spec 路径、diff/patch 摘要、低可信度推断和 active change 冲突，等待用户确认。未确认时只能输出 inventory / draft / patch 预览，不写入 baseline 事实源。
+
 Reference loading：
 
 - 需要追问时读取 `references/question-bank.md`。

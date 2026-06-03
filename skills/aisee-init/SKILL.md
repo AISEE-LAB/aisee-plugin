@@ -53,6 +53,8 @@ openspec init
 5. 若 `aisee/memory/index.md` 不存在，用 `assets/memory-index-template.md` 初始化 `aisee/memory/arch`、`aisee/memory/pref`、`aisee/memory/ctx`、`aisee/memory/stack`。
 6. 运行 `scripts/setup-hooks.js --codex` 安装 hooks。
 
+CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/memory/**`、`.codex/**`、`aisee/hooks/**`，或执行旧路径迁移前，必须先列出计划写入路径、覆盖/合并策略、hook target、迁移源和目标，等待用户确认。未确认时只输出审计报告和修复计划，不改文件、不安装 hooks、不迁移 memory。
+
 ## 目录布局与迁移
 
 新项目只创建和写入 `aisee/` 布局；旧 `.aisee/`、`.memory/` 和历史 `docs/*` 产物目录只允许作为 fallback 读取。
