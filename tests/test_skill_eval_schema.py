@@ -7,6 +7,10 @@ from pathlib import Path
 EVAL_FILES = [
     Path("skills/aisee-srs/evals/evals.json"),
     Path("skills/aisee-change-plan/evals/evals.json"),
+    Path("skills/aisee-ui-content/evals/evals.json"),
+    Path("skills/aisee-architecture/evals/evals.json"),
+    Path("skills/aisee-init/evals/evals.json"),
+    Path("skills/aisee-spec-migrate/evals/evals.json"),
 ]
 
 REQUIRED_CASE_FIELDS = {

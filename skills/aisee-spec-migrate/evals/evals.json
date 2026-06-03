@@ -1,25 +1,140 @@
 {
+  "schema_version": "aisee.skill-eval.v1",
   "skill_name": "aisee:spec-migrate",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
   "evals": [
     {
-      "id": 1,
+      "id": "spec-migrate-001",
       "name": "existing-admin-project-baseline",
+      "scenario": "existing-project",
       "prompt": "基于一个已有后台管理系统迁移 OpenSpec specs。项目已有用户登录、RBAC 权限、优惠券管理和导出报表。代码里有 routes、controllers、tests 和 README。请整理 baseline specs。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "已有代码、测试和 README 可作为证据来源。",
+          "目标是 baseline specs，不是新 change。"
+        ]
+      },
       "expected_output": "先扫描证据并生成能力地图，按 auth/rbac/coupons/reports 等业务能力规划 openspec/specs/，生成 migration index 和 baseline spec 草案。不得输出新需求、/opsx:new、proposal.md、design.md、tasks.md 或实现计划。不得使用 skill 内置 spec 正文模板；应读取当前 OpenSpec 环境并用 openspec validate <capability> 校验 baseline spec。每条正式 Requirement 必须满足当前 OpenSpec 校验器对 SHALL/MUST 和 Scenario 的要求，并标注证据可信度到迁移索引。",
+      "expected_outputs": [
+        "扫描证据并生成能力地图。",
+        "按 auth/rbac/coupons/reports 等业务能力规划 openspec/specs/。",
+        "生成 migration index 和 baseline spec 草案。",
+        "使用当前 OpenSpec 环境和 openspec validate <capability> 校验 baseline spec。",
+        "在迁移索引中标注证据可信度。"
+      ],
+      "must_ask": [
+        "是否允许读取 routes、controllers、tests 和 README 作为迁移证据？",
+        "baseline 迁移是否按业务域分批执行？"
+      ],
+      "must_include": [
+        "能力地图",
+        "migration index",
+        "baseline spec 草案",
+        "证据可信度",
+        "openspec validate <capability>"
+      ],
+      "must_not": [
+        "不得输出新需求。",
+        "不得输出 /opsx:new、proposal.md、design.md、tasks.md 或实现计划。",
+        "不得使用 skill 内置 spec 正文模板替代当前 OpenSpec 环境。"
+      ],
+      "quality_checks": [
+        "每条正式 Requirement 满足当前 OpenSpec 校验器对 SHALL/MUST 和 Scenario 的要求。",
+        "spec 按业务能力组织，不按技术层机械拆分。"
+      ],
+      "fact_source_constraints": [
+        "只有代码、测试、README 或已确认文档中的当前行为可进入 baseline spec。",
+        "迁移索引记录证据，不创造新规范事实。"
+      ],
       "files": []
     },
     {
-      "id": 2,
+      "id": "spec-migrate-002",
       "name": "conflicting-docs-and-code",
+      "scenario": "evidence-conflict",
       "prompt": "现有项目 README 写订单可以取消，测试显示已支付订单不可取消，controller 代码显示待支付订单 15 分钟后自动关闭。请迁移订单模块 baseline spec。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "README、测试和代码之间存在行为冲突。"
+        ]
+      },
       "expected_output": "识别 README、测试和代码之间的行为边界，使用 [BEHAVIOR-CONFLICT] 或 [EVIDENCE-GAP] 标注不一致项。只把有可信证据的当前行为写入 baseline spec；争议行为进入 Open Questions。不得把理想行为或未来需求写入 openspec/specs/。",
+      "expected_outputs": [
+        "识别 README、测试和 controller 代码之间的行为冲突。",
+        "使用 [BEHAVIOR-CONFLICT] 或 [EVIDENCE-GAP] 标注不一致项。",
+        "只把有可信证据的当前行为写入 baseline spec。",
+        "争议行为进入 Open Questions。"
+      ],
+      "must_ask": [
+        "测试和代码冲突时采用哪个来源作为当前行为证据？",
+        "README 是否代表理想行为、过期文档还是当前产品承诺？"
+      ],
+      "must_include": [
+        "[BEHAVIOR-CONFLICT]",
+        "[EVIDENCE-GAP]",
+        "Open Questions",
+        "证据来源"
+      ],
+      "must_not": [
+        "不得把理想行为写入 openspec/specs/。",
+        "不得把未来需求写入 baseline spec。",
+        "不得消除冲突而不标注。"
+      ],
+      "quality_checks": [
+        "当前行为、冲突行为和待确认行为清晰分离。",
+        "Open Questions 保留可追踪证据来源。"
+      ],
+      "fact_source_constraints": [
+        "baseline spec 只能记录当前已证实行为；争议不进入正式 Requirement。"
+      ],
       "files": []
     },
     {
-      "id": 3,
+      "id": "spec-migrate-003",
       "name": "large-monorepo-batched-migration",
+      "scenario": "large-monorepo",
       "prompt": "为一个大型 monorepo 建立 OpenSpec baseline。包含 web、admin、api、worker、mobile 多个 package，模块超过 30 个。请快速迁移到 OpenSpec 管理。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "项目规模较大，不适合一次性生成完整 baseline。"
+        ]
+      },
       "expected_output": "判断范围过大，输出分批迁移策略和 aisee/docs/spec-migration/ 索引。目标 specs 按业务域和 package 边界组合规划，单批最多生成少量 spec，不生成巨型 everything/spec.md，不按 frontend/backend/database 技术层机械拆分。",
+      "expected_outputs": [
+        "判断范围过大，不一次性迁移全部模块。",
+        "输出分批迁移策略和 aisee/docs/spec-migration/ 索引。",
+        "目标 specs 按业务域和 package 边界组合规划。",
+        "单批最多生成少量 spec。"
+      ],
+      "must_ask": [
+        "优先迁移哪些业务域或 package？",
+        "是否先建立能力地图，再分批生成 baseline specs？"
+      ],
+      "must_include": [
+        "分批迁移策略",
+        "aisee/docs/spec-migration/ 索引",
+        "业务域和 package 边界",
+        "批次范围"
+      ],
+      "must_not": [
+        "不得生成巨型 everything/spec.md。",
+        "不得按 frontend/backend/database 技术层机械拆分。",
+        "不得声称已完成全量迁移。"
+      ],
+      "quality_checks": [
+        "迁移计划可渐进执行和审查。",
+        "批次边界可映射到代码证据和业务能力。"
+      ],
+      "fact_source_constraints": [
+        "aisee/docs/spec-migration/ 是迁移索引，不替代 openspec/specs/ baseline。"
+      ],
       "files": []
     }
   ]
