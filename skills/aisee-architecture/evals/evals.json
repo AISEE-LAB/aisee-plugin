@@ -12,7 +12,7 @@
       "id": 2,
       "name": "existing-project-architecture",
       "prompt": "基于现有项目和优惠券管理 SRS/UI 内容规格生成技术架构。需求包括优惠券列表、新建优惠券、停用优惠券、导出优惠券报表。已有项目使用统一认证、RBAC 权限和审计日志，导出能力是否已有不确定。",
-      "expected_output": "输出技术栈状态、来源可信度、架构概览、已确认/待确认架构决策、现有架构边界、可复用认证/RBAC/审计能力、优惠券数据模型耦合点、导出能力的 [STACK-GAP] 或 Open Question，以及给 aisee:change-plan 的架构提示。不得输出具体 change 边界规划结果。",
+      "expected_output": "输出技术栈状态、来源可信度、架构概览、已确认/待确认架构决策、现有架构边界、可复用认证/RBAC/审计能力、优惠券数据模型耦合点、导出能力的 [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] 或 Open Question，以及给 aisee:change-plan 的架构提示。不得输出具体 change 边界规划结果。",
       "files": []
     },
     {
@@ -26,7 +26,7 @@
       "id": 4,
       "name": "global-engineering-conventions-and-artifact-hints",
       "prompt": "为现有订单退款功能生成 architecture。项目已有统一 API 响应 envelope `{ code, message, data }`，分页使用 page/pageSize/total，鉴权使用 Authorization Bearer token，日志里有 X-Request-Id。需求包括退款申请、退款审核、退款状态通知和退款报表导出。队列是否已有不确定。",
-      "expected_output": "应输出全局工程约定，记录 API envelope、分页、鉴权和 Trace ID 的来源/可信度/影响范围；队列能力未确认应标注 [STACK-GAP] 或 Open Question。应输出 Schema Artifact Hints，提示 UI、服务、数据、Job/异步、通知/观测性等后续契约类型，但不得写具体 endpoint、request/response 字段、数据库表结构、change 名称或 phase。",
+      "expected_output": "应输出全局工程约定，记录 API envelope、分页、鉴权和 Trace ID 的来源/可信度/影响范围；队列能力未确认应标注 [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] 或 Open Question。应输出 Schema Artifact Hints，提示 UI、服务、数据、Job/异步、通知/观测性等后续契约类型，但不得写具体 endpoint、request/response 字段、数据库表结构、change 名称或 phase。",
       "files": []
     },
     {

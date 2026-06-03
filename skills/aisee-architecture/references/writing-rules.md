@@ -15,10 +15,11 @@
 
 - 不要规划 change 边界，不要命名 change，不要输出 phase、依赖图或 `/opsx:*` 命令。
 - 不要做技术栈 / 工具链选型；缺失时标注 `[STACK-CONTEXT-MISSING]` 或 `[STACK-DECISION-REQUIRED]`。
+- 不要靠记忆判断框架、SDK、CLI、云服务、数据库或工具链能力；项目来源和官方文档不可用时标注 `[DOC-CONTEXT-MISSING]`。
 - 不要输出数据库表结构、API endpoint、request/response 字段、CLI 参数完整契约、Job 详细调度策略、ORM 代码或实现步骤。
 - 不要输出硬件架构、固件设计、引脚、寄存器、RTOS 任务、驱动结构、BOM、PCB 或制造细节。
 - 给 `aisee:change-plan` 的提示只能是事实、约束和原因，不是边界规划结果。
-- 架构决策必须区分“已确认”和“待确认”；没有可信来源时只能写入待确认决策、阻塞项或 Open Questions。
+- 架构决策必须区分“已确认”和“待确认”；没有可信来源时只能写入 `[ARCH-DECISION-REQUIRED]`、待确认决策、阻塞项或 Open Questions。
 
 ## 来源规则
 
@@ -26,6 +27,7 @@
 - `high`：来自 `openspec/project.md`、代码、schema、配置、官方架构文档。
 - `medium`：来自 SRS、UI Content、Design Spec、用户明确说明。
 - `low`：从命名或上下文推断，必须标注为假设。
+- `low` 可信度事实不能直接作为 change-plan 输入；必须附带后续确认动作。
 
 ## 全局工程约定
 

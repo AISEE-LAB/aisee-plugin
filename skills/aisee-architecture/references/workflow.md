@@ -28,6 +28,23 @@
 
 关键技术栈包括：前端框架 / 客户端形态、后端框架 / 服务边界、数据库、ORM / 数据访问、鉴权与权限、队列 / 异步任务、缓存、文件存储、通知 / 消息、部署环境、测试和可观测性。
 
+## Phase 1.5 — 缺口标签与处理动作
+
+遇到缺口时先判断是否阻塞 change-plan，再写入风险、待确认决策或 Open Questions。不要把缺口补成推断结论。
+
+| 标签 | 使用条件 | 处理动作 | 是否阻塞 change-plan |
+|---|---|---|---|
+| `[STACK-CONTEXT-MISSING]` | 技术栈或运行环境没有可信来源 | 列出缺失层级、已查来源、需要用户提供的项目文件/配置/文档；不做选型 | 影响 change 拆分时阻塞 |
+| `[STACK-DECISION-REQUIRED]` | 已知有多个可行技术方向，但用户或项目未决策 | 写入待确认决策，说明影响范围和可选方向，不推荐单一结论 | 通常阻塞 |
+| `[DOC-CONTEXT-MISSING]` | 框架、SDK、CLI、云服务、数据库能力无法从项目或官方文档确认 | 标注需要查证的版本、能力点和官方来源；不得靠记忆写事实 | 取决于影响范围 |
+| `[ARCH-DECISION-REQUIRED]` | 架构边界、运行单元、集成方式、权限/数据归属等未决 | 写入待确认决策，说明对后续 contract 或 change-plan 的影响 | 通常阻塞 |
+| `[TECH-CONVENTION-MISSING]` | API 响应、错误码、日志、配置、CLI 输出、Job 幂等等全局约定缺失 | 只记录缺口和影响，不创建新约定；提示后续 artifact 承接 | 通常为 risk |
+| `[STACK-CONFLICT]` | 需求与现有技术栈、平台能力或运行环境冲突 | 写明冲突证据、影响范围和需要回到 SRS/change-plan 的原因 | 通常阻塞 |
+| `[SPEC-GAP]` | 技术事实暴露需求缺口或验收缺口 | 写入风险和 Open Questions；不要在 Architecture 中补业务需求 | 取决于缺口 |
+| `[SCHEMA-HINT-UNCLEAR]` | 后续契约类型不明确或 schema pack 可能不同 | 只写建议 artifact 类型和原因，不绑定文件名 | 不阻塞，但需提示 |
+
+如果某标签涉及具体框架 / SDK / CLI / 云服务能力，先查项目文件；需要当前官方用法时使用 Context7 或官方文档。工具不可用或文档不可达时，保留 `[DOC-CONTEXT-MISSING]`，不要弱化为“应该可以”。
+
 ## Phase 2 — 技术架构事实与决策提取
 
 需要追问时读取 `references/question-bank.md`，只问会影响技术架构判断的问题。每轮最多 3 个问题；超过 3 轮仍不明确时写入 Open Questions。
@@ -55,6 +72,8 @@
 - `high`：来自 `openspec/project.md`、代码、schema、配置、官方架构文档
 - `medium`：来自 SRS、UI Content、Design Spec、用户明确说明
 - `low`：从命名或上下文推断，必须标注为假设
+
+对所有 `low` 来源的关键事实，必须给出后续动作：用户确认、补充项目文件、查官方文档、或降级为 Open Question。不能让 low 可信度事实直接影响 change-plan。
 
 ## Phase 3 — 生成给 change-plan 的技术提示
 
@@ -89,6 +108,8 @@
 - `assets/architecture-template-software.md`
 - `assets/architecture-template-artifact-hints.md`
 - `references/writing-rules.md`
+
+生成前先输出确认摘要：技术域、技术栈状态、关键来源、待确认决策、阻塞标签、将保留的 domain blocks、schema artifact hints 类型和 ID 状态。用户未确认时，只能输出草稿或 Open Questions，不直接写入长期 Architecture 文档。
 
 默认保存：
 

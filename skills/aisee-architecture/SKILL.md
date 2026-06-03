@@ -98,7 +98,9 @@ rg --files openspec/specs openspec/changes 2>/dev/null | head -80
 
 只读与输入需求相关的目录和文件。查找路由、页面、控制器、服务、模型、schema、migration、API contract、权限中间件、任务队列、测试目录和既有架构文档。不要因为文件名猜测项目事实；关键结论必须标注来源。
 
-当涉及具体框架、SDK、ORM、数据库、云服务、API 或工具链用法判断时，优先使用项目文件；需要当前官方用法时使用 Context7 或官方文档。没有文档支撑时标注为假设。
+当涉及具体框架、SDK、ORM、数据库、云服务、API、CLI 或工具链用法判断时，优先读取项目文件、锁文件、配置、测试和已有架构文档；需要判断当前官方用法、版本能力或兼容性时，使用 Context7 或官方文档。若无法查证，不得写成架构事实；标注 `[STACK-CONTEXT-MISSING]`、`[DOC-CONTEXT-MISSING]` 或 `[ARCH-DECISION-REQUIRED]`，并写明需要补充的来源。
+
+CHECKPOINT: 生成或写入 Architecture 前，必须确认或显式标注技术域、技术栈状态、主要来源、现有架构边界、平台/运行环境约束、集成/数据/权限/任务等相关 domain block、阻塞风险、待确认架构决策和 ID 状态。技术栈、架构决策或平台约束会影响 change-plan 时，先暂停让用户确认；用户要求继续但证据不足时，只能写缺口标签和 Open Questions，不得把推断写成既定架构。
 
 ## Workflow
 
@@ -118,8 +120,9 @@ Reference loading：
 - 不要生成 `/opsx:new`、`/opsx:propose` 或其他执行命令。
 - 不要生成 `design.md`。
 - 不要做技术选型；技术栈缺失时标注 `[STACK-CONTEXT-MISSING]` 或 `[STACK-DECISION-REQUIRED]`。
+- 不要靠记忆判断框架、SDK、CLI、云服务或数据库能力；项目来源和官方文档都不可用时标注 `[DOC-CONTEXT-MISSING]`。
 - 不要把推断写成事实；每条关键技术事实都要有来源和可信度。
-- 不要把待确认架构决策写成已确认结论；没有来源时标注阻塞或 Open Question。
+- 不要把待确认架构决策写成已确认结论；没有来源时标注 `[ARCH-DECISION-REQUIRED]`、阻塞或 Open Question。
 - 不要输出数据库表结构、API endpoint、request/response 字段、CLI 参数完整契约、Job 详细调度策略、ORM 代码或实现步骤。
 - 不要输出硬件架构、固件设计、引脚、寄存器、RTOS 任务、驱动结构、BOM、PCB 或制造细节。
 - 不要把建议 artifact 类型写死为当前 schema 的固定文件名；schema pack 未来可调整。
