@@ -1,23 +1,28 @@
 ---
 name: aisee:init
-description: 初始化、审计并优化 OpenSpec 项目的 Codex 配置体系。用于创建或修复 AGENTS.md、openspec/project.md、aisee/memory/ 和 Codex hooks；检查 hook 机制兼容性、OpenSpec 状态机、规划目录与项目技术架构边界。触发词包括 aisee:init、aisee-init、初始化项目配置、优化 AGENTS.md、配置 Codex hooks、OpenSpec 配置审计。
+description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。用于创建或修复 AGENTS.md、openspec/project.md、aisee/memory/、aisee/docs/ 规划目录，并在当前支持的 Codex hook target 下安装项目级 hooks；检查 hook 机制兼容性、OpenSpec 状态机、规划目录与项目技术架构边界。触发词包括 aisee:init、aisee-init、初始化项目配置、优化 AGENTS.md、配置 Codex hooks、OpenSpec 配置审计。
 ---
 
 # aisee:init
 
-对外 skill 名称是 `aisee:init`；目录名保持 `aisee-init/`，脚本路径仍使用 `aisee-init/scripts/...`。
+对外 skill 名称是 `aisee:init`；目录名保持 `aisee-init/`。执行脚本时从当前 skill 目录解析 `<skill-dir>/scripts/...`；安装后的 hook 命令只引用目标项目内 `aisee/hooks/`。
 
 ## 目标
 
-把一个项目整理成 OpenSpec 驱动的 Codex 配置：
+把一个项目整理成 OpenSpec 驱动的 Aisee 项目配置：
 
-- `AGENTS.md`：Codex 项目规则、OpenSpec 工作流、工具调用约束、沙箱和验证要求。
+- `AGENTS.md`：当前 Codex target 的项目规则、OpenSpec 工作流、工具调用约束、沙箱和验证要求。
 - `openspec/project.md`：项目事实、技术栈、架构、开发命令；不放 AI 行为规则。
 - `aisee/docs/requirements/`、`aisee/docs/ui-content/`、`aisee/docs/architecture/`、`aisee/docs/change-plan/`：Aisee 规划链路产物目录。
 - `aisee/memory/rules.md` 与 `aisee/memory/index.md`：项目本地记忆规则和记忆入口。
 - `aisee/docs/reflect/`：会话复盘和 memory 候选区；不替代 `aisee/memory/`。
-- `.codex/hooks.json` 与 `.codex/config.toml`：项目级 Codex hook 配置。
-- `aisee/hooks/`：本技能安装到目标项目的 hook 脚本目录，Codex 从这里执行脚本。
+- 当前支持的 hook target 是 Codex：`.codex/hooks.json` 与 `.codex/config.toml`。
+- `aisee/hooks/`：本技能安装到目标项目的 hook 脚本目录；runtime 从这里执行脚本，不依赖 skill 安装路径。
+
+非目标：
+
+- 不生成非 Codex hook target 配置。若用户需要其他 agent runtime，先输出差异和待设计项，不要套用 Codex hook 协议。
+- 不安装或维护 OpenSpec custom schemas；转交 `aisee-schema-pack`。
 
 ## 先决条件
 
@@ -51,9 +56,9 @@ openspec init
 3. 用 `assets/openspec-project-template.md` 生成 `openspec/project.md`。
 4. 若 `aisee/memory/rules.md` 不存在，用 `assets/memory-rules-template.md` 写入项目本地记忆规则。
 5. 若 `aisee/memory/index.md` 不存在，用 `assets/memory-index-template.md` 初始化 `aisee/memory/arch`、`aisee/memory/pref`、`aisee/memory/ctx`、`aisee/memory/stack`。
-6. 运行 `scripts/setup-hooks.js --codex` 安装 hooks。
+6. 在用户确认后运行 `<skill-dir>/scripts/setup-hooks.js --codex` 安装 Codex hooks。
 
-CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/memory/**`、`.codex/**`、`aisee/hooks/**`，或执行旧路径迁移前，必须先列出计划写入路径、覆盖/合并策略、hook target、迁移源和目标，等待用户确认。未确认时只输出审计报告和修复计划，不改文件、不安装 hooks、不迁移 memory。
+CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/docs/**`、`aisee/memory/**`、`.codex/**`、`aisee/hooks/**`，安装 hooks，建议 schema-pack 安装，或执行旧路径迁移前，必须先列出计划写入路径、覆盖/合并策略、hook target、迁移源和目标，等待用户确认。未确认时只输出审计报告和修复计划，不改文件、不安装 hooks、不迁移 memory。
 
 ## 目录布局与迁移
 
@@ -75,6 +80,7 @@ CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/memory/
 - `AGENTS.md` 必须承载完整 OpenSpec 工作流、冲突标记和 Codex 执行约束。
 - 项目级技术栈只放 `openspec/project.md`；未确认项写“未确认”，不要在 `AGENTS.md` 里补技术选型。
 - Hook 命令只引用项目内 `aisee/hooks/`，不要引用技能安装路径。
+- 运行安装器时可以引用 `<skill-dir>/scripts/setup-hooks.js`；写入目标项目的 hook runtime 命令不能引用 `<skill-dir>`、`aisee-init/scripts/`、全局 skill 缓存或用户 home 下的技能路径。
 - 记忆规则使用项目本地 `aisee/memory/rules.md`，不再引用或写入任何全局 memory rules 文件。
 - `aisee/memory/` 是长期项目记忆的权威位置；`aisee/docs/reflect/` 只作为复盘、草案和待确认候选区。
 - OpenSpec custom schemas 由 `aisee-schema-pack` 负责；本技能不安装或维护 schema pack。
@@ -84,11 +90,13 @@ CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/memory/
 运行方式：
 
 ```bash
-node aisee-init/scripts/setup-hooks.js --codex
-node aisee-init/scripts/setup-hooks.js
+node <skill-dir>/scripts/setup-hooks.js --codex
+node <skill-dir>/scripts/setup-hooks.js
 ```
 
-默认自动检测：存在 `AGENTS.md` 或 `.codex/` 则安装 Codex hooks。无法检测时传入 `--codex`。
+`<skill-dir>` 是当前 skill 所在目录，例如仓库内 `skills/aisee-init` 或用户本地安装目录。不要假设目标项目根目录下存在 `aisee-init/scripts/`。
+
+默认自动检测：存在 `AGENTS.md` 或 `.codex/` 则安装 Codex hooks。无法检测时传入 `--codex`。当前只支持 Codex hook target；其他 target 只审计需求，不生成配置。
 
 安装结果：
 

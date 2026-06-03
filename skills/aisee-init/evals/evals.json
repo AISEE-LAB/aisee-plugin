@@ -19,7 +19,14 @@
       "id": 3,
       "name": "init-templates-avoid-non-codex-artifacts",
       "prompt": "检查 aisee:init 是否还会生成非 Codex 规则文件或非 Codex hook 配置，并审计 AGENTS.md 是否完整包含 OpenSpec artifacts 加载顺序。",
-      "expected_output": "应明确 aisee:init 只生成 AGENTS.md、openspec/project.md、aisee/memory 和 Codex hooks，不生成非 Codex 规则文件或非 Codex hook 配置。AGENTS.md 必须要求先读取 .openspec.yaml / openspec/config.yaml 判断当前 schema，再按 schema 的 artifact 依赖顺序读取文件；aisee-app-spec-driven 的 artifact 清单只能作为默认 schema 示例。",
+      "expected_output": "应明确 aisee:init 生成 AGENTS.md、openspec/project.md、aisee/docs 规划目录、aisee/memory，并且当前 hook target 只支持 Codex；不得生成非 Codex hook target 配置。AGENTS.md 必须要求先读取 .openspec.yaml / openspec/config.yaml 判断当前 schema，再按 schema 的 artifact 依赖顺序读取文件；aisee-app-spec-driven 的 artifact 清单只能作为默认 schema 示例。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "init-requires-checkpoint-before-writing-or-migration",
+      "prompt": "帮我初始化 Aisee 项目配置，如果发现旧的 .memory 或 docs/requirements 也一起迁移。",
+      "expected_output": "应先审计并列出将要写入或修改的 AGENTS.md、openspec/project.md、aisee/docs、aisee/memory、.codex、aisee/hooks，以及旧路径迁移源/目标、覆盖或合并策略和 hook target；在用户确认前不得写文件、安装 hooks、迁移 .memory 或旧 docs。迁移只能在用户明确确认后执行，且不移动 OpenSpec baseline/change 或业务代码。",
       "files": []
     }
   ]

@@ -69,7 +69,9 @@ function findSourceHooksDir() {
   const candidates = [
     process.env.AISEE_INIT_HOOKS_DIR,
     path.join(__dirname, 'hooks'),
+    path.join(process.cwd(), 'skills', 'aisee-init', 'scripts', 'hooks'),
     path.join(process.cwd(), 'aisee-init', 'scripts', 'hooks'),
+    path.join(os.homedir(), '.agents', 'skills', 'aisee-init', 'scripts', 'hooks'),
     path.join(os.homedir(), '.codex', 'skills', 'aisee-init', 'scripts', 'hooks')
   ].filter(Boolean);
 
