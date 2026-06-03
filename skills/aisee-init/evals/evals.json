@@ -35,6 +35,13 @@
       "prompt": "审查 aisee:init 的 spec-drift hook：多个 active changes 时，用户说新增页面或接口应该怎么处理？",
       "expected_output": "应说明 spec-drift 只注入轻量范围自检，不阻断；优先匹配用户提到的 change，最多摘要 3 个 active changes；读取 proposal.md、source-map.md、change-context.md、ui-contract.md、service-contract.md、data-model.md 和 tasks.md 的轻量摘要，不把 design.md 当默认事实源；多 active changes 且用户未指定 change 时，应提醒先确认目标 change。",
       "files": []
+    },
+    {
+      "id": 6,
+      "name": "session-inject-prefers-canonical-and-limits-context",
+      "prompt": "审查 aisee:init 的 session-inject hook：如果项目里同时有 aisee/docs/requirements 和 docs/requirements，并且 active changes 很多，会怎么注入？",
+      "expected_output": "应说明 session-inject 只注入路径和轻量提示，不作为事实源；active changes 最多直接列 8 个并提示剩余数量；知识库入口最多列 10 个；canonical aisee/ 路径优先，legacy docs/ 或 .memory 只作为 fallback 或迁移提示，不应同时把 canonical 与 legacy 当同等事实源注入。",
+      "files": []
     }
   ]
 }
