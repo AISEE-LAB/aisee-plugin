@@ -16,6 +16,7 @@ from aisee_cli.flow import build_flow
 from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids
 from aisee_cli.index import build_index
 from aisee_cli.lookup import get_id, trace_id
+from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
 from aisee_cli.project import resolve_project_root
 from aisee_cli.schema_pack import check_schema_packs, install_schema_packs, list_schema_packs
@@ -34,7 +35,17 @@ def main() -> int:
     bootstrap_group.add_argument("--plan", action="store_true", help="output bootstrap plan")
     bootstrap_group.add_argument("--apply", action="store_true", help="apply bootstrap plan")
     bootstrap_parser.add_argument("--json", action="store_true", help="output JSON")
+    openspec_parser = subparsers.add_parser("openspec")
+    openspec_parser.add_argument("--json", action="store_true", help="output JSON")
+    openspec_subparsers = openspec_parser.add_subparsers(dest="openspec_command")
+    openspec_ensure_parser = openspec_subparsers.add_parser("ensure")
+    openspec_ensure_parser.add_argument("--profile", default="core", help="OpenSpec profile preset; default: core")
+    openspec_ensure_parser.add_argument("--tools", default="none", help="OpenSpec AI tools value for init; default: none")
+    openspec_ensure_parser.add_argument("--skip-profile", action="store_true", help="do not run openspec config profile")
+    openspec_ensure_parser.add_argument("--force", action="store_true", help="pass --force to openspec init when initialization is needed")
+    openspec_ensure_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_parser = subparsers.add_parser("sources")
+    sources_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_subparsers = sources_parser.add_subparsers(dest="sources_command")
     sources_list_parser = sources_subparsers.add_parser("list")
     sources_list_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -54,6 +65,7 @@ def main() -> int:
     sources_remove_parser.add_argument("--path", required=True, help="source path")
     sources_remove_parser.add_argument("--json", action="store_true", help="output JSON")
     schemas_parser = subparsers.add_parser("schemas")
+    schemas_parser.add_argument("--json", action="store_true", help="output JSON")
     schemas_subparsers = schemas_parser.add_subparsers(dest="schemas_command")
     schemas_list_parser = schemas_subparsers.add_parser("list")
     schemas_list_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -69,6 +81,7 @@ def main() -> int:
     index_parser.add_argument("--json", action="store_true", help="output JSON")
     index_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
     change_parser = subparsers.add_parser("change")
+    change_parser.add_argument("--json", action="store_true", help="output JSON")
     change_subparsers = change_parser.add_subparsers(dest="change_command")
     inspect_parser = change_subparsers.add_parser("inspect")
     inspect_parser.add_argument("change", help="OpenSpec change name")
@@ -85,12 +98,14 @@ def main() -> int:
     archive_check_parser.add_argument("--json", action="store_true", help="output JSON")
     archive_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
     context_parser = subparsers.add_parser("context")
+    context_parser.add_argument("--json", action="store_true", help="output JSON")
     context_subparsers = context_parser.add_subparsers(dest="context_command")
     pack_parser = context_subparsers.add_parser("pack")
     pack_parser.add_argument("--change", required=True, help="OpenSpec change name")
     pack_parser.add_argument("--for", dest="target", required=True, help="context target")
     pack_parser.add_argument("--json", action="store_true", help="output JSON")
     id_parser = subparsers.add_parser("id")
+    id_parser.add_argument("--json", action="store_true", help="output JSON")
     id_subparsers = id_parser.add_subparsers(dest="id_command")
     id_check_parser = id_subparsers.add_parser("check")
     id_check_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -115,6 +130,7 @@ def main() -> int:
     id_deprecate_parser.add_argument("--reason", required=True, help="deprecation reason")
     id_deprecate_parser.add_argument("--json", action="store_true", help="output JSON")
     flow_parser = subparsers.add_parser("flow")
+    flow_parser.add_argument("--json", action="store_true", help="output JSON")
     flow_subparsers = flow_parser.add_subparsers(dest="flow_command")
     flow_inspect_parser = flow_subparsers.add_parser("inspect")
     flow_inspect_parser.add_argument("--change", help="OpenSpec change name")
@@ -149,6 +165,26 @@ def main() -> int:
         print_json(result)
         return exit_code_for(result, fail_on_blocker=args.apply)
 
+    if args.command == "openspec" and args.openspec_command is None:
+        print_json(error_response("Use one of: ensure.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
+
+    if args.command == "openspec" and args.openspec_command == "ensure":
+        root = resolve_project_root(Path.cwd())
+        result = run_openspec_init(
+            root,
+            profile=args.profile,
+            tools=args.tools,
+            skip_profile=args.skip_profile,
+            force=args.force,
+        )
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=True)
+
+    if args.command == "context" and args.context_command is None:
+        print_json(error_response("Use one of: pack.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
+
     if args.command == "context" and args.context_command == "pack":
         try:
             root = resolve_project_root(Path.cwd())
@@ -175,6 +211,10 @@ def main() -> int:
         }
         print_json(result)
         return 0
+
+    if args.command == "change" and args.change_command is None:
+        print_json(error_response("Use one of: inspect, author-check, verify-check, archive-check.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
 
     if args.command == "change" and args.change_command == "inspect":
         root = resolve_project_root(Path.cwd())
@@ -222,6 +262,8 @@ def main() -> int:
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
+        print_json(error_response("Use one of: list, check, add, remove.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
 
     if args.command == "schemas":
         root = resolve_project_root(Path.cwd())
@@ -242,6 +284,8 @@ def main() -> int:
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
+        print_json(error_response("Use one of: list, check, install.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
 
     if args.command == "index":
         root = resolve_project_root(Path.cwd())
@@ -263,11 +307,8 @@ def main() -> int:
             elif args.id_command == "deprecate":
                 result = deprecate_id(root, args.id, args.replaced_by, args.reason)
             else:
-                result = {
-                    "status": "planned",
-                    "command": args.command,
-                    "message": "Use one of: check, next, reserve, activate, deprecate.",
-                }
+                print_json(error_response("Use one of: check, next, reserve, activate, deprecate.", "MISSING_SUBCOMMAND"), stderr=True)
+                return 2
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
@@ -297,16 +338,15 @@ def main() -> int:
 
     if args.command == "flow":
         root = resolve_project_root(Path.cwd())
-        result = build_flow(root, change=getattr(args, "change", None))
+        if args.flow_command is None:
+            print_json(error_response("Use one of: inspect, next.", "MISSING_SUBCOMMAND"), stderr=True)
+            return 2
+        result = build_flow(root, change=getattr(args, "change", None), command=args.flow_command)
         print_json(result)
         return 0
 
-    print_json({
-        "status": "planned",
-        "command": args.command,
-        "message": "Aisee CLI scaffold is initialized; implementation pending."
-    })
-    return 0
+    print_json(error_response("Use a supported Aisee command.", "MISSING_COMMAND"), stderr=True)
+    return 2
 
 
 def summarize_gaps(gaps: list[dict[str, object]]) -> dict[str, int | str]:

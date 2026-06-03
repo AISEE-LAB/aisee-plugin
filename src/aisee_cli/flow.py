@@ -11,21 +11,21 @@ from aisee_cli.context_pack import build_context_pack
 from aisee_cli.doctor import build_doctor
 
 
-def build_flow(project_root: Path, *, change: str | None = None) -> dict[str, Any]:
+def build_flow(project_root: Path, *, change: str | None = None, command: str = "inspect") -> dict[str, Any]:
     root = project_root.resolve()
     doctor = build_doctor(root)
     if doctor["status"] == "blocked":
-        return flow_result("uninitialized", ["aisee doctor", "aisee:init", "aisee-schema-pack"], ["doctor has blockers"], doctor, change)
+        return flow_result("uninitialized", ["aisee doctor", "aisee:init", "aisee-schema-pack"], ["doctor has blockers"], doctor, change, command)
 
     if not change:
         sources = doctor["aisee"]["sources"]
         if sources["sources"]:
-            return flow_result("context-ready", ["aisee:change-plan"], [], doctor, change)
-        return flow_result("idea", ["aisee:srs"], ["no change selected"], doctor, change)
+            return flow_result("context-ready", ["aisee:change-plan"], [], doctor, change, command)
+        return flow_result("idea", ["aisee:srs"], ["no change selected"], doctor, change, command)
 
     change_path = root / "openspec" / "changes" / change
     if not change_path.exists():
-        return flow_result("change-planned", ["aisee:change-author"], [f"change is missing: {change}"], doctor, change)
+        return flow_result("change-planned", ["aisee:change-author"], [f"change is missing: {change}"], doctor, change, command)
 
     pack = build_context_pack(root, change, "ce-work")
     author = build_author_check(root, change)
@@ -118,12 +118,12 @@ def build_flow(project_root: Path, *, change: str | None = None) -> dict[str, An
             "write durable conclusions back to OpenSpec artifacts",
         ],
         "meta": {
-            "command": f"aisee flow inspect --change {change} --json",
+            "command": f"aisee flow {command} --change {change} --json",
         },
     }
 
 
-def flow_result(stage: str, recommended: list[str], blocking: list[str], doctor: dict[str, Any], change: str | None) -> dict[str, Any]:
+def flow_result(stage: str, recommended: list[str], blocking: list[str], doctor: dict[str, Any], change: str | None, command: str) -> dict[str, Any]:
     return {
         "status": "ok" if not blocking else "blocked",
         "stage": stage,
@@ -140,7 +140,7 @@ def flow_result(stage: str, recommended: list[str], blocking: list[str], doctor:
             "schema is decided by aisee:change-plan per change",
         ],
         "meta": {
-            "command": "aisee flow inspect --json",
+            "command": f"aisee flow {command}" + (f" --change {change}" if change else "") + " --json",
         },
     }
 

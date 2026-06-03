@@ -133,6 +133,8 @@ def test_doctor_reports_missing_openspec_as_blocked(tmp_path: Path) -> None:
     data = run_json(tmp_path, "doctor", "--json")
 
     assert data["status"] == "blocked"
+    assert "cli" in data["openspec"]
+    assert "compound" in data
     assert any(item["code"] == "OPENSPEC_CONFIG_MISSING" for item in data["issues"])
     assert data["meta"]["writes"] is False
 
@@ -227,6 +229,14 @@ def test_flow_inspect_recommends_ce_plan_when_execution_paths_are_missing(tmp_pa
     assert "SOURCE_MAP_GAP" in data["checks"]["gaps"]["codes"]
     assert "SOURCE_MAP_GAP" in data["checks"]["implementation_gaps"]["codes"]
     assert any("context pack --change add-auth --for ce-work" in item for item in data["required_commands"])
+
+
+def test_flow_next_reports_next_command_in_metadata(tmp_path: Path) -> None:
+    create_open_project(tmp_path)
+
+    data = run_json(tmp_path, "flow", "next", "--change", "add-auth", "--json")
+
+    assert data["meta"]["command"] == "aisee flow next --change add-auth --json"
 
 
 def test_flow_ignores_ce_work_gaps_for_no_apply_schema(tmp_path: Path) -> None:

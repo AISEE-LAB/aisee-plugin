@@ -83,8 +83,12 @@ aisee doctor --json
 ```json
 {
   "openspec": {
-    "cli": "missing",
-    "project_initialized": false
+    "cli": {
+      "available": false,
+      "version": null,
+      "status": "missing"
+    },
+    "initialized": false
   },
   "aisee": {
     "schemas_installed": false,
@@ -95,38 +99,45 @@ aisee doctor --json
   },
   "compound": {
     "plugin_available": false,
+    "status": "missing",
     "skills": {
+      "ce-plan": false,
       "ce-work": false,
       "ce-doc-review": false,
       "ce-code-review": false
-    }
+    },
+    "missing_skills": ["ce-plan", "ce-work", "ce-doc-review", "ce-code-review"]
   }
 }
 ```
 
 ### bootstrap
 
-生成或执行项目初始化计划。
+生成项目初始化计划。`bootstrap` 是编排视图，不是大而全的执行器。
 
 ```bash
 aisee bootstrap --plan --json
-aisee bootstrap --apply
 ```
 
 `--plan` 只输出计划，不修改文件。
 
-`--apply` 可以执行：
+当前阶段 `bootstrap --apply` 不执行写入。需要写入时使用窄命令：
 
-- 检查或安装 OpenSpec CLI。
-- 调用 `openspec init`。
-- 安装或同步 Aisee schema pack。
-- 执行 Aisee 项目记忆初始化。
-- 创建或修复 `AGENTS.md`、`openspec/project.md`、`aisee/memory/`。
-- 安装或修复 Codex hooks。
-- 检查 Compound Engineering plugin 是否可用。
-- 检查 `ce-doc-review`、`ce-work`、`ce-code-review` 等 skill 是否存在。
+```bash
+aisee openspec ensure --json
+aisee schemas install --json
+```
 
-当前阶段 `bootstrap --apply` 不执行自动迁移。Aisee 目录迁移只在 `doctor` 和 `bootstrap --plan` 中提示：
+`aisee openspec ensure` 默认直接执行：
+
+- `openspec init . --tools none --profile core`
+- `openspec config profile core`
+
+如果项目已经存在 `openspec/config.yaml` 和 `openspec/changes/`，跳过 `openspec init`，但仍默认执行 `openspec config profile core`，确保全局 OpenSpec profile 可预测。由于 `openspec config profile` 写入用户全局配置，命令必须在 JSON 输出中标明 `profile_scope: global`。如需避免全局 profile 写入，可显式传 `--skip-profile`。
+
+默认 `--tools none`，避免 OpenSpec 初始化阶段绑定某个 AI 工具；Codex/AGENTS/hooks 仍由 `aisee:init` 负责。若用户明确希望 OpenSpec 初始化工具配置，可传 `--tools codex` 或 OpenSpec 支持的其他工具值。
+
+Aisee 目录迁移只在 `doctor` 和 `bootstrap --plan` 中提示：
 
 - 新项目只写入 `aisee/`。
 - 旧项目允许 fallback 读取 `.aisee/`、`.memory/` 和历史 `docs/*` 产物目录。
@@ -152,8 +163,7 @@ aisee bootstrap --apply
 `bootstrap` 应该只是编排器，底层能力拆成可单独调用的命令：
 
 ```bash
-aisee install openspec
-aisee install compound
+aisee openspec ensure
 aisee init project
 aisee init memory
 aisee init hooks
@@ -927,7 +937,7 @@ Cache 只加速这些回答，不保存权威内容。
 1. aisee doctor --json
 2. aisee bootstrap --plan
 3. 用户确认
-4. aisee bootstrap --apply
+4. aisee openspec ensure --json
 5. aisee schemas install
 6. aisee index
 7. aisee id check
@@ -941,6 +951,8 @@ Cache 只加速这些回答，不保存权威内容。
 
 - `aisee doctor --json`
 - `aisee bootstrap --plan`
+- `aisee openspec ensure --json`
+- `aisee schemas install --json`
 - `aisee index --json`
 - `aisee get <id> --json`
 - `aisee trace <id> --json`

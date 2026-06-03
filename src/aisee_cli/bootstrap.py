@@ -14,6 +14,10 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
     root = project_root.resolve()
     doctor = build_doctor(root)
     actions = []
+    if not doctor["openspec"]["cli"]["available"]:
+        actions.append(action("install", "openspec-cli", "Install or expose the OpenSpec CLI before running OpenSpec commands."))
+    if doctor["compound"]["status"] != "ok":
+        actions.append(action("install", "compound-engineering-plugin", "Install or enable Compound Engineering when CE review/work skills are part of the workflow."))
     if not (root / "AGENTS.md").exists():
         actions.append(action("create", "AGENTS.md", "Run aisee:init to create the project AI-agent rules entrypoint."))
     openspec_initialized = (root / "openspec" / "config.yaml").exists() and (root / "openspec" / "changes").exists()

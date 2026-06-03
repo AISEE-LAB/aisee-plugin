@@ -12,6 +12,7 @@ from aisee_cli.paths import inspect_layout
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.schema_pack import list_schema_packs
 from aisee_cli.sources import check_sources
+from aisee_cli.tool_checks import check_compound_plugin, check_openspec_cli
 
 
 def build_doctor(project_root: Path) -> dict[str, Any]:
@@ -47,18 +48,27 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
     sources = check_sources(root)
     registry = check_registry(root)
     schemas = list_schema_packs(root)
+    openspec_cli = check_openspec_cli()
+    compound = check_compound_plugin()
     issues.extend(item for item in sources["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in registry["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in schemas["issues"] if item.get("severity") == "blocker")
+    if not openspec_cli["available"]:
+        issues.append(issue("OPENSPEC_CLI_UNAVAILABLE", "info", "OpenSpec CLI is not available or failed to report a version"))
+    if compound["status"] != "ok":
+        missing = ", ".join(compound["missing_skills"]) if compound["missing_skills"] else "Compound plugin"
+        issues.append(issue("COMPOUND_UNAVAILABLE", "info", f"Compound Engineering is not fully available: {missing}"))
 
     return {
         "status": status_from_issues(issues),
         "project_rules": rules,
         "openspec": {
+            "cli": openspec_cli,
             "config": rel(root, openspec_config) if openspec_config.exists() else None,
             "changes": rel(root, openspec_changes) if openspec_changes.exists() else None,
             "initialized": openspec_config.exists() and openspec_changes.exists(),
         },
+        "compound": compound,
         "aisee": {
             "layout": layout,
             "sources": sources,

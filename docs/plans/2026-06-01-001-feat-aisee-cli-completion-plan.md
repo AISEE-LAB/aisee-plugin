@@ -134,8 +134,8 @@ flowchart TD
 | --- | --- | --- | --- |
 | `aisee doctor --json` | 项目和工具健康检查 | 否 | 是 |
 | `aisee bootstrap --plan --json` | 初始化计划 | 否 | 是 |
-| `aisee bootstrap --apply` | 幂等初始化执行 | 是 | 后续 |
-| `aisee sources list/check/add/remove --json` | 上游来源登记 | add/remove 写 `.aisee/sources.json` | 是 |
+| `aisee openspec ensure --json` | 窄执行 OpenSpec 初始化和默认 profile 配置 | OpenSpec init 写项目文件，profile 写全局配置 | 是 |
+| `aisee sources list/check/add/remove --json` | 上游来源登记 | add/remove 写 `aisee/registry/sources.json` | 是 |
 | `aisee index --json` | 建立可重建缓存 | `.aisee/cache/context-index.json` | 是 |
 | `aisee get <id> --json` | ID 精准查询 | 否 | 是 |
 | `aisee trace <id> --json` | ID 关系追踪 | 否 | 已有，增强 |
