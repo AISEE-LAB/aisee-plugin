@@ -1,42 +1,350 @@
 # Aisee Plugin
 
-Aisee means **AI-Enhanced Software Engineering**.
+[English](README.en.md) | 简体中文
 
-This repository contains the Aisee plugin system for OpenSpec-driven development:
+**Aisee** 是 **AI-Enhanced Software Engineering** 的缩写。
 
-- Aisee skills for requirements, UI content, technical context, OpenSpec change authoring, verification, and reflection.
-- OpenSpec schema packs under `skills/aisee-schema-pack/assets/schema-pack/` for app, device, docsite, infra, security, quick-fix, research, and collaboration workflows.
-- Planning documents for Aisee CLI, context packs, ID registry, source registry, and Compound Engineering handoffs.
+Aisee Plugin 是一个面向 OpenSpec 工作流的 AI 软件工程插件。它帮助团队把模糊想法整理成可审查的需求、UI 内容规格、技术架构上下文、schema-aware OpenSpec changes、实现交接 brief、验证检查和归档门禁。
 
-## Repository Layout
+Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、schema packs、JSON context tooling、稳定 ID 追踪和工程交接规则。
+
+> 当前状态：early alpha。仓库可用于本地实验和插件开发，但公开发布、安装自动化和版本化发行仍在完善中。
+
+## 为什么需要 Aisee？
+
+AI coding assistant 很有用，但当需求、UI 说明、技术约束和实现证据长期停留在聊天记录里时，项目很容易上下文漂移。
+
+Aisee 的目标是让这些上下文显式化：
+
+- 在实现前澄清业务需求；
+- 分离需求、UI 内容、技术架构和 change planning；
+- 以 schema-aware 的方式创建和补齐 OpenSpec changes；
+- 保持 OpenSpec 作为唯一持久规范事实源；
+- 为实现、验证和审查生成机器可读的 context pack；
+- 追踪需求、页面、契约、任务、代码和证据 ID；
+- 检查 artifacts、tasks、source-map、测试和 review evidence 是否闭环。
+
+## 工作流定位
 
 ```text
-.codex-plugin/
-.claude-plugin/
-.cursor-plugin/
-bin/
-skills/
-references/
-scripts/
-docs/architecture/
-```
-
-## Current Status
-
-This is the initial extracted project scaffold. Some orchestration skills are skeletons and should be implemented against the architecture documents under `docs/architecture/`.
-
-## Core Idea
-
-```text
+用户意图
+  ↓
 Aisee skills
-  structure requirements and author OpenSpec changes
-
+  澄清需求、UI 内容、架构和 change 边界
+  ↓
 OpenSpec
-  remains the specification state machine and baseline source of truth
-
+  管理 active changes、baseline specs、validate、apply 和 archive
+  ↓
 Aisee CLI
-  parses templates and returns JSON context packs without becoming a second content source
-
-Compound Engineering
-  performs document review, implementation, test, code review, commit, and PR handoff
+  读取 OpenSpec/Aisee metadata，输出 JSON context packs
+  ↓
+Compound Engineering 或其它 coding agent
+  实现、审查、测试并产出 evidence
+  ↓
+Aisee verify / archive guard
+  检查当前 change 是否可以进入归档
 ```
+
+核心边界：
+
+```text
+OpenSpec = 规范状态机和 baseline 事实源
+Aisee = 规划、上下文、schema、追踪和工作流 guardrails
+Aisee CLI = JSON context bus，不是第二份事实源
+Compound Engineering = 可选的执行 / 审查 / 测试消费方
+```
+
+## 功能特性
+
+- **结构化需求澄清**：`aisee:srs` 通过对话澄清业务需求，并生成规划级 SRS。
+- **UI 内容规格**：`aisee:ui-content` 将已确认需求转换为页面内容、状态、流程、权限可见性和平台差异，不写视觉设计。
+- **技术架构上下文**：`aisee:architecture` 记录技术事实、约束、可复用能力、全局工程约定和 artifact hints。
+- **Schema-aware change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
+- **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
+- **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
+- **ID registry 与 traceability**：`aisee id`、`aisee get`、`aisee trace` 连接上游文档、OpenSpec artifacts、tasks、代码路径、测试和 evidence。
+- **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
+- **Harness 设计**：通过 CLI contract tests 和规范化 skill eval cases 保持工作流稳定。
+
+## 环境要求
+
+- Python 3.10+
+- Git
+- Node.js 和 OpenSpec CLI
+
+OpenSpec 需要单独安装：
+
+```bash
+npm install -g @fission-ai/openspec@latest
+```
+
+Compound Engineering 是可选依赖。Aisee 可以通过 `aisee doctor --json` 检查关键 Compound skills 是否可用。
+
+## 从源码安装
+
+克隆仓库：
+
+```bash
+git clone <repository-url>
+cd aisee-plugin
+```
+
+以 editable 模式安装 Python CLI：
+
+```bash
+python -m pip install -e .
+```
+
+检查 CLI：
+
+```bash
+aisee --version
+aisee doctor --json
+```
+
+也可以不安装，直接运行仓库内入口：
+
+```bash
+./bin/aisee doctor --json
+```
+
+## 插件使用
+
+仓库包含多个 agent runtime 的插件元数据：
+
+```text
+.codex-plugin/plugin.json
+.claude-plugin/plugin.json
+.cursor-plugin/plugin.json
+```
+
+如果你的 agent runtime 支持加载本地插件，可以指向本仓库或对应的 plugin metadata 文件。Skill 文件位于 `skills/`。
+
+Codex plugin metadata 会直接声明 skills 目录：
+
+```json
+{
+  "skills": "./skills/"
+}
+```
+
+## 快速开始
+
+在需要使用 OpenSpec 的项目内运行：
+
+```bash
+aisee doctor --json
+aisee bootstrap --plan --json
+```
+
+如果项目还没有初始化 OpenSpec：
+
+```bash
+aisee openspec ensure --json
+```
+
+该命令使用保守默认值桥接 OpenSpec 初始化：
+
+```text
+openspec init . --tools none --profile core
+openspec config profile core
+```
+
+然后安装本插件提供的 schemas：
+
+```bash
+aisee schemas install --all --json
+```
+
+再次检查项目状态：
+
+```bash
+aisee doctor --json
+aisee flow inspect --json
+```
+
+## 典型流程
+
+```text
+1. aisee:srs
+2. aisee:ui-content
+3. aisee:architecture
+4. aisee:change-plan
+5. /opsx:new "<change>" --schema <schema>
+6. aisee:change-author
+7. openspec validate <change>
+8. aisee:implementation-bridge
+9. implementation / review / test
+10. aisee:verify
+11. aisee:archive-guard
+12. openspec archive <change>
+```
+
+对于已有项目，可使用 `aisee:spec-migrate` 从代码、测试、文档、路由和已验证行为中整理 OpenSpec baseline specs。
+
+## 主要 Skills
+
+| Skill | 作用 |
+| --- | --- |
+| `aisee:flow` | 检查当前工作流阶段并推荐下一步。 |
+| `aisee:init` | 初始化或审计 `AGENTS.md`、`openspec/project.md`、Aisee docs、memory 和 Codex hooks。 |
+| `aisee:srs` | 澄清软件需求并生成规划级 SRS。 |
+| `aisee:ui-content` | 生成页面、元素、状态、流程、权限和平台差异等 UI 内容规格。 |
+| `aisee:architecture` | 捕获软件架构上下文、技术约束、可复用能力和 artifact hints。 |
+| `aisee:change-plan` | 规划独立 OpenSpec changes 并选择 schema。 |
+| `aisee-schema-pack` | 安装和维护 OpenSpec schema packs。 |
+| `aisee:implementation-bridge` | 生成单个 change 的实现交接 brief 和 context pack 摘要。 |
+| `aisee:verify` | 诊断 artifact、task、source-map、ID 和 evidence 缺口。 |
+| `aisee:archive-guard` | 在 `openspec archive` 前给出最终归档建议。 |
+| `aisee:spec-migrate` | 为已有项目整理 OpenSpec baseline specs。 |
+| `aisee:design-spec` | 生成设计规范，不重复 UI 内容规格。 |
+| `aisee:design-assets` | 生成或提取视觉参考和设计素材。 |
+| `aisee:svg-assets` | 生成、矢量化、优化和校验 SVG assets。 |
+| `aisee:image-object` | 对象级图片分割、mask、去背景和导出工作流。 |
+| `aisee:reflect` | 沉淀可复用项目经验和工作流改进。 |
+
+硬件相关 skills 已保留，但仍在整合到 Aisee 主工作流中：
+
+```text
+hw-init
+hw-srs
+hw-architecture
+hw-change-plan
+```
+
+## Schema Packs
+
+Schema pack 源位置：
+
+```text
+skills/aisee-schema-pack/assets/schema-pack/
+```
+
+当前包含：
+
+| Schema | 适用场景 |
+| --- | --- |
+| `aisee-app-spec-driven` | App / 软件变更，包含 source-map、contracts、specs 和 tasks。 |
+| `aisee-device-spec-driven` | 设备、固件、runtime、生产和验证相关变更。 |
+| `aisee-docsite-driven` | 文档站变更。 |
+| `infra-change` | 基础设施变更。 |
+| `security-audit` | 安全审计工作流。 |
+| `quick-fix` | 小型、边界清晰的修复。 |
+| `quick-research` | 技术调研和建议。 |
+| `opsx-collab-pr-loop` | 协作和 PR loop 工作流。 |
+
+安装单个 schema：
+
+```bash
+aisee schemas install --schema aisee-app-spec-driven --json
+```
+
+安装全部 schemas：
+
+```bash
+aisee schemas install --all --json
+```
+
+检查 schema pack：
+
+```bash
+aisee schemas check --json --fail-on-blocker
+```
+
+## CLI Reference
+
+```bash
+aisee doctor --json
+aisee bootstrap --plan --json
+aisee openspec ensure --json
+aisee schemas list --json
+aisee schemas check --json
+aisee schemas install --all --json
+aisee sources list --json
+aisee sources check --json
+aisee index --json
+aisee flow inspect --json
+aisee flow inspect --change <change> --json
+aisee change inspect <change> --json
+aisee change author-check <change> --json
+aisee gaps --change <change> --json
+aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for aisee-verify --json
+aisee change verify-check <change> --json
+aisee change archive-check <change> --json
+aisee id check --json
+aisee id reserve --scope <scope> --type <type> --count 3 --json
+aisee get <id> --json
+aisee trace <id> --json
+```
+
+CLI 关键规则：
+
+- JSON 输出只是上下文视图，不是事实源。
+- `aisee/cache/context-index.json` 只是可删除、可重建的 cache。
+- `aisee/registry/id-registry.json`、`aisee/registry/sources.json`、OpenSpec artifacts 和 `source-map.md` 是持久追踪输入。
+- `bootstrap --plan` 是只读计划，不做大而全初始化写入。
+- `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
+
+## 仓库结构
+
+```text
+.codex-plugin/       Codex plugin metadata
+.claude-plugin/      Claude plugin metadata
+.cursor-plugin/      Cursor plugin metadata
+bin/                 本地 CLI 入口
+src/aisee_cli/       Aisee Python CLI
+skills/              Aisee skills 和 skill assets
+references/          跨 skill contracts 和 references
+docs/architecture/   架构与工作流设计文档
+docs/plans/          开发计划
+docs/reviews/        审计和 review 记录
+tests/               CLI 与 harness 测试
+```
+
+## 开发
+
+运行测试：
+
+```bash
+python -m pytest
+```
+
+校验 skill eval JSON：
+
+```bash
+python -m pytest tests/test_skill_eval_schema.py
+```
+
+查看 CLI help：
+
+```bash
+python -m aisee_cli.__main__ --help
+```
+
+## 设计原则
+
+- OpenSpec 是 canonical specification source。
+- 不在 Aisee docs、CLI cache 或聊天总结中创建平行事实源。
+- Skill 保持单一职责：需求、UI 内容、架构、change planning、implementation bridge、verify、archive guard。
+- 优先使用 schema-aware 检查，而不是硬编码 artifact 假设。
+- `SKILL.md` 保持精简，长规则放到 references 或 architecture docs。
+- 硬件和嵌入式流程作为专用扩展处理，不强行套入 app schema。
+
+## 相关项目
+
+- [OpenSpec](https://github.com/Fission-AI/OpenSpec) — 面向 AI coding assistants 的 spec-driven development 框架。
+- [OpenSpec documentation](https://openspec.dev/) — OpenSpec 安装和工作流文档。
+
+## Roadmap
+
+- 稳定公开插件安装说明。
+- 继续将 skill eval cases 规范化到 `aisee.skill-eval.v1`。
+- 增加完整生命周期 workflow scenario fixtures。
+- 补充 schema pack 文档和示例。
+- 将硬件和嵌入式工作流整合进 Aisee 体系。
+- 公开 1.0 前补齐 release、contributing 和 license 文件。
+
+## License
+
+MIT。当前 license 声明位于插件 metadata 中。
