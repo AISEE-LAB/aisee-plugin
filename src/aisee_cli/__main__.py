@@ -18,6 +18,7 @@ from aisee_cli.index import build_index
 from aisee_cli.lookup import get_id, trace_id
 from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
+from aisee_cli.plugin_assets import export_plugin_assets, inspect_plugin_assets, plugin_path
 from aisee_cli.project import resolve_project_root
 from aisee_cli.schema_pack import check_schema_packs, install_schema_packs, list_schema_packs
 from aisee_cli.sources import add_source, check_sources, list_sources, remove_source
@@ -44,6 +45,19 @@ def main() -> int:
     openspec_ensure_parser.add_argument("--skip-profile", action="store_true", help="do not run openspec config profile")
     openspec_ensure_parser.add_argument("--force", action="store_true", help="pass --force to openspec init when initialization is needed")
     openspec_ensure_parser.add_argument("--json", action="store_true", help="output JSON")
+    plugin_parser = subparsers.add_parser("plugin")
+    plugin_parser.add_argument("--json", action="store_true", help="output JSON")
+    plugin_subparsers = plugin_parser.add_subparsers(dest="plugin_command")
+    plugin_inspect_parser = plugin_subparsers.add_parser("inspect")
+    plugin_inspect_parser.add_argument("--json", action="store_true", help="output JSON")
+    plugin_path_parser = plugin_subparsers.add_parser("path")
+    plugin_path_parser.add_argument("--target", choices=["codex", "claude", "cursor"], required=True, help="agent runtime target")
+    plugin_path_parser.add_argument("--json", action="store_true", help="output JSON")
+    plugin_export_parser = plugin_subparsers.add_parser("export")
+    plugin_export_parser.add_argument("--target", choices=["codex", "claude", "cursor"], required=True, help="agent runtime target")
+    plugin_export_parser.add_argument("--dest", required=True, help="destination directory for the exported plugin bundle")
+    plugin_export_parser.add_argument("--force", action="store_true", help="overwrite destination when it already exists")
+    plugin_export_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_parser = subparsers.add_parser("sources")
     sources_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_subparsers = sources_parser.add_subparsers(dest="sources_command")
@@ -180,6 +194,27 @@ def main() -> int:
         )
         print_json(result)
         return exit_code_for(result, fail_on_blocker=True)
+
+    if args.command == "plugin":
+        root = resolve_project_root(Path.cwd())
+        try:
+            if args.plugin_command in {None, "inspect"}:
+                result = inspect_plugin_assets(root)
+                print_json(result)
+                return exit_code_for(result, fail_on_blocker=True)
+            if args.plugin_command == "path":
+                result = plugin_path(root, args.target)
+                print_json(result)
+                return 0
+            if args.plugin_command == "export":
+                result = export_plugin_assets(root, args.target, Path(args.dest), force=args.force)
+                print_json(result)
+                return 0
+        except ValueError as error:
+            print_json(error_response(str(error)), stderr=True)
+            return 2
+        print_json(error_response("Use one of: inspect, path, export.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
 
     if args.command == "context" and args.context_command is None:
         print_json(error_response("Use one of: pack.", "MISSING_SUBCOMMAND"), stderr=True)

@@ -1,0 +1,56 @@
+name: quick-fix
+version: 1
+description: |
+  适用场景：小 bugfix、文案/样式/静态配置小改、已知根因的低风险修复，或紧急 Hotfix。
+  与 spec-driven 的区别：跳过完整的 specs/ + design.md，只保留问题描述、解决方案和任务清单，流程更轻量。
+  不适用于新增业务能力、新 UI/API/DATA 契约、跨模块架构调整或安全边界变更。
+  创建时间：2026-04-20
+  维护人：@team-lead
+
+artifacts:
+  - id: problem
+    generates: problem.md
+    description: "清晰描述问题现象、影响范围和复现步骤"
+    template: problem.md
+    requires: []
+    instruction: |
+      填写这份文档时需要：
+      - 用一句话说明问题本质（不要写解决方案）
+      - 写明用户可见的影响（什么功能坏了、多少用户受影响）
+      - 写明可复现的步骤，精确到操作路径
+      - 写明发现时间和紧急程度评级（P0/P1/P2）
+      - 如有错误日志、截图，写明位置或粘贴关键片段
+
+  - id: solution
+    generates: solution.md
+    description: "修复方案：根本原因 + 修复思路 + 风险评估"
+    template: solution.md
+    requires: [problem]
+    instruction: |
+      填写这份文档时需要：
+      - 先写根本原因（Root Cause），不是表象
+      - 方案部分写清楚修改哪些文件、改什么逻辑
+      - 明确说明方案的已知风险和缓解措施
+      - 如有多个可选方案，说明为什么选这个、放弃其他的原因
+      - 回滚方案：如果修复引入新问题，怎么快速回退
+
+  - id: tasks
+    generates: tasks.md
+    description: "实现清单，checkbox 格式，每项不超过 2 小时"
+    template: tasks.md
+    requires: [solution]
+    instruction: |
+      填写任务清单时：
+      - 每个 task 必须是具体的、可独立完成的操作（不能是"修复 bug"这样模糊的描述）
+      - 每项任务应在 2 小时内完成，否则拆分
+      - 必须包含：核心修复 → 验证 → 收尾确认 三个阶段
+      - 生产 Hotfix 才要求监控/观察和生产指标恢复；普通小修复可用本地测试、人工验证或预览验证替代
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    按 tasks.md 顺序逐项实现。
+    完成一项打一个勾后继续下一项。
+    如果实现过程中发现 solution.md 的方案有问题，暂停 → 更新 solution.md → 继续。
+    禁止在实现过程中静默扩大修改范围（超出 problem.md 描述的边界）。

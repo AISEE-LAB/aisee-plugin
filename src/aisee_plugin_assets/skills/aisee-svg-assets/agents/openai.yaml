@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:svg-assets"
+  short_description: "SVG 生成、位图矢量化、优化与安全校验工作流"
+  default_prompt: "Use $aisee:svg-assets to generate SVG assets or convert PNG images to SVG."

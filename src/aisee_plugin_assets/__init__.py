@@ -1,0 +1,2 @@
+"""Packaged Aisee plugin resources."""
+

@@ -80,18 +80,25 @@ npm install -g @fission-ai/openspec@latest
 
 Compound Engineering is optional. Aisee can use `aisee doctor --json` to check whether key Compound skills are available.
 
-## Install From Source
+## Install
 
-Clone the repository:
+Install the CLI with `pipx`:
+
+```bash
+pipx install aisee-plugin
+```
+
+You can also use `pip`:
+
+```bash
+python -m pip install aisee-plugin
+```
+
+Before public release, install from source:
 
 ```bash
 git clone <repository-url>
 cd aisee-plugin
-```
-
-Install the Python CLI in editable mode:
-
-```bash
 python -m pip install -e .
 ```
 
@@ -110,15 +117,43 @@ You can also run the repository-local entrypoint without installing:
 
 ## Plugin Usage
 
-The repository includes plugin metadata for multiple agent runtimes:
+The Python package includes Aisee skills, schema packs, references, and agent plugin metadata. Inspect packaged plugin resources:
+
+```bash
+aisee plugin inspect --json
+```
+
+Export a plugin directory that can be loaded by an agent runtime:
+
+```bash
+aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
+```
+
+Supported targets:
+
+```text
+codex
+claude
+cursor
+```
+
+The exported directory contains:
+
+```text
+aisee-plugin-bundle/
+  .codex-plugin/plugin.json
+  skills/
+```
+
+If your agent runtime supports loading local plugins, point it to the exported directory or the corresponding plugin metadata file.
+
+The source repository also includes plugin metadata for multiple agent runtimes:
 
 ```text
 .codex-plugin/plugin.json
 .claude-plugin/plugin.json
 .cursor-plugin/plugin.json
 ```
-
-If your agent runtime supports loading local plugins, point it to this repository or the corresponding plugin metadata file. Skill files live in `skills/`.
 
 Codex plugin metadata declares the skills directory directly:
 
@@ -135,6 +170,7 @@ Inside a project that should use OpenSpec:
 ```bash
 aisee doctor --json
 aisee bootstrap --plan --json
+aisee plugin inspect --json
 ```
 
 If the project has not initialized OpenSpec yet:
@@ -257,6 +293,9 @@ aisee schemas check --json --fail-on-blocker
 aisee doctor --json
 aisee bootstrap --plan --json
 aisee openspec ensure --json
+aisee plugin inspect --json
+aisee plugin path --target codex --json
+aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
 aisee schemas list --json
 aisee schemas check --json
 aisee schemas install --all --json
@@ -294,11 +333,14 @@ Key CLI rules:
 .cursor-plugin/      Cursor plugin metadata
 bin/                 Local CLI entrypoint
 src/aisee_cli/       Aisee Python CLI
+src/aisee_plugin_assets/
+                     Skills, schemas, references, and plugin metadata packaged into wheels
 skills/              Aisee skills and skill assets
 references/          Cross-skill contracts and references
 docs/architecture/   Architecture and workflow design docs
 docs/plans/          Development plans
 docs/reviews/        Audit and review records
+scripts/             Development and release helper scripts
 tests/               CLI and harness tests
 ```
 
@@ -320,6 +362,18 @@ Show CLI help:
 
 ```bash
 python -m aisee_cli.__main__ --help
+```
+
+Sync packaged plugin assets:
+
+```bash
+python scripts/sync_package_assets.py
+```
+
+Build a wheel:
+
+```bash
+python -m build
 ```
 
 ## Design Principles

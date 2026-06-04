@@ -80,18 +80,25 @@ npm install -g @fission-ai/openspec@latest
 
 Compound Engineering 是可选依赖。Aisee 可以通过 `aisee doctor --json` 检查关键 Compound skills 是否可用。
 
-## 从源码安装
+## 安装
 
-克隆仓库：
+推荐使用 `pipx` 安装 CLI：
+
+```bash
+pipx install aisee-plugin
+```
+
+也可以使用 `pip`：
+
+```bash
+python -m pip install aisee-plugin
+```
+
+公开发布前，可直接从源码安装：
 
 ```bash
 git clone <repository-url>
 cd aisee-plugin
-```
-
-以 editable 模式安装 Python CLI：
-
-```bash
 python -m pip install -e .
 ```
 
@@ -110,15 +117,43 @@ aisee doctor --json
 
 ## 插件使用
 
-仓库包含多个 agent runtime 的插件元数据：
+Python 包会同时携带 Aisee skills、schema pack、references 和 agent plugin metadata。可以先检查包内插件资源：
+
+```bash
+aisee plugin inspect --json
+```
+
+导出一个可被 agent runtime 加载的插件目录：
+
+```bash
+aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
+```
+
+当前支持的 target：
+
+```text
+codex
+claude
+cursor
+```
+
+导出后的目录包含：
+
+```text
+aisee-plugin-bundle/
+  .codex-plugin/plugin.json
+  skills/
+```
+
+如果你的 agent runtime 支持加载本地插件，可以指向导出的目录或对应的 plugin metadata 文件。
+
+源码仓库也包含多个 agent runtime 的插件元数据：
 
 ```text
 .codex-plugin/plugin.json
 .claude-plugin/plugin.json
 .cursor-plugin/plugin.json
 ```
-
-如果你的 agent runtime 支持加载本地插件，可以指向本仓库或对应的 plugin metadata 文件。Skill 文件位于 `skills/`。
 
 Codex plugin metadata 会直接声明 skills 目录：
 
@@ -135,6 +170,7 @@ Codex plugin metadata 会直接声明 skills 目录：
 ```bash
 aisee doctor --json
 aisee bootstrap --plan --json
+aisee plugin inspect --json
 ```
 
 如果项目还没有初始化 OpenSpec：
@@ -257,6 +293,9 @@ aisee schemas check --json --fail-on-blocker
 aisee doctor --json
 aisee bootstrap --plan --json
 aisee openspec ensure --json
+aisee plugin inspect --json
+aisee plugin path --target codex --json
+aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
 aisee schemas list --json
 aisee schemas check --json
 aisee schemas install --all --json
@@ -294,11 +333,14 @@ CLI 关键规则：
 .cursor-plugin/      Cursor plugin metadata
 bin/                 本地 CLI 入口
 src/aisee_cli/       Aisee Python CLI
+src/aisee_plugin_assets/
+                     打包进 wheel 的 skills、schemas、references 和 plugin metadata
 skills/              Aisee skills 和 skill assets
 references/          跨 skill contracts 和 references
 docs/architecture/   架构与工作流设计文档
 docs/plans/          开发计划
 docs/reviews/        审计和 review 记录
+scripts/             开发和发布辅助脚本
 tests/               CLI 与 harness 测试
 ```
 
@@ -320,6 +362,18 @@ python -m pytest tests/test_skill_eval_schema.py
 
 ```bash
 python -m aisee_cli.__main__ --help
+```
+
+同步包内插件资源：
+
+```bash
+python scripts/sync_package_assets.py
+```
+
+构建 wheel：
+
+```bash
+python -m build
 ```
 
 ## 设计原则

@@ -6,13 +6,14 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.assets import resolve_schema_pack_dir
 from aisee_cli.context_pack import parse_schema
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.project import rel
 
 
 def schema_pack_dir(root: Path) -> Path:
-    return root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
+    return resolve_schema_pack_dir(root)
 
 
 def list_available_schemas(root: Path) -> list[str]:
@@ -49,7 +50,7 @@ def check_schema_packs(root: Path) -> dict[str, Any]:
     listed = list_schema_packs(root)
     issues = list(listed["issues"])
     for item in listed["schemas"]:
-        schema_file = root / item["source"] / "schema.yaml"
+        schema_file = schema_pack_dir(root) / item["name"] / "schema.yaml"
         try:
             schema_info = parse_schema(schema_file)
         except Exception as error:

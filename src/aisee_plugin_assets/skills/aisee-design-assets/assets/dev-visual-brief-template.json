@@ -1,0 +1,58 @@
+{
+  "id": "",
+  "target": "frontend-development",
+  "platforms": [],
+  "sources": {
+    "uiContent": "",
+    "references": [],
+    "styleSpecs": [],
+    "assetManifest": "",
+    "extractionConfidence": "high|medium|low"
+  },
+  "visualTone": {
+    "keywords": [],
+    "density": "",
+    "avoid": []
+  },
+  "tokenCandidates": {
+    "colors": {},
+    "typography": {},
+    "spacing": {},
+    "radius": {},
+    "shadow": {}
+  },
+  "referenceFrames": [
+    {
+      "target": "",
+      "path": "",
+      "usage": "",
+      "confidence": "high|medium|low",
+      "notes": ""
+    }
+  ],
+  "layoutAndComponentSignals": {
+    "layoutRhythm": [],
+    "componentForms": [],
+    "radiusShadowBorder": [],
+    "spacingDensity": [],
+    "reuseCandidates": []
+  },
+  "assets": [],
+  "responsiveVisualRules": {
+    "pc": [],
+    "tablet": [],
+    "mobile": []
+  },
+  "developmentNotes": [
+    "reuse_existing_project_components_and_tokens",
+    "do_not_replace_ui_content_spec_with_visual_assets",
+    "keep_business_logic_api_permissions_out_of_this_brief",
+    "capture_browser_screenshots_or_manual_visual_evidence_when_implemented"
+  ],
+  "visualAcceptance": {
+    "screenshotTargets": [],
+    "comparisonFocus": [],
+    "knownRisks": []
+  },
+  "openQuestions": []
+}
