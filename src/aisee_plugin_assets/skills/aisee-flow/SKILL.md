@@ -92,7 +92,7 @@ idea
 -> aisee change author-check
 -> aisee:implementation-bridge
 -> ce-work
--> ce-code-review / ce-test-*（按需）
+-> review gate / ce-test-*（按需；命中公开接口、契约、schema、路径读取或安全表面时提示 Tier 2 review 授权）
 -> aisee:verify
 -> aisee:archive-guard
 -> openspec archive
@@ -106,6 +106,7 @@ idea
 - 无 apply / no implementation schema 不应因为 `ce-work` context pack 的 `TASK_GAP` 或 `IMPLEMENTATION_PATHS_GAP` 被误导回实现阶段；以当前 schema 的 archive/verify gate 为准。
 - `context pack --for ce-work` 中 `requires_ce_plan=true`：推荐先用 `aisee:implementation-bridge` 输出缺口，再用 `ce-plan` 临时细化；结论必须回写当前 schema 的 apply tracks，只有 schema 生成 `source-map.md` 时才要求回写 source-map。
 - source-map schema 的执行路径优先来自 `Affected Paths Index`；metadata fallback 只能作为 risk，不应静默放行。
+- `implementation-bridge` 或 `aisee:verify` 已建议 Tier 2 code review，且没有审查 evidence、本地重点自审 evidence 或正式 accepted risk：不要建议进入 archive-ready；先建议用户授权 `使用审查代理做 Tier 2 code review`，或记录可审查的 accepted risk。
 - `aisee:verify` 有 BLOCKER：不要进入 `aisee:archive-guard`。
 - `aisee:archive-guard` 未给出“可以 archive”：不要建议执行 `openspec archive`。
 - `ce-plan`、Implementation Brief、verify report 都不是长期事实源；长期结论必须回写 OpenSpec artifacts。

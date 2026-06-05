@@ -84,6 +84,14 @@
 - Evidence to record:
 - Evidence destination:
 
+## Review Recommendation
+
+- Tier 2 code review required: yes / no
+- Trigger reason:
+- Existing review evidence:
+- Suggested authorization: `使用审查代理做 Tier 2 code review` / N/A
+- Evidence destination:
+
 ## Blockers and Assumptions
 
 - Blockers:
@@ -94,5 +102,5 @@
 
 - Recommended: `ce-work`
 - Use `ce-plan` first only if:
-- After implementation: `ce-code-review`, relevant `ce-test-*`, then `aisee:verify`
+- After implementation: recommended review gate if required, relevant `ce-test-*`, then `aisee:verify`
 ```

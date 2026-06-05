@@ -15,6 +15,7 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 - 对需要 `source-map.md` 的 schema，检查 ID、source-map、artifact applicability、代码路径、测试路径和 evidence 是否闭合。
 - 对不生成 `source-map.md` 的 schema，只检查 schema artifacts、tasks、OpenSpec validate、review/test/manual evidence 和当前 change 明确引用的路径。
 - 消费已有 `ce-doc-review`、`ce-code-review`、`ce-test-*`、人工验证记录和监控/预览证据。
+- 识别当前 change 是否触及公开接口或高风险表面，并输出是否建议审查代理 / Tier 2 code review。
 - 输出 BLOCKER / RISK / INFO findings、修复建议和 archive-guard 前置状态。
 
 ## 不负责
@@ -69,6 +70,24 @@ openspec validate <change>
 - 已有 CE review/test 结果只作为 evidence；verify 不替代它们。
 - 未关闭的 P0 必须输出 BLOCKER；未关闭的 P1 至少输出 RISK。accepted risk 可视为已处理，但 archive-guard 仍需判断是否可接受。
 - 标记为 N/A 的 artifact 必须写明原因；缺少原因时输出 RISK。只检查当前 schema 会生成或当前 change 实际保留的 artifact。
+
+## 审查代理建议
+
+当当前 change 触及以下任一表面时，必须在输出中给出 `Review Recommendation`：
+
+- 公开 CLI 命令、参数、JSON 输出或退出码。
+- HTTP endpoint、局域网/远程服务、API/service contract、OpenAPI/events/webhooks/proto 等机器可读契约。
+- schema、artifact template、source-map parser、contract parser、ID registry、context pack 或 OpenSpec 衔接逻辑。
+- 文件/路径读取、目录遍历、缓存、包安装、package assets、dependency manifest。
+- 认证、权限、安全、隐私、敏感信息、生产配置或回滚策略。
+
+规则：
+
+- Recommendation 只提示审查门禁，不自动启动 subagent 或审查代理。
+- 如果用户已明确授权“使用审查代理做 Tier 2 code review”，优先使用可用的 CE / harness 审查能力，并把结果作为 evidence。
+- 如果尚未授权，在 `Suggested Next Step` 中给出可执行提示：`使用审查代理做 Tier 2 code review`。
+- 如果审查代理不可用，执行本地重点自审，并在 `Evidence Reviewed` 或 `Findings` 中说明限制。
+- 不满足上述表面时，可以写 `Review Recommendation: not required`，但仍保留已有 review/test evidence 检查。
 
 ## Schema 最低门槛
 
@@ -135,6 +154,13 @@ pass / fail / pass-with-risk
 ## Required Fixes
 
 ## Evidence Reviewed
+
+## Review Recommendation
+
+- Required: yes / no
+- Reason:
+- Existing evidence:
+- Suggested action:
 
 ## Archive-Guard Readiness
 

@@ -14,6 +14,7 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 - 输出给 `ce-work` 的一次性 Implementation Brief / context pack 摘要。
 - 明确事实源、读取顺序、执行规则、禁止越界项和验证要求。
 - 判断是否需要先用 `ce-plan` 细化，并要求有效结论回写当前 schema 的 apply tracks；只有 schema 生成 `source-map.md` 时才回写 source-map。
+- 识别实现后是否建议 Tier 2 code review，并把审查代理授权提示写入 Brief。
 - 指出不能进入实现的阻塞项。
 
 ## 不负责
@@ -129,6 +130,8 @@ aisee context pack --change <change> --for ce-work --json
 
 ## Verification
 
+## Review Recommendation
+
 ## Blockers and Assumptions
 
 ## Recommended Compound Skill
@@ -143,6 +146,7 @@ Brief 只做执行索引，不复制 OpenSpec artifact 正文：
 - `Change Scope` 只写 in/out scope 摘要、关键 ID 和 follow-up candidates。
 - `Task Execution` 只写当前批次的起点、允许路径、建议顺序和回写位置。
 - `Verification` 只写必须运行的命令、人工检查和 evidence 写回位置。
+- `Review Recommendation` 只写是否建议 Tier 2 code review、触发原因、授权提示和 evidence 写回位置，不启动审查代理。
 - contracts、specs、source-map、tasks 的详细内容只能作为路径引用，不要复制全文。
 
 当 change 很大或 context pack 指出任务过多时，不回到 `aisee:change-plan` 重新拆 change。改为在当前 change 内分批交接：
@@ -165,6 +169,23 @@ Brief 只做执行索引，不复制 OpenSpec artifact 正文：
 - 不创建新的长期计划文件；需要临时推理时，结论必须回写当前 schema 的 apply tracks 或追踪 artifact。
 - 不扩大 change 范围；超出范围的发现记录为 follow-up 或新 change 候选。
 - 完成实现后必须更新当前 schema 的 apply tracks 和验证证据；没有 apply tracks 的 schema 只记录必要 evidence。
+
+## 实现后审查建议
+
+Brief 必须根据当前 change 和 context pack 判断是否建议 Tier 2 code review。触发条件与 `aisee:verify` 保持一致：
+
+- 公开 CLI 命令、参数、JSON 输出或退出码。
+- HTTP endpoint、局域网/远程服务、API/service contract、OpenAPI/events/webhooks/proto 等机器可读契约。
+- schema、artifact template、source-map parser、contract parser、ID registry、context pack 或 OpenSpec 衔接逻辑。
+- 文件/路径读取、目录遍历、缓存、包安装、package assets、dependency manifest。
+- 认证、权限、安全、隐私、敏感信息、生产配置或回滚策略。
+
+规则：
+
+- `aisee:implementation-bridge` 只把 review gate 写入 Brief，不自动启动 subagent。
+- 如果用户已明确授权“使用审查代理做 Tier 2 code review”，执行阶段可调用可用的 CE / harness 审查能力。
+- 如果尚未授权，Brief 中写：`Suggested authorization: 使用审查代理做 Tier 2 code review`。
+- 审查结果应作为 evidence 供 `aisee:verify` 和 `aisee:archive-guard` 消费；不可写成新的规范事实源。
 
 ## ce-plan 使用边界
 

@@ -12,6 +12,7 @@ description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当
 - 识别当前 change schema，并按 schema 判断归档必需 artifacts、tasks、apply tracks、source-map、contracts 和验证证据。
 - 读取已有 validate、verify、review、test、manual verification、preview、monitoring 或设备验证结果。
 - 运行或读取 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change verify-check <change> --json`、`aisee change archive-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 检查 `aisee:verify` 的 Review Recommendation 是否已有审查证据、本地重点自审证据或正式 accepted risk。
 - 判断是否建议执行 `openspec archive <change>`。
 - 输出 `可以 archive` / `有风险但可接受` / `暂不建议 archive`，并列出阻断项、接受风险和归档后基线影响。
 
@@ -68,6 +69,7 @@ openspec archive <change>
 - `tasks.md` 或 schema apply tracks 中的实现、验证、证据记录和 archive gate 任务已关闭；N/A 必须有原因。
 - 需要 `source-map.md` 的 schema：ID、Required=yes contracts、代码路径、测试路径和 evidence 必须闭合；Required=no contracts 以 source-map N/A 原因为准。
 - 不生成 `source-map.md` 的 schema：只检查 schema artifacts、tasks/apply tracks、当前 artifacts 明确引用的路径和 schema 所需 evidence。
+- 如果 `aisee:verify` 建议 Tier 2 code review，必须存在 CE / harness 审查 evidence、本地重点自审 evidence，或带 owner、理由、影响范围和后续处理方式的 accepted risk；否则不得输出 `可以 archive`。
 - CE P0/P1、failed validate、failed test evidence、未处理安全 High/Critical、infra 回滚不可执行、device 必需验证缺失，均视为 archive blocker。
 - accepted risk 只能在有 owner、理由、影响范围和后续处理方式时成立；否则仍按 blocker 或 risk 输出。
 
@@ -85,7 +87,7 @@ openspec archive <change>
 
 ## 判定规则
 
-- `暂不建议 archive`：存在 blocker；validate 未运行或失败；verify 缺失且无等价证据；tasks/apply tracks 未关闭；P0/P1 未处理；schema 必需 evidence 缺失。
+- `暂不建议 archive`：存在 blocker；validate 未运行或失败；verify 缺失且无等价证据；tasks/apply tracks 未关闭；P0/P1 未处理；schema 必需 evidence 缺失；verify 建议 Tier 2 review 但没有审查 evidence 或 accepted risk。
 - `有风险但可接受`：无 blocker，但存在 risk；每项 risk 均有 owner、接受理由、影响范围和后续处理方式。
 - `可以 archive`：validate 通过、verify 无 blocker、archive-check ready、tasks/apply tracks 关闭、schema 必需 artifacts/evidence 闭合，且无未接受 risk。
 
@@ -119,6 +121,13 @@ openspec archive <change>
 - OpenSpec validate:
 - Aisee verify report:
 - Review / test / manual evidence:
+
+## Review Gate
+
+- Review recommendation from verify:
+- Review evidence:
+- Local self-review fallback:
+- Accepted risk, if any:
 
 ## Blocking Items
 
