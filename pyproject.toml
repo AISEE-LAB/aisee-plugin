@@ -12,6 +12,9 @@ license = { text = "MIT" }
 authors = [
   { name = "Fengliang" }
 ]
+dependencies = [
+  "PyYAML>=6.0"
+]
 
 [project.scripts]
 aisee = "aisee_cli.__main__:main"

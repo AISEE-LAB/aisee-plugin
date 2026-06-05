@@ -98,3 +98,47 @@ def test_knowledge_query_missing_config_returns_empty_matches(tmp_path: Path) ->
     assert data["knowledge"]["enabled"] is False
     assert data["knowledge"]["matches"] == []
     assert data["issues"][0]["code"] == "KNOWLEDGE_CONFIG_MISSING"
+
+
+def test_knowledge_query_allows_body_frontmatter_separator_text(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+    configure_project(tmp_path, team)
+    write(
+        team / "knowledge" / "cards" / "backend" / "separator-body.md",
+        """---
+id: cli-separator-body
+title: CLI card body can mention separators
+status: active
+applies_to:
+  phases: [implementation]
+  surfaces: [cli]
+trigger: [separator]
+recommended_action: [keep YAML frontmatter parsing line based]
+boundaries: [only tests parsing behavior]
+---
+
+Body may include a markdown separator.
+
+---
+
+This must remain body text.
+""",
+    )
+
+    data = run_json(
+        tmp_path,
+        "knowledge",
+        "query",
+        "--phase",
+        "implementation",
+        "--surface",
+        "cli",
+        "--query",
+        "separator",
+        "--debug",
+        "--json",
+    )
+    matches = {match["id"]: match for match in data["knowledge"]["matches"]}
+
+    assert "cli-separator-body" in matches
+    assert "This must remain body text" in matches["cli-separator-body"]["debug"]["body_excerpt"]

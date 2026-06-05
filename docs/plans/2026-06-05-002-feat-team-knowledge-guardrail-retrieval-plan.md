@@ -1,7 +1,7 @@
 ---
 title: "feat: 设计团队知识守卫检索"
 type: feat
-status: active
+status: completed
 date: 2026-06-05
 ---
 

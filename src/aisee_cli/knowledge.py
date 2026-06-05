@@ -9,10 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-try:  # PyYAML is optional; tests run with it, installed packages may not.
-    import yaml  # type: ignore
-except Exception:  # pragma: no cover - exercised only without PyYAML.
-    yaml = None
+import yaml
 
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import knowledge_config_path, knowledge_index_path
@@ -303,12 +300,13 @@ def load_card(path: Path) -> tuple[dict[str, Any], str, str | None]:
 
 
 def split_frontmatter(text: str) -> tuple[str, str]:
-    if not text.startswith("---\n"):
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
         return "", text
-    parts = text.split("---", 2)
-    if len(parts) < 3:
-        return "", text
-    return parts[1].strip(), parts[2].lstrip()
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            return "".join(lines[1:index]).strip(), "".join(lines[index + 1 :]).lstrip()
+    return "", text
 
 
 def load_project_candidates(root: Path) -> list[dict[str, Any]]:
@@ -598,19 +596,13 @@ def load_yaml_file(path: Path) -> tuple[dict[str, Any], str | None]:
 def load_yaml_text(text: str, label: str) -> tuple[dict[str, Any], str | None]:
     if not text.strip():
         return {}, None
-    if yaml is not None:
-        try:
-            data = yaml.safe_load(text) or {}
-            if not isinstance(data, dict):
-                return {}, f"YAML root must be a mapping: {label}"
-            return data, None
-        except Exception as error:
-            return {}, f"invalid YAML in {label}: {error}"
     try:
-        data = json.loads(text)
-        return data if isinstance(data, dict) else {}, None
-    except json.JSONDecodeError as error:
-        return {}, f"YAML parser unavailable and JSON parse failed in {label}: {error}"
+        data = yaml.safe_load(text) or {}
+        if not isinstance(data, dict):
+            return {}, f"YAML root must be a mapping: {label}"
+        return data, None
+    except Exception as error:
+        return {}, f"invalid YAML in {label}: {error}"
 
 
 def normalize_string_list(value: Any) -> list[str]:
