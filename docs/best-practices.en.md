@@ -208,7 +208,28 @@ Best practices:
 - LAN access requires explicit `--host 0.0.0.0`.
 - Do not use the contract service to expose source code, secrets, environment variables, or full-repository search results.
 
-## 13. Do Not Make Aisee Another OpenSpec
+## 13. Team Knowledge Only Provides Guardrails
+
+Team knowledge helps reuse engineering lessons across projects, but it must not become a second specification source.
+
+Recommended:
+
+- Use an independent `aisee-team-knowledge` repository for reviewed cards and packs.
+- Let each business project pin repo/path/ref/packs in `aisee/knowledge.yaml`.
+- Use `aisee knowledge query` to retrieve a small number of matches.
+- Let the CLI read pack manifests and card frontmatter first, then read matched summaries on demand.
+- Run `aisee:reflect` or `aisee:knowledge-curate` only when the user explicitly asks.
+- Require explicit user authorization before writing to the team knowledge repo, creating branches, commits, or PRs.
+
+Avoid:
+
+- Scanning `knowledge/cards/**/*.md` directly as AI context.
+- Copying entire `docs/solutions/`, memory, or reflect documents into business projects.
+- Making evidence a hard required card field.
+- Treating vector indexes, caches, or AI summaries as fact sources.
+- Automatically writing team knowledge after archive or verify.
+
+## 14. Do Not Make Aisee Another OpenSpec
 
 Aisee should solve what OpenSpec does not:
 

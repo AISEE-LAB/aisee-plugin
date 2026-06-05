@@ -208,7 +208,28 @@ aisee contract serve --host 127.0.0.1 --port 8765
 - 局域网访问必须显式开启 `--host 0.0.0.0`。
 - 不用 contract service 暴露源码、密钥、环境变量或全仓库搜索结果。
 
-## 13. 不要把 Aisee 做成另一个 OpenSpec
+## 13. Team knowledge 只提供 guardrails
+
+团队知识库用于跨项目复用工程经验，但不能成为第二套规范事实源。
+
+推荐：
+
+- 使用独立 `aisee-team-knowledge` 仓库存放经审查的 cards 和 packs。
+- 业务项目只在 `aisee/knowledge.yaml` pin repo/path/ref/packs。
+- 通过 `aisee knowledge query` 获取少量 matches。
+- 让 CLI 先读 pack manifest 和 card frontmatter，再按需读取命中摘要。
+- 只在用户明确触发时运行 `aisee:reflect` 或 `aisee:knowledge-curate`。
+- 写入 team knowledge repo、创建分支、提交或 PR 前必须获得用户明确授权。
+
+避免：
+
+- 直接扫描 `knowledge/cards/**/*.md` 作为 AI 上下文。
+- 把 `docs/solutions/`、memory 或 reflect 文档整库复制到业务项目。
+- 把 evidence 当成 card 硬必填字段。
+- 让向量索引、cache 或 AI 摘要成为事实源。
+- 在 archive、verify 后自动写入 team knowledge。
+
+## 14. 不要把 Aisee 做成另一个 OpenSpec
 
 Aisee 应解决 OpenSpec 不负责的部分：
 
