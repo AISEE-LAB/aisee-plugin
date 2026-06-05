@@ -47,7 +47,7 @@ aisee-team-knowledge/
     vector-index/
 ```
 
-事实源只有 `knowledge/cards/**` 和 `knowledge/packs/**`。`indexes/**` 是可删除、可重建缓存。
+team knowledge 仓库内可解析、可审查的持久来源只有 `knowledge/cards/**` 和 `knowledge/packs/**`。`indexes/**` 是可删除、可重建缓存。它不改变 OpenSpec change、baseline specs、tasks、contracts 和 source-map 的规范事实源地位。
 
 ## 业务项目配置
 

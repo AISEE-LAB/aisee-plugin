@@ -1,6 +1,6 @@
 ---
 name: aisee:knowledge-curate
-description: 批量审查项目内 reusable knowledge candidates，把 reflect/solution/review/test 证据去敏、泛化、去重并整理成可提交到 aisee-team-knowledge 的 card drafts。用于用户明确要求“整理可复用知识”“提炼到团队知识”“curate knowledge”“准备团队知识 PR”“把候选经验批量审查”时触发。只产出审查报告和草稿；不自动写入 team repo、创建分支、提交或 PR。
+description: 批量审查项目内 reusable knowledge candidates，把 reflect/solution/review/test 证据去敏、泛化、去重并整理成可提交到 aisee-team-knowledge 的 card drafts。用于用户明确要求“整理可复用知识”“提炼到团队知识”“curate knowledge”“准备团队知识 PR”“把候选经验批量审查”时触发。只产出审查报告和草稿；不自动写入 team repo、创建分支、提交、合并或 PR。
 ---
 
 # aisee:knowledge-curate
@@ -23,7 +23,7 @@ description: 批量审查项目内 reusable knowledge candidates，把 reflect/s
 - 不复制 solution 正文。
 - 不把 candidate 自动提升为 active card。
 - 不自动写入 `aisee-team-knowledge`。
-- 不创建分支、commit、push 或 PR，除非用户明确授权并提供 team repo 路径。
+- 不创建分支、commit、push、merge 或 PR，除非用户明确授权并提供 team repo 路径。
 - 不让 team knowledge 覆盖 OpenSpec specs、tasks、contracts、source-map 或 baseline。
 
 ## Phase 0 — 扫描候选
@@ -56,7 +56,7 @@ rg --files aisee/docs/reflect docs/solutions 2>/dev/null | rg 'knowledge-candida
 ## Guardrails
 
 - 默认只输出审查报告，不改 team repo。
-- 写入 team repo、创建分支、提交或 PR 前必须再次确认用户授权和目标路径。
+- 写入 team repo、创建分支、提交、合并或 PR 前必须再次确认用户授权和目标路径。
 - 推荐 batch review：积累 3-10 条真实可复用候选后再提交。
 - 安全、高风险或公开接口类候选可以建议单独 PR，但仍需用户授权。
 - 每条 draft 必须包含 required machine fields：`id`、`title`、`status`、`applies_to`、`trigger`、`recommended_action`、`boundaries`。

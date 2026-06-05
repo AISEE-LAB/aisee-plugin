@@ -67,6 +67,9 @@ def export_plugin_assets(root: Path, target: str, dest: Path, *, force: bool = F
     dest.mkdir(parents=True, exist_ok=True)
 
     shutil.copytree(skills_dir, dest / "skills")
+    references_dir = asset_root / "references"
+    if references_dir.exists():
+        shutil.copytree(references_dir, dest / "references")
     plugin_dir_name = {
         "codex": ".codex-plugin",
         "claude": ".claude-plugin",

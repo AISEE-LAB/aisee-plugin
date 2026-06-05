@@ -250,7 +250,7 @@ It should not add:
 
 When OpenSpec already owns a capability, Aisee should only bridge, validate, or optimize context around it.
 
-## 14. Dogfood Real Projects Instead Of Expanding Abstractions
+## 15. Dogfood Real Projects Instead Of Expanding Abstractions
 
 Once the main path is usable, validate it with real or sample projects:
 

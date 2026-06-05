@@ -59,7 +59,7 @@ def build_knowledge_query(
 ) -> dict[str, Any]:
     config, config_issues = load_knowledge_config(root)
     team_root = resolve_team_root(root, config)
-    pack_results, team_cards, load_issues = load_configured_knowledge(root, config, team_root)
+    pack_results, team_cards, load_issues = load_configured_knowledge(root, config, team_root, include_body=debug)
     feature_data = extract_query_features(
         root,
         phase=phase,
@@ -202,6 +202,8 @@ def load_configured_knowledge(
     root: Path,
     config: dict[str, Any],
     team_root: Path | None,
+    *,
+    include_body: bool = False,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, str]]]:
     issues: list[dict[str, str]] = []
     if not config.get("available"):
@@ -226,7 +228,7 @@ def load_configured_knowledge(
             pack_results.append({"id": pack_id, "status": "invalid", "path": rel(root, pack_path), "cards": []})
             issues.append(issue("KNOWLEDGE_PACK_INVALID", "blocker", parse_error, rel(root, pack_path)))
             continue
-        pack_cards, card_issues = load_pack_cards(root, team_root, pack_id, pack_data)
+        pack_cards, card_issues = load_pack_cards(root, team_root, pack_id, pack_data, include_body=include_body)
         cards.extend(pack_cards)
         issues.extend(card_issues)
         pack_results.append({
@@ -239,7 +241,14 @@ def load_configured_knowledge(
     return pack_results, cards, issues
 
 
-def load_pack_cards(root: Path, team_root: Path, pack_id: str, pack_data: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+def load_pack_cards(
+    root: Path,
+    team_root: Path,
+    pack_id: str,
+    pack_data: dict[str, Any],
+    *,
+    include_body: bool = False,
+) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     issues: list[dict[str, str]] = []
     disabled = set(normalize_string_list(pack_data.get("disabled_cards")))
     declared_paths: set[Path] = set()
@@ -253,13 +262,22 @@ def load_pack_cards(root: Path, team_root: Path, pack_id: str, pack_data: dict[s
             continue
         declared_paths.add(found)
     for pattern in normalize_string_list(pack_data.get("card_globs")):
-        for path in sorted((team_root).glob(pattern)):
+        pattern_path = Path(pattern)
+        if pattern_path.is_absolute() or ".." in pattern_path.parts:
+            issues.append(issue("KNOWLEDGE_PACK_INVALID", "risk", f"card_globs must be relative and stay under team root: {pattern}", pack_id))
+            continue
+        try:
+            paths = sorted(team_root.glob(pattern))
+        except (NotImplementedError, ValueError) as error:
+            issues.append(issue("KNOWLEDGE_PACK_INVALID", "risk", f"invalid card_globs pattern {pattern}: {error}", pack_id))
+            continue
+        for path in paths:
             if path.is_file() and is_under(path, team_root):
                 declared_paths.add(path)
 
     cards: list[dict[str, Any]] = []
     for path in sorted(declared_paths):
-        metadata, body, parse_error = load_card(path)
+        metadata, body, parse_error = load_card(path, include_body=include_body)
         if parse_error:
             issues.append(issue("KNOWLEDGE_CARD_INVALID", "risk", parse_error, rel(root, path)))
             continue
@@ -269,6 +287,7 @@ def load_pack_cards(root: Path, team_root: Path, pack_id: str, pack_data: dict[s
         missing = [field for field in CARD_REQUIRED_FIELDS if not metadata.get(field)]
         if missing:
             issues.append(issue("KNOWLEDGE_CARD_FIELDS_MISSING", "risk", f"card missing required fields: {', '.join(missing)}", rel(root, path)))
+            continue
         cards.append({
             "pack": pack_id,
             "path": rel(team_root, path),
@@ -287,25 +306,44 @@ def find_card_by_id(team_root: Path, card_id: str) -> Path | None:
     return None
 
 
-def load_card(path: Path) -> tuple[dict[str, Any], str, str | None]:
-    text = read_text(path)
+def load_card(path: Path, *, include_body: bool = False) -> tuple[dict[str, Any], str, str | None]:
     if path.suffix.lower() in {".yaml", ".yml"}:
-        data, error = load_yaml_text(text, str(path))
+        data, error = load_yaml_text(read_text(path), str(path))
         return (data if isinstance(data, dict) else {}), "", error
-    frontmatter, body = split_frontmatter(text)
+    if include_body:
+        frontmatter, body = split_frontmatter(read_text(path), include_body=True)
+    else:
+        frontmatter, body = read_frontmatter(path), ""
     if not frontmatter:
         return {}, body, f"card has no YAML frontmatter: {path}"
     data, error = load_yaml_text(frontmatter, str(path))
     return (data if isinstance(data, dict) else {}), body, error
 
 
-def split_frontmatter(text: str) -> tuple[str, str]:
+def read_frontmatter(path: Path) -> str:
+    try:
+        with path.open(encoding="utf-8", errors="ignore") as file:
+            first_line = file.readline()
+            if first_line.strip() != "---":
+                return ""
+            collected: list[str] = []
+            for line in file:
+                if line.strip() == "---":
+                    return "".join(collected).strip()
+                collected.append(line)
+    except OSError:
+        return ""
+    return ""
+
+
+def split_frontmatter(text: str, *, include_body: bool = False) -> tuple[str, str]:
     lines = text.splitlines(keepends=True)
     if not lines or lines[0].strip() != "---":
         return "", text
     for index, line in enumerate(lines[1:], start=1):
         if line.strip() == "---":
-            return "".join(lines[1:index]).strip(), "".join(lines[index + 1 :]).lstrip()
+            body = "".join(lines[index + 1 :]).lstrip() if include_body else ""
+            return "".join(lines[1:index]).strip(), body
     return "", text
 
 
@@ -374,7 +412,7 @@ def extract_query_features(
     from_change: str | None,
     target: str | None,
 ) -> dict[str, Any]:
-    features = {
+    direct_features = {
         "phase": phase,
         "phases": [phase] if phase else [],
         "surfaces": normalize_string_list(surfaces),
@@ -389,7 +427,28 @@ def extract_query_features(
         "target": target,
     }
     if not from_change:
-        return features
+        return direct_features
+
+    features = {
+        "phase": None,
+        "phases": [],
+        "surfaces": [],
+        "schema": None,
+        "schemas": [],
+        "stack": None,
+        "stacks": [],
+        "query": query or "",
+        "risk_signals": [],
+        "paths": [],
+        "change": from_change,
+        "target": target,
+        "hints": {
+            "phase": phase,
+            "surfaces": normalize_string_list(surfaces),
+            "schema": schema,
+            "stack": stack,
+        },
+    }
 
     from aisee_cli.context_pack import build_context_pack
 
@@ -401,11 +460,11 @@ def extract_query_features(
     schema_name = pack["change"].get("schema")
     phase_name = phase_for_target(target or "ce-work")
     features.update({
-        "phase": phase or phase_name,
-        "phases": sorted(set([*(features["phases"] or []), phase_name])),
-        "schema": schema or schema_name,
-        "schemas": sorted(set([item for item in [schema, schema_name] if item])),
-        "surfaces": sorted(set(features["surfaces"] + surfaces_from_paths)),
+        "phase": phase_name,
+        "phases": [phase_name],
+        "schema": schema_name,
+        "schemas": [schema_name] if schema_name else [],
+        "surfaces": surfaces_from_paths,
         "paths": paths,
         "query": query or " ".join([
             pack["change"].get("id", ""),

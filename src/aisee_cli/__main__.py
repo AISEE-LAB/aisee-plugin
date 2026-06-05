@@ -269,7 +269,7 @@ def main() -> int:
             pack = build_context_pack(root, args.change, args.target)
             if args.knowledge:
                 knowledge = build_knowledge_query(root, from_change=args.change, target=args.target)
-                pack["knowledge"] = knowledge["knowledge"]
+                pack["knowledge"] = compact_knowledge_for_context_pack(knowledge)
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
@@ -504,6 +504,23 @@ def main() -> int:
 
     print_json(error_response("Use a supported Aisee command.", "MISSING_COMMAND"), stderr=True)
     return 2
+
+
+def compact_knowledge_for_context_pack(knowledge: dict) -> dict:
+    payload = knowledge.get("knowledge", {})
+    meta = knowledge.get("meta", {})
+    return {
+        "status": knowledge.get("status"),
+        "enabled": payload.get("enabled"),
+        "source": payload.get("source"),
+        "matches": payload.get("matches", []),
+        "summary": knowledge.get("summary", {}),
+        "issues": knowledge.get("issues", []),
+        "meta": {
+            "cache_is_fact_source": meta.get("cache_is_fact_source", False),
+            "full_card_body_read": meta.get("full_card_body_read", False),
+        },
+    }
 
 
 def summarize_gaps(gaps: list[dict[str, object]]) -> dict[str, int | str]:

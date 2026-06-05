@@ -161,3 +161,47 @@ packs:
 
     assert data["status"] == "risk"
     assert data["issues"][0]["code"] == "KNOWLEDGE_PACK_MISSING"
+
+
+def test_knowledge_query_excludes_cards_missing_required_fields(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+    configure_project(tmp_path, team)
+    write(
+        team / "knowledge" / "cards" / "backend" / "missing-required.md",
+        """---
+id: missing-required-card
+title: Missing required card
+status: active
+applies_to:
+  phases: [implementation]
+  surfaces: [cli]
+trigger: [missing-required]
+recommended_action: [should not be returned]
+---
+""",
+    )
+
+    data = run_json(tmp_path, "knowledge", "query", "--phase", "implementation", "--surface", "cli", "--query", "missing-required", "--json")
+    ids = {match["id"] for match in data["knowledge"]["matches"]}
+
+    assert "missing-required-card" not in ids
+    assert "KNOWLEDGE_CARD_FIELDS_MISSING" in {item["code"] for item in data["issues"]}
+
+
+def test_knowledge_inspect_reports_invalid_card_glob_without_traceback(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+    configure_project(tmp_path, team)
+    write(
+        team / "knowledge" / "packs" / "web-app.yaml",
+        """id: web-app
+version: 0.1.0
+status: active
+card_globs:
+  - /tmp/**/*.md
+""",
+    )
+
+    data = run_json(tmp_path, "knowledge", "inspect", "--json")
+
+    assert data["status"] == "risk"
+    assert "KNOWLEDGE_PACK_INVALID" in {item["code"] for item in data["issues"]}
