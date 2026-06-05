@@ -41,6 +41,7 @@ date: 2026-06-05
 - 设计项目内 reflect/solution evidence 与 team knowledge active card 的去重和优先级规则。
 - 明确所有 skill 和 AI 上下文注入都通过 Aisee CLI 查询 knowledge，不直接扫描 team knowledge 仓库正文。
 - 明确 team knowledge 仓库的 parse contract：CLI 按需读取 pack manifest、card metadata 和少量命中 card，不做无边界全仓库扫描。
+- 明确知识沉淀触发策略：自动发现候选信号，用户确认后才运行 reflect / curate / 写入 team knowledge。
 - 设计 context pack 中可选的 `knowledge.matches` 输出。
 - 定义可重建 lexical index 和可选 vector index 的边界。
 
@@ -68,42 +69,50 @@ date: 2026-06-05
 
 ### Card 与 Pack 协议
 
-- R5. Card 必须包含 `id`、`title`、`status`、`applies_to`、`trigger`、`recommended_action`、`boundaries`、`evidence`。
+- R5. Card 必填机器字段只包含 `id`、`title`、`status`、`applies_to`、`trigger`、`recommended_action`、`boundaries`。
 - R6. Card 必须支持 `status: candidate | active | deprecated`；只有 active card 默认参与业务项目检索。
 - R7. Card 必须支持去敏检查，避免泄露 secrets、客户信息、私有 URL、生产凭据或项目私密路径。
 - R8. Pack 必须声明包含的 cards、适用项目类型、默认 max matches、禁用项和版本。
+- R9. Card 推荐字段包括 `risk_types`、`evidence`、`tags`；可选字段包括 `examples`、`deprecated_by`、`review`、`source_links`。这些字段不得成为第一轮检索的硬依赖。
 
 ### 检索与注入
 
-- R9. 检索必须先做硬过滤：status、pack、schema、phase、surface、stack、risk type。
-- R10. 通过硬过滤后，才允许 lexical scoring；vector rerank 只能作为后续可选层。
-- R11. 每条召回结果必须包含 `match_reason` 和 `boundaries`，让 AI 知道为什么出现、什么时候不要套用。
-- R12. 默认最多注入 3 条 matches；安全、权限、架构类知识宁可少召回，不做宽召回。
-- R13. 如果 card boundary 与当前 context 冲突，必须过滤或降权，并在 explain 输出中说明。
+- R10. 检索必须先做硬过滤：status、pack、schema、phase、surface、stack；`risk_types` 存在时参与过滤或降权，但不得成为 card 有效性的硬前提。
+- R11. 通过硬过滤后，才允许 lexical scoring；vector rerank 只能作为后续可选层。
+- R12. 每条召回结果必须包含 `match_reason` 和 `boundaries`，让 AI 知道为什么出现、什么时候不要套用。
+- R13. 默认最多注入 3 条 matches；安全、权限、架构类知识宁可少召回，不做宽召回。
+- R14. 如果 card boundary 与当前 context 冲突，必须过滤或降权，并在 explain 输出中说明。
 
 ### CLI 与 Context Pack
 
-- R14. Aisee CLI 应支持读取项目级 `aisee/knowledge.yaml`，解析 team knowledge repo/ref/packs/retrieval 配置。
-- R15. Aisee CLI 应支持 `aisee knowledge query --from-change <change> --for <target> --json`，从 context pack 或 change metadata 提取检索特征。
-- R16. Aisee CLI 应支持直接特征查询，用于没有 OpenSpec change 的场景。
-- R17. `aisee context pack` 可以可选携带 `knowledge.matches`，但默认输出必须保持小上下文。
-- R18. CLI JSON 输出必须标记 knowledge 来源、pack ref、match score、match reason 和是否来自缓存。
-- R19. CLI 默认读取顺序必须是 `aisee/knowledge.yaml` -> pack manifest -> card metadata/frontmatter -> 命中 card 摘要；只有 explain/debug 或用户显式请求时才读取完整 card 正文。
-- R20. Team knowledge repo 必须提供机器可读入口，避免 CLI 递归扫描 `docs/**`、`reviews/**`、`drafts/**` 或任意 Markdown。
+- R15. Aisee CLI 应支持读取项目级 `aisee/knowledge.yaml`，解析 team knowledge repo/ref/packs/retrieval 配置。
+- R16. Aisee CLI 应支持 `aisee knowledge query --from-change <change> --for <target> --json`，从 context pack 或 change metadata 提取检索特征。
+- R17. Aisee CLI 应支持直接特征查询，用于没有 OpenSpec change 的场景。
+- R18. `aisee context pack` 可以可选携带 `knowledge.matches`，但默认输出必须保持小上下文。
+- R19. CLI JSON 输出必须标记 knowledge 来源、pack ref、match score、match reason 和是否来自缓存。
+- R20. CLI 默认读取顺序必须是 `aisee/knowledge.yaml` -> pack manifest -> card metadata/frontmatter -> 命中 card 摘要；只有 explain/debug 或用户显式请求时才读取完整 card 正文。
+- R21. Team knowledge repo 必须提供机器可读入口，避免 CLI 递归扫描 `docs/**`、`reviews/**`、`drafts/**` 或任意 Markdown。
 
 ### Reflect 和 Compound 边界
 
-- R21. `aisee:reflect` 生成的 reusable knowledge candidate 应接近 card 协议，但仍是候选，不自动进入 team knowledge。
-- R22. `ce-compound` 继续记录具体工程问题 solution；team knowledge card 可以引用 solution 作为 evidence，但不复制 solution 正文。
-- R23. `ce-compound-refresh` 继续维护 `docs/solutions/`；team knowledge refresh 是后续独立流程，不混入 Compound refresh。
+- R22. `aisee:reflect` 生成的 reusable knowledge candidate 应接近 card 协议，但仍是候选，不自动进入 team knowledge。
+- R23. `ce-compound` 继续记录具体工程问题 solution；team knowledge card 可以引用 solution 作为 evidence，但不复制 solution 正文。
+- R24. `ce-compound-refresh` 继续维护 `docs/solutions/`；team knowledge refresh 是后续独立流程，不混入 Compound refresh。
 
 ### Curation、批量提交与去重
 
-- R24. `aisee:knowledge-curate` 负责批量审查项目内候选知识，执行去敏、泛化、去重、边界补全和 evidence 检查；`aisee:reflect` 不直接写入 team knowledge。
-- R25. Team knowledge 提交策略默认是周期性 batch PR：积累 3-10 条真实可复用候选后一次审查和提交；只有安全、高风险或阻断类经验才考虑单独 PR。
-- R26. 检索输出必须处理项目内候选知识与 team knowledge 的重复：OpenSpec/current change facts 最高优先级，project-local evidence 作为本地上下文，team active card 作为经审查 guardrail。
-- R27. 如果 project-local candidate 与 active team card 重叠，默认只注入 team card；如果项目内证据更新或更具体，应在 explain 中提示 stale candidate，而不是重复注入两份知识。
-- R28. Skill、context pack target 和 AI 提示必须通过 `aisee knowledge query` 获取知识 matches；不要直接读取或扫描 `knowledge/cards/**/*.md` 作为上下文。
+- R25. `aisee:knowledge-curate` 负责批量审查项目内候选知识，执行去敏、泛化、去重、边界补全和 evidence 检查；`aisee:reflect` 不直接写入 team knowledge。
+- R26. Team knowledge 提交策略默认是周期性 batch PR：积累 3-10 条真实可复用候选后一次审查和提交；只有安全、高风险或阻断类经验才考虑单独 PR。
+- R27. 检索输出必须处理项目内候选知识与 team knowledge 的重复：OpenSpec/current change facts 最高优先级，project-local evidence 作为本地上下文，team active card 作为经审查 guardrail。
+- R28. 如果 project-local candidate 与 active team card 重叠，默认只注入 team card；如果项目内证据更新或更具体，应在 explain 中提示 stale candidate，而不是重复注入两份知识。
+- R29. Skill、context pack target 和 AI 提示必须通过 `aisee knowledge query` 获取知识 matches；不要直接读取或扫描 `knowledge/cards/**/*.md` 作为上下文。
+
+### 触发策略
+
+- R30. 项目内候选沉淀默认由用户主动触发，例如用户明确要求“复盘”“沉淀经验”“保存教训”“reflect”时才运行 `aisee:reflect`。
+- R31. Team knowledge 提炼默认由用户主动或阶段性触发，例如用户明确要求“整理可复用知识”“提炼到团队知识”“curate knowledge”时才运行 `aisee:knowledge-curate`。
+- R32. 写入 team knowledge repo、创建分支、提交或 PR 必须获得用户明确授权，并且需要已配置或显式提供 team repo 路径。
+- R33. `aisee:archive-guard`、`aisee:verify` 或 `aisee:reflect` 可以提示候选沉淀信号，但只能询问是否运行后续流程，不得自动写入项目候选或 team knowledge。
 
 ---
 
@@ -112,7 +121,7 @@ date: 2026-06-05
 - KTD1. **独立仓库承载共享知识：** 使用 `aisee-team-knowledge` 作为团队级知识事实源，业务项目只 pin repo/ref/packs。这样避免把共享经验散落到每个项目，也避免让业务项目承担知识库维护。
 - KTD2. **Card 是事实源，索引是缓存：** `knowledge/cards/**/*.md|yaml` 和 `knowledge/packs/*.yaml` 是事实源；`indexes/lexical-index.json` 和 `indexes/vector-index/` 都是可删除、可重建缓存。
 - KTD3. **特征召回，不按 change ID 召回：** `--from-change <change>` 只用于提取 schema、phase、surface、paths、risk signals 和 artifact types；不会用 change name 查询历史 change。
-- KTD4. **先过滤后检索：** 先用 `applies_to` 和 pack/status 做硬过滤，再对 `title`、`trigger`、`problem`、`recommended_action` 做 lexical scoring；vector rerank 只作用于已过滤候选。
+- KTD4. **先过滤后检索：** 先用 `applies_to` 和 pack/status 做硬过滤，再对 `title`、`trigger`、`recommended_action`、`tags` 和按需读取的摘要片段做 lexical scoring；vector rerank 只作用于已过滤候选。
 - KTD5. **输出 guardrails，不输出长文：** 检索结果默认只返回 title、reason、recommended_action、boundaries 和 source，不返回完整 card 正文。
 - KTD6. **Context pack 注入必须可控：** `aisee context pack` 只在显式配置或 flag 打开时包含 knowledge matches；并且默认最多 top 3。
 - KTD7. **MCP 后置：** 第一版先用 CLI + Git 仓库。MCP 可以后续包装 `resolve_pack`、`query_knowledge`、`get_card`、`explain_match`，不改变底层事实源。
@@ -123,7 +132,9 @@ date: 2026-06-05
 - KTD12. **项目内知识与 team knowledge 分层：** OpenSpec/current change 是规范事实源；project-local reflect/solution 是本地证据；team active card 是复用 guardrail。重复时输出去重说明。
 - KTD13. **外部 RAG 后置：** 本计划暂不评估外部知识库项目。后续如果接入，也只能作为 card 索引和 rerank 后端，不能成为事实源。
 - KTD14. **按需读取：** CLI 第一阶段只读取 pack manifest 和 card frontmatter/metadata；只有通过 pack/status/applies_to 硬过滤并进入 top candidates 后，才读取 card 摘要或正文片段。
-- KTD15. **语义匹配有边界：** semantic matching 只能作用于已过滤候选集，用于 rerank 或补充 match reason；不得绕过 pack、status、phase、surface、stack、risk type 直接全库召回。
+- KTD15. **语义匹配有边界：** semantic matching 只能作用于已过滤候选集，用于 rerank 或补充 match reason；不得绕过 pack、status、phase、surface、stack 和可用 risk signals 直接全库召回。
+- KTD16. **自动发现，人工确认：** 系统可以在 archive/verify/reflect 阶段发现“重复踩坑、公开接口、工作流规则、跨项目通用约束”等候选信号，但沉淀动作必须由用户确认。
+- KTD17. **写入 team knowledge 必须授权：** 任何写入独立知识仓库、创建分支、提交或 PR 的动作都不能隐式发生；第一版 `aisee:knowledge-curate` 只产出 batch review report 和 card drafts。
 
 ---
 
@@ -211,6 +222,8 @@ retrieval:
 
 ## 初始 Card 协议草案
 
+必填机器字段只服务于 CLI 硬过滤、轻量匹配和默认输出：
+
 ```yaml
 id: cli-json-output-stability
 title: CLI JSON 输出必须保持字段稳定
@@ -221,7 +234,6 @@ applies_to:
   phases: [implementation, review, verify]
   schemas: []
   surfaces: [cli, json-output]
-  risk_types: [public-contract]
 trigger:
   - 新增或修改 public CLI command
   - 修改 JSON 输出字段、错误 envelope 或退出码
@@ -231,10 +243,28 @@ recommended_action:
   - 不要把人类提示文本混入机器 JSON 字段
 boundaries:
   - 不适用于仅面向人类的非 JSON 日志输出
+```
+
+推荐字段用于排序、审查和 explain，不作为第一轮检索硬依赖：
+
+```yaml
+risk_types: [public-contract]
+tags: [cli, json-output]
 evidence:
   - type: solution
     repo: aisee-plugin
     path: docs/solutions/cli/json-output-stability.md
+```
+
+可选字段只在 curate、debug、explain 或人工 review 时按需读取：
+
+```yaml
+examples: []
+deprecated_by:
+review:
+  reviewed_at:
+  reviewer:
+source_links: []
 ```
 
 ---
@@ -245,7 +275,7 @@ evidence:
 
 **目标：** 建立 team knowledge 的文件级事实源协议，先把格式和边界稳定下来。
 
-**覆盖需求：** R1、R2、R3、R5、R6、R7、R8、R19、R20。
+**覆盖需求：** R1、R2、R3、R5、R6、R7、R8、R9、R20、R21。
 
 **依赖：** 无。
 
@@ -257,7 +287,7 @@ evidence:
 - `docs/best-practices.en.md`
 - `tests/test_plugin_packaging.py`
 
-**做法：** 新增 knowledge card contract，定义 card、pack、status、applies_to、trigger、boundaries、evidence、sensitive information check 和 index/cache 边界。在 architecture 文档中说明独立仓库定位、目录、review policy 和项目配置文件 `aisee/knowledge.yaml`。
+**做法：** 新增 knowledge card contract，定义 card、pack、status、applies_to、trigger、boundaries、recommended/optional fields、sensitive information check 和 index/cache 边界。在 architecture 文档中说明独立仓库定位、目录、review policy 和项目配置文件 `aisee/knowledge.yaml`。
 
 同时定义 repo parse contract：
 
@@ -272,6 +302,7 @@ evidence:
 - Package assets 仍能包含新增 `references/*.md` 和 `docs/architecture/*.md`。
 - README / docs 链接指向存在文件。
 - 文档明确 card 是事实源、index/vector 是缓存。
+- 文档明确必填机器字段、推荐字段和可选字段，不把 evidence 作为 active card 的硬必填。
 - 文档明确 CLI parse contract、允许目录、禁止默认扫描目录和按需读取顺序。
 
 **验证：** 打包测试通过，文档链接可解析，且没有把 knowledge 说成 OpenSpec baseline 或项目 memory。
@@ -280,7 +311,7 @@ evidence:
 
 **目标：** 让 reflect 生成的候选卡片能被人工 review 后复制或迁移到 `aisee-team-knowledge`。
 
-**覆盖需求：** R21、R22、R23。
+**覆盖需求：** R22、R23、R24。
 
 **依赖：** U1。
 
@@ -292,7 +323,7 @@ evidence:
 - `src/aisee_plugin_assets/skills/aisee-reflect/**`
 - `tests/test_plugin_packaging.py`
 
-**做法：** 将 reflect candidate 模板字段对齐 `knowledge-card-contract.md`，补充 `status: candidate`、`applies_to`、`trigger`、`recommended_action`、`boundaries`、`evidence`、`sensitive_information_check`。保留 reflect 候选区定位，不自动写入 team repo。
+**做法：** 将 reflect candidate 模板字段对齐 `knowledge-card-contract.md`，补充 `status: candidate`、`applies_to`、`trigger`、`recommended_action`、`boundaries`，并把 `evidence` 和 `sensitive_information_check` 作为 candidate review 信息。保留 reflect 候选区定位，不自动写入 team repo。
 
 **测试场景：**
 
@@ -306,7 +337,7 @@ evidence:
 
 **目标：** 把项目内候选知识批量审查为可提交到 `aisee-team-knowledge` 的 card draft，但不自动 push、merge 或创建远程 PR。
 
-**覆盖需求：** R7、R21、R22、R23、R24、R25、R26、R27、R28。
+**覆盖需求：** R7、R22、R23、R24、R25、R26、R27、R28、R29、R30、R31、R32、R33。
 
 **依赖：** U1、U2。
 
@@ -326,6 +357,7 @@ evidence:
 - `SKILL.md` 保持精简，长流程放入 references。
 - 文档明确不直接复制 solution 正文，不自动提交 team repo。
 - Batch review 模板包含去敏、泛化、evidence、boundary、重复项合并和 stale candidate 标记。
+- 文档明确 `aisee:knowledge-curate` 由用户主动或阶段性触发，不能被 archive/verify 自动执行。
 
 **验证：** 打包测试通过，skill 文档不会把 candidate 说成 active card，也不会建议 agent 绕过 CLI 直接读取 team knowledge。
 
@@ -333,7 +365,7 @@ evidence:
 
 **目标：** 让业务项目可以声明 pinned team knowledge repo/ref/packs，并由 CLI 只读解析。
 
-**覆盖需求：** R2、R8、R14、R18、R19、R20、R28。
+**覆盖需求：** R2、R8、R15、R19、R20、R21、R29。
 
 **依赖：** U1。
 
@@ -362,7 +394,7 @@ evidence:
 
 **目标：** 支持不依赖 OpenSpec change 的特征查询，并提供后续 `--from-change` 的公共匹配核心。
 
-**覆盖需求：** R4、R9、R10、R11、R12、R13、R16、R18、R19、R20、R26、R27、R28。
+**覆盖需求：** R4、R10、R11、R12、R13、R14、R17、R19、R20、R21、R27、R28、R29。
 
 **依赖：** U4。
 
@@ -392,7 +424,7 @@ evidence:
 
 **目标：** 从当前 OpenSpec change / context pack 中提取检索特征，而不是按 change ID 搜索。
 
-**覆盖需求：** R4、R9、R11、R15、R18、R19、R20、R26、R27、R28。
+**覆盖需求：** R4、R10、R12、R16、R19、R20、R21、R27、R28、R29。
 
 **依赖：** U5。
 
@@ -419,7 +451,7 @@ evidence:
 
 **目标：** 让实现、verify、review 阶段可选获得少量知识 guardrails。
 
-**覆盖需求：** R11、R12、R17、R18、R19、R20、R26、R27、R28。
+**覆盖需求：** R12、R13、R18、R19、R20、R21、R27、R28、R29。
 
 **依赖：** U6。
 
@@ -467,7 +499,7 @@ evidence:
 
 **目标：** 提升本地检索效率，但保持 index 非事实源。
 
-**覆盖需求：** R1、R9、R10、R12、R13、R18、R19、R20。
+**覆盖需求：** R1、R10、R11、R13、R14、R19、R20、R21。
 
 **依赖：** U5。
 
@@ -496,6 +528,7 @@ evidence:
 - **误召回导致 AI 套用错误经验。** 通过 hard filters、boundaries、max matches、match reason 和安全类低召回策略缓解。
 - **知识仓库变成第二套规范。** 通过 card contract 强制定位为 guardrail，并禁止覆盖 OpenSpec artifacts。
 - **跨项目泄露敏感信息。** 通过 candidate 去敏检查、review policy、禁止原始 solution 复制缓解。
+- **自动沉淀产生噪声或泄露。** 只允许自动发现候选信号；reflect、curate、写入 team repo 都需要用户确认或授权。
 - **分支和 PR 数量膨胀。** 默认采用 batch review 和 batch PR，避免一条知识一个分支。
 - **项目内知识与 team knowledge 重复注入。** 通过 CLI 统一检索、优先级规则、dedupe explanation 和 stale candidate 标记缓解。
 - **Agent 绕过 CLI 直接读知识库。** 在 skill、context pack target 和 docs 中明确 knowledge retrieval 必须走 CLI，由 CLI 做过滤、去重和边界检查。
