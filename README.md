@@ -467,6 +467,7 @@ python -m build
 
 - [OpenSpec](https://github.com/Fission-AI/OpenSpec) — 面向 AI coding assistants 的 spec-driven development 框架。
 - [OpenSpec documentation](https://openspec.dev/) — OpenSpec 安装和工作流文档。
+- [Compound Engineering Plugin](https://github.com/EveryInc/compound-engineering-plugin) — 面向 AI 工程执行、审查、测试、提交和团队知识沉淀的 agent workflow 插件。
 
 ## Roadmap
 
