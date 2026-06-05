@@ -17,6 +17,7 @@ from aisee_cli.doctor import build_doctor
 from aisee_cli.flow import build_flow
 from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids
 from aisee_cli.index import build_index
+from aisee_cli.knowledge import build_knowledge_index, build_knowledge_inspect, build_knowledge_query
 from aisee_cli.lookup import get_id, trace_id
 from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
@@ -119,7 +120,26 @@ def main() -> int:
     pack_parser = context_subparsers.add_parser("pack")
     pack_parser.add_argument("--change", required=True, help="OpenSpec change name")
     pack_parser.add_argument("--for", dest="target", required=True, help="context target")
+    pack_parser.add_argument("--knowledge", action="store_true", help="include knowledge guardrail matches")
     pack_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_parser = subparsers.add_parser("knowledge")
+    knowledge_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_subparsers = knowledge_parser.add_subparsers(dest="knowledge_command")
+    knowledge_inspect_parser = knowledge_subparsers.add_parser("inspect")
+    knowledge_inspect_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_query_parser = knowledge_subparsers.add_parser("query")
+    knowledge_query_parser.add_argument("--phase", help="phase feature")
+    knowledge_query_parser.add_argument("--surface", action="append", default=[], help="surface feature; can be repeated")
+    knowledge_query_parser.add_argument("--schema", help="schema feature")
+    knowledge_query_parser.add_argument("--stack", help="stack feature")
+    knowledge_query_parser.add_argument("--query", help="free text query")
+    knowledge_query_parser.add_argument("--from-change", help="OpenSpec change name to extract features from")
+    knowledge_query_parser.add_argument("--for", dest="target", help="context target for --from-change")
+    knowledge_query_parser.add_argument("--max-cards", type=int, help="maximum matches")
+    knowledge_query_parser.add_argument("--debug", action="store_true", help="include matched body excerpts")
+    knowledge_query_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_index_parser = knowledge_subparsers.add_parser("index")
+    knowledge_index_parser.add_argument("--json", action="store_true", help="output JSON")
     contract_parser = subparsers.add_parser("contract")
     contract_parser.add_argument("--json", action="store_true", help="output JSON")
     contract_subparsers = contract_parser.add_subparsers(dest="contract_command")
@@ -247,11 +267,47 @@ def main() -> int:
         try:
             root = resolve_project_root(Path.cwd())
             pack = build_context_pack(root, args.change, args.target)
+            if args.knowledge:
+                knowledge = build_knowledge_query(root, from_change=args.change, target=args.target)
+                pack["knowledge"] = knowledge["knowledge"]
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
         print_json(pack)
         return 0
+
+    if args.command == "knowledge" and args.knowledge_command is None:
+        print_json(error_response("Use one of: inspect, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
+
+    if args.command == "knowledge":
+        root = resolve_project_root(Path.cwd())
+        try:
+            if args.knowledge_command == "inspect":
+                result = build_knowledge_inspect(root)
+            elif args.knowledge_command == "query":
+                result = build_knowledge_query(
+                    root,
+                    phase=args.phase,
+                    surfaces=args.surface,
+                    schema=args.schema,
+                    stack=args.stack,
+                    query=args.query,
+                    from_change=args.from_change,
+                    target=args.target,
+                    max_cards=args.max_cards,
+                    debug=args.debug,
+                )
+            elif args.knowledge_command == "index":
+                result = build_knowledge_index(root, write_cache=True)
+            else:
+                print_json(error_response("Use one of: inspect, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+                return 2
+        except ValueError as error:
+            print_json(error_response(str(error), "KNOWLEDGE_ERROR"), stderr=True)
+            return 2
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=False)
 
     if args.command == "contract" and args.contract_command is None:
         print_json(error_response("Use one of: manifest, summary, get, serve.", "MISSING_SUBCOMMAND"), stderr=True)

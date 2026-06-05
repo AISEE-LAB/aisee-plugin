@@ -63,6 +63,14 @@ def context_index_path(root: Path) -> Path:
     return existing_or_preferred(cache_dir(root) / "context-index.json", legacy_aisee_root(root) / "cache" / "context-index.json")
 
 
+def knowledge_config_path(root: Path) -> Path:
+    return existing_or_preferred(aisee_root(root) / "knowledge.yaml", legacy_aisee_root(root) / "knowledge.yaml")
+
+
+def knowledge_index_path(root: Path) -> Path:
+    return existing_or_preferred(cache_dir(root) / "knowledge-index.json", legacy_aisee_root(root) / "cache" / "knowledge-index.json")
+
+
 def memory_rules_path(root: Path) -> Path:
     return existing_or_preferred(memory_dir(root) / "rules.md", legacy_memory_dir(root) / "rules.md")
 
@@ -78,6 +86,8 @@ def inspect_layout(root: Path) -> dict[str, Any]:
         layout_check(root, "sources", registry_dir(root) / "sources.json", legacy_aisee_root(root) / "sources.json"),
         layout_check(root, "id_registry", registry_dir(root) / "id-registry.json", legacy_aisee_root(root) / "id-registry.json"),
         layout_check(root, "context_index", cache_dir(root) / "context-index.json", legacy_aisee_root(root) / "cache" / "context-index.json"),
+        layout_check(root, "knowledge_config", aisee_root(root) / "knowledge.yaml", legacy_aisee_root(root) / "knowledge.yaml"),
+        layout_check(root, "knowledge_index", cache_dir(root) / "knowledge-index.json", legacy_aisee_root(root) / "cache" / "knowledge-index.json"),
         layout_check(root, "memory_rules", memory_dir(root) / "rules.md", legacy_memory_dir(root) / "rules.md"),
         layout_check(root, "memory_index", memory_dir(root) / "index.md", legacy_memory_dir(root) / "index.md"),
         layout_check(root, "hooks", hooks_dir(root), legacy_aisee_root(root) / "hooks"),

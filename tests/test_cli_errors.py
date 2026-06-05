@@ -66,3 +66,12 @@ def test_missing_contract_subcommand_returns_json_error(tmp_path: Path) -> None:
     assert result.returncode == 2
     assert result.stdout == ""
     assert data["issues"][0]["code"] == "MISSING_SUBCOMMAND"
+
+
+def test_missing_knowledge_subcommand_returns_json_error(tmp_path: Path) -> None:
+    result = run_aisee(tmp_path, "knowledge", "--json")
+    data = json.loads(result.stderr)
+
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert data["issues"][0]["code"] == "MISSING_SUBCOMMAND"
