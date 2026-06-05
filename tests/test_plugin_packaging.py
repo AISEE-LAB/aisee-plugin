@@ -55,6 +55,7 @@ def test_plugin_inspect_lists_packaged_skills_without_source_checkout(tmp_path: 
     assert data["status"] == "ok"
     assert "aisee-srs" in data["skills"]
     assert "aisee-change-plan" in data["skills"]
+    assert "aisee-knowledge-curate" in data["skills"]
     assert {target["target"] for target in data["targets"]} == {"codex", "claude", "cursor"}
 
 
@@ -65,5 +66,6 @@ def test_plugin_export_writes_codex_bundle(tmp_path: Path) -> None:
     assert data["status"] == "ok"
     assert (destination / ".codex-plugin" / "plugin.json").exists()
     assert (destination / "skills" / "aisee-srs" / "SKILL.md").exists()
+    assert (destination / "skills" / "aisee-knowledge-curate" / "SKILL.md").exists()
     metadata = json.loads((destination / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert metadata["skills"] == "./skills/"
