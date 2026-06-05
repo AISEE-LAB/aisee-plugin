@@ -17,6 +17,32 @@ N/A 原因：
 | Change Context | change-context.md | {{scope}}:CONSTRAINT-001 / {{scope}}:RISK-001 | 平台、权限、性能、集成、风险约束 | |
 | Existing system / source-map | source-map.md / code / docs | {{scope}}:API-001 | 既有接口、命令、job 或集成事实 | Existing 只引用来源 |
 
+## 契约归属与同步
+
+> 本节必须与 source-map.md 的 `Contract Ownership / Sync` 表保持一致。
+> service-contract.md 是面向人和 AI 阅读的服务契约；OpenAPI、events、webhooks、proto 等机器可读文件是可选附件，不默认要求生成。
+
+| 项目 | 值 | 说明 |
+|---|---|---|
+| Contract Owner | backend / frontend-bff / contract-repo / external-provider / shared / N/A | 权威维护方 |
+| Canonical Source | service-contract.md / contracts/openapi.yaml / contracts/events.yaml / contracts/webhooks.yaml / contracts/proto/*.proto / external | 冲突时以此为准 |
+| Backend Provider | repo / package / URL / N/A | 服务提供方 |
+| Frontend Consumer | repo / app / package / N/A | 服务消费方，可多个 |
+| Sync Mode | manual-copy / git-submodule / package / local-http / artifact-export / N/A | 跨仓库同步方式 |
+| Conflict Rule | canonical-source-wins / provider-wins / consumer-request-provider-approval / N/A | 冲突解决规则 |
+| Version / Commit / Tag | commit / tag / package version / document version / N/A | 当前同步引用 |
+
+## 机器可读契约附件
+
+> 只登记本 change 实际需要追踪的附件。不存在时写 N/A 和原因，不要为了模板完整而生成空文件。
+
+| 类型 | 路径 / 包 / URL | 来源 | 状态 | 关联能力 ID | 备注 |
+|---|---|---|---|---|---|
+| OpenAPI | contracts/openapi.yaml / N/A | source-map / provider repo / contract repo | existing / changed / new / N/A | {{scope}}:API-001 / N/A | |
+| Events | contracts/events.yaml / N/A | source-map / provider repo / contract repo | existing / changed / new / N/A | {{scope}}:API-001 / N/A | |
+| Webhooks | contracts/webhooks.yaml / N/A | source-map / provider repo / contract repo | existing / changed / new / N/A | {{scope}}:API-001 / N/A | |
+| Proto | contracts/proto/*.proto / N/A | source-map / provider repo / contract repo | existing / changed / new / N/A | {{scope}}:API-001 / N/A | |
+
 ## 服务变更范围
 
 | 状态 | 能力完整 ID | 类型 | 名称 | 来源 | 本 change 处理 | 是否需要实现 |
@@ -98,6 +124,8 @@ N/A 原因：
 
 - [ ] 覆盖相关上游 ID：{{scope}}:FR-001 / {{scope}}:RULE-001 / {{scope}}:API-001 / N/A。
 - [ ] 已引用必要的 ui-contract / data-model / change-context / N/A。
+- [ ] 契约 owner、canonical source、provider、consumer、sync mode 和 version/ref 已与 source-map.md 对齐，或已写明 N/A 原因。
+- [ ] 声明的机器可读契约附件已在 source-map.md 追踪，或已写明 N/A 原因。
 - [ ] 请求、响应、命令参数、权限、错误、幂等、分页、排序、过滤、重试和超时已覆盖本 change 影响。
 - [ ] 数据读写、事务、一致性和失败处理已与 data-model.md 对齐，或已写明 N/A。
 - [ ] 需要的验证证据已登记到 source-map.md 或 tasks.md。

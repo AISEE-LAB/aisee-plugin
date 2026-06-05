@@ -66,9 +66,11 @@ N/A 原因：
 
 ## 前端数据需求
 
-| 页面 / 元素 | 需要的数据 | 来源能力 | 状态 / 权限影响 | 关联 ID | 备注 |
-|---|---|---|---|---|---|
-| {{scope}}:PAGE-001 | | {{scope}}:API-001 / 本地状态 / 配置 | loading / empty / error / permission | {{scope}}:FR-001 | |
+> 本表只描述前端需要什么数据、由哪个能力提供、当前能力状态如何；不要在这里定义 API 字段、错误码或服务事实源。
+
+| 页面 / 元素 | 需要的数据 | 来源能力 | 后端能力状态 | 状态 / 权限影响 | 关联 ID | 备注 |
+|---|---|---|---|---|---|---|
+| {{scope}}:PAGE-001 | | {{scope}}:API-001 / 本地状态 / 配置 | ready / missing / changed / blocked / N/A | loading / empty / error / permission | {{scope}}:FR-001 | 契约细节见 service-contract.md / N/A |
 
 ## 交互与流程
 
@@ -88,4 +90,5 @@ N/A 原因：
 - [ ] 已引用必要的 Design Spec / Design Assets / dev-visual-brief / N/A。
 - [ ] 已引用必要的 service-contract / data-model / N/A。
 - [ ] 页面、操作、状态、权限可见性和前端数据需求已覆盖本 change 影响。
+- [ ] 当前端依赖后端能力时，已标注后端能力状态，并把 API 事实源交给 service-contract.md / source-map.md。
 - [ ] 需要的验证证据已登记到 source-map.md 或 tasks.md。

@@ -10,7 +10,7 @@ from typing import Any
 ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-(?:NEW-)?\d+\b")
 PATH_PATTERN = re.compile(
     r"(?<![\w./-])"
-    r"((?:src|app|apps|lib|libs|packages|tests|test|docs|openspec|assets|config)"
+    r"((?:src|app|apps|lib|libs|packages|tests|test|docs|openspec|assets|config|contracts)"
     r"/[A-Za-z0-9_./@:+-]+)"
 )
 IMPLEMENTATION_PATH_SECTION_TOKENS = (
@@ -37,6 +37,7 @@ def parse_source_map(change_path: Path) -> dict[str, Any]:
     implementation_paths = extract_implementation_paths(tables, text)
     evidence = extract_evidence(tables)
     artifact_applicability = extract_artifact_applicability(tables)
+    contract_sync = extract_contract_sync(tables)
     id_trace = extract_id_trace(tables)
     upstream_sources = extract_upstream_sources(tables)
     out_of_scope = extract_bullets(sections, {"不在本 Change 范围", "不在范围", "Out of Scope", "Follow-up", "后续处理"})
@@ -48,6 +49,7 @@ def parse_source_map(change_path: Path) -> dict[str, Any]:
         "upstream_sources": upstream_sources,
         "id_trace": id_trace,
         "artifact_applicability": artifact_applicability,
+        "contract_sync": contract_sync,
         "implementation_paths": implementation_paths,
         "verification_evidence": evidence,
         "out_of_scope": out_of_scope,
@@ -136,6 +138,10 @@ def normalize_key(key: str) -> str:
         "kind": "kind",
         "path": "path",
         "mode": "mode",
+        "key": "key",
+        "value": "value",
+        "值": "value",
+        "项目": "key",
     }
     return mapping.get(lowered, lowered.replace(" ", "_"))
 
@@ -188,6 +194,49 @@ def extract_artifact_applicability(tables: dict[str, list[dict[str, str]]]) -> l
                     "handoff": row.get("handoff") or "",
                 })
     return rows
+
+
+def extract_contract_sync(tables: dict[str, list[dict[str, str]]]) -> dict[str, Any]:
+    values: dict[str, dict[str, str]] = {}
+    for title, table in tables.items():
+        if not any(token in title for token in ("Contract Ownership", "契约归属", "契约同步", "Contract Sync")):
+            continue
+        for row in table:
+            key = normalize_contract_key(row.get("key") or row.get("source") or "")
+            if not key:
+                continue
+            values[key] = {
+                "value": row.get("value") or row.get("path") or "",
+                "status": normalize_status(row.get("status") or ""),
+                "notes": row.get("notes") or row.get("reason") or "",
+            }
+    return {
+        "available": bool(values),
+        "values": values,
+        "machine_readable_contracts": split_contract_paths(values.get("machine_readable_contract", {}).get("value", "")),
+    }
+
+
+def normalize_contract_key(value: str) -> str:
+    lowered = value.strip().lower().replace("-", "_").replace(" ", "_")
+    mapping = {
+        "contract_source": "canonical_source",
+        "canonical_contract": "canonical_source",
+        "frontend_consumer": "consumer_repo",
+        "backend_provider": "provider_repo",
+        "external_repo/package/artifact_path": "machine_readable_contract",
+        "external_repo_/_package_/_artifact_path": "machine_readable_contract",
+        "version/commit/tag": "version_ref",
+        "version_/_commit_/_tag": "version_ref",
+    }
+    return mapping.get(lowered, lowered)
+
+
+def split_contract_paths(value: str) -> list[str]:
+    if not value or value.strip().lower() in {"n/a", "na", "none", "无"}:
+        return []
+    parts = re.split(r"[,，\n]| / |；|;", value)
+    return [part.strip() for part in parts if part.strip() and part.strip().lower() not in {"n/a", "na"}]
 
 
 def extract_implementation_paths(tables: dict[str, list[dict[str, str]]], text: str) -> list[dict[str, Any]]:

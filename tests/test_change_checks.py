@@ -115,11 +115,31 @@ apply:
 | Artifact | Required | IDs | Reason | Handoff |
 |---|---|---|---|---|
 | service-contract.md | yes | auth:API-001 | 需要接口 | tasks.md |
+
+## Contract Ownership / Sync
+
+| Key | Value | Status | Notes |
+|---|---|---|---|
+| contract_owner | backend | confirmed | |
+| canonical_source | service-contract.md | confirmed | |
+| provider_repo | backend-api | confirmed | |
+| consumer_repo | frontend-app | confirmed | |
+| sync_mode | local-http | confirmed | |
+| machine_readable_contract | contracts/openapi.yaml | confirmed | |
 """,
     )
     write(change / "specs" / "auth.md", "## ADDED Requirements\n")
     write(change / "service-contract.md", "src/auth/session.py\n")
-    write(change / "tasks.md", f"# Tasks\n\n- [{task_mark}] Implement src/auth/session.py.\n")
+    write(
+        change / "tasks.md",
+        f"""# Tasks
+
+- [{task_mark}] Provider implementation: implement src/auth/session.py.
+- [{task_mark}] Consumer integration: update frontend caller.
+- [{task_mark}] Contract test: validate provider and consumer compatibility.
+- [{task_mark}] Backward compatibility check: confirm login contract compatibility.
+""",
+    )
 
 
 def create_device_project(root: Path) -> None:
@@ -375,6 +395,56 @@ def test_verify_check_reports_risk_when_evidence_missing(tmp_path: Path) -> None
 
     assert data["status"] == "risk"
     assert any(item["code"] == "TEST_EVIDENCE_MISSING" for item in data["warnings"])
+
+
+def test_verify_check_warns_when_required_service_contract_lacks_sync_metadata(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
+        """# Source Map
+
+## Implementation Paths
+
+| Kind | Path | IDs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/auth/session.py | auth:API-001 | modify | |
+| test | tests/auth/test_session.py | auth:TEST-001 | add | |
+
+## Artifact Applicability
+
+| Artifact | Required | IDs | Reason | Handoff |
+|---|---|---|---|---|
+| service-contract.md | yes | auth:API-001 | 需要接口 | tasks.md |
+""",
+    )
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "verify-check", "add-auth", "--json")
+
+    assert data["status"] == "risk"
+    assert any(item["code"] == "CONTRACT_SYNC_METADATA_MISSING" for item in data["warnings"])
+
+
+def test_verify_check_accepts_chinese_provider_consumer_task_terms(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md",
+        """# Tasks
+
+- [x] 提供方实现：更新 src/auth/session.py。
+- [x] 消费方接入：更新前端调用。
+- [x] 契约测试：验证 provider / consumer 契约一致性。
+- [x] 兼容性检查：确认登录契约兼容。
+""",
+    )
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")
+
+    data = run_json(tmp_path, "change", "verify-check", "add-auth", "--json")
+    warning_codes = {item["code"] for item in data["warnings"]}
+
+    assert "CONTRACT_PROVIDER_TASK_MISSING" not in warning_codes
+    assert "CONTRACT_CONSUMER_TASK_MISSING" not in warning_codes
+    assert "CONTRACT_TEST_TASK_MISSING" not in warning_codes
 
 
 def test_archive_check_blocks_open_tasks_and_fail_flag(tmp_path: Path) -> None:

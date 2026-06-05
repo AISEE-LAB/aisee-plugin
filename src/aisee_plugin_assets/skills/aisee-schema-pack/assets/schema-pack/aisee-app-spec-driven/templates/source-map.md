@@ -108,6 +108,22 @@
 | service-contract.md | yes / no | {{scope}}:FR-001 / {{scope}}:API-001 / N/A | | data-model.md / tasks.md / N/A |
 | data-model.md | yes / no | {{scope}}:DATA-001 / N/A | | service-contract.md / tasks.md / N/A |
 
+## Contract Ownership / Sync
+
+> 当前后端分仓、独立契约仓库、BFF 或外部服务适用时填写。`service-contract.md` Required=no 且无跨仓库协作时，可全部写 N/A 并说明原因。
+> 本表是机器可解析的同步路由；不要在这里展开接口字段、请求响应或业务规则。
+
+| Key | Value | Status | Notes |
+|---|---|---|---|
+| contract_owner | backend / frontend-bff / contract-repo / external-provider / shared / N/A | confirmed / pending / N/A | 权威维护方 |
+| canonical_source | service-contract.md / contracts/openapi.yaml / contracts/events.yaml / contracts/webhooks.yaml / contracts/proto/*.proto / external | confirmed / pending / N/A | 冲突时以此为准 |
+| provider_repo | repo name / package / URL / N/A | confirmed / pending / N/A | 服务提供方 |
+| consumer_repo | repo name / package / URL / N/A | confirmed / pending / N/A | 服务消费方，可多个 |
+| sync_mode | manual-copy / git-submodule / package / local-http / artifact-export / N/A | confirmed / pending / N/A | 跨仓库同步方式 |
+| conflict_rule | canonical-source-wins / provider-wins / consumer-request-provider-approval / N/A | confirmed / pending / N/A | 冲突解决规则 |
+| machine_readable_contract | contracts/openapi.yaml / contracts/events.yaml / contracts/webhooks.yaml / contracts/proto/*.proto / N/A | confirmed / pending / N/A | 可选附件路径；不默认要求生成 |
+| version_ref | commit / tag / package version / document version / N/A | confirmed / pending / N/A | 同步版本或引用 |
+
 ## 阻塞项 / 假设
 
 - [ASSUMPTION] 

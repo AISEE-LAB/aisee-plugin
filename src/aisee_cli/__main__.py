@@ -10,6 +10,8 @@ from aisee_cli.author_check import build_author_check
 from aisee_cli.bootstrap import build_bootstrap_apply_response, build_bootstrap_plan
 from aisee_cli.change import build_change_inspect
 from aisee_cli.change_checks import build_archive_check, build_verify_check
+from aisee_cli.contract import build_contract_get, build_contract_manifest, build_contract_summary
+from aisee_cli.contract_server import lan_warning, serve_contract_context
 from aisee_cli.context_pack import build_context_pack
 from aisee_cli.doctor import build_doctor
 from aisee_cli.flow import build_flow
@@ -118,6 +120,27 @@ def main() -> int:
     pack_parser.add_argument("--change", required=True, help="OpenSpec change name")
     pack_parser.add_argument("--for", dest="target", required=True, help="context target")
     pack_parser.add_argument("--json", action="store_true", help="output JSON")
+    contract_parser = subparsers.add_parser("contract")
+    contract_parser.add_argument("--json", action="store_true", help="output JSON")
+    contract_subparsers = contract_parser.add_subparsers(dest="contract_command")
+    contract_manifest_parser = contract_subparsers.add_parser("manifest")
+    contract_manifest_parser.add_argument("--max-chars", type=int, default=800, help="maximum summary characters per contract")
+    contract_manifest_parser.add_argument("--json", action="store_true", help="output JSON")
+    contract_summary_parser = contract_subparsers.add_parser("summary")
+    contract_summary_parser.add_argument("--change", required=True, help="OpenSpec change name")
+    contract_summary_parser.add_argument("--max-chars", type=int, default=800, help="maximum summary characters per contract")
+    contract_summary_parser.add_argument("--json", action="store_true", help="output JSON")
+    contract_get_parser = contract_subparsers.add_parser("get")
+    contract_get_parser.add_argument("--change", required=True, help="OpenSpec change name")
+    contract_get_parser.add_argument("--artifact", required=True, help="contract artifact id or path")
+    contract_get_parser.add_argument("--section", help="contract section id or title")
+    contract_get_parser.add_argument("--max-chars", type=int, default=4000, help="maximum content characters")
+    contract_get_parser.add_argument("--raw", action="store_true", help="return raw artifact content when no section is selected")
+    contract_get_parser.add_argument("--json", action="store_true", help="output JSON")
+    contract_serve_parser = contract_subparsers.add_parser("serve")
+    contract_serve_parser.add_argument("--host", default="127.0.0.1", help="host to bind; default: 127.0.0.1")
+    contract_serve_parser.add_argument("--port", type=int, default=8765, help="port to bind; default: 8765")
+    contract_serve_parser.add_argument("--json", action="store_true", help="output JSON startup metadata")
     id_parser = subparsers.add_parser("id")
     id_parser.add_argument("--json", action="store_true", help="output JSON")
     id_subparsers = id_parser.add_subparsers(dest="id_command")
@@ -228,6 +251,49 @@ def main() -> int:
             print_json(error_response(str(error)), stderr=True)
             return 2
         print_json(pack)
+        return 0
+
+    if args.command == "contract" and args.contract_command is None:
+        print_json(error_response("Use one of: manifest, summary, get, serve.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
+
+    if args.command == "contract":
+        try:
+            root = resolve_project_root(Path.cwd())
+            if args.contract_command == "manifest":
+                result = build_contract_manifest(root, max_chars=args.max_chars)
+            elif args.contract_command == "summary":
+                result = build_contract_summary(root, args.change, max_chars=args.max_chars)
+            elif args.contract_command == "get":
+                result = build_contract_get(
+                    root,
+                    args.change,
+                    args.artifact,
+                    section=args.section,
+                    max_chars=args.max_chars,
+                    raw=args.raw,
+                )
+            elif args.contract_command == "serve":
+                if not args.host:
+                    print_json(error_response("contract serve host must not be empty", "CONTRACT_CONTEXT_ERROR"), stderr=True)
+                    return 2
+                startup = {
+                    "schema_version": "1.0",
+                    "status": "serving",
+                    "host": args.host,
+                    "port": args.port,
+                    "warning": lan_warning(args.host),
+                }
+                print_json(startup, stderr=True)
+                serve_contract_context(root, host=args.host, port=args.port)
+                return 0
+            else:
+                print_json(error_response("Use one of: manifest, summary, get, serve.", "MISSING_SUBCOMMAND"), stderr=True)
+                return 2
+        except ValueError as error:
+            print_json(error_response(str(error), "CONTRACT_CONTEXT_ERROR"), stderr=True)
+            return 2
+        print_json(result)
         return 0
 
     if args.command == "gaps":

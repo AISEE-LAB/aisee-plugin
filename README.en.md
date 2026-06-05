@@ -62,6 +62,7 @@ Compound Engineering = optional implementation / review / test consumer
 - **Schema-aware change planning**: `aisee:change-plan` maps confirmed inputs into independently deliverable OpenSpec changes.
 - **OpenSpec schema pack**: includes app, device, docsite, infra, security, quick-fix, quick-research, and collaboration schemas.
 - **Context packs**: `aisee context pack` generates JSON context for implementation, verification, and review.
+- **Contract context service**: `aisee contract` exposes service contracts through manifest-first and section-level reads for cross-repository frontend/backend collaboration.
 - **ID registry and traceability**: `aisee id`, `aisee get`, and `aisee trace` connect upstream documents, OpenSpec artifacts, tasks, code paths, tests, and evidence.
 - **Verification and archive guardrails**: `aisee:verify` and `aisee:archive-guard` diagnose gaps and risks before archive.
 - **Harness design**: CLI contract tests and normalized skill eval cases keep the workflow stable.
@@ -309,6 +310,10 @@ aisee change author-check <change> --json
 aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee contract manifest --json
+aisee contract summary --change <change> --json
+aisee contract get --change <change> --artifact service-contract --section capabilities --json
+aisee contract serve --host 127.0.0.1 --port 8765
 aisee change verify-check <change> --json
 aisee change archive-check <change> --json
 aisee id check --json
@@ -324,6 +329,27 @@ Key CLI rules:
 - `aisee/registry/id-registry.json`, `aisee/registry/sources.json`, OpenSpec artifacts, and `source-map.md` are persistent traceability inputs.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
 - `aisee openspec ensure` only bridges OpenSpec initialization and profile setup. It does not replace `aisee:init`.
+- `aisee contract serve` is a read-only contract context service, not a mock backend, API gateway, or second API source of truth. It binds to `127.0.0.1` by default; LAN access requires explicit `--host 0.0.0.0` and exposes local contract documents to that network.
+
+### Cross-Repository Contract Reads
+
+When frontend and backend are developed in separate repositories, the backend repository, BFF repository, or independent contract repository should own `service-contract.md` and optional machine-readable attachments such as `contracts/openapi.yaml`, `contracts/events.yaml`, `contracts/webhooks.yaml`, or `contracts/proto/*.proto`.
+
+Recommended flow:
+
+```bash
+# In the contract provider repository
+aisee contract manifest --json
+aisee contract summary --change <change> --json
+aisee contract serve --host 127.0.0.1 --port 8765
+
+# In the consumer repository AI context, read the manifest first and fetch small sections as needed
+curl http://127.0.0.1:8765/manifest
+curl http://127.0.0.1:8765/changes/<change>/summary
+curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections/<section>?max_chars=4000"
+```
+
+OpenSpec/Aisee artifacts remain the authoritative contract source. The HTTP service reads current files on request and returns a JSON view; it does not persist contract copies and does not expose source code, environment variables, secrets, or full-repository search results.
 
 ## Repository Layout
 

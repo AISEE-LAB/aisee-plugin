@@ -48,6 +48,19 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
 | service-contract.md | yes | auth:API-001 | 需要接口 | tasks.md |
 | data-model.md | no | N/A | 不涉及持久化 | N/A |
 
+## Contract Ownership / Sync
+
+| Key | Value | Status | Notes |
+|---|---|---|---|
+| contract_owner | backend | confirmed | |
+| canonical_source | contracts/openapi.yaml | confirmed | |
+| provider_repo | backend-api | confirmed | |
+| consumer_repo | frontend-app | confirmed | |
+| sync_mode | local-http | confirmed | |
+| conflict_rule | canonical-source-wins | confirmed | |
+| machine_readable_contract | contracts/openapi.yaml, contracts/events.yaml | confirmed | |
+| version_ref | commit:abc123 | confirmed | |
+
 ## Out of Scope
 
 - auth:FR-002 注册
@@ -77,6 +90,12 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
     ]
     assert parsed["verification_evidence"][0]["status"] == "passed"
     assert parsed["artifact_applicability"][1]["required"] == "no"
+    assert parsed["contract_sync"]["values"]["contract_owner"]["value"] == "backend"
+    assert parsed["contract_sync"]["values"]["canonical_source"]["value"] == "contracts/openapi.yaml"
+    assert parsed["contract_sync"]["machine_readable_contracts"] == [
+        "contracts/openapi.yaml",
+        "contracts/events.yaml",
+    ]
     assert parsed["out_of_scope"] == ["auth:FR-002 注册"]
     assert parsed["issues"] == []
 
@@ -116,3 +135,32 @@ def test_parse_source_map_keeps_legacy_section_heading_compatibility(tmp_path: P
 
     assert parsed["implementation_paths"][0]["path"] == "src/auth/session.py"
     assert parsed["verification_evidence"][0]["path"] == "docs/verification/add-auth-test-results.md"
+
+
+def test_parse_source_map_contract_sync_legacy_labels(tmp_path: Path) -> None:
+    change = tmp_path / "openspec" / "changes" / "add-auth"
+    write(
+        change / "source-map.md",
+        """# Source Map
+
+## Contract Sync
+
+| Key | Value | Status | Notes |
+|---|---|---|---|
+| Contract Source | service-contract.md | confirmed | |
+| Frontend Consumer | frontend-app | confirmed | |
+| Backend Provider | backend-api | confirmed | |
+| Sync Mode | package | confirmed | |
+| External Repo / Package / Artifact Path | contracts/proto/auth.proto | confirmed | |
+| Version / Commit / Tag | v1.2.3 | confirmed | |
+""",
+    )
+
+    parsed = parse_source_map(change)
+
+    values = parsed["contract_sync"]["values"]
+    assert values["canonical_source"]["value"] == "service-contract.md"
+    assert values["consumer_repo"]["value"] == "frontend-app"
+    assert values["provider_repo"]["value"] == "backend-api"
+    assert values["machine_readable_contract"]["value"] == "contracts/proto/auth.proto"
+    assert values["version_ref"]["value"] == "v1.2.3"

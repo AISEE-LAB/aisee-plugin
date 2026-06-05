@@ -25,7 +25,7 @@ CONTEXT_SCHEMA_VERSION = "1.0"
 ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-(?:NEW-)?\d+\b")
 PATH_PATTERN = re.compile(
     r"(?<![\w./-])"
-    r"((?:src|app|apps|lib|libs|packages|tests|test|aisee/docs|docs|openspec|assets|config)"
+    r"((?:src|app|apps|lib|libs|packages|tests|test|aisee/docs|docs|openspec|assets|config|contracts)"
     r"/[A-Za-z0-9_./@:+-]+)"
 )
 CHECKBOX_PATTERN = re.compile(r"^\s*-\s+\[(?P<mark>[ xX~-])\]\s*(?P<title>.*)$")
@@ -104,6 +104,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         source_map=source_map,
         source_map_required=source_map_required,
         unmapped_reference_paths=unmapped_reference_paths,
+        tasks_text=tasks_text,
     )
 
     read_order = build_read_order(root, change_path, artifact_entries, read_paths)
@@ -186,7 +187,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "schema_artifacts": summarize_artifact_checks(artifact_entries),
             "traceability": summarize_trace_checks(upstream_ids, produced_ids),
             "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries),
+            "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
             "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
             "review_and_tests": [],
         }
@@ -197,7 +198,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "schema_artifacts": summarize_artifact_checks(artifact_entries),
             "traceability": summarize_trace_checks(upstream_ids, produced_ids),
             "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries),
+            "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
         }
     elif target == "ce-code-review":
         pack["facts"]["derived"]["review"] = {
@@ -339,6 +340,7 @@ def not_applicable_source_map() -> dict[str, Any]:
         "upstream_sources": [],
         "id_trace": [],
         "artifact_applicability": [],
+        "contract_sync": {"available": False, "values": {}, "machine_readable_contracts": []},
         "implementation_paths": [],
         "verification_evidence": [],
         "out_of_scope": [],
@@ -562,6 +564,7 @@ def build_gaps(
     source_map: dict[str, Any],
     source_map_required: bool,
     unmapped_reference_paths: list[str],
+    tasks_text: str,
 ) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if not change_path.exists():
@@ -654,6 +657,7 @@ def build_gaps(
                     unmapped_reference_paths,
                 )
             )
+    gaps.extend(contract_sync_gaps(artifact_entries, source_map, tasks_text))
     return gaps
 
 
@@ -682,6 +686,118 @@ def artifact_not_required(entry: dict[str, Any], source_map: dict[str, Any]) -> 
         if row.get("required") == "no" and str(row.get("reason") or "").strip():
             return True
     return False
+
+
+def contract_sync_gaps(
+    artifact_entries: list[dict[str, Any]],
+    source_map: dict[str, Any],
+    tasks_text: str,
+) -> list[dict[str, Any]]:
+    service_contract = next((entry for entry in artifact_entries if entry.get("id") == "service-contract"), None)
+    if service_contract is None or artifact_not_required(service_contract, source_map):
+        return []
+    if service_contract.get("status") == "missing":
+        return []
+
+    gaps: list[dict[str, Any]] = []
+    contract_sync = source_map.get("contract_sync") if isinstance(source_map, dict) else {}
+    values = contract_sync.get("values", {}) if isinstance(contract_sync, dict) else {}
+    if not values:
+        return [
+            gap(
+                "CONTRACT_SYNC_METADATA_MISSING",
+                "risk",
+                "service-contract.md is required but source-map.md has no Contract Ownership / Sync table",
+                "source-map.md",
+            )
+        ]
+
+    required_keys = ("contract_owner", "canonical_source", "provider_repo", "consumer_repo", "sync_mode")
+    missing_keys = [key for key in required_keys if contract_value_is_missing(values.get(key))]
+    if missing_keys:
+        gaps.append(
+            gap(
+                "CONTRACT_SYNC_FIELDS_MISSING",
+                "risk",
+                f"service-contract.md is required but contract sync fields are missing: {', '.join(missing_keys)}",
+                "source-map.md",
+            )
+        )
+
+    for key, entry in values.items():
+        if not isinstance(entry, dict):
+            continue
+        if str(entry.get("status") or "").strip().lower() == "pending":
+            gaps.append(
+                gap(
+                    "CONTRACT_SYNC_PENDING",
+                    "risk",
+                    f"contract sync field is still pending: {key}",
+                    "source-map.md",
+                )
+            )
+
+    machine_paths = contract_sync.get("machine_readable_contracts", []) if isinstance(contract_sync, dict) else []
+    for path in machine_paths:
+        if isinstance(path, str) and path and path not in source_map.get("paths", []):
+            gaps.append(
+                gap(
+                    "CONTRACT_ARTIFACT_PATH_UNTRACKED",
+                    "risk",
+                    f"machine-readable contract path is not tracked by source-map path scan: {path}",
+                    "source-map.md",
+                )
+            )
+
+    tasks_lower = tasks_text.lower()
+    provider = value_from_contract_sync(values, "provider_repo")
+    consumer = value_from_contract_sync(values, "consumer_repo")
+    if provider and provider.lower() not in {"n/a", "na", "none"} and not has_any_term(
+        tasks_text,
+        ("provider", "提供方", "服务提供", "后端实现", "后端能力"),
+    ):
+        gaps.append(
+            gap(
+                "CONTRACT_PROVIDER_TASK_MISSING",
+                "risk",
+                "provider repo is declared but tasks.md has no provider implementation task",
+                "tasks.md",
+            )
+        )
+    if consumer and consumer.lower() not in {"n/a", "na", "none"} and not has_any_term(
+        tasks_text,
+        ("consumer", "消费方", "服务消费", "前端接入", "前端调用"),
+    ):
+        gaps.append(
+            gap(
+                "CONTRACT_CONSUMER_TASK_MISSING",
+                "risk",
+                "consumer repo is declared but tasks.md has no consumer integration task",
+                "tasks.md",
+            )
+        )
+    if machine_paths and not any(term in tasks_lower for term in ("contract test", "契约测试", "backward compatibility", "兼容")):
+        gaps.append(
+            gap(
+                "CONTRACT_TEST_TASK_MISSING",
+                "risk",
+                "machine-readable contracts are declared but tasks.md has no contract test or compatibility check",
+                "tasks.md",
+            )
+        )
+    return gaps
+
+
+def contract_value_is_missing(entry: Any) -> bool:
+    if not isinstance(entry, dict):
+        return True
+    value = str(entry.get("value") or "").strip().lower()
+    return value in {"", "n/a", "na", "none", "待确认"}
+
+
+def has_any_term(text: str, terms: tuple[str, ...]) -> bool:
+    lowered = text.lower()
+    return any(term.lower() in lowered or term in text for term in terms)
 
 
 def build_read_order(root: Path, change_path: Path, artifact_entries: list[dict[str, Any]], paths: list[str]) -> list[str]:
@@ -987,12 +1103,39 @@ def summarize_task_checks(task_state: dict[str, Any]) -> list[dict[str, Any]]:
     return [{"total": task_state["total"], "done": task_state["done"], "open": task_state["open"], "blocked": task_state["blocked"]}]
 
 
-def summarize_contract_checks(artifact_entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [
+def summarize_contract_checks(
+    artifact_entries: list[dict[str, Any]],
+    contract_sync: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    checks = [
         {"artifact": entry["id"], "status": entry["status"]}
         for entry in artifact_entries
         if "contract" in entry["id"] or entry["id"] in {"change-context", "design"}
     ]
+    if contract_sync:
+        values = contract_sync.get("values", {}) if isinstance(contract_sync, dict) else {}
+        checks.append(
+            {
+                "artifact": "contract-sync",
+                "status": "present" if values else "missing",
+                "owner": value_from_contract_sync(values, "contract_owner"),
+                "canonical_source": value_from_contract_sync(values, "canonical_source"),
+                "provider_repo": value_from_contract_sync(values, "provider_repo"),
+                "consumer_repo": value_from_contract_sync(values, "consumer_repo"),
+                "sync_mode": value_from_contract_sync(values, "sync_mode"),
+                "machine_readable_contracts": contract_sync.get("machine_readable_contracts", []),
+            }
+        )
+    return checks
+
+
+def value_from_contract_sync(values: Any, key: str) -> str:
+    if not isinstance(values, dict):
+        return ""
+    entry = values.get(key)
+    if not isinstance(entry, dict):
+        return ""
+    return str(entry.get("value") or "")
 
 
 def summarize_implementation_checks(code_paths: list[str], test_paths: list[str], source_map_required: bool) -> list[dict[str, Any]]:

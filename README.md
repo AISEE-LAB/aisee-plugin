@@ -62,6 +62,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 - **Schema-aware change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
 - **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
 - **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
+- **契约上下文服务**：`aisee contract` 以 manifest-first、section 级读取方式暴露服务契约，支持前后端跨仓库协作。
 - **ID registry 与 traceability**：`aisee id`、`aisee get`、`aisee trace` 连接上游文档、OpenSpec artifacts、tasks、代码路径、测试和 evidence。
 - **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
 - **Harness 设计**：通过 CLI contract tests 和规范化 skill eval cases 保持工作流稳定。
@@ -309,6 +310,10 @@ aisee change author-check <change> --json
 aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee contract manifest --json
+aisee contract summary --change <change> --json
+aisee contract get --change <change> --artifact service-contract --section 能力契约 --json
+aisee contract serve --host 127.0.0.1 --port 8765
 aisee change verify-check <change> --json
 aisee change archive-check <change> --json
 aisee id check --json
@@ -324,6 +329,27 @@ CLI 关键规则：
 - `aisee/registry/id-registry.json`、`aisee/registry/sources.json`、OpenSpec artifacts 和 `source-map.md` 是持久追踪输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
 - `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
+- `aisee contract serve` 是只读契约上下文服务，不是 mock backend、API gateway 或第二份接口事实源；默认只监听 `127.0.0.1`，如需局域网访问必须显式传 `--host 0.0.0.0` 并承担暴露本地契约文档的风险。
+
+### 跨仓库接口契约读取
+
+当前后端分离在不同仓库开发时，建议由后端仓库、BFF 仓库或独立契约仓库维护 `service-contract.md` 与可选的机器可读附件，例如 `contracts/openapi.yaml`、`contracts/events.yaml`、`contracts/webhooks.yaml` 或 `contracts/proto/*.proto`。
+
+推荐流程：
+
+```bash
+# 在契约提供方仓库
+aisee contract manifest --json
+aisee contract summary --change <change> --json
+aisee contract serve --host 127.0.0.1 --port 8765
+
+# 在消费方仓库的 AI 上下文中，先读 manifest，再按需读取小 section
+curl http://127.0.0.1:8765/manifest
+curl http://127.0.0.1:8765/changes/<change>/summary
+curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections/<section>?max_chars=4000"
+```
+
+契约权威来源仍然是 OpenSpec/Aisee artifacts。HTTP 服务只在请求时读取当前文件并返回 JSON 视图，不持久化契约副本，不暴露源码、环境变量、密钥或全仓库搜索结果。
 
 ## 仓库结构
 

@@ -56,7 +56,7 @@ Aisee CLI is an OpenSpec context companion, not an OpenSpec parser.
 - 对 OpenSpec artifacts，Aisee CLI 默认只做 metadata scan：路径、存在性、hash、heading、ID 引用、路径引用、checkbox 状态和 evidence 入口。
 - 当 OpenSpec CLI 提供可用 JSON 输出时，Aisee CLI 应优先消费 OpenSpec CLI 输出；缺少结构化输出时才做保守 metadata scan。
 
-`source-map.md` 是例外中的重点：它是 Aisee 自己定义的 OpenSpec companion 路由表，因此 Aisee CLI 可以结构化解析它。解析范围维护在 [source-map-contract.md](../../references/source-map-contract.md)，只覆盖 upstream sources、ID trace、artifact applicability、Affected Paths Index、Expected Evidence Index 和 out-of-scope/follow-up，不扩展到其它 OpenSpec artifact 的业务语义。
+`source-map.md` 是例外中的重点：它是 Aisee 自己定义的 OpenSpec companion 路由表，因此 Aisee CLI 可以结构化解析它。解析范围维护在 [source-map-contract.md](../../references/source-map-contract.md)，覆盖 upstream sources、ID trace、artifact applicability、Contract Ownership / Sync、Affected Paths Index、Expected Evidence Index 和 out-of-scope/follow-up，不扩展到其它 OpenSpec artifact 的业务语义。
 
 ## 设计原则
 
@@ -426,6 +426,38 @@ aisee context pack --change add-auth-login --for ce-work --json --with-summary
 - 不替代 OpenSpec schema validator
 - 不把 artifact template 变成 Aisee 的第二套 DSL
 - 不从散文中推断接口字段、UI 完整性、硬件资源正确性或验收语义
+```
+
+### contract
+
+`aisee contract` 面向前后端分仓、BFF、独立契约仓库或外部服务协作场景，提供只读契约上下文读取能力。
+
+```bash
+aisee contract manifest --json
+aisee contract summary --change add-auth-login --json
+aisee contract get --change add-auth-login --artifact service-contract --section 能力契约 --json
+aisee contract serve --host 127.0.0.1 --port 8765
+```
+
+定位边界：
+
+- 只读取 OpenSpec/Aisee artifacts，不创建第二份契约事实源。
+- 默认 manifest-first：先返回 change、契约 artifact、section index、etag 和 source files。
+- 默认 section-first：AI 应按 section 获取最小上下文，raw artifact 只能显式读取。
+- `service-contract.md` 是面向人和 AI 的契约说明；`contracts/openapi.yaml`、`contracts/events.yaml`、`contracts/webhooks.yaml`、`contracts/proto/*.proto` 是可选机器可读附件。
+- `source-map.md` 的 `Contract Ownership / Sync` 表记录 owner、canonical source、provider、consumer、sync mode、conflict rule、version/ref 和机器可读附件路径。
+- `aisee contract serve` 是只读 HTTP context server，不是 mock server、API gateway、SDK generator 或 OpenAPI 替代品。
+- HTTP 服务默认监听 `127.0.0.1`；`--host 0.0.0.0` 必须显式传入，并应提示局域网暴露风险。
+- 服务按请求读取当前文件并计算 etag，不写持久缓存，不暴露源码、环境变量、密钥或全仓库搜索。
+
+推荐跨仓库读取顺序：
+
+```text
+1. GET /manifest
+2. GET /changes/<change>/summary
+3. GET /changes/<change>/contracts/<artifact>/sections
+4. GET /changes/<change>/contracts/<artifact>/sections/<section>?max_chars=4000
+5. 必要时显式读取 raw artifact
 ```
 
 不同目标的上下文不同：

@@ -143,6 +143,17 @@ apply:
 ## Artifact 适用性
 
 | service-contract.md | yes | auth:API-001 | 需要后端接口 | tasks.md |
+
+## Contract Ownership / Sync
+
+| Key | Value | Status | Notes |
+|---|---|---|---|
+| contract_owner | backend | confirmed | |
+| canonical_source | contracts/openapi.yaml | confirmed | |
+| provider_repo | backend-api | confirmed | |
+| consumer_repo | frontend-app | confirmed | |
+| sync_mode | local-http | confirmed | |
+| machine_readable_contract | contracts/openapi.yaml | confirmed | |
 """,
     )
     write(
@@ -166,8 +177,10 @@ auth:API-001 uses src/auth/session.py and tests/auth/test_session.py.
         change / "tasks.md",
         """# Tasks
 
-- [ ] auth:TASK-001 Implement src/auth/session.py.
-- [ ] auth:TEST-001 Verify tests/auth/test_session.py.
+- [ ] auth:TASK-001 Provider implementation: implement src/auth/session.py.
+- [ ] auth:TASK-001 Consumer integration: update frontend caller.
+- [ ] auth:TEST-001 Contract test: verify tests/auth/test_session.py.
+- [ ] auth:TEST-001 Backward compatibility check: confirm login contract compatibility.
 """,
     )
 
@@ -220,7 +233,7 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path) -> None:
     assert pack["change"]["schema"] == "aisee-app-spec-driven"
     assert "src/auth/session.py" in pack["facts"]["derived"]["code_paths"]
     assert "tests/auth/test_session.py" in pack["facts"]["derived"]["test_paths"]
-    assert pack["facts"]["derived"]["task_state"]["total"] == 2
+    assert pack["facts"]["derived"]["task_state"]["total"] == 4
     assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
     assert pack["facts"]["derived"]["execution"]["allowed_paths"] == [
         "src/auth/session.py",
@@ -281,6 +294,20 @@ def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:
     assert "schema_artifacts" in checks
     assert "traceability" in checks
     assert "review_and_tests" in checks
+    contract_sync = pack["facts"]["parsed"]["source_map"]["contract_sync"]
+    assert contract_sync["values"]["provider_repo"]["value"] == "backend-api"
+    assert contract_sync["machine_readable_contracts"] == ["contracts/openapi.yaml"]
+    contract_checks = checks["contracts"]
+    assert {
+        "artifact": "contract-sync",
+        "status": "present",
+        "owner": "backend",
+        "canonical_source": "contracts/openapi.yaml",
+        "provider_repo": "backend-api",
+        "consumer_repo": "frontend-app",
+        "sync_mode": "local-http",
+        "machine_readable_contracts": ["contracts/openapi.yaml"],
+    } in contract_checks
     assert pack["facts"]["derived"]["drift_candidates"] == []
 
 
@@ -386,7 +413,7 @@ def test_cli_change_inspect_outputs_summary(tmp_path: Path) -> None:
     assert "auth:SPEC-001" in data["ids"]["produced"]
     assert data["ids"]["registry"]["missing"] == []
     assert data["ids"]["registry"]["status_counts"]["active"] == 5
-    assert data["task_state"]["total"] == 2
+    assert data["task_state"]["total"] == 4
     assert "src/auth/session.py" in data["paths"]["code"]
 
 

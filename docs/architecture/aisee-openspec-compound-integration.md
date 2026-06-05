@@ -135,9 +135,10 @@ Aisee CLI 是 Aisee/OpenSpec/Compound 之间的上下文总线，也是 OpenSpec
 - `aisee trace <id>`：查询 ID 上下游关系。
 - `aisee change inspect <change>`：衔接单个 OpenSpec change，返回 schema/artifact metadata、ID、路径和 evidence。
 - `aisee context pack --change <change> --for <target>`：调用时汇总 OpenSpec metadata、sources、ID registry、source-map 和 evidence，生成给 Aisee skill 或 CE skill 的最小上下文包。
+- `aisee contract manifest/summary/get/serve`：从 OpenSpec/Aisee artifacts 只读派生契约上下文，支持前后端跨仓库 AI 按 manifest、summary 和 section 逐步读取接口契约。
 - `aisee id reserve/activate/check`：维护 `aisee/registry/id-registry.json`。
 
-Aisee CLI 不替代 OpenSpec CLI。它只负责来源登记、ID/路径/证据追踪、metadata scan、查询、初始化编排和 AI 友好 JSON 输出。JSON 是当前 OpenSpec/Aisee/CE 事实的上下文视图，不是第二份事实源。OpenSpec artifacts 的合法性仍以 `openspec validate` 和 OpenSpec schema 机制为准。详细设计见 [aisee-cli-context-and-id-registry.md](aisee-cli-context-and-id-registry.md)。
+Aisee CLI 不替代 OpenSpec CLI。它只负责来源登记、ID/路径/证据追踪、metadata scan、契约上下文读取、查询、初始化编排和 AI 友好 JSON 输出。JSON 是当前 OpenSpec/Aisee/CE 事实的上下文视图，不是第二份事实源。OpenSpec artifacts 的合法性仍以 `openspec validate` 和 OpenSpec schema 机制为准。详细设计见 [aisee-cli-context-and-id-registry.md](aisee-cli-context-and-id-registry.md)。
 
 ### OpenSpec
 

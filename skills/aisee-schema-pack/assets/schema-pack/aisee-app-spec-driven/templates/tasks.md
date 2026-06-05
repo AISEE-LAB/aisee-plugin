@@ -13,9 +13,13 @@
 ## 1. 实现
 
 > 每个实现任务必须引用已有 specs / contract / source-map ID，不重新描述需求、页面、接口或数据模型。
+> 当前后端分仓协作适用时，保留 provider / consumer / contract-test 任务；不适用时写 N/A 原因，不要为模板完整而制造任务。
 
 - [ ] {{scope}}:TASK-001 实现 {{scope}}:SPEC-001 对应行为，覆盖 {{scope}}:API-001 / {{scope}}:PAGE-001 / {{scope}}:DATA-001 / N/A。
 - [ ] {{scope}}:TASK-002 更新必要代码、配置或文档，覆盖 {{scope}}:CONSTRAINT-001 / N/A。
+- [ ] {{scope}}:TASK-003 Provider implementation：实现或更新 {{scope}}:API-001 对应 provider 能力；证据：代码路径 / N/A 原因。
+- [ ] {{scope}}:TASK-004 Consumer integration：接入或更新 {{scope}}:API-001 对应 consumer 调用；证据：代码路径 / N/A 原因。
+- [ ] {{scope}}:TASK-005 Mock / SDK / generated client：生成、更新或确认不需要 mock / SDK / client；证据：路径 / 命令 / N/A 原因。
 
 ## 2. 验证
 
@@ -24,6 +28,8 @@
 - [ ] {{scope}}:TEST-001 验证 {{scope}}:SPEC-001 验收场景；证据：docs/verification/{{change-name}}-test-results.md / N/A。
 - [ ] {{scope}}:TEST-002 验证 Required=yes 的 UI / 服务 / 数据 / 架构约束；证据：截图 / 测试命令 / 人工验证记录 / N/A。
 - [ ] {{scope}}:TEST-003 运行相关测试、检查命令或人工验证；证据：命令输出 / 验证报告 / N/A。
+- [ ] {{scope}}:TEST-004 Contract test：验证 provider / consumer 契约一致性；证据：命令输出 / 报告 / N/A 原因。
+- [ ] {{scope}}:TEST-005 Backward compatibility check：验证兼容性、版本引用或破坏性变更处理；证据：命令输出 / 报告 / N/A 原因。
 
 ## 3. 完成确认
 

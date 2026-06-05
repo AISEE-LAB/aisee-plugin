@@ -6,6 +6,9 @@ description: |
   单个 OpenSpec change 内可实现、可验证、可追踪的 artifacts。
   与官方 spec-driven 的区别：增加 source-map.md 作为 ID 路由表，增加 change-context.md 承接
   本 change 相关架构约束，并按需生成 ui-contract.md、service-contract.md、data-model.md。
+  当前后端分仓或存在独立契约仓库时，source-map.md 与 service-contract.md 必须记录契约 owner、
+  provider / consumer、同步模式和机器可读契约附件路径；OpenAPI、events、webhooks、proto 等文件
+  是可选契约附件，不默认要求生成，但必须能被追踪。
   最小闭环是 proposal.md、source-map.md、specs/**/*.md 和 tasks.md。
   change-context.md、ui-contract.md、service-contract.md、data-model.md 是按需 artifacts；
   source-map.md 的 Artifact 适用性表明确 Required=no 且写明原因时，可以不展开对应 contract。
@@ -48,6 +51,7 @@ artifacts:
       - 映射本 change 产出 ID：SPEC / API / DATA / TASK / TEST
       - 明确不在范围内的上游条目
       - 声明 change-context.md、ui-contract.md、service-contract.md、data-model.md 是否适用；Required=no 必须写具体原因
+      - 当 service-contract.md Required=yes 或涉及跨仓库协作时，记录契约归属、权威来源、provider、consumer、同步模式、冲突规则、版本引用和机器可读契约附件路径
       - Required=no 的 contract 不需要展开完整模板；如项目要求保留文件，只写状态和 N/A 原因即可
       - 候选影响路径只作为索引，不写具体实现步骤
       - 预期证据只作为索引，不写最终验证结论
@@ -99,6 +103,7 @@ artifacts:
       - Existing / Changed / New / Deprecated / Unknown 的 UI 变更范围；Existing 只引用来源，不重写完整规格
       - 页面内容结构、区块、操作、状态反馈和权限可见性
       - 前端需要的数据与来源能力
+      - 当前端数据依赖服务契约时，只记录数据需求、能力引用和后端能力状态，不把 ui-contract.md 当作 API 事实源
       - 引用 Design Spec / Design Assets / dev-visual-brief 中对本 change 生效的组件库、token、资产、布局、响应式、可访问性、动效和视觉验收约束
       - 轻量覆盖检查；跨文档追踪关系写入 source-map.md，验证证据写入 source-map.md 或 tasks.md
       - 不要在 ui-contract.md 重新定义或复制完整视觉规范、组件库、配色、排版或像素布局；这些仍以 Design Spec / Design Assets 为事实源
@@ -132,6 +137,8 @@ artifacts:
       - API / backend service / async job / scheduled job / CLI or tool command / integration endpoint
       - 新增 API ID 前必须通过 ID registry 预留
       - Existing / Changed / New / Deprecated / Unknown 的服务变更范围；Existing 只引用来源，不重写完整契约
+      - 契约归属、权威来源、provider / consumer、同步模式、冲突规则、版本引用和机器可读契约附件路径
+      - OpenAPI / events / webhooks / proto 等机器可读契约只作为可选附件追踪；默认不要求每个 change 生成
       - 请求响应、命令参数、权限、错误、幂等、分页、排序、过滤、重试、超时必须明确
       - 业务逻辑、状态流转、校验规则、异步任务和通知必须引用 specs / RULE，不复制需求全文
       - 数据读写、事务、一致性和失败处理必须引用 data-model.md
@@ -154,6 +161,7 @@ artifacts:
       - 确认 Required=no 的按需 artifact 已在 source-map.md 写明 N/A 原因
       - 确认无阻塞项；保留风险已写入 source-map.md
       - 实现任务必须引用已有 specs / contract / source-map ID，不重新描述需求、页面、接口或数据模型
+      - 当前后端分仓协作适用时，任务必须覆盖 provider implementation、consumer integration、mock / SDK / generated client 使用或 N/A、contract test、backward compatibility check
       - 验证任务必须关联 TEST ID，并记录证据命令或证据路径
       - 完成确认只记录任务和验证是否完成；归档判断交给 aisee:archive-guard
 
