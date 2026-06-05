@@ -63,6 +63,7 @@ Compound Engineering = optional implementation / review / test consumer
 - **OpenSpec schema pack**: includes app, device, docsite, infra, security, quick-fix, quick-research, and collaboration schemas.
 - **Context packs**: `aisee context pack` generates JSON context for implementation, verification, and review.
 - **Contract context service**: `aisee contract` exposes service contracts through manifest-first and section-level reads for cross-repository frontend/backend collaboration.
+- **Team knowledge guardrails**: `aisee knowledge` retrieves a small number of reviewed engineering lessons through pack/card protocols without turning the knowledge repository into a second specification source.
 - **ID registry and traceability**: `aisee id`, `aisee get`, and `aisee trace` connect upstream documents, OpenSpec artifacts, tasks, code paths, tests, and evidence.
 - **Verification and archive guardrails**: `aisee:verify` and `aisee:archive-guard` diagnose gaps and risks before archive.
 - **Harness design**: CLI contract tests and normalized skill eval cases keep the workflow stable.
@@ -144,6 +145,7 @@ The exported directory contains:
 aisee-plugin-bundle/
   .codex-plugin/plugin.json
   skills/
+  references/
 ```
 
 If your agent runtime supports loading local plugins, point it to the exported directory or the corresponding plugin metadata file.
@@ -204,6 +206,7 @@ aisee flow inspect --json
 
 - [Aisee Workflow](docs/workflow.en.md): end-to-end guidance from setup, requirement clarification, change authoring, implementation handoff, verification, and archive.
 - [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, schemas, contracts, context packs, review, and archive when using Aisee with OpenSpec.
+- [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, and read model.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
 
@@ -246,6 +249,7 @@ For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline spec
 | `aisee:svg-assets` | Generate, vectorize, optimize, and validate SVG assets. |
 | `aisee:image-object` | Handle object-level image segmentation, masks, background removal, and exports. |
 | `aisee:reflect` | Capture reusable project lessons and workflow improvements. |
+| `aisee:knowledge-curate` | Batch-review project-local reusable knowledge candidates and produce card drafts for human submission to team knowledge. |
 
 Hardware-related skills are retained but still being integrated into the main Aisee workflow:
 
@@ -316,7 +320,12 @@ aisee change inspect <change> --json
 aisee change author-check <change> --json
 aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee knowledge inspect --json
+aisee knowledge query --phase implementation --surface cli --query "public CLI JSON" --json
+aisee knowledge query --from-change <change> --for ce-work --json
+aisee knowledge index --json
 aisee contract manifest --json
 aisee contract summary --change <change> --json
 aisee contract get --change <change> --artifact service-contract --section capabilities --json
@@ -333,10 +342,12 @@ Key CLI rules:
 
 - JSON output is a context view, not a source of truth.
 - `aisee/cache/context-index.json` is a deletable and rebuildable cache.
+- `aisee/cache/knowledge-index.json` is also a deletable and rebuildable cache; team knowledge persists in pinned pack/card files.
 - `aisee/registry/id-registry.json`, `aisee/registry/sources.json`, OpenSpec artifacts, and `source-map.md` are persistent traceability inputs.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
 - `aisee openspec ensure` only bridges OpenSpec initialization and profile setup. It does not replace `aisee:init`.
 - `aisee contract serve` is a read-only contract context service, not a mock backend, API gateway, or second API source of truth. It binds to `127.0.0.1` by default; LAN access requires explicit `--host 0.0.0.0` and exposes local contract documents to that network.
+- `aisee knowledge query` returns only a small number of guardrails. By default it reads pack manifests and card frontmatter; `--debug` is required for matched card body excerpts.
 
 ### Cross-Repository Contract Reads
 
@@ -357,6 +368,39 @@ curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections
 ```
 
 OpenSpec/Aisee artifacts remain the authoritative contract source. The HTTP service reads current files on request and returns a JSON view; it does not persist contract copies and does not expose source code, environment variables, secrets, or full-repository search results.
+
+### Team Knowledge Guardrails
+
+Team knowledge reuses engineering lessons across projects, but it does not replace OpenSpec, `source-map.md`, contracts, tasks, or baseline specs.
+
+Business projects can pin an independent knowledge repository, local path, ref, and packs in `aisee/knowledge.yaml`:
+
+```yaml
+repo: git@example.com:org/aisee-team-knowledge.git
+path: .aisee/team-knowledge
+ref: v0.1.0
+packs:
+  - web-app
+retrieval:
+  max_cards: 3
+  include_project_candidates: true
+```
+
+Common commands:
+
+```bash
+aisee knowledge inspect --json
+aisee knowledge query --phase implementation --surface cli --query "public CLI JSON" --json
+aisee knowledge query --from-change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --knowledge --json
+```
+
+Rules:
+
+- Query through the CLI instead of letting AI scan `knowledge/cards/**/*.md` directly.
+- Return a small number of bounded matches as implementation, review, or verification reminders.
+- Project-local `aisee/docs/reflect/knowledge-candidates/` remains a candidate area and is not promoted automatically.
+- `aisee:knowledge-curate` only produces review reports and card drafts. Writing to the team repo, creating branches, committing, merging, or opening PRs requires explicit user authorization again.
 
 ## Repository Layout
 

@@ -63,6 +63,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 - **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
 - **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
 - **契约上下文服务**：`aisee contract` 以 manifest-first、section 级读取方式暴露服务契约，支持前后端跨仓库协作。
+- **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
 - **ID registry 与 traceability**：`aisee id`、`aisee get`、`aisee trace` 连接上游文档、OpenSpec artifacts、tasks、代码路径、测试和 evidence。
 - **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
 - **Harness 设计**：通过 CLI contract tests 和规范化 skill eval cases 保持工作流稳定。
@@ -144,6 +145,7 @@ cursor
 aisee-plugin-bundle/
   .codex-plugin/plugin.json
   skills/
+  references/
 ```
 
 如果你的 agent runtime 支持加载本地插件，可以指向导出的目录或对应的 plugin metadata 文件。
@@ -204,6 +206,7 @@ aisee flow inspect --json
 
 - [Aisee Workflow](docs/workflow.md)：端到端说明如何从初始化、需求澄清、change authoring、实现交接、验证到 archive。
 - [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、schema、contract、context pack、review 和 archive 约定。
+- [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md)：说明 team knowledge 的 guardrail retrieval 定位、card/pack 边界和读取模型。
 - [Aisee / OpenSpec / Compound Engineering 融合方案](docs/architecture/aisee-openspec-compound-integration.md)：高层职责边界和历史决策快照。
 - [OpenSpec 多 Schema 最佳实践](docs/architecture/openspec-multi-schema-best-practices.md)：多 schema 共存、冲突和管理规则。
 
@@ -246,6 +249,7 @@ aisee flow inspect --json
 | `aisee:svg-assets` | 生成、矢量化、优化和校验 SVG assets。 |
 | `aisee:image-object` | 对象级图片分割、mask、去背景和导出工作流。 |
 | `aisee:reflect` | 沉淀可复用项目经验和工作流改进。 |
+| `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
 
 硬件相关 skills 已保留，但仍在整合到 Aisee 主工作流中：
 
@@ -316,7 +320,12 @@ aisee change inspect <change> --json
 aisee change author-check <change> --json
 aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee knowledge inspect --json
+aisee knowledge query --phase implementation --surface cli --query "public CLI JSON" --json
+aisee knowledge query --from-change <change> --for ce-work --json
+aisee knowledge index --json
 aisee contract manifest --json
 aisee contract summary --change <change> --json
 aisee contract get --change <change> --artifact service-contract --section 能力契约 --json
@@ -333,10 +342,12 @@ CLI 关键规则：
 
 - JSON 输出只是上下文视图，不是事实源。
 - `aisee/cache/context-index.json` 只是可删除、可重建的 cache。
+- `aisee/cache/knowledge-index.json` 也是可删除、可重建的 cache；team knowledge 的持久来源是已 pin 的 pack/card 文件。
 - `aisee/registry/id-registry.json`、`aisee/registry/sources.json`、OpenSpec artifacts 和 `source-map.md` 是持久追踪输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
 - `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
 - `aisee contract serve` 是只读契约上下文服务，不是 mock backend、API gateway 或第二份接口事实源；默认只监听 `127.0.0.1`，如需局域网访问必须显式传 `--host 0.0.0.0` 并承担暴露本地契约文档的风险。
+- `aisee knowledge query` 只返回少量 guardrails；默认只读 pack manifest 和 card frontmatter，`--debug` 才包含命中 card 的正文摘要。
 
 ### 跨仓库接口契约读取
 
@@ -357,6 +368,39 @@ curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections
 ```
 
 契约权威来源仍然是 OpenSpec/Aisee artifacts。HTTP 服务只在请求时读取当前文件并返回 JSON 视图，不持久化契约副本，不暴露源码、环境变量、密钥或全仓库搜索结果。
+
+### 团队知识 Guardrails
+
+团队知识用于跨项目复用工程经验，但不替代 OpenSpec、`source-map.md`、contracts、tasks 或 baseline specs。
+
+业务项目可以在 `aisee/knowledge.yaml` 中 pin 独立知识仓库、本地路径、ref 和 packs：
+
+```yaml
+repo: git@example.com:org/aisee-team-knowledge.git
+path: .aisee/team-knowledge
+ref: v0.1.0
+packs:
+  - web-app
+retrieval:
+  max_cards: 3
+  include_project_candidates: true
+```
+
+常用命令：
+
+```bash
+aisee knowledge inspect --json
+aisee knowledge query --phase implementation --surface cli --query "public CLI JSON" --json
+aisee knowledge query --from-change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --knowledge --json
+```
+
+使用原则：
+
+- 通过 CLI 查询，不让 AI 直接扫描 `knowledge/cards/**/*.md`。
+- 只返回少量带边界的 matches，作为实现、review 或 verify 的提醒。
+- 项目内 `aisee/docs/reflect/knowledge-candidates/` 仍是候选区，不自动进入 team knowledge。
+- `aisee:knowledge-curate` 只生成审查报告和 card drafts；写入 team repo、创建分支、提交、合并或 PR 必须再次获得用户明确授权。
 
 ## 仓库结构
 

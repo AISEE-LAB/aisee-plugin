@@ -117,6 +117,15 @@ aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 ```
 
+如果项目配置了 team knowledge，可以在公开接口、schema、路径读取、安全、跨仓库契约等高风险实现前额外读取少量 guardrails：
+
+```bash
+aisee knowledge query --from-change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --knowledge --json
+```
+
+Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，也不应复制进长期 artifacts。
+
 然后使用 `aisee:implementation-bridge` 输出 Implementation Brief。Brief 只做执行索引：
 
 - 当前 change 和 schema。
@@ -204,6 +213,27 @@ curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections
 ```
 
 `aisee contract serve` 是只读上下文服务，不是 mock backend，不是 API gateway，也不是第二份接口事实源。
+
+## 9. Team Knowledge 复用
+
+当一个项目沉淀出可复用经验时，先由用户明确触发 `aisee:reflect` 生成项目内 candidate，再按需运行 `aisee:knowledge-curate` 做批量审查、去敏、泛化和去重。
+
+推荐路径：
+
+```text
+aisee:reflect
+  -> aisee/docs/reflect/knowledge-candidates/
+  -> aisee:knowledge-curate
+  -> batch review report / card drafts
+  -> 用户确认后再写入 team knowledge repo
+```
+
+边界：
+
+- 不在 archive 或 verify 后自动写入 team knowledge。
+- 不把 `docs/solutions/`、memory 或 reflect 文档整库复制到其他项目。
+- 不让 AI 直接扫描 team knowledge 仓库正文；使用 `aisee knowledge query`。
+- 写入 team repo、创建分支、提交、合并或 PR 前必须再次获得用户明确授权。
 
 ## 快速路径
 

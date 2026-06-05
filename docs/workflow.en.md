@@ -117,6 +117,15 @@ aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 ```
 
+If the project has configured team knowledge, read a small number of guardrails before high-risk implementation such as public interfaces, schemas, path reads, security, or cross-repository contracts:
+
+```bash
+aisee knowledge query --from-change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --knowledge --json
+```
+
+Knowledge matches are reminders only. They do not change the current change's specification source and should not be copied into durable artifacts.
+
 Then use `aisee:implementation-bridge` to produce an Implementation Brief. The brief is an execution index:
 
 - current change and schema;
@@ -204,6 +213,27 @@ curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections
 ```
 
 `aisee contract serve` is a read-only context service. It is not a mock backend, API gateway, or second API source of truth.
+
+## 9. Team Knowledge Reuse
+
+When a project produces reusable engineering lessons, first let the user explicitly trigger `aisee:reflect` to create project-local candidates, then run `aisee:knowledge-curate` when batch review, desensitization, generalization, and deduplication are needed.
+
+Recommended path:
+
+```text
+aisee:reflect
+  -> aisee/docs/reflect/knowledge-candidates/
+  -> aisee:knowledge-curate
+  -> batch review report / card drafts
+  -> user confirmation before writing to the team knowledge repo
+```
+
+Boundaries:
+
+- Do not write team knowledge automatically after archive or verify.
+- Do not copy whole `docs/solutions/`, memory, or reflect documents into other projects.
+- Do not let AI scan team knowledge repository bodies directly; use `aisee knowledge query`.
+- Writing to the team repo, creating branches, committing, merging, or opening PRs requires explicit user authorization again.
 
 ## Fast Paths
 
