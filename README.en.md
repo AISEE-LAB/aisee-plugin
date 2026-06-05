@@ -200,6 +200,13 @@ aisee doctor --json
 aisee flow inspect --json
 ```
 
+## Documentation
+
+- [Aisee Workflow](docs/workflow.en.md): end-to-end guidance from setup, requirement clarification, change authoring, implementation handoff, verification, and archive.
+- [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, schemas, contracts, context packs, review, and archive when using Aisee with OpenSpec.
+- [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
+- [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
+
 ## Typical Workflow
 
 ```text
@@ -363,7 +370,8 @@ src/aisee_plugin_assets/
                      Skills, schemas, references, and plugin metadata packaged into wheels
 skills/              Aisee skills and skill assets
 references/          Cross-skill contracts and references
-docs/architecture/   Architecture and workflow design docs
+docs/                User workflow, best practices, architecture, plans, and review docs
+docs/architecture/   Architecture and historical decision docs
 docs/plans/          Development plans
 docs/reviews/        Audit and review records
 scripts/             Development and release helper scripts
@@ -420,7 +428,7 @@ python -m build
 
 - Stabilize public plugin installation instructions.
 - Continue normalizing skill eval cases to `aisee.skill-eval.v1`.
-- Add full lifecycle workflow scenario fixtures.
+- Add full lifecycle workflow dogfood and scenario fixtures.
 - Add schema pack documentation and examples.
 - Integrate hardware and embedded workflows into the Aisee system.
 - Add release, contributing, and license files before public 1.0.

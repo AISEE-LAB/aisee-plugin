@@ -200,6 +200,13 @@ aisee doctor --json
 aisee flow inspect --json
 ```
 
+## 文档
+
+- [Aisee Workflow](docs/workflow.md)：端到端说明如何从初始化、需求澄清、change authoring、实现交接、验证到 archive。
+- [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、schema、contract、context pack、review 和 archive 约定。
+- [Aisee / OpenSpec / Compound Engineering 融合方案](docs/architecture/aisee-openspec-compound-integration.md)：高层职责边界和历史决策快照。
+- [OpenSpec 多 Schema 最佳实践](docs/architecture/openspec-multi-schema-best-practices.md)：多 schema 共存、冲突和管理规则。
+
 ## 典型流程
 
 ```text
@@ -363,7 +370,8 @@ src/aisee_plugin_assets/
                      打包进 wheel 的 skills、schemas、references 和 plugin metadata
 skills/              Aisee skills 和 skill assets
 references/          跨 skill contracts 和 references
-docs/architecture/   架构与工作流设计文档
+docs/                用户 workflow、最佳实践、架构、计划和 review 文档
+docs/architecture/   架构与历史决策文档
 docs/plans/          开发计划
 docs/reviews/        审计和 review 记录
 scripts/             开发和发布辅助脚本
@@ -420,7 +428,7 @@ python -m build
 
 - 稳定公开插件安装说明。
 - 继续将 skill eval cases 规范化到 `aisee.skill-eval.v1`。
-- 增加完整生命周期 workflow scenario fixtures。
+- 增加完整生命周期 workflow dogfood 和 scenario fixtures。
 - 补充 schema pack 文档和示例。
 - 将硬件和嵌入式工作流整合进 Aisee 体系。
 - 公开 1.0 前补齐 release、contributing 和 license 文件。
