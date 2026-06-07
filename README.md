@@ -209,6 +209,7 @@ aisee flow inspect --json
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md)：说明 team knowledge 的 guardrail retrieval 定位、card/pack 边界和读取模型。
 - [Aisee / OpenSpec / Compound Engineering 融合方案](docs/architecture/aisee-openspec-compound-integration.md)：高层职责边界和历史决策快照。
 - [OpenSpec 多 Schema 最佳实践](docs/architecture/openspec-multi-schema-best-practices.md)：多 schema 共存、冲突和管理规则。
+- [Release And Version Governance](docs/release.md)：版本号单一事实源、发布检查和 tag 规则。
 
 ## 典型流程
 
@@ -448,6 +449,13 @@ python -m aisee_cli.__main__ --help
 python scripts/sync_package_assets.py
 ```
 
+检查和同步版本号：
+
+```bash
+python scripts/check_versions.py
+python scripts/sync_versions.py
+```
+
 构建 wheel：
 
 ```bash
@@ -471,12 +479,24 @@ python -m build
 
 ## Roadmap
 
-- 稳定公开插件安装说明。
+### Public Beta 前
+
+- 稳定公开安装路径：PyPI/pipx、源码安装、plugin export 和 runtime loading。
+- 完成版本治理：`pyproject.toml` 作为唯一版本事实源，脚本同步 CLI 与 plugin metadata，测试检查版本漂移。
 - 继续将 skill eval cases 规范化到 `aisee.skill-eval.v1`。
 - 增加完整生命周期 workflow dogfood 和 scenario fixtures。
-- 补充 schema pack 文档和示例。
+
+### 1.0 前
+
+- 补充 schema pack 文档、示例和可运行的样例 changes。
+- 补齐 `LICENSE`、`CONTRIBUTING.md`、release notes 和发布说明。
+- 定义 CLI JSON、schema packs 和 skill contracts 的兼容策略。
+- 完成 package build、plugin export 和安装后 smoke tests。
+
+### 后续
+
 - 将硬件和嵌入式工作流整合进 Aisee 体系。
-- 公开 1.0 前补齐 release、contributing 和 license 文件。
+- 扩展跨仓库契约协作示例和 team knowledge 工作流。
 
 ## License
 

@@ -209,6 +209,7 @@ aisee flow inspect --json
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, and read model.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
+- [Release And Version Governance](docs/release.md): single version source, release checks, and tag rules.
 
 ## Typical Workflow
 
@@ -448,6 +449,13 @@ Sync packaged plugin assets:
 python scripts/sync_package_assets.py
 ```
 
+Check and sync versions:
+
+```bash
+python scripts/check_versions.py
+python scripts/sync_versions.py
+```
+
 Build a wheel:
 
 ```bash
@@ -471,12 +479,24 @@ python -m build
 
 ## Roadmap
 
-- Stabilize public plugin installation instructions.
+### Before Public Beta
+
+- Stabilize public installation paths: PyPI/pipx, source install, plugin export, and runtime loading.
+- Complete version governance: use `pyproject.toml` as the single version source, sync CLI and plugin metadata through scripts, and test for version drift.
 - Continue normalizing skill eval cases to `aisee.skill-eval.v1`.
 - Add full lifecycle workflow dogfood and scenario fixtures.
-- Add schema pack documentation and examples.
+
+### Before 1.0
+
+- Add schema pack documentation, examples, and runnable sample changes.
+- Add `LICENSE`, `CONTRIBUTING.md`, release notes, and publishing guide.
+- Define compatibility policy for CLI JSON, schema packs, and skill contracts.
+- Complete package build, plugin export, and post-install smoke tests.
+
+### Later
+
 - Integrate hardware and embedded workflows into the Aisee system.
-- Add release, contributing, and license files before public 1.0.
+- Expand cross-repository contract collaboration examples and team knowledge workflows.
 
 ## License
 
