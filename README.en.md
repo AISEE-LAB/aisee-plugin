@@ -506,20 +506,24 @@ python scripts/smoke_release.py
 
 ## Roadmap
 
+### Available Today
+
+- Local source install, plugin export, runtime loading, version consistency checks, and release smoke tests.
+- `pyproject.toml` is the single version source, with scripts and tests checking CLI, plugin metadata, and package version drift.
+- CLI JSON, schema packs, context packs, plugin export, and experimental capabilities have an initial compatibility layering policy.
+- Team knowledge is explicitly experimental: only local `path`, CLI read-only retrieval, and explicit `--knowledge` injection are committed.
+- Existing skill eval cases use `aisee.skill-eval.v1`.
+
 ### Before Public Beta
 
-- Stabilize public installation paths: PyPI/pipx, source install, plugin export, and runtime loading.
-- Complete version governance: use `pyproject.toml` as the single version source, sync CLI and plugin metadata through scripts, and test for version drift.
-- Establish the first compatibility policy: CLI JSON, schema packs, context packs, plugin export, and experimental capabilities must have clear contract layers.
-- Keep team knowledge experimental: Public Beta only commits to local `path`, CLI read-only retrieval, and explicit `--knowledge` injection, not remote install, automatic sync, or automatic writes.
-- Continue normalizing skill eval cases to `aisee.skill-eval.v1`.
+- Complete PyPI/pipx release validation and run post-install smoke tests in a clean environment.
 - Add full lifecycle workflow dogfood and scenario fixtures.
+- Add runnable schema pack examples and sample changes.
 
 ### Before 1.0
 
-- Add runnable schema sample changes.
 - Freeze the 1.0 compatibility boundary and define versioning rules for breaking CLI JSON, schema packs, context packs, skill contracts, and plugin export.
-- Complete package build, plugin export, and post-install smoke tests.
+- Define upgrade, deprecation, and migration rules for Public Contract, Experimental Contract, and Internal Detail surfaces.
 
 ### Later
 

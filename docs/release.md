@@ -131,13 +131,11 @@ git tag v0.1.0
 
 公开 beta 前必须完成：
 
-- 安装路径稳定：PyPI/pipx、源码安装、plugin export、runtime loading。
-- 版本治理稳定：单一版本事实源、同步脚本、检查脚本、测试覆盖。
-- 兼容策略初版已落地：CLI JSON、schema packs、context pack、plugin export 和 experimental 能力有明确 contract 分层。
-- Team knowledge 保持 experimental；Public Beta 只承诺本地 `path`、CLI 只读检索和显式 `--knowledge` 注入，不承诺远程安装、自动同步或自动写入。
-- release checklist、changelog 和 tag 规则可执行。
+- PyPI/pipx 发布路径验证通过，并在干净环境中完成安装后 smoke test。
+- 完整生命周期 workflow dogfood 和 scenario fixtures 可执行。
+- schema pack 示例和 sample changes 可运行。
 
 1.0 前必须完成：
 
 - 冻结 1.0 兼容边界，明确破坏 CLI JSON、schema packs、context pack、skill contract 和 plugin export 的版本升级规则。
-- schema pack 文档、示例和完整 lifecycle dogfood fixtures。
+- 明确 Public Contract、Experimental Contract 和 Internal Detail 的升级、弃用和迁移规则。

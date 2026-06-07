@@ -506,20 +506,24 @@ python scripts/smoke_release.py
 
 ## Roadmap
 
+### 当前已具备
+
+- 本地源码安装、plugin export、runtime loading、版本一致性检查和 release smoke test。
+- `pyproject.toml` 作为唯一版本事实源，CLI、plugin metadata 和测试通过脚本检查版本漂移。
+- CLI JSON、schema packs、context pack、plugin export 和 experimental 能力已有初版兼容分层。
+- Team knowledge 已明确为 experimental：只承诺本地 `path`、CLI 只读检索和显式 `--knowledge` 注入。
+- 已有 skill eval cases 统一到 `aisee.skill-eval.v1`。
+
 ### Public Beta 前
 
-- 稳定公开安装路径：PyPI/pipx、源码安装、plugin export 和 runtime loading。
-- 完成版本治理：`pyproject.toml` 作为唯一版本事实源，脚本同步 CLI 与 plugin metadata，测试检查版本漂移。
-- 落实兼容策略初版：CLI JSON、schema packs、context pack、plugin export 和 experimental 能力必须有明确 contract 分层。
-- 团队知识保持 experimental：Public Beta 只承诺本地 `path`、CLI 只读检索和显式 `--knowledge` 注入，不承诺远程安装、自动同步或自动写入。
-- 继续将 skill eval cases 规范化到 `aisee.skill-eval.v1`。
+- 完成 PyPI/pipx 发布验证，并在干净环境中跑通安装后 smoke test。
 - 增加完整生命周期 workflow dogfood 和 scenario fixtures。
+- 补齐可运行的 schema pack 示例和 sample changes。
 
 ### 1.0 前
 
-- 补充可运行的 schema sample changes。
 - 冻结 1.0 兼容边界，明确破坏 CLI JSON、schema packs、context pack、skill contract 和 plugin export 的版本升级规则。
-- 完成 package build、plugin export 和安装后 smoke tests。
+- 明确 Public Contract、Experimental Contract 和 Internal Detail 的升级、弃用和迁移规则。
 
 ### 后续
 
