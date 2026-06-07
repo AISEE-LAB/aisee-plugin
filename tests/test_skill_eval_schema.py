@@ -4,14 +4,7 @@ import json
 from pathlib import Path
 
 
-EVAL_FILES = [
-    Path("skills/aisee-srs/evals/evals.json"),
-    Path("skills/aisee-change-plan/evals/evals.json"),
-    Path("skills/aisee-ui-content/evals/evals.json"),
-    Path("skills/aisee-architecture/evals/evals.json"),
-    Path("skills/aisee-init/evals/evals.json"),
-    Path("skills/aisee-spec-migrate/evals/evals.json"),
-]
+EVAL_FILES = sorted(Path("skills").glob("*/evals/evals.json"))
 
 REQUIRED_CASE_FIELDS = {
     "id",
@@ -31,6 +24,8 @@ REQUIRED_CASE_FIELDS = {
 
 
 def test_normalized_skill_eval_files_follow_schema() -> None:
+    assert EVAL_FILES, "no skill eval files found"
+
     for path in EVAL_FILES:
         data = json.loads(path.read_text(encoding="utf-8"))
 

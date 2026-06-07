@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import venv
+from importlib.util import find_spec
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,7 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def run(command: list[str], *, cwd: Path = ROOT, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     print(f"+ {' '.join(command)}")
-    return subprocess.run(command, cwd=cwd, env=env, text=True, check=True, capture_output=True)
+    result = subprocess.run(command, cwd=cwd, env=env, text=True, capture_output=True)
+    if result.returncode != 0:
+        print_output(result)
+        raise subprocess.CalledProcessError(result.returncode, result.args, output=result.stdout, stderr=result.stderr)
+    return result
 
 
 def print_output(result: subprocess.CompletedProcess[str]) -> None:
@@ -56,6 +61,12 @@ def assert_json_command(command: list[str], *, cwd: Path = ROOT) -> dict[str, ob
 
 def main() -> int:
     print_output(run([sys.executable, "scripts/check_versions.py"]))
+
+    if find_spec("build") is None:
+        print("Missing Python module: build", file=sys.stderr)
+        print("Install it before release smoke checks:", file=sys.stderr)
+        print("  python -m pip install build", file=sys.stderr)
+        return 2
 
     dist_dir = ROOT / "dist"
     if dist_dir.exists():

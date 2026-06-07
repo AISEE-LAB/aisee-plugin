@@ -1,25 +1,144 @@
 {
+  "schema_version": "aisee.skill-eval.v1",
   "skill_name": "aisee:design-spec",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
   "evals": [
     {
-      "id": 1,
+      "id": "design-spec-001",
       "name": "adopt-existing-admin-component-library",
+      "scenario": "adopt-existing-library",
       "prompt": "请为一个 PC 管理后台生成 design-spec。项目已使用 Ant Design，已有主题 token，不希望做品牌化改造。UI Content 包含订单列表、订单详情、退款审核弹窗，主要用户是运营管理员，目标是高频处理订单问题。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "项目已有 Ant Design 和主题 token。",
+          "用户明确不希望做品牌化改造。"
+        ]
+      },
       "expected_output": "应识别为 adopt 策略，输出设计规范而非页面内容规格。应覆盖 Ant Design 采用规则、主题 token 来源、表格/筛选/详情/弹窗的界面模式和交互模式、禁止魔改组件、可访问性和追踪关系。不得生成参考图、CSS、组件 props、API 或具体页面像素稿。",
+      "expected_outputs": [
+        "识别为 adopt 策略。",
+        "输出设计规范而不是 UI Content、API 或实现方案。",
+        "覆盖 Ant Design 采用规则、主题 token 来源、后台高频操作界面模式、可访问性和追踪关系。",
+        "明确禁止魔改组件和无依据品牌化改造。"
+      ],
+      "must_ask": [
+        "Ant Design 版本和现有主题 token 来源是否已确认？",
+        "是否已有后台布局、表格密度、筛选区和弹窗交互规范？"
+      ],
+      "must_include": [
+        "adopt 策略",
+        "组件库采用规则",
+        "主题 token 来源",
+        "Screen Patterns",
+        "可访问性"
+      ],
+      "must_not": [
+        "不得生成参考图。",
+        "不得输出 CSS、组件 props、API 或数据库字段。",
+        "不得把 design-spec 写成 UI Content。"
+      ],
+      "quality_checks": [
+        "设计规范应约束后续 UI 实现，而不是重写页面内容。",
+        "组件库和 token 来源应作为事实或 Open Question 标注。"
+      ],
+      "fact_source_constraints": [
+        "Design Spec 是 change 前设计约束，不替代 ui-contract 或 OpenSpec artifacts。"
+      ],
       "files": []
     },
     {
-      "id": 2,
+      "id": "design-spec-002",
       "name": "extend-component-library-with-brand-assets",
+      "scenario": "extend-existing-library",
       "prompt": "基于 shadcn/ui 做一个 SaaS 客户成功平台的设计规范。我们有 Logo 和一张参考仪表盘截图，希望在组件库基础上建立更强的品牌风格。UI Content 包含客户工作台、客户详情、健康度看板和续费风险提醒流程。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "项目希望在 shadcn/ui 基础上扩展品牌风格。",
+          "Logo 和参考截图是设计输入，不是最终设计稿。"
+        ]
+      },
       "expected_output": "应识别为 extend 策略，引用 Logo、参考截图和 UI Content 作为设计来源，输出 token 覆盖、组件业务封装策略、客户工作台/详情/看板等开放式 Screen Patterns、交互模式、响应式规则和 Do/Don't。不得把参考图当最终设计稿，也不得复制素材清单。",
+      "expected_outputs": [
+        "识别为 extend 策略。",
+        "引用 Logo、参考截图和 UI Content 作为设计来源。",
+        "输出 token 覆盖、组件业务封装策略、Screen Patterns、响应式规则和 Do/Don't。",
+        "说明 design-spec 与 design-assets 的边界。"
+      ],
+      "must_ask": [
+        "Logo、参考截图和品牌资产是否已有可访问路径？",
+        "是否已有 shadcn/ui 主题 token 或 Tailwind 配置？",
+        "客户成功平台主要用户和信息密度偏好是否已确认？"
+      ],
+      "must_include": [
+        "extend 策略",
+        "品牌资产来源",
+        "token 覆盖",
+        "组件业务封装",
+        "Do/Don't"
+      ],
+      "must_not": [
+        "不得把参考图当最终设计稿。",
+        "不得复制素材清单。",
+        "不得生成代码或具体组件 props。"
+      ],
+      "quality_checks": [
+        "扩展策略应说明哪些沿用组件库，哪些由品牌规范覆盖。",
+        "参考图只能作为风格来源，不能成为事实上的像素级规范。"
+      ],
+      "fact_source_constraints": [
+        "Logo 和参考截图需要来源路径或用户确认；未知资产不得写成已存在事实。"
+      ],
       "files": []
     },
     {
-      "id": 3,
+      "id": "design-spec-003",
       "name": "rewrite-mobile-consumer-app-design-system",
+      "scenario": "rewrite-design-system",
       "prompt": "我们要为一个新的消费级 App 重写视觉体系，当前没有组件库。用户可以浏览课程、加入学习计划、打卡、查看学习日历和成就徽章。请生成 change-plan 前的设计规范。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "当前没有组件库。",
+          "用户要求的是 change-plan 前的设计规范。"
+        ]
+      },
       "expected_output": "应识别为 rewrite 策略，输出新的设计语言、Design Tokens、组件原则、浏览/计划/打卡/日历/成就等 Screen Patterns、移动端交互模式、可访问性和 Open Questions。不得写成 UI Content，不得生成图片素材或前端实现代码。",
+      "expected_outputs": [
+        "识别为 rewrite 策略。",
+        "输出新的设计语言、Design Tokens、组件原则、Screen Patterns、移动端交互模式和可访问性。",
+        "保留 Open Questions。",
+        "不生成素材、代码或 UI Content。"
+      ],
+      "must_ask": [
+        "品牌调性、目标用户年龄层和内容密度是否已确认？",
+        "是否有 Logo、品牌色、竞品或参考图？",
+        "设计规范是否需要覆盖深色模式或无障碍等级？"
+      ],
+      "must_include": [
+        "rewrite 策略",
+        "设计语言",
+        "Design Tokens",
+        "组件原则",
+        "移动端交互模式"
+      ],
+      "must_not": [
+        "不得写成 UI Content。",
+        "不得生成图片素材。",
+        "不得输出前端实现代码。"
+      ],
+      "quality_checks": [
+        "设计语言应服务消费级学习场景，而不是通用模板。",
+        "Screen Patterns 应开放而非枚举固定页面布局。"
+      ],
+      "fact_source_constraints": [
+        "没有组件库时可以提出新规范方向，但未确认品牌事实必须标注为 Open Question。"
+      ],
       "files": []
     }
   ]

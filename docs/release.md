@@ -34,6 +34,8 @@ Aisee 使用 SemVer：
 
 `0.x` 阶段仍允许较快演进，但每次发布必须保持所有版本文件一致。
 
+公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
+
 ## 本地检查
 
 检查版本一致性：
@@ -56,10 +58,10 @@ python scripts/sync_package_assets.py
 
 ## 发布前检查清单
 
-如本地没有 `build` 模块，先安装：
+如本地没有 `build` 或 `twine` 模块，先安装：
 
 ```bash
-python -m pip install build
+python -m pip install build twine
 ```
 
 ```bash
@@ -70,13 +72,43 @@ pytest -q
 python scripts/smoke_release.py
 ```
 
+## 构建与发布命令
+
+构建发布包：
+
+```bash
+rm -rf dist
+python -m build
+python -m twine check dist/*
+```
+
+发布到 PyPI：
+
+```bash
+python -m twine upload dist/*
+```
+
+发布后使用干净环境验证：
+
+```bash
+python -m pipx install aisee-plugin
+aisee --version
+aisee doctor --json
+aisee plugin inspect --json
+aisee plugin export --target codex --dest /tmp/aisee-plugin-bundle --force --json
+aisee schemas list --json
+```
+
 发布前还需要人工确认：
 
 - `README.md` 和 `README.en.md` 的安装、CLI 和 Roadmap 是否仍准确。
 - `docs/workflow.md` 和 `docs/best-practices.md` 是否覆盖新增公开能力。
+- `docs/compatibility-policy.md` 是否覆盖新增或破坏的公开契约。
 - `docs/schema-packs.md` 是否覆盖新增或调整的 schema。
+- `docs/plugin-marketplace.md` 是否覆盖 plugin manifest、marketplace listing 或 runtime export 变化。
 - 新增 skill 是否同步到 `src/aisee_plugin_assets/`。
 - 新增 CLI JSON 字段是否有 contract tests。
+- 破坏性或用户可见变更是否写入 `CHANGELOG.md`。
 - 需要长期保留的发布决策是否写入 `aisee/memory/`。
 
 ## Git Tag 规则
@@ -101,10 +133,11 @@ git tag v0.1.0
 
 - 安装路径稳定：PyPI/pipx、源码安装、plugin export、runtime loading。
 - 版本治理稳定：单一版本事实源、同步脚本、检查脚本、测试覆盖。
+- 兼容策略初版已落地：CLI JSON、schema packs、context pack、plugin export 和 experimental 能力有明确 contract 分层。
 - Team knowledge 保持 experimental；Public Beta 只承诺本地 `path`、CLI 只读检索和显式 `--knowledge` 注入，不承诺远程安装、自动同步或自动写入。
 - release checklist、changelog 和 tag 规则可执行。
 
 1.0 前必须完成：
 
-- CLI JSON、schema packs、skill contracts 的兼容策略。
+- 冻结 1.0 兼容边界，明确破坏 CLI JSON、schema packs、context pack、skill contract 和 plugin export 的版本升级规则。
 - schema pack 文档、示例和完整 lifecycle dogfood fixtures。
