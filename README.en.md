@@ -8,7 +8,7 @@ Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It hel
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, stable ID tracking, and engineering handoff rules around OpenSpec.
 
-> Status: early alpha / pre-release. The repository supports source installs, plugin export, version consistency checks, and release smoke tests; PyPI/pipx public distribution and the 1.0 compatibility freeze are still being refined.
+> Status: early alpha / pre-release. `0.1.0` has been verified through TestPyPI, venv installation, and isolated pipx installation; official PyPI publication and the 1.0 compatibility freeze are still in progress.
 
 ## Why Aisee?
 
@@ -489,7 +489,7 @@ Run the release smoke test:
 python scripts/smoke_release.py
 ```
 
-Before Public Beta, also run the isolated `pipx` install smoke test when `pipx` is available:
+For release candidates, also run the isolated `pipx` install smoke test when `pipx` is available:
 
 ```bash
 python scripts/smoke_release.py --with-pipx
@@ -512,30 +512,23 @@ python scripts/smoke_release.py --with-pipx
 
 ## Roadmap
 
-### Available Today
+### Public PyPI Release
 
-- Local source install, plugin export, runtime loading, version consistency checks, and release smoke tests.
-- `pyproject.toml` is the single version source, with scripts and tests checking CLI, plugin metadata, and package version drift.
-- CLI JSON, schema packs, context packs, plugin export, and experimental capabilities have an initial compatibility layering policy.
-- Team knowledge is explicitly experimental: only local `path`, CLI read-only retrieval, and explicit `--knowledge` injection are committed.
-- Existing skill eval cases use `aisee.skill-eval.v1`.
+- Publish `aisee-plugin` to official PyPI.
+- Verify `pipx install aisee-plugin` from official PyPI in a clean environment.
+- Update installation docs from pre-release guidance to public install guidance.
 
-### Before Public Beta
+### 1.0
 
-- Complete PyPI/pipx release validation and run post-install smoke tests in a clean environment.
-- Add full lifecycle workflow dogfood and scenario fixtures.
-- Add runnable schema pack examples and sample changes.
-
-### Before 1.0
-
-- Freeze the 1.0 compatibility boundary and define versioning rules for breaking CLI JSON, schema packs, context packs, skill contracts, and plugin export.
-- Define upgrade, deprecation, and migration rules for Public Contract, Experimental Contract, and Internal Detail surfaces.
+- Freeze compatibility boundaries for CLI JSON, schema packs, context packs, plugin export, and skill contracts.
+- Define deprecation and migration rules for breaking changes.
+- Decide which hardware and embedded workflows remain experimental and which enter the main Aisee workflow.
+- Add more real-world lifecycle fixtures beyond the app scenario.
 
 ### Later
 
-- Integrate hardware and embedded workflows into the Aisee system.
 - Expand cross-repository contract collaboration examples.
-- Stabilize team knowledge remote install, sync, promote-batch, lifecycle management, and optional MCP wrapping.
+- Stabilize team knowledge remote sync, promote workflows, lifecycle management, and optional MCP wrapping.
 
 ## License
 

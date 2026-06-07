@@ -138,11 +138,11 @@ git tag v0.1.0
 
 ## Roadmap 进入条件
 
-公开 beta 前必须完成：
+正式 PyPI 发布前必须完成：
 
-- PyPI/pipx 发布路径验证通过，并在干净环境中完成安装后 smoke test。
-- 完整生命周期 workflow dogfood 和 scenario fixtures 可执行。
-- schema pack 示例和 sample changes 可运行。
+- 正式 PyPI 发布路径验证通过，并在干净环境中完成 `pipx install aisee-plugin` smoke test。
+- README 安装说明从 pre-release guidance 更新为 public install guidance。
+- 临时 account-scoped token 已撤销，发布认证切换为 project-scoped token 或 Trusted Publishing。
 
 1.0 前必须完成：
 
