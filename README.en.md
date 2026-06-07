@@ -8,7 +8,7 @@ Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It hel
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, stable ID tracking, and engineering handoff rules around OpenSpec.
 
-> Status: early alpha / pre-release. The repository supports source installs, plugin export, version consistency checks, and release smoke tests; PyPI/pipx public distribution and the 1.0 compatibility policy are still being refined.
+> Status: early alpha / pre-release. The repository supports source installs, plugin export, version consistency checks, and release smoke tests; PyPI/pipx public distribution and the 1.0 compatibility freeze are still being refined.
 
 ## Why Aisee?
 
@@ -84,7 +84,23 @@ Compound Engineering is optional. Aisee can use `aisee doctor --json` to check w
 
 ## Install
 
-Install the CLI with `pipx`:
+During pre-release, install from source:
+
+```bash
+git clone https://cnb.cool/zersproducts/aisee-plugin
+cd aisee-plugin
+python -m pip install -e .
+```
+
+You can also build and install a local wheel:
+
+```bash
+python -m pip install build
+python -m build
+python -m pip install dist/aisee_plugin-*.whl
+```
+
+After PyPI publication, install the CLI with `pipx`:
 
 ```bash
 pipx install aisee-plugin
@@ -94,14 +110,6 @@ You can also use `pip`:
 
 ```bash
 python -m pip install aisee-plugin
-```
-
-Before public release, install from source:
-
-```bash
-git clone <repository-url>
-cd aisee-plugin
-python -m pip install -e .
 ```
 
 Check the CLI:
@@ -149,6 +157,14 @@ aisee-plugin-bundle/
 ```
 
 If your agent runtime supports loading local plugins, point it to the exported directory or the corresponding plugin metadata file.
+
+To manually confirm runtime loading, check at least:
+
+- the exported directory contains the target runtime metadata file;
+- the agent runtime recognizes `skills/` in the exported directory;
+- a core skill such as `aisee:srs` or `aisee:change-plan` can be triggered in the agent.
+
+Plugin marketplaces are optional runtime discovery and distribution channels. They do not replace PyPI / pipx installation. Aisee does not embed a `marketplace.json` by default; personal or team marketplaces can point to the exported plugin directory as needed. See [Plugin Marketplace](docs/plugin-marketplace.en.md).
 
 The source repository also includes plugin metadata for multiple agent runtimes:
 
@@ -206,6 +222,8 @@ aisee flow inspect --json
 
 - [Aisee Workflow](docs/workflow.en.md): end-to-end guidance from setup, requirement clarification, change authoring, implementation handoff, verification, and archive.
 - [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, schemas, contracts, context packs, review, and archive when using Aisee with OpenSpec.
+- [Compatibility Policy](docs/compatibility-policy.en.md): compatibility boundaries for CLI JSON, schema packs, context packs, plugin export, and experimental capabilities.
+- [Plugin Marketplace](docs/plugin-marketplace.en.md): responsibilities of plugin manifests, marketplace listings, PyPI/pipx, and runtime export.
 - [Team Knowledge Guardrails](docs/team-knowledge.en.md): experimental status, usage, and gaps before stability for shared team knowledge.
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, and read model.
 - [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, ID/source-map rules, and contract attachment boundaries.
@@ -492,6 +510,7 @@ python scripts/smoke_release.py
 
 - Stabilize public installation paths: PyPI/pipx, source install, plugin export, and runtime loading.
 - Complete version governance: use `pyproject.toml` as the single version source, sync CLI and plugin metadata through scripts, and test for version drift.
+- Establish the first compatibility policy: CLI JSON, schema packs, context packs, plugin export, and experimental capabilities must have clear contract layers.
 - Keep team knowledge experimental: Public Beta only commits to local `path`, CLI read-only retrieval, and explicit `--knowledge` injection, not remote install, automatic sync, or automatic writes.
 - Continue normalizing skill eval cases to `aisee.skill-eval.v1`.
 - Add full lifecycle workflow dogfood and scenario fixtures.
@@ -499,7 +518,7 @@ python scripts/smoke_release.py
 ### Before 1.0
 
 - Add runnable schema sample changes.
-- Define compatibility policy for CLI JSON, schema packs, and skill contracts.
+- Freeze the 1.0 compatibility boundary and define versioning rules for breaking CLI JSON, schema packs, context packs, skill contracts, and plugin export.
 - Complete package build, plugin export, and post-install smoke tests.
 
 ### Later
