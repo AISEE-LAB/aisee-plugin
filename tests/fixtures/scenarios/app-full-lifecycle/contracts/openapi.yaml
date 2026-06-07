@@ -1,0 +1,17 @@
+openapi: 3.1.0
+info:
+  title: Auth API
+  version: 0.1.0
+paths:
+  /auth/passwordless/request:
+    post:
+      operationId: requestPasswordlessLogin
+      responses:
+        "200":
+          description: Code request accepted
+  /auth/passwordless/verify:
+    post:
+      operationId: verifyPasswordlessLogin
+      responses:
+        "200":
+          description: Session created

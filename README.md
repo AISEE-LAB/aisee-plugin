@@ -489,6 +489,12 @@ python -m build
 python scripts/smoke_release.py
 ```
 
+Public Beta 前还需要在本机具备 `pipx` 时运行隔离安装验证：
+
+```bash
+python scripts/smoke_release.py --with-pipx
+```
+
 ## 设计原则
 
 - OpenSpec 是 canonical specification source。

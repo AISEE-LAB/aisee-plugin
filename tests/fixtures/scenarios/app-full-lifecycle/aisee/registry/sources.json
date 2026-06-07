@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "scope": "auth",
+      "type": "srs",
+      "path": "aisee/docs/requirements/auth-srs.md",
+      "template": "srs",
+      "parser": "markdown"
+    },
+    {
+      "scope": "auth",
+      "type": "ui-content",
+      "path": "aisee/docs/ui-content/auth-ui.md",
+      "template": "ui-content",
+      "parser": "markdown"
+    },
+    {
+      "scope": "auth",
+      "type": "architecture",
+      "path": "aisee/docs/architecture/auth-architecture.md",
+      "template": "architecture",
+      "parser": "markdown"
+    },
+    {
+      "scope": "auth",
+      "type": "verification",
+      "path": "docs/verification/add-passwordless-login-tests.md",
+      "template": "verification",
+      "parser": "markdown"
+    }
+  ]
+}

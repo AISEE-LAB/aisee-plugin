@@ -26,8 +26,16 @@ src/aisee_plugin_assets/skills/aisee-schema-pack/assets/schema-pack/
 
 ```bash
 python scripts/sync_package_assets.py
-python -m pytest tests/test_plugin_packaging.py tests/test_doctor_flow_schema.py
+python -m pytest tests/test_plugin_packaging.py tests/test_doctor_flow_schema.py tests/test_schema_pack_examples.py
 ```
+
+可运行 sample changes 放在对应 schema 的 `examples/` 目录。例如：
+
+```text
+skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/examples/add-passwordless-login/
+```
+
+这些示例必须随 `scripts/sync_package_assets.py` 同步到 Python 包资产，并由 `tests/test_schema_pack_examples.py` 检查。
 
 ## Schema 选择
 

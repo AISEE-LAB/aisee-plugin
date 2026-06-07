@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "scopes": {
+    "auth": {
+      "counters": {
+        "FR": 1,
+        "PAGE": 1,
+        "FLOW": 1,
+        "STATE": 1,
+        "ARCH": 1,
+        "DEC": 1,
+        "SPEC": 1,
+        "API": 1,
+        "DATA": 1,
+        "TASK": 1,
+        "TEST": 1
+      },
+      "ids": {
+        "auth:FR-001": {
+          "type": "FR",
+          "number": 1,
+          "status": "active",
+          "title": "Passwordless login",
+          "owner": "aisee/docs/requirements/auth-srs.md"
+        },
+        "auth:PAGE-001": {
+          "type": "PAGE",
+          "number": 1,
+          "status": "active",
+          "title": "Login page",
+          "owner": "aisee/docs/ui-content/auth-ui.md"
+        },
+        "auth:FLOW-001": {
+          "type": "FLOW",
+          "number": 1,
+          "status": "active",
+          "title": "Request and verify code",
+          "owner": "aisee/docs/ui-content/auth-ui.md"
+        },
+        "auth:STATE-001": {
+          "type": "STATE",
+          "number": 1,
+          "status": "active",
+          "title": "Code sent state",
+          "owner": "aisee/docs/ui-content/auth-ui.md"
+        },
+        "auth:ARCH-001": {
+          "type": "ARCH",
+          "number": 1,
+          "status": "active",
+          "title": "Session boundary",
+          "owner": "aisee/docs/architecture/auth-architecture.md"
+        },
+        "auth:DEC-001": {
+          "type": "DEC",
+          "number": 1,
+          "status": "active",
+          "title": "Token storage decision",
+          "owner": "aisee/docs/architecture/auth-architecture.md"
+        },
+        "auth:SPEC-001": {
+          "type": "SPEC",
+          "number": 1,
+          "status": "active",
+          "title": "Passwordless login behavior",
+          "owner": "openspec/changes/add-passwordless-login/specs/auth.md"
+        },
+        "auth:API-001": {
+          "type": "API",
+          "number": 1,
+          "status": "active",
+          "title": "Passwordless login API",
+          "owner": "openspec/changes/add-passwordless-login/service-contract.md"
+        },
+        "auth:DATA-001": {
+          "type": "DATA",
+          "number": 1,
+          "status": "active",
+          "title": "Login verification token",
+          "owner": "openspec/changes/add-passwordless-login/data-model.md"
+        },
+        "auth:TASK-001": {
+          "type": "TASK",
+          "number": 1,
+          "status": "active",
+          "title": "Implement passwordless login",
+          "owner": "openspec/changes/add-passwordless-login/tasks.md"
+        },
+        "auth:TEST-001": {
+          "type": "TEST",
+          "number": 1,
+          "status": "active",
+          "title": "Passwordless login tests",
+          "owner": "openspec/changes/add-passwordless-login/tasks.md"
+        }
+      }
+    }
+  }
+}

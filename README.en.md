@@ -489,6 +489,12 @@ Run the release smoke test:
 python scripts/smoke_release.py
 ```
 
+Before Public Beta, also run the isolated `pipx` install smoke test when `pipx` is available:
+
+```bash
+python scripts/smoke_release.py --with-pipx
+```
+
 ## Design Principles
 
 - OpenSpec is the canonical specification source.

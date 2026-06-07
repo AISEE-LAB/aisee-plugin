@@ -99,6 +99,15 @@ aisee plugin export --target codex --dest /tmp/aisee-plugin-bundle --force --jso
 aisee schemas list --json
 ```
 
+本地 Public Beta 候选验证应先跑：
+
+```bash
+python scripts/smoke_release.py
+python scripts/smoke_release.py --with-pipx
+```
+
+`--with-pipx` 使用临时 `PIPX_HOME`、`PIPX_BIN_DIR` 和 `PIPX_MAN_DIR`，不会把候选包安装到用户默认 pipx 环境。若本机没有 `pipx`，该检查会明确失败；默认 smoke 不强制依赖 pipx。
+
 发布前还需要人工确认：
 
 - `README.md` 和 `README.en.md` 的安装、CLI 和 Roadmap 是否仍准确。
