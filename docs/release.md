@@ -56,19 +56,25 @@ python scripts/sync_package_assets.py
 
 ## 发布前检查清单
 
+如本地没有 `build` 模块，先安装：
+
+```bash
+python -m pip install build
+```
+
 ```bash
 python scripts/sync_versions.py
 python scripts/sync_package_assets.py
 python scripts/check_versions.py
 pytest -q
-python -m build
-aisee plugin export --target codex --dest /tmp/aisee-plugin-bundle --force --json
+python scripts/smoke_release.py
 ```
 
 发布前还需要人工确认：
 
 - `README.md` 和 `README.en.md` 的安装、CLI 和 Roadmap 是否仍准确。
 - `docs/workflow.md` 和 `docs/best-practices.md` 是否覆盖新增公开能力。
+- `docs/schema-packs.md` 是否覆盖新增或调整的 schema。
 - 新增 skill 是否同步到 `src/aisee_plugin_assets/`。
 - 新增 CLI JSON 字段是否有 contract tests。
 - 需要长期保留的发布决策是否写入 `aisee/memory/`。
@@ -95,10 +101,10 @@ git tag v0.1.0
 
 - 安装路径稳定：PyPI/pipx、源码安装、plugin export、runtime loading。
 - 版本治理稳定：单一版本事实源、同步脚本、检查脚本、测试覆盖。
+- Team knowledge 保持 experimental；Public Beta 只承诺本地 `path`、CLI 只读检索和显式 `--knowledge` 注入，不承诺远程安装、自动同步或自动写入。
 - release checklist、changelog 和 tag 规则可执行。
 
 1.0 前必须完成：
 
-- `LICENSE`、`CONTRIBUTING.md` 和发布说明。
 - CLI JSON、schema packs、skill contracts 的兼容策略。
 - schema pack 文档、示例和完整 lifecycle dogfood fixtures。

@@ -8,7 +8,7 @@ Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It hel
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, stable ID tracking, and engineering handoff rules around OpenSpec.
 
-> Status: early alpha. This repository is ready for local experiments and plugin development, but public distribution, installation automation, and versioned releases are still being refined.
+> Status: early alpha / pre-release. The repository supports source installs, plugin export, version consistency checks, and release smoke tests; PyPI/pipx public distribution and the 1.0 compatibility policy are still being refined.
 
 ## Why Aisee?
 
@@ -206,7 +206,9 @@ aisee flow inspect --json
 
 - [Aisee Workflow](docs/workflow.en.md): end-to-end guidance from setup, requirement clarification, change authoring, implementation handoff, verification, and archive.
 - [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, schemas, contracts, context packs, review, and archive when using Aisee with OpenSpec.
+- [Team Knowledge Guardrails](docs/team-knowledge.en.md): experimental status, usage, and gaps before stability for shared team knowledge.
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, and read model.
+- [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, ID/source-map rules, and contract attachment boundaries.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
 - [Release And Version Governance](docs/release.md): single version source, release checks, and tag rules.
@@ -372,7 +374,7 @@ OpenSpec/Aisee artifacts remain the authoritative contract source. The HTTP serv
 
 ### Team Knowledge Guardrails
 
-Team knowledge reuses engineering lessons across projects, but it does not replace OpenSpec, `source-map.md`, contracts, tasks, or baseline specs.
+Team knowledge is experimental. It reuses engineering lessons across projects, but it does not replace OpenSpec, `source-map.md`, contracts, tasks, or baseline specs.
 
 Business projects can pin an independent knowledge repository, local path, ref, and packs in `aisee/knowledge.yaml`:
 
@@ -398,6 +400,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 Rules:
 
+- The current workflow is centered on local `path` usage and manual synchronization. Remote install, automatic sync, promote-batch, PR automation, and MCP service support are still unsettled.
 - Query through the CLI instead of letting AI scan `knowledge/cards/**/*.md` directly.
 - Return a small number of bounded matches as implementation, review, or verification reminders.
 - Project-local `aisee/docs/reflect/knowledge-candidates/` remains a candidate area and is not promoted automatically.
@@ -462,6 +465,12 @@ Build a wheel:
 python -m build
 ```
 
+Run the release smoke test:
+
+```bash
+python scripts/smoke_release.py
+```
+
 ## Design Principles
 
 - OpenSpec is the canonical specification source.
@@ -483,21 +492,22 @@ python -m build
 
 - Stabilize public installation paths: PyPI/pipx, source install, plugin export, and runtime loading.
 - Complete version governance: use `pyproject.toml` as the single version source, sync CLI and plugin metadata through scripts, and test for version drift.
+- Keep team knowledge experimental: Public Beta only commits to local `path`, CLI read-only retrieval, and explicit `--knowledge` injection, not remote install, automatic sync, or automatic writes.
 - Continue normalizing skill eval cases to `aisee.skill-eval.v1`.
 - Add full lifecycle workflow dogfood and scenario fixtures.
 
 ### Before 1.0
 
-- Add schema pack documentation, examples, and runnable sample changes.
-- Add `LICENSE`, `CONTRIBUTING.md`, release notes, and publishing guide.
+- Add runnable schema sample changes.
 - Define compatibility policy for CLI JSON, schema packs, and skill contracts.
 - Complete package build, plugin export, and post-install smoke tests.
 
 ### Later
 
 - Integrate hardware and embedded workflows into the Aisee system.
-- Expand cross-repository contract collaboration examples and team knowledge workflows.
+- Expand cross-repository contract collaboration examples.
+- Stabilize team knowledge remote install, sync, promote-batch, lifecycle management, and optional MCP wrapping.
 
 ## License
 
-MIT. The current license declaration lives in plugin metadata.
+MIT. See [LICENSE](LICENSE).
