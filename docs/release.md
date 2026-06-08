@@ -72,6 +72,25 @@ pytest -q
 python scripts/smoke_release.py
 ```
 
+## GitHub Actions 自动发布
+
+`.github/workflows/publish-pypi.yml` 在 `main` 分支收到 push 或手动触发时运行：
+
+- 先读取 `pyproject.toml` 中的版本号；
+- 如果该版本已经存在于 PyPI，则跳过发布；
+- 如果该版本不存在，则运行版本检查、测试、构建、`twine check`，再发布到 PyPI。
+
+该 workflow 默认使用 PyPI Trusted Publishing，不在仓库中保存 PyPI token。PyPI 项目需要配置 trusted publisher：
+
+```text
+Owner: AISEE-LAB
+Repository: aisee-plugin
+Workflow: publish-pypi.yml
+Environment: pypi
+```
+
+如果改用 GitHub secret token，应单独调整 workflow，不要同时保留无用的长期 PyPI token。
+
 ## 构建与发布命令
 
 构建发布包：

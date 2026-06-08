@@ -1,0 +1,128 @@
+name: Publish PyPI
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-version:
+    name: check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      exists: ${{ steps.pypi.outputs.exists }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read package version
+        id: version
+        run: |
+          version=$(python - <<'PY'
+          import tomllib
+          from pathlib import Path
+
+          data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+          print(data["project"]["version"])
+          PY
+          )
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check PyPI release
+        id: pypi
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          status=$(python - <<'PY'
+          import os
+          from urllib.error import HTTPError
+          from urllib.request import urlopen
+
+          version = os.environ["VERSION"]
+          url = f"https://pypi.org/pypi/aisee-plugin/{version}/json"
+          try:
+              with urlopen(url, timeout=10) as response:
+                  print(response.status)
+          except HTTPError as exc:
+              print(exc.code)
+          PY
+          )
+          if [ "$status" = "200" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "aisee-plugin $VERSION already exists on PyPI; publish will be skipped."
+          elif [ "$status" = "404" ]; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "aisee-plugin $VERSION is not on PyPI; publish will run."
+          else
+            echo "Unexpected PyPI status: $status" >&2
+            exit 1
+          fi
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    needs:
+      - check-version
+    if: needs.check-version.outputs.exists == 'false'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build twine pytest
+          python -m pip install -e .
+
+      - name: Check version consistency
+        run: python scripts/check_versions.py
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Build distributions
+        run: |
+          rm -rf dist
+          python -m build
+          python -m twine check dist/*
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ needs.check-version.outputs.version }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs:
+      - check-version
+      - build
+    if: needs.check-version.outputs.exists == 'false'
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ needs.check-version.outputs.version }}
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
