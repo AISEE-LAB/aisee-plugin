@@ -8,7 +8,7 @@ Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It hel
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, stable ID tracking, and engineering handoff rules around OpenSpec.
 
-> Status: early alpha / pre-release. `0.1.0` has been verified through TestPyPI, venv installation, and isolated pipx installation; official PyPI publication and ongoing compatibility governance are still in progress.
+> Status: early alpha. `0.1.0` has been published to official PyPI and verified through TestPyPI, venv installation, and isolated pipx installation; ongoing compatibility governance is still in progress.
 
 ## Why Aisee?
 
@@ -84,7 +84,19 @@ Compound Engineering is optional. Aisee can use `aisee doctor --json` to check w
 
 ## Install
 
-During pre-release, install from source:
+Install the CLI with `pipx`:
+
+```bash
+pipx install aisee-plugin
+```
+
+You can also use `pip`:
+
+```bash
+python -m pip install aisee-plugin
+```
+
+For development or local changes, install from source:
 
 ```bash
 git clone https://cnb.cool/zersproducts/aisee-plugin
@@ -98,18 +110,6 @@ You can also build and install a local wheel:
 python -m pip install build
 python -m build
 python -m pip install dist/aisee_plugin-*.whl
-```
-
-After PyPI publication, install the CLI with `pipx`:
-
-```bash
-pipx install aisee-plugin
-```
-
-You can also use `pip`:
-
-```bash
-python -m pip install aisee-plugin
 ```
 
 Check the CLI:
@@ -522,12 +522,6 @@ python scripts/smoke_release.py --with-pipx
 - [Compound Engineering Plugin](https://github.com/EveryInc/compound-engineering-plugin) — an agent workflow plugin for AI engineering execution, review, testing, commits, and team learning.
 
 ## Roadmap
-
-### Public PyPI Release
-
-- Publish `aisee-plugin` to official PyPI.
-- Verify `pipx install aisee-plugin` from official PyPI in a clean environment.
-- Update installation docs from pre-release guidance to public install guidance.
 
 ### Ongoing Compatibility Governance
 
