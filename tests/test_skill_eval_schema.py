@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 
-EVAL_FILES = sorted(Path("skills").glob("*/evals/evals.json"))
+EVAL_FILES = sorted(Path("plugins/aisee-plugin/skills").glob("*/evals/evals.json"))
 
 REQUIRED_CASE_FIELDS = {
     "id",

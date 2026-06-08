@@ -146,9 +146,9 @@ aisee doctor --json
 源码仓库也包含多个 agent runtime 的插件元数据：
 
 ```text
-.codex-plugin/plugin.json
-.claude-plugin/plugin.json
-.cursor-plugin/plugin.json
+plugins/aisee-plugin/.codex-plugin/plugin.json
+plugins/aisee-plugin/.claude-plugin/plugin.json
+plugins/aisee-plugin/.cursor-plugin/plugin.json
 ```
 
 Codex plugin metadata 会直接声明 skills 目录：
@@ -262,7 +262,7 @@ hw-change-plan
 Schema pack 源位置：
 
 ```text
-skills/aisee-schema-pack/assets/schema-pack/
+plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/
 ```
 
 当前包含：
@@ -397,15 +397,18 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 ## 仓库结构
 
 ```text
-.codex-plugin/       Codex plugin metadata
-.claude-plugin/      Claude plugin metadata
-.cursor-plugin/      Cursor plugin metadata
+.agents/plugins/marketplace.json
+                     Codex marketplace listing
+plugins/aisee-plugin/
+  .codex-plugin/     Codex plugin metadata
+  .claude-plugin/    Claude plugin metadata
+  .cursor-plugin/    Cursor plugin metadata
+  skills/            Aisee skills 和 skill assets
+  references/        跨 skill contracts 和 references
 bin/                 本地 CLI 入口
 src/aisee_cli/       Aisee Python CLI
 src/aisee_plugin_assets/
                      最小兼容 package；不再携带 skills、schemas、references 或 plugin metadata
-skills/              Aisee skills 和 skill assets
-references/          跨 skill contracts 和 references
 docs/                用户 workflow、最佳实践、架构、计划和 review 文档
 docs/architecture/   架构与历史决策文档
 docs/plans/          开发计划

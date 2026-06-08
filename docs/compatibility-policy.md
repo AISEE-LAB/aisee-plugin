@@ -71,9 +71,9 @@
 
 字段级契约以以下文件为准：
 
-- [references/context-pack-contract.md](../references/context-pack-contract.md)
-- [references/context-pack-targets.md](../references/context-pack-targets.md)
-- [references/context-pack-gaps.md](../references/context-pack-gaps.md)
+- [references/context-pack-contract.md](../plugins/aisee-plugin/references/context-pack-contract.md)
+- [references/context-pack-targets.md](../plugins/aisee-plugin/references/context-pack-targets.md)
+- [references/context-pack-gaps.md](../plugins/aisee-plugin/references/context-pack-gaps.md)
 
 规则：
 
@@ -87,7 +87,7 @@
 
 以下属于公开契约：
 
-- GitHub 仓库中的 `.codex-plugin/plugin.json`、`skills/`、`references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
+- GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
 - `aisee plugin inspect --json` 在 CLI-only 安装中返回稳定状态和 setup hint；
 - `aisee plugin export --target codex|claude|cursor` 在迁移期返回稳定 deprecation/blocker JSON，不从 wheel 写 plugin bundle；
 - PyPI wheel 不再承诺包含 skills、references、schema packs、team knowledge templates 或 plugin metadata 副本。
@@ -99,7 +99,7 @@
 以下属于公开契约：
 
 - 插件名称 `aisee-plugin`；
-- `.codex-plugin/plugin.json` 保持存在且可被 Codex plugin validator 接受；
+- `plugins/aisee-plugin/.codex-plugin/plugin.json` 保持存在且可被 Codex plugin validator 接受；
 - Codex manifest 的 `skills` 字段指向可加载 skills 目录；
 - marketplace listing 示例使用 `policy.installation`、`policy.authentication` 和 `category`；
 - PyPI / pipx 安装与 plugin marketplace 安装是两个通道，CLI 不能依赖 marketplace 才能运行。

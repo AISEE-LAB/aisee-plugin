@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.assets import repo_asset_root
 from aisee_cli.paths import id_registry_path, sources_path as aisee_sources_path
 from aisee_cli.source_map import parse_source_map
 from aisee_cli.tool_checks import check_compound_plugin
@@ -245,10 +246,12 @@ def resolve_change_schema(root: Path, change_path: Path) -> str:
 
 
 def find_schema_path(root: Path, schema_name: str) -> Path | None:
+    asset_root = repo_asset_root(root)
     candidates = [
         root / "openspec" / "schemas" / schema_name / "schema.yaml",
-        root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / schema_name / "schema.yaml",
     ]
+    if asset_root is not None:
+        candidates.append(asset_root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / schema_name / "schema.yaml")
     for candidate in candidates:
         if candidate.exists():
             return candidate

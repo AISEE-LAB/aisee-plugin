@@ -17,9 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 VERSION_FILES = [
     ".agents/plugins/marketplace.json",
-    ".codex-plugin/plugin.json",
-    ".claude-plugin/plugin.json",
-    ".cursor-plugin/plugin.json",
+    "plugins/aisee-plugin/.codex-plugin/plugin.json",
+    "plugins/aisee-plugin/.claude-plugin/plugin.json",
+    "plugins/aisee-plugin/.cursor-plugin/plugin.json",
 ]
 
 

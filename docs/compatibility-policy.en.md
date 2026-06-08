@@ -71,9 +71,9 @@ Breaking changes:
 
 Field-level contracts are defined in:
 
-- [references/context-pack-contract.md](../references/context-pack-contract.md)
-- [references/context-pack-targets.md](../references/context-pack-targets.md)
-- [references/context-pack-gaps.md](../references/context-pack-gaps.md)
+- [references/context-pack-contract.md](../plugins/aisee-plugin/references/context-pack-contract.md)
+- [references/context-pack-targets.md](../plugins/aisee-plugin/references/context-pack-targets.md)
+- [references/context-pack-gaps.md](../plugins/aisee-plugin/references/context-pack-gaps.md)
 
 Rules:
 
@@ -87,7 +87,7 @@ Rules:
 
 The following are public contracts:
 
-- `.codex-plugin/plugin.json`, `skills/`, `references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
+- `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
 - `aisee plugin inspect --json` returns stable status and setup hints in CLI-only installs;
 - `aisee plugin export --target codex|claude|cursor` returns stable deprecation/blocker JSON during migration and does not write plugin bundles from the wheel;
 - the PyPI wheel no longer promises bundled copies of skills, references, schema packs, team knowledge templates, or plugin metadata.
@@ -99,7 +99,7 @@ Breaking changes include renaming the plugin, removing the Codex manifest, break
 The following are public contracts:
 
 - plugin name `aisee-plugin`;
-- `.codex-plugin/plugin.json` remains present and accepted by the Codex plugin validator;
+- `plugins/aisee-plugin/.codex-plugin/plugin.json` remains present and accepted by the Codex plugin validator;
 - Codex manifest `skills` points to a loadable skills directory;
 - marketplace listing examples use `policy.installation`, `policy.authentication`, and `category`;
 - PyPI / pipx installation and plugin marketplace installation remain separate channels, and the CLI must not require marketplace availability to run.

@@ -36,9 +36,9 @@ def test_marketplace_and_plugin_metadata_use_package_version() -> None:
     expected = read_pyproject_version()
     for path in (
         ".agents/plugins/marketplace.json",
-        ".codex-plugin/plugin.json",
-        ".claude-plugin/plugin.json",
-        ".cursor-plugin/plugin.json",
+        "plugins/aisee-plugin/.codex-plugin/plugin.json",
+        "plugins/aisee-plugin/.claude-plugin/plugin.json",
+        "plugins/aisee-plugin/.cursor-plugin/plugin.json",
     ):
         metadata = json.loads((ROOT / path).read_text(encoding="utf-8"))
         assert metadata["version"] == expected

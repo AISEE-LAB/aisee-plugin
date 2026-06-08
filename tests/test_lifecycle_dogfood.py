@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "scenarios" / "app-full-lifecycle"
-SCHEMA_PACK_ROOT = ROOT / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
+SCHEMA_PACK_ROOT = ROOT / "plugins" / "aisee-plugin" / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
 
 
 def run_aisee(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:

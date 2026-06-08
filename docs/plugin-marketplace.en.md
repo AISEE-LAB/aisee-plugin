@@ -30,10 +30,10 @@ The CLI only prints these commands as setup hints. It does not write Codex confi
 
 | File | Responsibility | Current Status |
 | --- | --- | --- |
-| `.codex-plugin/plugin.json` | Plugin manifest with name, version, skills path, and UI metadata | Provided in this repository |
-| `.agents/plugins/marketplace.json` | Codex marketplace listing pointing at the repository plugin root | Provided in this repository |
+| `plugins/aisee-plugin/.codex-plugin/plugin.json` | Plugin manifest with name, version, skills path, and UI metadata | Provided in this repository |
+| `.agents/plugins/marketplace.json` | Codex marketplace listing pointing at the `plugins/aisee-plugin` plugin root | Provided in this repository |
 
-`.codex-plugin/plugin.json` belongs to the plugin itself:
+`plugins/aisee-plugin/.codex-plugin/plugin.json` belongs to the plugin itself:
 
 ```json
 {
@@ -42,7 +42,7 @@ The CLI only prints these commands as setup hints. It does not write Codex confi
 }
 ```
 
-`.agents/plugins/marketplace.json` is the marketplace entry. Its source points at the repository root:
+`.agents/plugins/marketplace.json` is the marketplace entry. Its source points at the plugin directory inside the repository:
 
 ```json
 {
@@ -51,7 +51,11 @@ The CLI only prints these commands as setup hints. It does not write Codex confi
       "name": "aisee-plugin",
       "source": {
         "source": "local",
-        "path": "."
+        "path": "./plugins/aisee-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
       },
       "category": "Coding"
     }
@@ -96,12 +100,12 @@ The following are not stable:
 When touching plugin marketplace compatibility, run at least:
 
 ```bash
-python /Users/fengliang/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .
+python /Users/fengliang/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/aisee-plugin
 python scripts/smoke_release.py
 ```
 
 Also confirm manually:
 
-- `.codex-plugin/plugin.json` has no unsupported fields;
-- `.agents/plugins/marketplace.json` points at the repository plugin root;
+- `plugins/aisee-plugin/.codex-plugin/plugin.json` has no unsupported fields;
+- `.agents/plugins/marketplace.json` points at the `./plugins/aisee-plugin` plugin root;
 - `pipx install aisee-plugin` validates the CLI only and does not assume plugin content exists inside the wheel.
