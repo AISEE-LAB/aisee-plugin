@@ -140,7 +140,7 @@ git tag v0.1.0
 
 首次正式 PyPI 发布已完成：
 
-- `0.1.0` 已发布到正式 PyPI。
+- `0.1.1` 已发布到正式 PyPI。
 - 已在干净环境中完成 `pipx install aisee-plugin` smoke test。
 - README 安装说明已从 pre-release guidance 更新为 public install guidance。
 

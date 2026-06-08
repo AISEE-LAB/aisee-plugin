@@ -1,6 +1,6 @@
 # Aisee Plugin
 
-English | [简体中文](README.md)
+English | [简体中文](https://cnb.cool/zersproducts/aisee-plugin/-/blob/main/README.md)
 
 **Aisee** stands for **AI-Enhanced Software Engineering**.
 
@@ -8,7 +8,7 @@ Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It hel
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, stable ID tracking, and engineering handoff rules around OpenSpec.
 
-> Status: early alpha. `0.1.0` has been published to official PyPI and verified through TestPyPI, venv installation, and isolated pipx installation; ongoing compatibility governance is still in progress.
+> Status: early alpha. `0.1.1` has been published to official PyPI and verified through TestPyPI, venv installation, and isolated pipx installation; ongoing compatibility governance is still in progress.
 
 ## Why Aisee?
 
