@@ -148,6 +148,16 @@ Implementation can be handled by a coding agent or human developer. Regardless o
 
 When a change touches public CLI behavior, HTTP endpoints, API/service contracts, schemas, parsers, path reads, security, or privacy, Tier 2 code review is recommended.
 
+Read-only Aisee reviewer role timing:
+
+| Reviewer | When to trigger | Purpose |
+| --- | --- | --- |
+| `aisee-change-architect` | After `aisee:change-plan` and before `aisee:change-author` when the change has complex boundaries, cross-module or cross-schema impact, unclear dependencies, or uncertain granularity | Review change boundaries, dependencies, granularity, and independent deliverability |
+| `aisee-spec-reviewer` | After `aisee:change-author` and before `aisee:implementation-bridge` / `ce-work` | Review whether artifacts, contracts, source-map, and tasks are complete, consistent, and verifiable |
+| `aisee-implementation-reviewer` | After `ce-work` and before `aisee:verify` / `aisee:archive-guard` | Compare implementation, tasks, specs/source-map, and evidence for drift |
+
+These reviewers only return structured review conclusions. They do not edit code, run tests, submit PRs, or replace `ce-doc-review`, `ce-code-review`, `ce-test-*`, or `ce-work`. Interface, UI, hardware, firmware, security, and verification differences should remain schema-aware check lenses rather than new all-purpose agents.
+
 ## 6. Verify
 
 After implementation, run:

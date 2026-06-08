@@ -143,7 +143,20 @@ Rules:
 - When gaps are found, write back to the current change artifact or apply tracks.
 - Do not bypass the current change and search the whole repository to expand scope.
 
-## 9. Implementation Brief Is Only A Handoff Index
+## 9. Reuse Existing Workflows Before Creating Or Executing Tasks
+
+Before creating tasks, entering implementation, proposing reviewer roles, or recommending a next step, check existing workflows and skills first:
+
+- When there is no explicit change, use `aisee:flow` or `aisee flow inspect --json` to identify the current stage.
+- When there is an explicit change, read the target context pack first, such as `aisee context pack --change <change> --for ce-work --json`.
+- `reusable_workflow_candidates` in the `ce-work` context pack is a routing hint only, not a source of truth.
+- Use `ce-plan` only when `requires_ce_plan=true`; its conclusions must be written back to the current schema apply tracks, and only source-map schemas write back to `source-map.md`.
+- When `requires_ce_plan=false` and paths/tasks are clear, prefer `aisee:implementation-bridge -> ce-work`.
+- Do not create execution, code-review, or test agents that overlap with CE responsibilities.
+
+Interface, UI, hardware, firmware, security, and verification differences should remain schema-aware check lenses. When Aisee reviewers are needed, use only the read-only consistency roles `aisee-change-architect`, `aisee-spec-reviewer`, and `aisee-implementation-reviewer`.
+
+## 10. Implementation Brief Is Only A Handoff Index
 
 A brief should include:
 
@@ -165,7 +178,7 @@ A brief should not include:
 
 Large changes can use multiple brief parts, but they still belong to the same OpenSpec change.
 
-## 10. Review And Test Evidence Must Be Traceable
+## 11. Review And Test Evidence Must Be Traceable
 
 After implementation, the team should be able to answer:
 
@@ -177,7 +190,7 @@ After implementation, the team should be able to answer:
 
 For public CLI behavior, HTTP endpoints, API/service contracts, schemas, parsers, path reads, security, or privacy changes, Tier 2 code review is recommended. If no review agent is available, local focused self-review is acceptable only when the limitation is recorded.
 
-## 11. Archive Guard Is Not A Formality
+## 12. Archive Guard Is Not A Formality
 
 Do not treat `openspec archive` as a command to run casually after development.
 
@@ -192,7 +205,7 @@ Before archive:
 
 When `aisee:archive-guard` says archive is not recommended, fix blockers first.
 
-## 12. Share Cross-Repository Contracts Read-Only
+## 13. Share Cross-Repository Contracts Read-Only
 
 For frontend/backend split work, the contract provider can expose read-only context:
 
@@ -208,7 +221,7 @@ Best practices:
 - LAN access requires explicit `--host 0.0.0.0`.
 - Do not use the contract service to expose source code, secrets, environment variables, or full-repository search results.
 
-## 13. Team Knowledge Only Provides Guardrails
+## 14. Team Knowledge Only Provides Guardrails
 
 Team knowledge helps reuse engineering lessons across projects, but it must not become a second specification source.
 
@@ -229,7 +242,7 @@ Avoid:
 - Treating vector indexes, caches, or AI summaries as fact sources.
 - Automatically writing team knowledge after archive or verify.
 
-## 14. Do Not Make Aisee Another OpenSpec
+## 15. Do Not Make Aisee Another OpenSpec
 
 Aisee should solve what OpenSpec does not:
 
@@ -250,7 +263,7 @@ It should not add:
 
 When OpenSpec already owns a capability, Aisee should only bridge, validate, or optimize context around it.
 
-## 15. Dogfood Real Projects Instead Of Expanding Abstractions
+## 16. Dogfood Real Projects Instead Of Expanding Abstractions
 
 Once the main path is usable, validate it with real or sample projects:
 

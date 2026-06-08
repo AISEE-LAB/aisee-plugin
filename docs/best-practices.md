@@ -143,7 +143,20 @@ aisee context pack --change <change> --for ce-code-review --json
 - 发现缺口时回写当前 change artifact 或 apply tracks。
 - 不绕过当前 change 去全仓库搜索后扩大范围。
 
-## 9. Implementation Brief 只做交接索引
+## 9. 任务创建和执行先复用已有 workflow
+
+创建任务、进入实现、提出审查角色或推荐下一步前，先检查已有 workflow 和 skill：
+
+- 无明确 change 时，先用 `aisee:flow` 或 `aisee flow inspect --json` 判断当前 stage。
+- 有明确 change 时，优先读取目标 context pack，例如 `aisee context pack --change <change> --for ce-work --json`。
+- `ce-work` context pack 的 `reusable_workflow_candidates` 只是路由提示，不是事实源。
+- `requires_ce_plan=true` 时才按需使用 `ce-plan` 细化执行顺序；结论必须回写当前 schema apply tracks，只有 source-map schema 才回写 `source-map.md`。
+- `requires_ce_plan=false` 且 paths/tasks 清楚时，优先 `aisee:implementation-bridge -> ce-work`。
+- 不创建与 CE 重叠的执行、代码审查或测试 agent。
+
+接口、UI、硬件、固件、安全和验证差异应作为 schema-aware check lenses。需要 Aisee reviewer 时，只使用 `aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer` 这三个只读一致性审查 role。
+
+## 10. Implementation Brief 只做交接索引
 
 Brief 应包含：
 
@@ -165,7 +178,7 @@ Brief 不应包含：
 
 大 change 可以分批 Brief，但仍属于同一个 OpenSpec change。
 
-## 10. Review 和 test evidence 必须可追溯
+## 11. Review 和 test evidence 必须可追溯
 
 实现完成后至少要能回答：
 
@@ -177,7 +190,7 @@ Brief 不应包含：
 
 公开 CLI、HTTP endpoint、API/service contract、schema、parser、路径读取、安全或隐私相关变更，建议走 Tier 2 code review。没有审查代理时，可以做本地重点自审，但必须记录限制。
 
-## 11. Archive guard 不是形式步骤
+## 12. Archive guard 不是形式步骤
 
 不要把 `openspec archive` 当作“开发结束后随手执行”的命令。
 
@@ -192,7 +205,7 @@ archive 前应满足：
 
 `aisee:archive-guard` 给出“暂不建议 archive”时，应先修 blocker，而不是强行归档。
 
-## 12. 跨仓库契约只读共享
+## 13. 跨仓库契约只读共享
 
 前后端分离时，推荐 contract provider 暴露只读上下文：
 
@@ -208,7 +221,7 @@ aisee contract serve --host 127.0.0.1 --port 8765
 - 局域网访问必须显式开启 `--host 0.0.0.0`。
 - 不用 contract service 暴露源码、密钥、环境变量或全仓库搜索结果。
 
-## 13. Team knowledge 只提供 guardrails
+## 14. Team knowledge 只提供 guardrails
 
 团队知识库用于跨项目复用工程经验，但不能成为第二套规范事实源。
 
@@ -229,7 +242,7 @@ aisee contract serve --host 127.0.0.1 --port 8765
 - 让向量索引、cache 或 AI 摘要成为事实源。
 - 在 archive、verify 后自动写入 team knowledge。
 
-## 14. 不要把 Aisee 做成另一个 OpenSpec
+## 15. 不要把 Aisee 做成另一个 OpenSpec
 
 Aisee 应解决 OpenSpec 不负责的部分：
 
@@ -250,7 +263,7 @@ Aisee 应解决 OpenSpec 不负责的部分：
 
 当某个能力已经由 OpenSpec 原生提供时，Aisee 只应做衔接、校验或上下文优化。
 
-## 15. 从真实项目 dogfood，而不是无限补抽象
+## 16. 从真实项目 dogfood，而不是无限补抽象
 
 主链路可用后，优先用真实或样例项目验证：
 

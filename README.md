@@ -221,7 +221,7 @@ aisee flow inspect --json
 ## 文档
 
 - [Aisee Workflow](docs/workflow.md)：端到端说明如何从初始化、需求澄清、change authoring、实现交接、验证到 archive。
-- [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、schema、contract、context pack、review 和 archive 约定。
+- [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、schema、contract、context pack、复用优先、review 和 archive 约定。
 - [Compatibility Policy](docs/compatibility-policy.md)：说明 CLI JSON、schema pack、context pack、plugin export 和实验性能力的兼容边界。
 - [Plugin Marketplace](docs/plugin-marketplace.md)：说明插件 manifest、marketplace listing、PyPI/pipx 和 runtime export 的分工。
 - [Team Knowledge Guardrails](docs/team-knowledge.md)：说明团队共享知识的实验性状态、使用方式和稳定前缺口。
@@ -247,6 +247,8 @@ aisee flow inspect --json
 11. aisee:archive-guard
 12. openspec archive <change>
 ```
+
+实现前后可按需触发只读 Aisee reviewer role：`aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer`。触发时机和边界见 [Aisee Workflow](docs/workflow.md)，复用优先规则见 [Aisee Best Practices](docs/best-practices.md)。
 
 对于已有项目，可使用 `aisee:spec-migrate` 从代码、测试、文档、路由和已验证行为中整理 OpenSpec baseline specs。
 

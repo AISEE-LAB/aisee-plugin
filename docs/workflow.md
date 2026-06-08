@@ -148,6 +148,16 @@ Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，
 
 当 change 触及公开 CLI、HTTP endpoint、API/service contract、schema、parser、路径读取、安全或隐私表面时，建议执行 Tier 2 code review。
 
+只读 Aisee reviewer role 的触发时机：
+
+| Reviewer | 触发时机 | 用途 |
+| --- | --- | --- |
+| `aisee-change-architect` | `aisee:change-plan` 后、`aisee:change-author` 前按需触发；仅用于边界复杂、跨模块、跨 schema、依赖不清或粒度不确定的 change | 审查 change 边界、依赖、粒度和可独立交付性 |
+| `aisee-spec-reviewer` | `aisee:change-author` 后、`aisee:implementation-bridge` / `ce-work` 前建议触发 | 审查 artifacts、contracts、source-map、tasks 是否完整、一致、可验证 |
+| `aisee-implementation-reviewer` | `ce-work` 完成后、`aisee:verify` / `aisee:archive-guard` 前建议触发 | 比对实现、tasks、spec/source-map 和 evidence 是否一致 |
+
+这些 reviewer 只输出结构化审查结论，不改代码、不跑测试、不提交 PR，也不替代 `ce-doc-review`、`ce-code-review`、`ce-test-*` 或 `ce-work`。接口、UI、硬件、固件、安全和验证差异应作为 schema-aware check lenses，而不是新增独立全能 agent。
+
 ## 6. Verify
 
 实现后运行：
