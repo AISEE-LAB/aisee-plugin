@@ -5,10 +5,6 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 
 # aisee:verify
 
-## CLI preflight
-
-调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；缺失时停止并提示用户通过 PyPI / pipx 安装 CLI。
-
 `aisee:verify` 是当前 change 的 schema-aware 一致性诊断器。它不创建事实源，不替代 OpenSpec parser，也不做 archive 放行审批；OpenSpec artifact 合法性以 `openspec validate` 和当前 schema 为准。
 
 ## Reviewer role 边界

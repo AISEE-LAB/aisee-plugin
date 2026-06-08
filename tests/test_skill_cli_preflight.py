@@ -6,21 +6,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_cli_dependent_skills_reference_shared_preflight() -> None:
+def test_skills_do_not_reference_shared_cli_preflight() -> None:
     skill_files = sorted((ROOT / "skills").glob("*/SKILL.md"))
-    missing = []
+    offenders = []
     for path in skill_files:
         text = path.read_text(encoding="utf-8")
-        if "aisee " in text and "references/cli-preflight.md" not in text:
-            missing.append(path.relative_to(ROOT).as_posix())
+        if "references/cli-preflight.md" in text or "## CLI preflight" in text:
+            offenders.append(path.relative_to(ROOT).as_posix())
 
-    assert missing == []
+    assert offenders == []
 
 
-def test_cli_preflight_documents_cli_and_marketplace_boundary() -> None:
-    text = (ROOT / "references" / "cli-preflight.md").read_text(encoding="utf-8")
+def test_shared_cli_preflight_document_is_not_part_of_skill_context() -> None:
+    assert not (ROOT / "references" / "cli-preflight.md").exists()
 
-    assert "pipx install aisee-plugin" in text
-    assert "codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main" in text
-    assert "Marketplace installation 不会安装 `aisee` CLI" in text
-    assert "PyPI / pipx installation 不会安装 bundled skills" in text
+
+def test_cli_outputs_keep_marketplace_recovery_hints() -> None:
+    import sys
+
+    sys.path.insert(0, str(ROOT / "src"))
+
+    from aisee_cli.marketplace import MARKETPLACE_ADD_COMMAND, PLUGIN_ADD_COMMAND
+
+    assert MARKETPLACE_ADD_COMMAND == "codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main"
+    assert PLUGIN_ADD_COMMAND == "codex plugin add aisee-plugin@aisee-plugin"

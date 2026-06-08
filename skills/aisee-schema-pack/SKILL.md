@@ -7,10 +7,6 @@ description: 提供、审计、创建并维护 OpenSpec schema pack。用于从 
 
 > 旧名称：`aisee-opsx-schema`。若用户仍使用旧名，按本技能处理。
 
-## CLI preflight
-
-调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；schema pack 内容来自 marketplace-installed plugin，不来自 PyPI wheel。
-
 命名策略：本 skill 暂时保留 `aisee-schema-pack`，不改为 `aisee:schema-pack`。原因是它管理的是可安装的 schema 包和脚本资产，已被文档、CLI 和安装路径引用；重命名会影响发现、安装和旧项目兼容。若未来统一命名，应单独做迁移计划，而不是在 schema 内容优化中顺手改名。
 
 ## 目标

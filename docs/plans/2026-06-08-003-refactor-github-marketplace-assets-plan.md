@@ -81,7 +81,7 @@ flowchart TB
 
 ## 范围边界
 
-- 范围内：Codex marketplace listing、CLI asset 命令收缩、skill CLI preflight、package-data slimming、测试、release smoke checks 和文档。
+- 范围内：Codex marketplace listing、CLI asset 命令收缩、CLI 错误提示与 blocker、package-data slimming、测试、release smoke checks 和文档。
 - 范围内：为当前使用 `src/aisee_plugin_assets/` 的命令提供分阶段兼容迁移。
 - 范围内：盘点 CLI command surface，直接删除不再使用且不属于项目内工具边界的命令，并同步 README、CLI help 和测试。
 - 范围内：更新或标注旧文档和旧计划中的 wheel asset 分发假设，避免后续执行继续引用已废弃的 packaged assets 模型。
@@ -162,20 +162,19 @@ flowchart TB
   - 检查逻辑不读取或写入 Codex cache 中的插件内容。
 - **验证：** doctor 输出能帮助 PyPI-only 用户找到 GitHub marketplace 安装路径，同时保持 CLI-only 安装可用。
 
-### U5. 增加 Skill-Level CLI Preflight
+### U5. 删除 Skill Preflight，保留 CLI 错误提示
 
-- **目标：** marketplace-installed skills 在需要 `aisee` 时，能引导用户安装或升级 CLI。
+- **目标：** marketplace-installed skills 不携带重复 CLI preflight 文案；当 `aisee` 不可用、版本不匹配或 marketplace plugin content 缺失时，由实际命令失败、CLI blocker 或 `aisee doctor --json` 提示用户安装或升级 CLI / marketplace plugin。
 - **需求：** R4, R6.
 - **依赖：** U1.
-- **文件：** `skills/aisee-srs/SKILL.md`, `skills/aisee-architecture/SKILL.md`, `skills/aisee-ui-content/SKILL.md`, `skills/aisee-schema-pack/SKILL.md`, `skills/aisee-knowledge-curate/SKILL.md`, `skills/aisee-implementation-bridge/SKILL.md`, `skills/aisee-verify/SKILL.md`, `skills/aisee-archive-guard/SKILL.md`, `skills/aisee-flow/SKILL.md`, `tests/test_skill_cli_preflight.py`.
-- **做法：** 在依赖 CLI 的 skills 中引入一条简短共享 preflight 规则：调用 CLI 命令前检查 `aisee` 是否可用；缺失时停止并提供 PyPI / pipx 安装说明。规则保持精简，避免膨胀 `SKILL.md`。
+- **文件：** `skills/aisee-srs/SKILL.md`, `skills/aisee-architecture/SKILL.md`, `skills/aisee-ui-content/SKILL.md`, `skills/aisee-schema-pack/SKILL.md`, `skills/aisee-knowledge-curate/SKILL.md`, `skills/aisee-implementation-bridge/SKILL.md`, `skills/aisee-verify/SKILL.md`, `skills/aisee-archive-guard/SKILL.md`, `skills/aisee-flow/SKILL.md`, `src/aisee_cli/marketplace.py`, `src/aisee_cli/doctor.py`, `tests/test_skill_cli_preflight.py`, `tests/test_marketplace_hints.py`.
+- **做法：** 删除 `SKILL.md` 中的 CLI preflight 小节和共享 preflight 文档，避免 skill 常驻上下文重复安装说明。CLI 命令继续在 blocker / issues / doctor 输出中返回稳定提示；shell 级 `aisee` 不存在时，由执行错误触发用户提示。
 - **参考模式：** 当前 skills 只命名必要命令，不嵌入长脚本。
 - **测试场景：**
-  - 所有调用 `aisee` 的 skill 都包含共享 preflight 引用或规则。
-  - 不依赖 CLI 的 skills 不被强行添加 preflight。
-  - 安装提示提到 PyPI / pipx，但不声称 plugin marketplace installation 会安装 CLI。
-  - team knowledge 初始化流程由 skill 说明模板来源，并在需要 CLI 写配置或检查时执行 missing-CLI preflight。
-- **验证：** 审查者能快速确认所有 CLI-dependent skills 具备一致的 missing-CLI 行为。
+  - `SKILL.md` 不再引用 `references/cli-preflight.md`。
+  - 安装提示仍由 CLI blocker / doctor 输出提供，且提到 PyPI / pipx 与 Codex marketplace 的职责边界。
+  - team knowledge 初始化流程由 skill 说明模板来源，不从 PyPI wheel 复制模板；需要 CLI 时由实际命令结果驱动提示。
+- **验证：** 审查者能快速确认 skill 上下文不再承担安装检查，CLI 输出仍具备一致的恢复提示。
 
 ### U6. 迁移前更新文档和兼容策略
 
@@ -254,7 +253,7 @@ flowchart TB
 ## 验收示例
 
 - AE1. 给定用户已在 Codex 中添加 GitHub marketplace，当用户安装 `aisee-plugin` 时，Codex 从 repository plugin content 加载 skills，而不是从 PyPI wheel 加载。
-- AE2. 给定 marketplace-installed Aisee skill 需要 CLI 支持且 `aisee` 缺失，当 skill 启动时，它会停止并提示用户通过 PyPI / pipx 安装 CLI。
+- AE2. 给定 marketplace-installed Aisee skill 需要调用 CLI 且 `aisee` 缺失，或相关 `aisee ...` 命令因 CLI / marketplace 内容缺失失败时，它会停止当前 CLI-dependent 分支，并提示用户通过 PyPI / pipx 安装 CLI 或通过 Codex marketplace 安装插件内容。
 - AE3. 给定用户在项目里运行 `aisee schemas list`，当安装的是 slim wheel 时，命令只报告项目已安装 schema 状态或返回迁移提示，且不会寻找 packaged schema packs。
 - AE4. 给定用户需要安装 Aisee schema packs，当插件已通过 GitHub marketplace 安装时，agent workflow 从插件内容中读取 schema packs，而不是通过 CLI 从 PyPI wheel 安装。
 - AE5. 给定 release wheel 已构建，当检查 package contents 时，完整 skills 和 references 不存在，但 CLI modules 仍可安装。

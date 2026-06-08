@@ -5,10 +5,6 @@ description: 批量审查项目内 reusable knowledge candidates，把 reflect/s
 
 # aisee:knowledge-curate
 
-## CLI preflight
-
-调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；team knowledge 模板位于本 skill 的 `assets/team-knowledge/` 或外部知识库，不来自 PyPI wheel。
-
 批量审查项目内候选知识，产出可人工 review 的 team knowledge card drafts。
 
 ## 职责

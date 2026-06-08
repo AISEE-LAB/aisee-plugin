@@ -5,10 +5,6 @@ description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当
 
 # aisee:archive-guard
 
-## CLI preflight
-
-调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；缺失时停止并提示用户通过 PyPI / pipx 安装 CLI。
-
 `aisee:archive-guard` 是 `openspec archive <change>` 前的最终放行建议器。它不创建新事实源，不替代 `aisee:verify`，也不替代 OpenSpec archive；OpenSpec artifact 合法性和 baseline merge 仍以 `openspec validate` / `openspec archive` 为准。
 
 ## Reviewer evidence 边界
