@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "title", "cards"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "cards": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

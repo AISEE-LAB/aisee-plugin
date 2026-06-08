@@ -27,56 +27,53 @@ def run_json(root: Path, *args: str) -> dict:
     return json.loads(result.stdout)
 
 
-def test_schema_pack_falls_back_to_packaged_assets(tmp_path: Path) -> None:
+def test_schema_pack_does_not_fall_back_to_packaged_assets(tmp_path: Path) -> None:
     data = run_json(tmp_path, "schemas", "list", "--json")
 
-    names = {schema["name"] for schema in data["schemas"]}
     assert data["status"] == "ok"
-    assert "aisee-app-spec-driven" in names
-    assert "quick-fix" in names
-    assert "src/aisee_plugin_assets" in data["source"]
+    assert data["schemas"] == []
+    assert data["source"] is None
+    assert data["issues"][0]["code"] == "SCHEMA_PACK_SOURCE_UNAVAILABLE"
+    assert "codex plugin marketplace add" in data["setup_hint"]["commands"][0]
 
 
-def test_unrelated_project_skills_do_not_shadow_packaged_assets(tmp_path: Path) -> None:
+def test_unrelated_project_skills_do_not_shadow_aisee_assets(tmp_path: Path) -> None:
     (tmp_path / "skills" / "custom-skill").mkdir(parents=True)
     (tmp_path / "skills" / "custom-skill" / "SKILL.md").write_text("# Custom\n", encoding="utf-8")
 
     data = run_json(tmp_path, "schemas", "list", "--json")
 
-    names = {schema["name"] for schema in data["schemas"]}
     assert data["status"] == "ok"
-    assert "aisee-app-spec-driven" in names
-    assert "src/aisee_plugin_assets" in data["source"]
+    assert data["schemas"] == []
+    assert data["source"] is None
+    assert data["issues"][0]["code"] == "SCHEMA_PACK_SOURCE_UNAVAILABLE"
 
 
-def test_plugin_inspect_lists_packaged_skills_without_source_checkout(tmp_path: Path) -> None:
+def test_plugin_inspect_reports_cli_only_without_source_checkout(tmp_path: Path) -> None:
     data = run_json(tmp_path, "plugin", "inspect", "--json")
 
     assert data["status"] == "ok"
-    assert "aisee-srs" in data["skills"]
-    assert "aisee-change-plan" in data["skills"]
-    assert "aisee-knowledge-curate" in data["skills"]
-    assert {target["target"] for target in data["targets"]} == {"codex", "claude", "cursor"}
+    assert data["mode"] == "cli-only"
+    assert data["skills"] == []
+    assert data["targets"] == []
+    assert data["issues"][0]["code"] == "PLUGIN_CONTENT_UNAVAILABLE"
 
 
-def test_plugin_export_writes_codex_bundle(tmp_path: Path) -> None:
+def test_plugin_export_returns_deprecation_blocker(tmp_path: Path) -> None:
     destination = tmp_path / "exported-plugin"
     data = run_json(tmp_path, "plugin", "export", "--target", "codex", "--dest", str(destination), "--json")
 
-    assert data["status"] == "ok"
-    assert (destination / ".codex-plugin" / "plugin.json").exists()
-    assert (destination / "skills" / "aisee-srs" / "SKILL.md").exists()
-    assert (destination / "skills" / "aisee-knowledge-curate" / "SKILL.md").exists()
-    assert (destination / "skills" / "aisee-verify" / "evals" / "evals.json").exists()
-    assert (destination / "references" / "knowledge-card-contract.md").exists()
-    metadata = json.loads((destination / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
-    assert metadata["skills"] == "./skills/"
+    assert data["status"] == "blocked"
+    assert data["meta"]["writes"] is False
+    assert data["issues"][0]["code"] == "PLUGIN_EXPORT_DEPRECATED"
+    assert not destination.exists()
 
 
-def test_team_knowledge_scaffold_is_packaged_asset(tmp_path: Path) -> None:
+def test_team_knowledge_scaffold_returns_deprecation_blocker(tmp_path: Path) -> None:
     destination = tmp_path / "team-knowledge"
     data = run_json(tmp_path, "knowledge", "scaffold", "--dest", str(destination), "--json")
 
-    assert data["status"] == "ok"
-    assert (destination / "knowledge" / "packs" / "web-app.yaml").exists()
-    assert (destination / "schemas" / "knowledge-card.schema.json").exists()
+    assert data["status"] == "blocked"
+    assert data["meta"]["writes"] is False
+    assert data["issues"][0]["code"] == "KNOWLEDGE_SCAFFOLD_DEPRECATED"
+    assert not destination.exists()

@@ -8,6 +8,13 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.marketplace import MARKETPLACE_SOURCE, marketplace_setup_hint
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
+    import tomli as tomllib
+
 
 COMPOUND_REQUIRED_SKILLS = ["ce-plan", "ce-doc-review", "ce-work", "ce-code-review"]
 
@@ -53,6 +60,64 @@ def check_compound_plugin() -> dict[str, Any]:
         "skills": skills,
         "missing_skills": missing,
     }
+
+
+def check_codex_aisee_marketplace() -> dict[str, Any]:
+    executable = shutil.which("codex")
+    config_path = codex_config_path()
+    result: dict[str, Any] = {
+        "runtime": "codex",
+        "codex_cli_available": bool(executable),
+        "codex_cli": executable,
+        "config_path": config_path.as_posix(),
+        "config_read": False,
+        "marketplace_configured": False,
+        "plugin_enabled": False,
+        "status": "unknown",
+        "setup_hint": marketplace_setup_hint(),
+    }
+    if not config_path.exists():
+        result["reason"] = "config-missing"
+        return result
+
+    try:
+        config = tomllib.loads(config_path.read_text(encoding="utf-8"))
+    except Exception as error:
+        result["reason"] = f"config-unreadable: {error}"
+        return result
+
+    result["config_read"] = True
+    marketplaces = config.get("marketplaces") if isinstance(config, dict) else None
+    plugins = config.get("plugins") if isinstance(config, dict) else None
+    if isinstance(marketplaces, dict):
+        result["marketplace_configured"] = any(
+            marketplace_matches_aisee(item)
+            for item in marketplaces.values()
+            if isinstance(item, dict)
+        )
+    if isinstance(plugins, dict):
+        result["plugin_enabled"] = any(
+            name.startswith("aisee-plugin@") and bool(item.get("enabled", True))
+            for name, item in plugins.items()
+            if isinstance(name, str) and isinstance(item, dict)
+        )
+    if result["marketplace_configured"] and result["plugin_enabled"]:
+        result["status"] = "ok"
+    else:
+        result["status"] = "missing"
+    return result
+
+
+def marketplace_matches_aisee(item: dict[str, Any]) -> bool:
+    values = [str(item.get(key) or "") for key in ("source", "repo", "url", "path")]
+    return any(MARKETPLACE_SOURCE in value or "AISEE-LAB/aisee-plugin" in value for value in values)
+
+
+def codex_config_path() -> Path:
+    codex_home = os.environ.get("CODEX_HOME")
+    if codex_home:
+        return Path(codex_home).expanduser() / "config.toml"
+    return Path.home() / ".codex" / "config.toml"
 
 
 def find_compound_skill_roots() -> list[Path]:

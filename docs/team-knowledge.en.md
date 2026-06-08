@@ -1,6 +1,6 @@
 # Team Knowledge Guardrails
 
-> Experimental feature: suitable for local trials and workflow dogfooding, but not yet a stable public contract. Remote repository sync, promote-batch, and local scaffolding are available; PR automation and MCP service support are still unsettled.
+> Experimental feature: suitable for local trials and workflow dogfooding, but not yet a stable public contract. Remote repository sync and promote-batch are available; default templates live under `skills/aisee-knowledge-curate/assets/team-knowledge/` in the marketplace-installed plugin, or in an external knowledge repository. They no longer come from PyPI CLI scaffolding. PR automation and MCP service support are still unsettled.
 
 Team knowledge reuses a small number of reviewed engineering lessons across projects so AI agents can avoid repeating known mistakes during implementation, review, and verification.
 
@@ -17,7 +17,7 @@ It is not:
 The current version supports:
 
 - pinning a local team knowledge path, ref, and packs through `aisee/knowledge.yaml`;
-- creating an independent team knowledge scaffold and writing project config with `aisee knowledge scaffold --dest <path> --update-config --json`;
+- obtaining team knowledge templates from `skills/aisee-knowledge-curate/assets/team-knowledge/` in the marketplace-installed plugin or an external Git repository;
 - inspecting configuration with `aisee knowledge inspect --json`;
 - checking that the configured path and actual team knowledge directory match with `aisee knowledge doctor --json`;
 - validating cards and packs with `aisee knowledge check --json` or `--team-path <path>`;
@@ -55,11 +55,7 @@ V1 primarily uses the local `path`; `repo` and `ref` record provenance and suppo
 
 ## Retrieval
 
-Create a local team knowledge scaffold:
-
-```bash
-aisee knowledge scaffold --dest .aisee/team-knowledge --update-config --json
-```
+For default templates, install the Aisee plugin through the Codex marketplace first, then copy `skills/aisee-knowledge-curate/assets/team-knowledge/` into a dedicated team knowledge repository. The CLI no longer copies scaffold templates from the wheel.
 
 Inspect configuration first:
 

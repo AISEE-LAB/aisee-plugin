@@ -16,17 +16,17 @@ skills/aisee-schema-pack/assets/schema-pack/
 openspec/schemas/<schema-name>/
 ```
 
-Python 包内会同步一份用于 `aisee schemas install`：
+PyPI / pipx CLI 不再携带 schema pack 副本。Schema pack 内容通过 GitHub-backed Codex marketplace plugin 分发：
 
 ```text
-src/aisee_plugin_assets/skills/aisee-schema-pack/assets/schema-pack/
+codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+codex plugin add aisee-plugin@aisee-plugin
 ```
 
 修改 schema pack 后需要运行：
 
 ```bash
-python scripts/sync_package_assets.py
-python -m pytest tests/test_plugin_packaging.py tests/test_doctor_flow_schema.py tests/test_schema_pack_examples.py
+python -m pytest tests/test_plugin_marketplace.py tests/test_doctor_flow_schema.py tests/test_schema_pack_examples.py
 ```
 
 可运行 sample changes 放在对应 schema 的 `examples/` 目录。例如：
@@ -35,7 +35,7 @@ python -m pytest tests/test_plugin_packaging.py tests/test_doctor_flow_schema.py
 skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/examples/add-passwordless-login/
 ```
 
-这些示例必须随 `scripts/sync_package_assets.py` 同步到 Python 包资产，并由 `tests/test_schema_pack_examples.py` 检查。
+这些示例由 GitHub marketplace plugin 直接分发，并由 `tests/test_schema_pack_examples.py` 检查。
 
 ## Schema 选择
 
@@ -156,17 +156,7 @@ aisee schemas list --json
 aisee schemas check --json --fail-on-blocker
 ```
 
-安装全部 schema：
-
-```bash
-aisee schemas install --all --json
-```
-
-安装单个 schema：
-
-```bash
-aisee schemas install --schema aisee-app-spec-driven --json
-```
+`aisee schemas install` 不再从 PyPI wheel 安装 schema packs。需要 schema pack 内容时，通过 marketplace-installed plugin 的 `aisee-schema-pack` 工作流读取并复制插件内 schema。
 
 创建 app change：
 
@@ -184,5 +174,5 @@ aisee schemas install --schema aisee-app-spec-driven --json
 
 - schema 文件和模板必须同源维护，避免 skill 中复制另一份 schema。
 - README 只保留概览，详细规则放在本文档或 `schema.yaml`。
-- 修改 schema 后同步 package assets。
-- 公开发布前运行 release smoke test，确认 wheel 内 schema pack 可以安装和导出。
+- 修改 schema 后验证 marketplace plugin 中的 schema 内容和示例。
+- 公开发布前运行 release smoke test，确认 CLI-only wheel 不包含 schema pack，且 marketplace plugin metadata 可被验证。

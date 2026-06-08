@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import json
-import shutil
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.assets import packaged_asset_root, resolve_asset_root, resolve_plugin_metadata
+from aisee_cli.assets import resolve_asset_root, resolve_plugin_metadata
+from aisee_cli.marketplace import marketplace_issue, marketplace_setup_hint
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.project import rel
 
@@ -15,8 +14,29 @@ TARGETS = ("codex", "claude", "cursor")
 
 
 def inspect_plugin_assets(root: Path) -> dict[str, Any]:
-    asset_root = resolve_asset_root(root)
-    packaged_root = packaged_asset_root()
+    try:
+        asset_root = resolve_asset_root(root)
+    except FileNotFoundError:
+        issues = [marketplace_issue(
+            "PLUGIN_CONTENT_UNAVAILABLE",
+            "info",
+            "Aisee plugin content is provided by the GitHub marketplace plugin, not by the PyPI CLI package.",
+        )]
+        return {
+            "status": "ok",
+            "mode": "cli-only",
+            "asset_root": None,
+            "skills_dir": None,
+            "skills": [],
+            "targets": [],
+            "issues": issues,
+            "summary": summarize_issues(issues),
+            "setup_hint": marketplace_setup_hint(),
+            "meta": {
+                "command": "aisee plugin inspect --json",
+                "writes": False,
+            },
+        }
     skills_dir = asset_root / "skills"
     issues = []
     if not skills_dir.exists():
@@ -41,8 +61,8 @@ def inspect_plugin_assets(root: Path) -> dict[str, Any]:
     skills = sorted(path.parent.name for path in skills_dir.glob("*/SKILL.md")) if skills_dir.exists() else []
     return {
         "status": status_from_issues(issues),
+        "mode": "source-checkout",
         "asset_root": rel(root, asset_root),
-        "packaged_asset_root": rel(root, packaged_root),
         "skills_dir": rel(root, skills_dir),
         "skills": skills,
         "targets": targets,
@@ -54,47 +74,23 @@ def inspect_plugin_assets(root: Path) -> dict[str, Any]:
 def export_plugin_assets(root: Path, target: str, dest: Path, *, force: bool = False) -> dict[str, Any]:
     if target not in TARGETS:
         raise ValueError(f"unsupported plugin target: {target}")
-    asset_root = resolve_asset_root(root)
-    skills_dir = asset_root / "skills"
-    if not skills_dir.exists():
-        raise ValueError("plugin skills directory was not found")
-    metadata = resolve_plugin_metadata(target, root)
-
-    if dest.exists():
-        if not force:
-            raise ValueError(f"destination already exists: {dest}")
-        shutil.rmtree(dest)
-    dest.mkdir(parents=True, exist_ok=True)
-
-    shutil.copytree(skills_dir, dest / "skills")
-    references_dir = asset_root / "references"
-    if references_dir.exists():
-        shutil.copytree(references_dir, dest / "references")
-    plugin_dir_name = {
-        "codex": ".codex-plugin",
-        "claude": ".claude-plugin",
-        "cursor": ".cursor-plugin",
-    }[target]
-    plugin_dir = dest / plugin_dir_name
-    plugin_dir.mkdir(parents=True, exist_ok=True)
-
-    metadata_data = json.loads(metadata.read_text(encoding="utf-8"))
-    if target == "codex":
-        metadata_data["skills"] = "./skills/"
-    (plugin_dir / "plugin.json").write_text(
-        json.dumps(metadata_data, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
+    issues = [marketplace_issue(
+        "PLUGIN_EXPORT_DEPRECATED",
+        "blocker",
+        "aisee plugin export no longer exports bundled plugin content from the PyPI package; install Aisee through the Codex marketplace instead.",
+    )]
     return {
-        "status": "ok",
+        "status": "blocked",
         "target": target,
         "destination": rel(root, dest),
-        "metadata": rel(root, plugin_dir / "plugin.json"),
-        "skills": rel(root, dest / "skills"),
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "setup_hint": marketplace_setup_hint(),
         "meta": {
             "command": f"aisee plugin export --target {target} --dest {dest} --json",
-            "writes": True,
+            "writes": False,
+            "deprecated": True,
+            "force": force,
         },
     }
 
@@ -102,10 +98,33 @@ def export_plugin_assets(root: Path, target: str, dest: Path, *, force: bool = F
 def plugin_path(root: Path, target: str) -> dict[str, Any]:
     if target not in TARGETS:
         raise ValueError(f"unsupported plugin target: {target}")
-    asset_root = resolve_asset_root(root)
-    metadata = resolve_plugin_metadata(target, root)
+    try:
+        asset_root = resolve_asset_root(root)
+        metadata = resolve_plugin_metadata(target, root)
+    except FileNotFoundError:
+        issues = [marketplace_issue(
+            "PLUGIN_PATH_DEPRECATED",
+            "blocker",
+            "aisee plugin path no longer resolves plugin content from the PyPI package; Codex manages installed plugin paths.",
+        )]
+        return {
+            "status": "blocked",
+            "target": target,
+            "asset_root": None,
+            "metadata": None,
+            "skills": None,
+            "issues": issues,
+            "summary": summarize_issues(issues),
+            "setup_hint": marketplace_setup_hint(),
+            "meta": {
+                "command": f"aisee plugin path --target {target} --json",
+                "writes": False,
+                "deprecated": True,
+            },
+        }
     return {
         "status": "ok",
+        "mode": "source-checkout",
         "target": target,
         "asset_root": rel(root, asset_root),
         "metadata": rel(root, metadata),

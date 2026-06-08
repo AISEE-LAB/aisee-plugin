@@ -125,7 +125,13 @@ aisee bootstrap --plan --json
 
 ```bash
 aisee openspec ensure --json
-aisee schemas install --json
+```
+
+Schema pack 内容由 GitHub-backed Codex marketplace 中的 Aisee plugin 提供；`aisee schemas install` 不再从 PyPI CLI 写入 schema pack。需要插件内容时先安装 marketplace plugin：
+
+```bash
+codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+codex plugin add aisee-plugin@aisee-plugin
 ```
 
 `aisee openspec ensure` 默认直接执行：
@@ -167,7 +173,6 @@ aisee openspec ensure
 aisee init project
 aisee init memory
 aisee init hooks
-aisee schemas install
 ```
 
 这样便于调试，也避免一个命令做太多不可见修改。
@@ -970,9 +975,10 @@ Cache 只加速这些回答，不保存权威内容。
 2. aisee bootstrap --plan
 3. 用户确认
 4. aisee openspec ensure --json
-5. aisee schemas install
-6. aisee index
-7. aisee id check
+5. codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+6. codex plugin add aisee-plugin@aisee-plugin
+7. aisee index
+8. aisee id check
 ```
 
 ## V1 建议边界
@@ -984,7 +990,6 @@ Cache 只加速这些回答，不保存权威内容。
 - `aisee doctor --json`
 - `aisee bootstrap --plan`
 - `aisee openspec ensure --json`
-- `aisee schemas install --json`
 - `aisee index --json`
 - `aisee get <id> --json`
 - `aisee trace <id> --json`

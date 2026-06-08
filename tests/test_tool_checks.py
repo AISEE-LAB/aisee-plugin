@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from aisee_cli.tool_checks import check_compound_plugin, check_openspec_cli
+from aisee_cli.tool_checks import check_codex_aisee_marketplace, check_compound_plugin, check_openspec_cli
 
 
 def write(path: Path, text: str) -> None:
@@ -48,3 +48,44 @@ def test_compound_plugin_check_reports_partial_install(tmp_path: Path, monkeypat
     assert result["plugin_available"] is True
     assert result["status"] == "partial"
     assert "ce-plan" in result["missing_skills"]
+
+
+def test_codex_marketplace_check_reports_ok_from_config(tmp_path: Path, monkeypatch) -> None:
+    codex_home = tmp_path / "codex-home"
+    write(
+        codex_home / "config.toml",
+        """[marketplaces.aisee]
+source = "AISEE-LAB/aisee-plugin"
+
+[plugins."aisee-plugin@aisee"]
+enabled = true
+""",
+    )
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+
+    result = check_codex_aisee_marketplace()
+
+    assert result["status"] == "ok"
+    assert result["marketplace_configured"] is True
+    assert result["plugin_enabled"] is True
+
+
+def test_codex_marketplace_check_reports_missing_from_config(tmp_path: Path, monkeypatch) -> None:
+    codex_home = tmp_path / "codex-home"
+    write(codex_home / "config.toml", "[marketplaces.other]\nsource = \"other/repo\"\n")
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+
+    result = check_codex_aisee_marketplace()
+
+    assert result["status"] == "missing"
+    assert result["setup_hint"]["writes_codex_state"] is False
+    assert "codex plugin marketplace add" in result["setup_hint"]["commands"][0]
+
+
+def test_codex_marketplace_check_reports_unknown_without_config(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "missing-codex-home"))
+
+    result = check_codex_aisee_marketplace()
+
+    assert result["status"] == "unknown"
+    assert result["reason"] == "config-missing"

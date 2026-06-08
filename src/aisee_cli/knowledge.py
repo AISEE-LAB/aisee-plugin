@@ -13,7 +13,7 @@ from typing import Any
 
 import yaml
 
-from aisee_cli.assets import packaged_asset_root
+from aisee_cli.marketplace import marketplace_issue, marketplace_setup_hint
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import knowledge_config_path, knowledge_index_path
 from aisee_cli.project import rel
@@ -24,7 +24,6 @@ DEFAULT_MAX_CARDS = 3
 CARD_REQUIRED_FIELDS = ("id", "title", "status", "applies_to", "trigger", "recommended_action", "boundaries")
 CARD_STATUSES = {"candidate", "active", "deprecated"}
 TEXT_TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_:+.-]+|[\u4e00-\u9fff]+")
-TEAM_KNOWLEDGE_ASSET_DIR = "team-knowledge"
 SCAFFOLD_MARKER = ".aisee-team-knowledge"
 
 
@@ -286,33 +285,24 @@ def build_knowledge_scaffold(
     packs: list[str] | None = None,
 ) -> dict[str, Any]:
     destination = resolve_user_path(root, Path(dest))
-    source = packaged_asset_root() / TEAM_KNOWLEDGE_ASSET_DIR
-    if not source.exists():
-        raise ValueError("packaged team knowledge scaffold was not found")
-    if destination.exists():
-        if not force:
-            raise ValueError(f"destination already exists: {destination}")
-        ensure_safe_scaffold_force(root, destination)
-        shutil.rmtree(destination)
-    shutil.copytree(source, destination)
-    written = sorted(rel(root, path) for path in destination.rglob("*") if path.is_file())
-    config_update = None
-    if update_config:
-        config_update = write_knowledge_config_for_scaffold(root, destination, packs or [])
-        written.append(config_update["path"])
-    check = build_knowledge_check(root, team_path=str(destination))
+    issues = [marketplace_issue(
+        "KNOWLEDGE_SCAFFOLD_DEPRECATED",
+        "blocker",
+        "aisee knowledge scaffold no longer copies team knowledge templates from the PyPI package; copy skills/aisee-knowledge-curate/assets/team-knowledge from the marketplace-installed Aisee plugin, or configure an external team knowledge repository.",
+    )]
     return {
         "schema_version": KNOWLEDGE_SCHEMA_VERSION,
-        "status": check["status"],
+        "status": "blocked",
         "destination": rel(root, destination),
-        "source": rel(root, source),
-        "config_update": config_update,
-        "written": written,
-        "issues": check["issues"],
-        "summary": check["summary"],
+        "config_update": None,
+        "written": [],
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "setup_hint": marketplace_setup_hint(),
         "meta": {
             "command": f"aisee knowledge scaffold --dest {dest} --json",
-            "writes": True,
+            "writes": False,
+            "deprecated": True,
             "force": force,
             "updates_config": update_config,
         },
@@ -514,37 +504,6 @@ def load_knowledge_config(root: Path) -> tuple[dict[str, Any], list[dict[str, st
             "vector": retrieval.get("vector") if isinstance(retrieval, dict) else None,
         },
     }, issues
-
-
-def write_knowledge_config_for_scaffold(root: Path, destination: Path, packs: list[str]) -> dict[str, Any]:
-    path = knowledge_config_path(root)
-    if path.exists():
-        data, parse_error = load_yaml_file(path)
-        if parse_error:
-            raise ValueError(f"refusing to update invalid knowledge config: {parse_error}")
-        config_data = data if isinstance(data, dict) else {}
-    else:
-        config_data = {}
-    selected_packs = normalize_string_list(packs) or normalize_string_list(config_data.get("packs")) or ["web-app"]
-    config_data["path"] = rel(root, destination)
-    config_data["packs"] = selected_packs
-    retrieval = config_data.get("retrieval")
-    if not isinstance(retrieval, dict):
-        config_data["retrieval"] = {
-            "max_cards": DEFAULT_MAX_CARDS,
-            "include_project_candidates": True,
-        }
-    path.parent.mkdir(parents=True, exist_ok=True)
-    rendered = yaml.safe_dump(config_data, allow_unicode=True, sort_keys=False)
-    changed = not path.exists() or path.read_text(encoding="utf-8") != rendered
-    if changed:
-        path.write_text(rendered, encoding="utf-8")
-    return {
-        "path": rel(root, path),
-        "changed": changed,
-        "team_path": rel(root, destination),
-        "packs": selected_packs,
-    }
 
 
 def resolve_user_path(root: Path, path: Path) -> Path:
@@ -1317,27 +1276,6 @@ def ensure_clean_git_worktree(root: Path, team_root: Path, allow_dirty: bool) ->
     if result.stdout.strip():
         return issue("KNOWLEDGE_REPO_DIRTY", "blocker", "team knowledge checkout has uncommitted changes", rel(root, team_root))
     return None
-
-
-def ensure_safe_scaffold_force(root: Path, destination: Path) -> None:
-    if destination.is_symlink():
-        raise ValueError(f"refusing to overwrite symlink path: {destination}")
-    resolved = destination.resolve()
-    try:
-        resolved.relative_to(root.resolve())
-    except ValueError as error:
-        raise ValueError(f"refusing to overwrite scaffold outside project root: {destination}") from error
-    protected = {
-        root.resolve(),
-        Path.home().resolve(),
-        packaged_asset_root().resolve(),
-        (packaged_asset_root() / TEAM_KNOWLEDGE_ASSET_DIR).resolve(),
-    }
-    if resolved in protected or resolved.parent == resolved:
-        raise ValueError(f"refusing to overwrite protected path: {destination}")
-    marker = destination / SCAFFOLD_MARKER
-    if not marker.exists():
-        raise ValueError(f"refusing to overwrite non-scaffold directory: {destination}")
 
 
 def knowledge_git_result(

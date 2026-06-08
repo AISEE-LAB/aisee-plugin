@@ -16,12 +16,10 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
 ROOT = Path(__file__).resolve().parents[1]
 
 VERSION_FILES = [
+    ".agents/plugins/marketplace.json",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
     ".cursor-plugin/plugin.json",
-    "src/aisee_plugin_assets/plugin-metadata/codex/plugin.json",
-    "src/aisee_plugin_assets/plugin-metadata/claude/plugin.json",
-    "src/aisee_plugin_assets/plugin-metadata/cursor/plugin.json",
 ]
 
 

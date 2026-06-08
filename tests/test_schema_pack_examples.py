@@ -8,15 +8,7 @@ from aisee_cli.context_pack import parse_schema
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PACK_ROOT = ROOT / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
-PACKAGED_SCHEMA_PACK_ROOT = (
-    ROOT
-    / "src"
-    / "aisee_plugin_assets"
-    / "skills"
-    / "aisee-schema-pack"
-    / "assets"
-    / "schema-pack"
-)
+PACKAGED_SCHEMA_PACK_ROOT = ROOT / "src" / "aisee_plugin_assets" / "skills"
 ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-\d+\b")
 
 
@@ -64,11 +56,8 @@ def test_app_schema_sample_change_has_registered_style_ids() -> None:
     assert not any("-NEW-" in item for item in ids)
 
 
-def test_packaged_assets_include_schema_examples() -> None:
+def test_schema_examples_are_repository_plugin_content_not_packaged_assets() -> None:
     source = SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "examples" / "add-passwordless-login"
-    packaged = PACKAGED_SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "examples" / "add-passwordless-login"
 
-    assert packaged.exists()
-    source_files = sorted(path.relative_to(source).as_posix() for path in source.rglob("*") if path.is_file())
-    packaged_files = sorted(path.relative_to(packaged).as_posix() for path in packaged.rglob("*") if path.is_file())
-    assert packaged_files == source_files
+    assert source.exists()
+    assert not PACKAGED_SCHEMA_PACK_ROOT.exists()

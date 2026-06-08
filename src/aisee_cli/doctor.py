@@ -12,7 +12,7 @@ from aisee_cli.paths import inspect_layout
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.schema_pack import list_schema_packs
 from aisee_cli.sources import check_sources
-from aisee_cli.tool_checks import check_compound_plugin, check_openspec_cli
+from aisee_cli.tool_checks import check_codex_aisee_marketplace, check_compound_plugin, check_openspec_cli
 
 
 def build_doctor(project_root: Path) -> dict[str, Any]:
@@ -50,6 +50,7 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
     schemas = list_schema_packs(root)
     openspec_cli = check_openspec_cli()
     compound = check_compound_plugin()
+    codex_marketplace = check_codex_aisee_marketplace()
     issues.extend(item for item in sources["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in registry["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in schemas["issues"] if item.get("severity") == "blocker")
@@ -58,6 +59,14 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
     if compound["status"] != "ok":
         missing = ", ".join(compound["missing_skills"]) if compound["missing_skills"] else "Compound plugin"
         issues.append(issue("COMPOUND_UNAVAILABLE", "info", f"Compound Engineering is not fully available: {missing}"))
+    if codex_marketplace["status"] == "missing":
+        marketplace_issue = issue(
+            "AISEE_CODEX_MARKETPLACE_MISSING",
+            "info",
+            "Aisee Codex marketplace plugin is not configured; install plugin content from GitHub when you need Aisee skills or schema packs.",
+        )
+        marketplace_issue["setup_hint"] = codex_marketplace["setup_hint"]
+        issues.append(marketplace_issue)
 
     return {
         "status": status_from_issues(issues),
@@ -69,6 +78,7 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
             "initialized": openspec_config.exists() and openspec_changes.exists(),
         },
         "compound": compound,
+        "codex_marketplace": codex_marketplace,
         "aisee": {
             "layout": layout,
             "sources": sources,

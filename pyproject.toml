@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aisee-plugin"
-version = "0.1.3"
+version = "0.1.4"
 description = "AI-Enhanced Software Engineering plugin for OpenSpec and Compound Engineering workflows."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -35,7 +35,8 @@ classifiers = [
   "Topic :: Utilities"
 ]
 dependencies = [
-  "PyYAML>=6.0"
+  "PyYAML>=6.0",
+  "tomli>=2.0; python_version < '3.11'"
 ]
 
 [project.urls]
@@ -47,21 +48,6 @@ aisee = "aisee_cli.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools.package-data]
-aisee_plugin_assets = [
-  "**/*.csv",
-  "**/*.js",
-  "**/*.json",
-  "**/*.jsonl",
-  "**/*.md",
-  "**/*.py",
-  "**/*.svg",
-  "**/*.txt",
-  "**/*.xlsx",
-  "**/*.yaml",
-  "**/*.yml"
-]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

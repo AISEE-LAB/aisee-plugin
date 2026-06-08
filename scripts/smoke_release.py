@@ -8,12 +8,21 @@ import os
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import venv
+import zipfile
 from importlib.util import find_spec
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+FORBIDDEN_PACKAGE_CONTENT_PARTS = (
+    "/skills/",
+    "/references/",
+    "/team-knowledge/",
+    "/plugin-metadata/",
+    "schema-pack/",
+)
 
 
 def run(command: list[str], *, cwd: Path = ROOT, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
@@ -57,6 +66,31 @@ def latest_wheel(dist_dir: Path) -> Path:
     return wheels[0]
 
 
+def latest_sdist(dist_dir: Path) -> Path:
+    sdists = sorted(dist_dir.glob("aisee_plugin-*.tar.gz"), key=lambda path: path.stat().st_mtime, reverse=True)
+    if not sdists:
+        raise RuntimeError("dist/ 中没有 aisee_plugin sdist，请确认 python -m build 成功。")
+    return sdists[0]
+
+
+def assert_cli_only_archive_contents(wheel: Path, sdist: Path) -> None:
+    with zipfile.ZipFile(wheel) as archive:
+        assert_no_forbidden_package_content(wheel, archive.namelist())
+    with tarfile.open(sdist, "r:gz") as archive:
+        assert_no_forbidden_package_content(sdist, archive.getnames())
+
+
+def assert_no_forbidden_package_content(archive_path: Path, names: list[str]) -> None:
+    blocked = [
+        name
+        for name in names
+        if any(part in f"/{name}" for part in FORBIDDEN_PACKAGE_CONTENT_PARTS)
+    ]
+    if blocked:
+        sample = "\n".join(blocked[:20])
+        raise RuntimeError(f"{archive_path.name} contains plugin content that must not ship in the PyPI package:\n{sample}")
+
+
 def assert_json_command(command: list[str], *, cwd: Path = ROOT) -> dict[str, object]:
     result = run(command, cwd=cwd)
     print_output(result)
@@ -70,7 +104,6 @@ def run_venv_smoke(wheel: Path) -> None:
     with tempfile.TemporaryDirectory(prefix="aisee-release-smoke-") as temp:
         temp_dir = Path(temp)
         venv_dir = temp_dir / "venv"
-        export_dir = temp_dir / "plugin-bundle"
         project_dir = temp_dir / "project"
         project_dir.mkdir()
 
@@ -79,7 +112,7 @@ def run_venv_smoke(wheel: Path) -> None:
         aisee = venv_aisee(venv_dir)
 
         print_output(run([str(py), "-m", "pip", "install", "--disable-pip-version-check", str(wheel)]))
-        run_cli_smoke(aisee, project_dir, export_dir)
+        run_cli_smoke(aisee, project_dir)
 
 
 def run_pipx_smoke(wheel: Path) -> int:
@@ -94,7 +127,6 @@ def run_pipx_smoke(wheel: Path) -> int:
         home_dir = temp_dir / "pipx-home"
         bin_dir = temp_dir / "pipx-bin"
         man_dir = temp_dir / "pipx-man"
-        export_dir = temp_dir / "plugin-bundle"
         project_dir = temp_dir / "project"
         project_dir.mkdir()
         bin_dir.mkdir()
@@ -111,17 +143,25 @@ def run_pipx_smoke(wheel: Path) -> int:
         )
 
         print_output(run([pipx, "install", "--python", sys.executable, str(wheel)], env=env))
-        run_cli_smoke(pipx_aisee(bin_dir), project_dir, export_dir)
+        run_cli_smoke(pipx_aisee(bin_dir), project_dir)
     return 0
 
 
-def run_cli_smoke(aisee: Path, project_dir: Path, export_dir: Path) -> None:
+def run_cli_smoke(aisee: Path, project_dir: Path) -> None:
     print_output(run([str(aisee), "--version"]))
-    assert_json_command([str(aisee), "doctor", "--json"], cwd=project_dir)
-    assert_json_command([str(aisee), "plugin", "inspect", "--json"], cwd=project_dir)
-    assert_json_command([str(aisee), "plugin", "export", "--target", "codex", "--dest", str(export_dir), "--json"], cwd=project_dir)
-    assert_json_command([str(aisee), "schemas", "list", "--json"], cwd=project_dir)
+    doctor = assert_json_command([str(aisee), "doctor", "--json"], cwd=project_dir)
+    inspect = assert_json_command([str(aisee), "plugin", "inspect", "--json"], cwd=project_dir)
+    export = assert_json_command([str(aisee), "plugin", "export", "--target", "codex", "--dest", str(project_dir / "plugin-bundle"), "--json"], cwd=project_dir)
+    schemas = assert_json_command([str(aisee), "schemas", "list", "--json"], cwd=project_dir)
     assert_json_command([str(aisee), "schemas", "check", "--json"], cwd=project_dir)
+    if "codex_marketplace" not in doctor:
+        raise RuntimeError("doctor output did not include codex_marketplace")
+    if inspect.get("mode") != "cli-only":
+        raise RuntimeError("plugin inspect should report CLI-only mode in installed wheel")
+    if export.get("status") != "blocked" or export.get("meta", {}).get("writes") is not False:
+        raise RuntimeError("plugin export should return a non-writing blocker in installed wheel")
+    if schemas.get("source") is not None:
+        raise RuntimeError("schema list should not report packaged schema source in installed wheel")
 
 
 def parse_args() -> argparse.Namespace:
@@ -146,6 +186,8 @@ def main() -> int:
 
     print_output(run([sys.executable, "-m", "build"]))
     wheel = latest_wheel(dist_dir)
+    sdist = latest_sdist(dist_dir)
+    assert_cli_only_archive_contents(wheel, sdist)
     print(f"Built wheel: {wheel.name}")
 
     run_venv_smoke(wheel)

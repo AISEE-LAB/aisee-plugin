@@ -40,6 +40,8 @@ def run_json(root: Path, *args: str) -> dict:
 
 
 def create_schema_pack(root: Path) -> None:
+    write(root / "skills" / "aisee-srs" / "SKILL.md", "# Aisee SRS\n")
+    write(root / "references" / "README.md", "# References\n")
     write(
         root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "schema.yaml",
         """name: quick-fix
@@ -152,6 +154,9 @@ def test_bootstrap_plan_is_read_only(tmp_path: Path) -> None:
     assert data["status"] == "ready"
     assert data["writes"] is False
     assert any(item["path"] == "AGENTS.md" for item in data["actions"])
+    schema_action = next(item for item in data["actions"] if item["path"] == "aisee-plugin marketplace")
+    assert "codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main" in schema_action["reason"]
+    assert "aisee schemas install" not in schema_action["reason"]
     assert not (tmp_path / "AGENTS.md").exists()
 
 
@@ -186,8 +191,9 @@ def test_bootstrap_apply_is_explicitly_blocked(tmp_path: Path) -> None:
     assert data["issues"][0]["code"] == "BOOTSTRAP_APPLY_NOT_IMPLEMENTED"
 
 
-def test_schema_pack_list_check_and_install(tmp_path: Path) -> None:
+def test_schema_pack_list_and_check_use_explicit_dev_asset_root(tmp_path: Path, monkeypatch) -> None:
     create_schema_pack(tmp_path)
+    monkeypatch.setenv("AISEE_PLUGIN_ASSET_ROOT", str(tmp_path))
 
     listed = run_json(tmp_path, "schemas", "list", "--json")
     checked = run_json(tmp_path, "schemas", "check", "--json")
@@ -195,8 +201,21 @@ def test_schema_pack_list_check_and_install(tmp_path: Path) -> None:
 
     assert listed["schemas"][0]["name"] == "quick-fix"
     assert checked["status"] == "ok"
-    assert installed["installed"][0]["state"] == "installed"
-    assert (tmp_path / "openspec" / "schemas" / "quick-fix" / "schema.yaml").exists()
+    assert installed["status"] == "blocked"
+    assert installed["meta"]["writes"] is False
+    assert installed["issues"][0]["code"] == "SCHEMA_INSTALL_DEPRECATED"
+    assert not (tmp_path / "openspec" / "schemas" / "quick-fix" / "schema.yaml").exists()
+
+
+def test_schema_check_validates_project_installed_schema_without_source_assets(tmp_path: Path) -> None:
+    write(tmp_path / "openspec" / "schemas" / "broken" / "schema.yaml", "name: broken\nartifacts: [\n")
+
+    result = run_aisee(tmp_path, "schemas", "check", "--json", "--fail-on-blocker", check=False)
+    data = json.loads(result.stdout)
+
+    assert result.returncode == 1
+    assert data["status"] == "blocked"
+    assert any(item["code"] == "SCHEMA_PARSE_FAILED" for item in data["issues"])
 
 
 def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Path, monkeypatch) -> None:

@@ -1,0 +1,22 @@
+{
+  "name": "aisee-plugin",
+  "version": "0.1.4",
+  "interface": {
+    "displayName": "Aisee Plugin",
+    "description": "Aisee plugin marketplace for OpenSpec and Compound Engineering workflows."
+  },
+  "plugins": [
+    {
+      "name": "aisee-plugin",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "NONE"
+      },
+      "category": "Coding"
+    }
+  ]
+}

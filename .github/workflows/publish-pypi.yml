@@ -92,10 +92,11 @@ jobs:
       - name: Run tests
         run: python -m pytest -q
 
-      - name: Build distributions
+      - name: Run release smoke
+        run: python scripts/smoke_release.py
+
+      - name: Check distributions
         run: |
-          rm -rf dist
-          python -m build
           python -m twine check dist/*
 
       - name: Upload distributions

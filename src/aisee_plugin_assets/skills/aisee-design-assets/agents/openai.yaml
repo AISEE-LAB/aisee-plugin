@@ -1,4 +1,0 @@
-interface:
-  display_name: "aisee:design-assets"
-  short_description: "通用参考图、StyleSpec 草稿与生成型视觉素材工作流"
-  default_prompt: "Use $aisee:design-assets to generate reference images, draft a StyleSpec, plan generated assets, and maintain visual asset indexes."

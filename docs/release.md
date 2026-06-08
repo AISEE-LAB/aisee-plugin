@@ -14,12 +14,10 @@ pyproject.toml [project].version
 
 ```text
 src/aisee_cli/__init__.py
+.agents/plugins/marketplace.json
 .codex-plugin/plugin.json
 .claude-plugin/plugin.json
 .cursor-plugin/plugin.json
-src/aisee_plugin_assets/plugin-metadata/codex/plugin.json
-src/aisee_plugin_assets/plugin-metadata/claude/plugin.json
-src/aisee_plugin_assets/plugin-metadata/cursor/plugin.json
 ```
 
 ## 版本号规则
@@ -44,17 +42,13 @@ Aisee 使用 SemVer：
 python scripts/check_versions.py
 ```
 
-从 `pyproject.toml` 同步版本到 CLI 和 plugin metadata：
+从 `pyproject.toml` 同步版本到 CLI、marketplace listing 和 plugin metadata：
 
 ```bash
 python scripts/sync_versions.py
 ```
 
-同步 package assets：
-
-```bash
-python scripts/sync_package_assets.py
-```
+`scripts/sync_package_assets.py` 仅保留为兼容入口。PyPI package 是 CLI-only，不再 mirror skills、references、schema packs、team knowledge templates 或 plugin metadata。
 
 ## 发布前检查清单
 
@@ -66,7 +60,6 @@ python -m pip install build twine
 
 ```bash
 python scripts/sync_versions.py
-python scripts/sync_package_assets.py
 python scripts/check_versions.py
 pytest -q
 python scripts/smoke_release.py
@@ -78,7 +71,9 @@ python scripts/smoke_release.py
 
 - 先读取 `pyproject.toml` 中的版本号；
 - 如果该版本已经存在于 PyPI，则跳过发布；
-- 如果该版本不存在，则运行版本检查、测试、构建、`twine check`，再发布到 PyPI。
+- 如果该版本不存在，则运行版本检查、测试、`scripts/smoke_release.py`、`twine check`，再发布到 PyPI。
+
+`scripts/smoke_release.py` 会重新构建 dist、安装 wheel 到干净 venv，并检查 wheel / sdist 不包含完整 `skills/`、`references/`、schema pack trees、team knowledge templates 或 plugin metadata 副本。
 
 该 workflow 默认使用 PyPI Trusted Publishing，不在仓库中保存 PyPI token。PyPI 项目需要配置 trusted publisher：
 
@@ -114,9 +109,26 @@ python -m pipx install aisee-plugin
 aisee --version
 aisee doctor --json
 aisee plugin inspect --json
-aisee plugin export --target codex --dest /tmp/aisee-plugin-bundle --force --json
 aisee schemas list --json
+aisee schemas check --json
 ```
+
+发布后的 CLI-only smoke 需要确认：
+
+- `aisee doctor --json` 输出 `codex_marketplace` 检查结果；
+- `aisee plugin inspect --json` 输出 CLI-only 状态和 Codex marketplace setup hint；
+- `aisee plugin export --target codex --dest /tmp/aisee-plugin-bundle --force --json` 返回稳定 blocker，且 `meta.writes` 为 `false`；
+- `aisee schemas install --json` 返回稳定 blocker，且 `meta.writes` 为 `false`；
+- wheel 中不包含完整 `skills/`、`references/`、schema pack trees、team knowledge templates 或 plugin metadata 副本。
+
+Codex marketplace 真实安装 smoke 会写 Codex 本地配置，不放入默认 PyPI 发布 workflow。发布负责人可在已授权的本机环境中额外执行：
+
+```bash
+codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+codex plugin add aisee-plugin@aisee-plugin
+```
+
+然后确认 Codex 能发现 Aisee skills，并运行 `aisee doctor --json` 查看 `codex_marketplace.status`。
 
 本地 Public Beta 候选验证应先跑：
 
@@ -133,8 +145,8 @@ python scripts/smoke_release.py --with-pipx
 - `docs/workflow.md` 和 `docs/best-practices.md` 是否覆盖新增公开能力。
 - `docs/compatibility-policy.md` 是否覆盖新增或破坏的公开契约。
 - `docs/schema-packs.md` 是否覆盖新增或调整的 schema。
-- `docs/plugin-marketplace.md` 是否覆盖 plugin manifest、marketplace listing 或 runtime export 变化。
-- 新增 skill 是否同步到 `src/aisee_plugin_assets/`。
+- `docs/plugin-marketplace.md` 是否覆盖 plugin manifest、marketplace listing 和 Codex 安装路径。
+- 新增 skill、reference、schema pack 或 team knowledge template 是否位于 repository plugin content 源内，并能通过 Codex marketplace 安装读取。
 - 新增 CLI JSON 字段是否有 contract tests。
 - 破坏性或用户可见变更是否写入 `CHANGELOG.md`。
 - 需要长期保留的发布决策是否写入 `aisee/memory/`。
@@ -162,5 +174,5 @@ git tag v0.1.0
 
 持续兼容治理必须维护：
 
-- 明确 CLI JSON、schema packs、context pack、skill contract 和 plugin export 的兼容边界与版本升级规则。
+- 明确 CLI JSON、schema packs、context pack、skill contract 和 marketplace plugin content 的兼容边界与版本升级规则。
 - 明确 Public Contract、Experimental Contract 和 Internal Detail 的升级、弃用和迁移规则。

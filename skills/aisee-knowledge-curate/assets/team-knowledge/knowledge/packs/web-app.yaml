@@ -1,0 +1,5 @@
+id: web-app
+title: Web App Guardrails
+cards:
+  - cli-json-output-stability
+  - openspec-source-map-is-routing
