@@ -343,10 +343,17 @@ aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee knowledge scaffold --dest .aisee/team-knowledge --json
 aisee knowledge inspect --json
+aisee knowledge check --json
+aisee knowledge check --team-path .aisee/team-knowledge --json
+aisee knowledge install --json
+aisee knowledge update --json
 aisee knowledge query --phase implementation --surface cli --query "public CLI JSON" --json
 aisee knowledge query --from-change <change> --for ce-work --json
 aisee knowledge index --json
+aisee knowledge index --team-path .aisee/team-knowledge --json
+aisee knowledge promote-batch --curation <path> --team-path .aisee/team-knowledge --pack web-app --json
 aisee contract manifest --json
 aisee contract summary --change <change> --json
 aisee contract get --change <change> --artifact service-contract --section capabilities --json
@@ -364,6 +371,7 @@ Key CLI rules:
 - JSON output is a context view, not a source of truth.
 - `aisee/cache/context-index.json` is a deletable and rebuildable cache.
 - `aisee/cache/knowledge-index.json` is also a deletable and rebuildable cache; team knowledge persists in pinned pack/card files.
+- `aisee knowledge promote-batch` only writes the local team knowledge worktree; it does not commit, push, or create PRs.
 - `aisee/registry/id-registry.json`, `aisee/registry/sources.json`, OpenSpec artifacts, and `source-map.md` are persistent traceability inputs.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
 - `aisee openspec ensure` only bridges OpenSpec initialization and profile setup. It does not replace `aisee:init`.
@@ -418,7 +426,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 Rules:
 
-- The current workflow is centered on local `path` usage and manual synchronization. Remote install, automatic sync, promote-batch, PR automation, and MCP service support are still unsettled.
+- `install`, `update`, `promote-batch`, and local scaffolding are available but still experimental. PR automation and MCP service support are still unsettled.
 - Query through the CLI instead of letting AI scan `knowledge/cards/**/*.md` directly.
 - Return a small number of bounded matches as implementation, review, or verification reminders.
 - Project-local `aisee/docs/reflect/knowledge-candidates/` remains a candidate area and is not promoted automatically.

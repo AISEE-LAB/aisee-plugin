@@ -70,3 +70,12 @@ def test_plugin_export_writes_codex_bundle(tmp_path: Path) -> None:
     assert (destination / "references" / "knowledge-card-contract.md").exists()
     metadata = json.loads((destination / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert metadata["skills"] == "./skills/"
+
+
+def test_team_knowledge_scaffold_is_packaged_asset(tmp_path: Path) -> None:
+    destination = tmp_path / "team-knowledge"
+    data = run_json(tmp_path, "knowledge", "scaffold", "--dest", str(destination), "--json")
+
+    assert data["status"] == "ok"
+    assert (destination / "knowledge" / "packs" / "web-app.yaml").exists()
+    assert (destination / "schemas" / "knowledge-card.schema.json").exists()

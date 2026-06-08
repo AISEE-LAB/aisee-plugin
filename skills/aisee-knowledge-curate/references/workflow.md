@@ -92,3 +92,11 @@ aisee/docs/reflect/knowledge-curation/YYYY-MM-DD_<slug>.md
 ```
 
 不要自动写入 team knowledge repo。
+
+用户明确授权写入 team knowledge worktree 后，优先建议：
+
+```bash
+aisee knowledge promote-batch --curation <report> --team-path <team-knowledge> --pack <pack-id> --json
+```
+
+该命令只写本地 worktree，不创建分支、commit、push、merge 或 PR。

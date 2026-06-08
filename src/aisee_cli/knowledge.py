@@ -5,12 +5,15 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from aisee_cli.assets import packaged_asset_root
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import knowledge_config_path, knowledge_index_path
 from aisee_cli.project import rel
@@ -19,7 +22,10 @@ from aisee_cli.project import rel
 KNOWLEDGE_SCHEMA_VERSION = "1.0"
 DEFAULT_MAX_CARDS = 3
 CARD_REQUIRED_FIELDS = ("id", "title", "status", "applies_to", "trigger", "recommended_action", "boundaries")
+CARD_STATUSES = {"candidate", "active", "deprecated"}
 TEXT_TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_:+.-]+|[\u4e00-\u9fff]+")
+TEAM_KNOWLEDGE_ASSET_DIR = "team-knowledge"
+SCAFFOLD_MARKER = ".aisee-team-knowledge"
 
 
 def build_knowledge_inspect(root: Path) -> dict[str, Any]:
@@ -110,7 +116,10 @@ def build_knowledge_query(
     }
 
 
-def build_knowledge_index(root: Path, *, write_cache: bool = True) -> dict[str, Any]:
+def build_knowledge_index(root: Path, *, write_cache: bool = True, team_path: str | None = None) -> dict[str, Any]:
+    if team_path:
+        return build_team_knowledge_index(root, Path(team_path), write_cache=write_cache)
+
     config, config_issues = load_knowledge_config(root)
     team_root = resolve_team_root(root, config)
     pack_results, cards, load_issues = load_configured_knowledge(root, config, team_root)
@@ -155,6 +164,264 @@ def build_knowledge_index(root: Path, *, write_cache: bool = True) -> dict[str, 
     return result
 
 
+def build_team_knowledge_index(root: Path, team_path: Path, *, write_cache: bool = True) -> dict[str, Any]:
+    team_root = resolve_user_path(root, team_path)
+    packs, cards, issues = load_team_knowledge_repository(root, team_root, include_body=False)
+    documents = card_index_documents(cards, team_root)
+    path = team_root / "indexes" / "lexical-index.json"
+    result = {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": status_from_issues(issues),
+        "index": {
+            "path": rel(root, path),
+            "scope": "team",
+            "writes": write_cache,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+        },
+        "team_knowledge": {
+            "path": rel(root, team_root),
+            "exists": team_root.exists(),
+        },
+        "packs": packs,
+        "cards": documents,
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "meta": {
+            "command": f"aisee knowledge index --team-path {team_path} --json",
+            "cache_is_fact_source": False,
+        },
+    }
+    if write_cache and not any(item.get("severity") == "blocker" for item in issues):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return result
+
+
+def build_knowledge_check(root: Path, *, team_path: str | None = None) -> dict[str, Any]:
+    config, config_issues = load_knowledge_config(root)
+    if team_path:
+        team_root = resolve_user_path(root, Path(team_path))
+        packs, cards, issues = load_team_knowledge_repository(root, team_root)
+        config_payload = None
+        command = f"aisee knowledge check --team-path {team_path} --json"
+    else:
+        team_root = resolve_team_root(root, config)
+        packs, cards, issues = load_configured_knowledge(root, config, team_root)
+        issues = config_issues + issues
+        config_payload = config_public(root, config, team_root)
+        command = "aisee knowledge check --json"
+        if not config.get("available"):
+            issues.append(issue("KNOWLEDGE_CONFIG_MISSING", "risk", "aisee/knowledge.yaml was not found", rel(root, knowledge_config_path(root))))
+    return {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": status_from_issues(issues),
+        "config": config_payload,
+        "team_knowledge": {
+            "path": rel(root, team_root) if team_root else None,
+            "exists": bool(team_root and team_root.exists()),
+        },
+        "packs": packs,
+        "cards": summarize_cards(cards),
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "meta": {
+            "command": command,
+            "cache_is_fact_source": False,
+        },
+    }
+
+
+def build_knowledge_scaffold(root: Path, dest: str, *, force: bool = False) -> dict[str, Any]:
+    destination = resolve_user_path(root, Path(dest))
+    source = packaged_asset_root() / TEAM_KNOWLEDGE_ASSET_DIR
+    if not source.exists():
+        raise ValueError("packaged team knowledge scaffold was not found")
+    if destination.exists():
+        if not force:
+            raise ValueError(f"destination already exists: {destination}")
+        ensure_safe_scaffold_force(root, destination)
+        shutil.rmtree(destination)
+    shutil.copytree(source, destination)
+    written = sorted(rel(root, path) for path in destination.rglob("*") if path.is_file())
+    check = build_knowledge_check(root, team_path=str(destination))
+    return {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": check["status"],
+        "destination": rel(root, destination),
+        "source": rel(root, source),
+        "written": written,
+        "issues": check["issues"],
+        "summary": check["summary"],
+        "meta": {
+            "command": f"aisee knowledge scaffold --dest {dest} --json",
+            "writes": True,
+            "force": force,
+        },
+    }
+
+
+def build_knowledge_install(root: Path, *, allow_dirty: bool = False) -> dict[str, Any]:
+    config, issues = load_knowledge_config(root)
+    team_root = resolve_team_root(root, config)
+    if not config.get("available"):
+        issues.append(issue("KNOWLEDGE_CONFIG_MISSING", "blocker", "aisee/knowledge.yaml was not found", rel(root, knowledge_config_path(root))))
+    if not config.get("repo"):
+        issues.append(issue("KNOWLEDGE_REPO_MISSING", "blocker", "aisee/knowledge.yaml does not declare repo", config.get("path") or rel(root, knowledge_config_path(root))))
+    if team_root is None:
+        issues.append(issue("KNOWLEDGE_PATH_MISSING", "blocker", "aisee/knowledge.yaml does not declare path", config.get("path") or rel(root, knowledge_config_path(root))))
+    if issues:
+        return knowledge_git_result(root, "install", config, team_root, False, issues, None)
+    assert team_root is not None
+    if team_root.exists():
+        if (team_root / ".git").exists():
+            dirty_issue = ensure_clean_git_worktree(root, team_root, allow_dirty)
+            if dirty_issue:
+                return knowledge_git_result(root, "install", config, team_root, False, [dirty_issue], None)
+            return knowledge_git_result(root, "install", config, team_root, False, [], "already-installed")
+        return knowledge_git_result(root, "install", config, team_root, False, [
+            issue("KNOWLEDGE_PATH_EXISTS", "blocker", f"configured path already exists and is not a Git checkout: {team_root}", rel(root, team_root))
+        ], None)
+    command = ["git", "clone", str(config["repo"]), str(team_root)]
+    result = run_git_command(command, root)
+    clone_issues = git_issues(root, result, rel(root, team_root))
+    if not clone_issues and config.get("ref"):
+        checkout = run_git_command(["git", "checkout", str(config["ref"])], team_root)
+        clone_issues.extend(git_issues(root, checkout, rel(root, team_root)))
+        if clone_issues and team_root.exists():
+            shutil.rmtree(team_root)
+    return knowledge_git_result(root, "install", config, team_root, not clone_issues, clone_issues, "cloned" if not clone_issues else None)
+
+
+def build_knowledge_update(root: Path, *, allow_dirty: bool = False) -> dict[str, Any]:
+    config, issues = load_knowledge_config(root)
+    team_root = resolve_team_root(root, config)
+    if not config.get("available"):
+        issues.append(issue("KNOWLEDGE_CONFIG_MISSING", "blocker", "aisee/knowledge.yaml was not found", rel(root, knowledge_config_path(root))))
+    if team_root is None:
+        issues.append(issue("KNOWLEDGE_PATH_MISSING", "blocker", "aisee/knowledge.yaml does not declare path", config.get("path") or rel(root, knowledge_config_path(root))))
+    elif not (team_root / ".git").exists():
+        issues.append(issue("KNOWLEDGE_REPO_MISSING", "blocker", f"configured team knowledge path is not a Git checkout: {team_root}", rel(root, team_root)))
+    if issues:
+        return knowledge_git_result(root, "update", config, team_root, False, issues, None)
+    assert team_root is not None
+    dirty_issue = ensure_clean_git_worktree(root, team_root, allow_dirty)
+    if dirty_issue:
+        return knowledge_git_result(root, "update", config, team_root, False, [dirty_issue], None)
+    before = git_head(team_root)
+    update_issues: list[dict[str, str]] = []
+    fetch = run_git_command(["git", "fetch", "origin"], team_root)
+    update_issues.extend(git_issues(root, fetch, rel(root, team_root)))
+    if not update_issues and config.get("ref"):
+        checkout_target = str(config["ref"])
+        remote_branch = f"origin/{checkout_target}"
+        if git_ref_exists(team_root, remote_branch):
+            checkout = run_git_command(["git", "checkout", "-B", checkout_target, remote_branch], team_root)
+        else:
+            checkout = run_git_command(["git", "checkout", checkout_target], team_root)
+        update_issues.extend(git_issues(root, checkout, rel(root, team_root)))
+    after = git_head(team_root)
+    changed = bool(not update_issues and before and after and before != after)
+    return knowledge_git_result(root, "update", config, team_root, changed, update_issues, "updated" if not update_issues else None)
+
+
+def build_knowledge_promote_batch(
+    root: Path,
+    *,
+    curation: str,
+    team_path: str,
+    pack_id: str | None = None,
+    category: str = "general",
+    activate: bool = False,
+) -> dict[str, Any]:
+    curation_path = resolve_user_path(root, Path(curation))
+    team_root = resolve_user_path(root, Path(team_path))
+    issues: list[dict[str, str]] = []
+    if not curation_path.exists():
+        issues.append(issue("KNOWLEDGE_CURATION_MISSING", "blocker", f"curation file does not exist: {curation}", rel(root, curation_path)))
+    if not team_root.exists():
+        issues.append(issue("KNOWLEDGE_REPO_MISSING", "blocker", f"team knowledge path does not exist: {team_path}", rel(root, team_root)))
+    if pack_id:
+        try:
+            pack_path = pack_path_for_id(team_root, pack_id)
+        except ValueError as error:
+            issues.append(issue("KNOWLEDGE_PACK_INVALID", "blocker", str(error), rel(root, team_root / "knowledge" / "packs")))
+            pack_path = team_root / "knowledge" / "packs" / f"{pack_id}.yaml"
+        if not pack_path.exists():
+            issues.append(issue("KNOWLEDGE_PACK_MISSING", "blocker", f"knowledge pack was not found: {pack_id}", rel(root, pack_path)))
+    if issues:
+        return promote_result(root, curation_path, team_root, [], False, issues)
+    try:
+        category_id = safe_category(category)
+    except ValueError as error:
+        issues.append(issue("KNOWLEDGE_CATEGORY_INVALID", "blocker", str(error), rel(root, team_root / "knowledge" / "cards")))
+        return promote_result(root, curation_path, team_root, [], False, issues)
+
+    drafts = extract_card_drafts(read_text(curation_path))
+    if not drafts:
+        issues.append(issue("KNOWLEDGE_DRAFTS_MISSING", "blocker", "no card drafts were found in curation file", rel(root, curation_path)))
+        return promote_result(root, curation_path, team_root, [], False, issues)
+
+    prepared: list[dict[str, Any]] = []
+    seen_draft_ids: set[str] = set()
+    for draft in drafts:
+        metadata = dict(draft)
+        if activate:
+            metadata["status"] = "active"
+        metadata.setdefault("status", "candidate")
+        card_issues = validate_card_metadata(root, metadata, rel(root, curation_path))
+        if card_issues:
+            issues.extend({**item, "severity": "blocker"} for item in card_issues)
+            continue
+        card_id = str(metadata["id"])
+        if card_id in seen_draft_ids:
+            issues.append(issue("KNOWLEDGE_CARD_DUPLICATE", "blocker", f"duplicate draft card id: {card_id}", rel(root, curation_path)))
+            continue
+        seen_draft_ids.add(card_id)
+        prepared.append(metadata)
+    if issues:
+        return promote_result(root, curation_path, team_root, [], False, issues)
+
+    targets: list[tuple[dict[str, Any], Path, str]] = []
+    pack_data: dict[str, Any] | None = None
+    pack_path: Path | None = None
+    if pack_id:
+        pack_path = pack_path_for_id(team_root, pack_id)
+        pack_data, pack_error = load_yaml_file(pack_path)
+        if pack_error:
+            issues.append(issue("KNOWLEDGE_PACK_INVALID", "blocker", pack_error, rel(root, pack_path)))
+    registry = build_card_registry(root, team_root)
+    for metadata in prepared:
+        card_id = str(metadata["id"])
+        card_path = team_root / "knowledge" / "cards" / category_id / f"{card_id}.md"
+        rendered = render_card_markdown(metadata)
+        existing = registry["by_id"].get(card_id)
+        existing_path = existing["path_abs"] if existing else None
+        if existing_path is not None and existing_path != card_path:
+            issues.append(issue("KNOWLEDGE_CARD_DUPLICATE", "blocker", f"card id already exists at another path: {card_id}", rel(root, existing_path)))
+            continue
+        if card_path.exists() and read_text(card_path) != rendered:
+            issues.append(issue("KNOWLEDGE_CARD_EXISTS", "blocker", f"card already exists and would not be overwritten: {card_path}", rel(root, card_path)))
+            continue
+        targets.append((metadata, card_path, rendered))
+    if issues:
+        return promote_result(root, curation_path, team_root, [], False, issues)
+
+    written: list[str] = []
+    for metadata, card_path, rendered in targets:
+        card_id = str(metadata["id"])
+        card_path.parent.mkdir(parents=True, exist_ok=True)
+        if not card_path.exists():
+            card_path.write_text(rendered, encoding="utf-8")
+            written.append(rel(root, card_path))
+        if pack_id and pack_path is not None and pack_data is not None:
+            changed = add_card_to_pack_data(pack_data, card_id)
+            if changed:
+                written.append(rel(root, pack_path))
+    if pack_id and pack_path is not None and pack_data is not None and rel(root, pack_path) in written:
+        pack_path.write_text(yaml.safe_dump(pack_data, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    return promote_result(root, curation_path, team_root, sorted(set(written)), bool(written) and not issues, issues)
+
+
 def load_knowledge_config(root: Path) -> tuple[dict[str, Any], list[dict[str, str]]]:
     path = knowledge_config_path(root)
     if not path.exists():
@@ -190,12 +457,62 @@ def load_knowledge_config(root: Path) -> tuple[dict[str, Any], list[dict[str, st
     }, issues
 
 
+def resolve_user_path(root: Path, path: Path) -> Path:
+    return path if path.is_absolute() else root / path
+
+
 def resolve_team_root(root: Path, config: dict[str, Any]) -> Path | None:
     local_path = config.get("local_path")
     if not local_path:
         return None
     candidate = Path(str(local_path))
     return candidate if candidate.is_absolute() else root / candidate
+
+
+def load_team_knowledge_repository(
+    root: Path,
+    team_root: Path,
+    *,
+    include_body: bool = False,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, str]]]:
+    issues: list[dict[str, str]] = []
+    if not team_root.exists():
+        return [], [], [issue("KNOWLEDGE_REPO_MISSING", "blocker", f"team knowledge path does not exist: {team_root}", rel(root, team_root))]
+    packs_dir = team_root / "knowledge" / "packs"
+    if not packs_dir.exists():
+        return [], [], [issue("KNOWLEDGE_PACKS_MISSING", "blocker", "knowledge/packs directory was not found", rel(root, packs_dir))]
+    pack_ids = sorted(path.stem for path in packs_dir.glob("*.yaml"))
+    if not pack_ids:
+        issues.append(issue("KNOWLEDGE_PACKS_MISSING", "risk", "no knowledge packs were found", rel(root, packs_dir)))
+    config = {
+        "available": True,
+        "path": None,
+        "local_path": str(team_root),
+        "packs": pack_ids,
+        "retrieval": {"max_cards": DEFAULT_MAX_CARDS, "include_project_candidates": False},
+    }
+    packs, cards, load_issues = load_configured_knowledge(root, config, team_root, include_body=include_body)
+    issues.extend(load_issues)
+    return packs, cards, issues
+
+
+def card_index_documents(cards: list[dict[str, Any]], team_root: Path | None) -> list[dict[str, Any]]:
+    documents = []
+    for card in cards:
+        metadata = card.get("metadata", {})
+        source_path = card.get("path")
+        text = read_text((team_root / source_path) if source_path and team_root else Path(""))
+        documents.append({
+            "id": metadata.get("id"),
+            "title": metadata.get("title"),
+            "status": metadata.get("status"),
+            "deprecated_by": metadata.get("deprecated_by"),
+            "path": source_path,
+            "pack": card.get("pack"),
+            "tokens": sorted(tokens_for_card(metadata)),
+            "hash": "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest() if text else None,
+        })
+    return documents
 
 
 def load_configured_knowledge(
@@ -215,6 +532,8 @@ def load_configured_knowledge(
         issues.append(issue("KNOWLEDGE_REPO_MISSING", "risk", f"configured team knowledge path does not exist: {team_root}", rel(root, team_root)))
         return [], [], issues
 
+    registry = build_card_registry(root, team_root, include_body=include_body)
+    issues.extend(registry["issues"])
     pack_results: list[dict[str, Any]] = []
     cards: list[dict[str, Any]] = []
     for pack_id in config.get("packs", []):
@@ -228,7 +547,8 @@ def load_configured_knowledge(
             pack_results.append({"id": pack_id, "status": "invalid", "path": rel(root, pack_path), "cards": []})
             issues.append(issue("KNOWLEDGE_PACK_INVALID", "blocker", parse_error, rel(root, pack_path)))
             continue
-        pack_cards, card_issues = load_pack_cards(root, team_root, pack_id, pack_data, include_body=include_body)
+        issues.extend(validate_pack_data(pack_id, pack_data, rel(root, pack_path)))
+        pack_cards, card_issues = load_pack_cards(root, team_root, pack_id, pack_data, registry=registry)
         cards.extend(pack_cards)
         issues.extend(card_issues)
         pack_results.append({
@@ -247,20 +567,21 @@ def load_pack_cards(
     pack_id: str,
     pack_data: dict[str, Any],
     *,
-    include_body: bool = False,
+    registry: dict[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     issues: list[dict[str, str]] = []
+    registry = registry or build_card_registry(root, team_root)
     disabled = set(normalize_string_list(pack_data.get("disabled_cards")))
     declared_paths: set[Path] = set()
     cards_by_id = {item for item in normalize_string_list(pack_data.get("cards"))}
     for card_id in cards_by_id:
         if card_id in disabled:
             continue
-        found = find_card_by_id(team_root, card_id)
+        found = registry["by_id"].get(card_id)
         if found is None:
             issues.append(issue("KNOWLEDGE_CARD_MISSING", "risk", f"pack references missing card: {card_id}", pack_id))
             continue
-        declared_paths.add(found)
+        declared_paths.add(found["path_abs"])
     for pattern in normalize_string_list(pack_data.get("card_globs")):
         pattern_path = Path(pattern)
         if pattern_path.is_absolute() or ".." in pattern_path.parts:
@@ -277,33 +598,134 @@ def load_pack_cards(
 
     cards: list[dict[str, Any]] = []
     for path in sorted(declared_paths):
-        metadata, body, parse_error = load_card(path, include_body=include_body)
-        if parse_error:
-            issues.append(issue("KNOWLEDGE_CARD_INVALID", "risk", parse_error, rel(root, path)))
+        record = registry["by_path"].get(path.resolve())
+        if record is None:
             continue
+        metadata = record["metadata"]
         card_id = str(metadata.get("id") or "")
         if not card_id or card_id in disabled:
-            continue
-        missing = [field for field in CARD_REQUIRED_FIELDS if not metadata.get(field)]
-        if missing:
-            issues.append(issue("KNOWLEDGE_CARD_FIELDS_MISSING", "risk", f"card missing required fields: {', '.join(missing)}", rel(root, path)))
             continue
         cards.append({
             "pack": pack_id,
             "path": rel(team_root, path),
             "metadata": metadata,
-            "body": body,
+            "body": record.get("body", ""),
         })
     return cards, issues
 
 
-def find_card_by_id(team_root: Path, card_id: str) -> Path | None:
-    for suffix in (".md", ".yaml", ".yml"):
-        for path in sorted((team_root / "knowledge" / "cards").rglob(f"*{suffix}")):
-            metadata, _body, _error = load_card(path)
-            if str(metadata.get("id") or "") == card_id:
-                return path
-    return None
+def build_card_registry(root: Path, team_root: Path, *, include_body: bool = False) -> dict[str, Any]:
+    cards_dir = team_root / "knowledge" / "cards"
+    by_id: dict[str, dict[str, Any]] = {}
+    by_path: dict[Path, dict[str, Any]] = {}
+    metadata_by_id: dict[str, dict[str, Any]] = {}
+    seen: dict[str, str] = {}
+    issues: list[dict[str, str]] = []
+    if not cards_dir.exists():
+        return {
+            "by_id": by_id,
+            "by_path": by_path,
+            "issues": [issue("KNOWLEDGE_CARDS_MISSING", "risk", "knowledge/cards directory was not found", rel(root, cards_dir))],
+        }
+    for path in sorted(cards_dir.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in {".md", ".yaml", ".yml"}:
+            continue
+        metadata, body, parse_error = load_card(path, include_body=include_body)
+        path_label = rel(root, path)
+        if parse_error:
+            issues.append(issue("KNOWLEDGE_CARD_INVALID", "risk", parse_error, path_label))
+            continue
+        metadata_issues = validate_card_metadata(root, metadata, path_label)
+        issues.extend(metadata_issues)
+        if metadata_issues:
+            continue
+        card_id = str(metadata.get("id") or "")
+        if not card_id:
+            continue
+        record = {
+            "path_abs": path,
+            "path": rel(team_root, path),
+            "metadata": metadata,
+            "body": body,
+        }
+        by_path[path.resolve()] = record
+        if card_id in seen and seen[card_id] != path_label:
+            issues.append(issue("KNOWLEDGE_CARD_DUPLICATE", "blocker", f"duplicate card id: {card_id}", path_label))
+            continue
+        seen[card_id] = path_label
+        by_id[card_id] = record
+        metadata_by_id[card_id] = metadata
+    for card_id, metadata in metadata_by_id.items():
+        for replacement in normalize_string_list(metadata.get("deprecated_by")):
+            if replacement not in metadata_by_id:
+                issues.append(issue("KNOWLEDGE_CARD_REPLACEMENT_MISSING", "risk", f"{card_id} references missing replacement card: {replacement}", seen.get(card_id, "")))
+            elif metadata_by_id[replacement].get("status") == "deprecated":
+                issues.append(issue("KNOWLEDGE_CARD_REPLACEMENT_DEPRECATED", "risk", f"{card_id} replacement is also deprecated: {replacement}", seen.get(card_id, "")))
+    return {"by_id": by_id, "by_path": by_path, "issues": issues}
+
+
+def validate_pack_data(pack_id: str, pack_data: dict[str, Any], path_label: str) -> list[dict[str, str]]:
+    issues: list[dict[str, str]] = []
+    if not pack_data.get("version"):
+        issues.append(issue("KNOWLEDGE_PACK_VERSION_MISSING", "risk", "pack missing required field: version", path_label))
+    if not pack_data.get("status"):
+        issues.append(issue("KNOWLEDGE_PACK_STATUS_MISSING", "risk", "pack missing required field: status", path_label))
+    if str(pack_data.get("id") or pack_id) != pack_id:
+        issues.append(issue("KNOWLEDGE_PACK_ID_MISMATCH", "risk", f"pack id does not match filename: {pack_data.get('id')} != {pack_id}", path_label))
+    status = str(pack_data.get("status") or "active")
+    if status not in {"active", "deprecated"}:
+        issues.append(issue("KNOWLEDGE_PACK_STATUS_INVALID", "risk", f"pack has invalid status: {status}", path_label))
+    for field in ("cards", "card_globs", "disabled_cards"):
+        value = pack_data.get(field)
+        if value is not None and not isinstance(value, list):
+            issues.append(issue("KNOWLEDGE_PACK_FIELD_INVALID", "risk", f"{field} must be a list", path_label))
+    return issues
+
+
+def validate_card_metadata(root: Path, metadata: dict[str, Any], path_label: str) -> list[dict[str, str]]:
+    issues: list[dict[str, str]] = []
+    missing = [field for field in CARD_REQUIRED_FIELDS if not metadata.get(field)]
+    if missing:
+        issues.append(issue("KNOWLEDGE_CARD_FIELDS_MISSING", "risk", f"card missing required fields: {', '.join(missing)}", path_label))
+        return issues
+    card_id = str(metadata.get("id") or "")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", card_id):
+        issues.append(issue("KNOWLEDGE_CARD_ID_INVALID", "risk", f"card id must be kebab-case: {card_id}", path_label))
+    status = str(metadata.get("status") or "")
+    if status not in CARD_STATUSES:
+        issues.append(issue("KNOWLEDGE_CARD_STATUS_INVALID", "risk", f"card has invalid status: {status}", path_label))
+    applies = metadata.get("applies_to")
+    if not isinstance(applies, dict):
+        issues.append(issue("KNOWLEDGE_CARD_APPLIES_TO_INVALID", "risk", "applies_to must be a mapping", path_label))
+    else:
+        for field in ("stacks", "frameworks", "phases", "schemas", "surfaces"):
+            value = applies.get(field)
+            if value is not None and not isinstance(value, list):
+                issues.append(issue("KNOWLEDGE_CARD_APPLIES_TO_INVALID", "risk", f"applies_to.{field} must be a list", path_label))
+    for field in ("trigger", "recommended_action", "boundaries"):
+        value = metadata.get(field)
+        if not isinstance(value, list) or not normalize_string_list(value):
+            issues.append(issue("KNOWLEDGE_CARD_FIELD_INVALID", "risk", f"{field} must be a non-empty list", path_label))
+    if metadata.get("deprecated_by") is not None and not isinstance(metadata.get("deprecated_by"), list):
+        issues.append(issue("KNOWLEDGE_CARD_FIELD_INVALID", "risk", "deprecated_by must be a list", path_label))
+    if status == "deprecated" and not metadata.get("deprecated_by"):
+        issues.append(issue("KNOWLEDGE_CARD_DEPRECATED_BY_MISSING", "risk", "deprecated card should declare deprecated_by", path_label))
+    return issues
+
+
+def validate_card_uniqueness(root: Path, cards: list[dict[str, Any]]) -> list[dict[str, str]]:
+    seen: dict[str, str] = {}
+    issues: list[dict[str, str]] = []
+    for card in cards:
+        metadata = card.get("metadata", {})
+        card_id = str(metadata.get("id") or "")
+        if not card_id:
+            continue
+        card_path = str(card.get("path") or "")
+        if card_id in seen and seen[card_id] != card_path:
+            issues.append(issue("KNOWLEDGE_CARD_DUPLICATE", "blocker", f"duplicate card id: {card_id}", card_path))
+        seen[card_id] = card_path
+    return issues
 
 
 def load_card(path: Path, *, include_body: bool = False) -> tuple[dict[str, Any], str, str | None]:
@@ -769,6 +1191,183 @@ def is_under(path: Path, root: Path) -> bool:
         return True
     except ValueError:
         return False
+
+
+def run_git_command(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(command, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    except FileNotFoundError as error:
+        return subprocess.CompletedProcess(command, 127, "", str(error))
+
+
+def git_head(cwd: Path) -> str | None:
+    result = run_git_command(["git", "rev-parse", "HEAD"], cwd)
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def git_ref_exists(cwd: Path, ref: str) -> bool:
+    result = run_git_command(["git", "rev-parse", "--verify", ref], cwd)
+    return result.returncode == 0
+
+
+def git_issues(root: Path, result: subprocess.CompletedProcess[str], path_label: str) -> list[dict[str, str]]:
+    if result.returncode == 0:
+        return []
+    message = (result.stderr or result.stdout or "git command failed").strip()
+    return [issue("KNOWLEDGE_GIT_FAILED", "blocker", message, path_label)]
+
+
+def ensure_clean_git_worktree(root: Path, team_root: Path, allow_dirty: bool) -> dict[str, str] | None:
+    if allow_dirty:
+        return None
+    result = run_git_command(["git", "status", "--porcelain"], team_root)
+    git_issue = git_issues(root, result, rel(root, team_root))
+    if git_issue:
+        return git_issue[0]
+    if result.stdout.strip():
+        return issue("KNOWLEDGE_REPO_DIRTY", "blocker", "team knowledge checkout has uncommitted changes", rel(root, team_root))
+    return None
+
+
+def ensure_safe_scaffold_force(root: Path, destination: Path) -> None:
+    if destination.is_symlink():
+        raise ValueError(f"refusing to overwrite symlink path: {destination}")
+    resolved = destination.resolve()
+    try:
+        resolved.relative_to(root.resolve())
+    except ValueError as error:
+        raise ValueError(f"refusing to overwrite scaffold outside project root: {destination}") from error
+    protected = {
+        root.resolve(),
+        Path.home().resolve(),
+        packaged_asset_root().resolve(),
+        (packaged_asset_root() / TEAM_KNOWLEDGE_ASSET_DIR).resolve(),
+    }
+    if resolved in protected or resolved.parent == resolved:
+        raise ValueError(f"refusing to overwrite protected path: {destination}")
+    marker = destination / SCAFFOLD_MARKER
+    if not marker.exists():
+        raise ValueError(f"refusing to overwrite non-scaffold directory: {destination}")
+
+
+def knowledge_git_result(
+    root: Path,
+    action: str,
+    config: dict[str, Any],
+    team_root: Path | None,
+    changed: bool,
+    issues: list[dict[str, str]],
+    result: str | None,
+) -> dict[str, Any]:
+    return {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": status_from_issues(issues),
+        "action": action,
+        "result": result,
+        "changed": changed,
+        "config": config_public(root, config, team_root),
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "meta": {
+            "command": f"aisee knowledge {action} --json",
+            "writes": changed,
+        },
+    }
+
+
+def extract_card_drafts(text: str) -> list[dict[str, Any]]:
+    drafts: list[dict[str, Any]] = []
+    for block in extract_all_fenced_yaml(text):
+        data, _error = load_yaml_text(block, "curation draft")
+        if not isinstance(data, dict):
+            continue
+        if data.get("id") and any(field in data for field in CARD_REQUIRED_FIELDS):
+            drafts.append(data)
+    return drafts
+
+
+def extract_all_fenced_yaml(text: str) -> list[str]:
+    blocks: list[str] = []
+    in_fence = False
+    collected: list[str] = []
+    for line in text.splitlines():
+        if line.strip() in {"```yaml", "```yml"}:
+            in_fence = True
+            collected = []
+            continue
+        if line.strip() == "```" and in_fence:
+            blocks.append("\n".join(collected).strip())
+            in_fence = False
+            collected = []
+            continue
+        if in_fence:
+            collected.append(line)
+    return [block for block in blocks if block]
+
+
+def safe_category(category: str) -> str:
+    value = category.strip().lower().replace("_", "-")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", value):
+        raise ValueError(f"invalid category: {category}")
+    return value
+
+
+def safe_pack_id(pack_id: str) -> str:
+    value = pack_id.strip()
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", value):
+        raise ValueError(f"invalid pack id: {pack_id}")
+    return value
+
+
+def pack_path_for_id(team_root: Path, pack_id: str) -> Path:
+    safe_id = safe_pack_id(pack_id)
+    packs_dir = team_root / "knowledge" / "packs"
+    path = packs_dir / f"{safe_id}.yaml"
+    try:
+        path.resolve().relative_to(packs_dir.resolve())
+    except ValueError as error:
+        raise ValueError(f"pack path escapes knowledge/packs: {pack_id}") from error
+    return path
+
+
+def render_card_markdown(metadata: dict[str, Any]) -> str:
+    frontmatter = yaml.safe_dump(metadata, allow_unicode=True, sort_keys=False).strip()
+    return f"---\n{frontmatter}\n---\n\n## Guardrail\n\n待团队 review 后补充说明。\n"
+
+
+def add_card_to_pack_data(data: dict[str, Any], card_id: str) -> bool:
+    cards = normalize_string_list(data.get("cards"))
+    if card_id in cards:
+        return False
+    cards.append(card_id)
+    data["cards"] = cards
+    return True
+
+
+def promote_result(
+    root: Path,
+    curation_path: Path,
+    team_root: Path,
+    written: list[str],
+    changed: bool,
+    issues: list[dict[str, str]],
+) -> dict[str, Any]:
+    return {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": status_from_issues(issues),
+        "curation": rel(root, curation_path),
+        "team_knowledge": rel(root, team_root),
+        "written": written,
+        "changed": changed,
+        "git_actions": False,
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "meta": {
+            "command": "aisee knowledge promote-batch --json",
+            "writes": changed,
+            "git_actions": False,
+        },
+    }
 
 
 def read_text(path: Path) -> str:

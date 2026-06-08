@@ -343,10 +343,17 @@ aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee knowledge scaffold --dest .aisee/team-knowledge --json
 aisee knowledge inspect --json
+aisee knowledge check --json
+aisee knowledge check --team-path .aisee/team-knowledge --json
+aisee knowledge install --json
+aisee knowledge update --json
 aisee knowledge query --phase implementation --surface cli --query "public CLI JSON" --json
 aisee knowledge query --from-change <change> --for ce-work --json
 aisee knowledge index --json
+aisee knowledge index --team-path .aisee/team-knowledge --json
+aisee knowledge promote-batch --curation <path> --team-path .aisee/team-knowledge --pack web-app --json
 aisee contract manifest --json
 aisee contract summary --change <change> --json
 aisee contract get --change <change> --artifact service-contract --section 能力契约 --json
@@ -364,6 +371,7 @@ CLI 关键规则：
 - JSON 输出只是上下文视图，不是事实源。
 - `aisee/cache/context-index.json` 只是可删除、可重建的 cache。
 - `aisee/cache/knowledge-index.json` 也是可删除、可重建的 cache；team knowledge 的持久来源是已 pin 的 pack/card 文件。
+- `aisee knowledge promote-batch` 只写本地 team knowledge worktree，不自动 commit、push 或创建 PR。
 - `aisee/registry/id-registry.json`、`aisee/registry/sources.json`、OpenSpec artifacts 和 `source-map.md` 是持久追踪输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
 - `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
@@ -418,7 +426,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 使用原则：
 
-- 目前以本地 `path` 和人工同步为主，远程安装、自动同步、promote-batch、PR 自动化和 MCP 服务仍未稳定。
+- `install`、`update`、`promote-batch` 和本地 scaffold 已可用但仍是实验性能力；PR 自动化和 MCP 服务仍未稳定。
 - 通过 CLI 查询，不让 AI 直接扫描 `knowledge/cards/**/*.md`。
 - 只返回少量带边界的 matches，作为实现、review 或 verify 的提醒。
 - 项目内 `aisee/docs/reflect/knowledge-candidates/` 仍是候选区，不自动进入 team knowledge。

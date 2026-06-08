@@ -22,6 +22,8 @@ CLI 的默认读取入口固定为：
 <team-knowledge>/knowledge/cards/**/*.yaml
 ```
 
+独立 team knowledge 仓库可以通过 `aisee knowledge scaffold --dest <path> --json` 生成初始结构，再用 `aisee knowledge check --team-path <path> --json` 校验。
+
 读取顺序：
 
 1. 读取项目 `aisee/knowledge.yaml`，获得 repo/path/ref/packs/retrieval。
@@ -30,6 +32,8 @@ CLI 的默认读取入口固定为：
 4. 完成 status、pack、schema、phase、surface、stack 等硬过滤。
 5. 仅对通过硬过滤的候选做 lexical scoring 和可选 semantic rerank。
 6. 默认只输出命中 card 的摘要字段；只有 explain/debug 或用户显式请求时读取完整正文。
+
+业务项目同步已 pin 仓库时使用 `aisee knowledge install --json` 或 `aisee knowledge update --json`。写入候选 card 时使用 `aisee knowledge promote-batch`，该命令只写本地 worktree，不执行 commit、push 或 PR。
 
 CLI 不得默认递归扫描：
 
@@ -60,7 +64,7 @@ retrieval:
   vector: optional
 ```
 
-`repo` 是远程来源，`path` 是本地 checkout 或 vendored fixture。V1 可以只支持 `path`，远程 clone/install 后置。
+`repo` 是远程来源，`path` 是本地 checkout 或 vendored fixture。`install` 和 `update` 可同步已 pin 的远程仓库，但仍属于实验性能力；业务项目不得把生成的 `context-index.json` 当作事实源。
 
 ## Pack Schema
 

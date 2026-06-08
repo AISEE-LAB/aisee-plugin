@@ -17,7 +17,16 @@ from aisee_cli.doctor import build_doctor
 from aisee_cli.flow import build_flow
 from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids
 from aisee_cli.index import build_index
-from aisee_cli.knowledge import build_knowledge_index, build_knowledge_inspect, build_knowledge_query
+from aisee_cli.knowledge import (
+    build_knowledge_check,
+    build_knowledge_index,
+    build_knowledge_inspect,
+    build_knowledge_install,
+    build_knowledge_promote_batch,
+    build_knowledge_query,
+    build_knowledge_scaffold,
+    build_knowledge_update,
+)
 from aisee_cli.lookup import get_id, trace_id
 from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
@@ -127,6 +136,26 @@ def main() -> int:
     knowledge_subparsers = knowledge_parser.add_subparsers(dest="knowledge_command")
     knowledge_inspect_parser = knowledge_subparsers.add_parser("inspect")
     knowledge_inspect_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_check_parser = knowledge_subparsers.add_parser("check")
+    knowledge_check_parser.add_argument("--team-path", help="team knowledge repository path")
+    knowledge_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_scaffold_parser = knowledge_subparsers.add_parser("scaffold")
+    knowledge_scaffold_parser.add_argument("--dest", required=True, help="destination directory for scaffold")
+    knowledge_scaffold_parser.add_argument("--force", action="store_true", help="overwrite destination when it already exists")
+    knowledge_scaffold_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_install_parser = knowledge_subparsers.add_parser("install")
+    knowledge_install_parser.add_argument("--allow-dirty", action="store_true", help="allow dirty existing checkout")
+    knowledge_install_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_update_parser = knowledge_subparsers.add_parser("update")
+    knowledge_update_parser.add_argument("--allow-dirty", action="store_true", help="allow dirty existing checkout")
+    knowledge_update_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_promote_parser = knowledge_subparsers.add_parser("promote-batch")
+    knowledge_promote_parser.add_argument("--curation", required=True, help="curation report path")
+    knowledge_promote_parser.add_argument("--team-path", required=True, help="team knowledge repository path")
+    knowledge_promote_parser.add_argument("--pack", help="pack id to update")
+    knowledge_promote_parser.add_argument("--category", default="general", help="card category directory")
+    knowledge_promote_parser.add_argument("--activate", action="store_true", help="promote drafts as active cards")
+    knowledge_promote_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_query_parser = knowledge_subparsers.add_parser("query")
     knowledge_query_parser.add_argument("--phase", help="phase feature")
     knowledge_query_parser.add_argument("--surface", action="append", default=[], help="surface feature; can be repeated")
@@ -139,6 +168,7 @@ def main() -> int:
     knowledge_query_parser.add_argument("--debug", action="store_true", help="include matched body excerpts")
     knowledge_query_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_index_parser = knowledge_subparsers.add_parser("index")
+    knowledge_index_parser.add_argument("--team-path", help="team knowledge repository path")
     knowledge_index_parser.add_argument("--json", action="store_true", help="output JSON")
     contract_parser = subparsers.add_parser("contract")
     contract_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -277,7 +307,7 @@ def main() -> int:
         return 0
 
     if args.command == "knowledge" and args.knowledge_command is None:
-        print_json(error_response("Use one of: inspect, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+        print_json(error_response("Use one of: inspect, check, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "knowledge":
@@ -285,6 +315,23 @@ def main() -> int:
         try:
             if args.knowledge_command == "inspect":
                 result = build_knowledge_inspect(root)
+            elif args.knowledge_command == "check":
+                result = build_knowledge_check(root, team_path=args.team_path)
+            elif args.knowledge_command == "scaffold":
+                result = build_knowledge_scaffold(root, args.dest, force=args.force)
+            elif args.knowledge_command == "install":
+                result = build_knowledge_install(root, allow_dirty=args.allow_dirty)
+            elif args.knowledge_command == "update":
+                result = build_knowledge_update(root, allow_dirty=args.allow_dirty)
+            elif args.knowledge_command == "promote-batch":
+                result = build_knowledge_promote_batch(
+                    root,
+                    curation=args.curation,
+                    team_path=args.team_path,
+                    pack_id=args.pack,
+                    category=args.category,
+                    activate=args.activate,
+                )
             elif args.knowledge_command == "query":
                 result = build_knowledge_query(
                     root,
@@ -299,9 +346,9 @@ def main() -> int:
                     debug=args.debug,
                 )
             elif args.knowledge_command == "index":
-                result = build_knowledge_index(root, write_cache=True)
+                result = build_knowledge_index(root, write_cache=True, team_path=args.team_path)
             else:
-                print_json(error_response("Use one of: inspect, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+                print_json(error_response("Use one of: inspect, check, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
                 return 2
         except ValueError as error:
             print_json(error_response(str(error), "KNOWLEDGE_ERROR"), stderr=True)

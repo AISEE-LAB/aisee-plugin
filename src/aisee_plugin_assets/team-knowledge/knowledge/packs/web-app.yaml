@@ -1,0 +1,11 @@
+id: web-app
+version: 0.1.0
+status: active
+description: Web application guardrails.
+cards:
+  - cli-json-output-stability
+card_globs: []
+disabled_cards: []
+defaults:
+  max_cards: 3
+

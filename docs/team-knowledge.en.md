@@ -1,6 +1,6 @@
 # Team Knowledge Guardrails
 
-> Experimental feature: suitable for local trials and workflow dogfooding, but not yet a stable public contract. Remote repository install, automatic sync, promote-batch, PR automation, and MCP service support are still unsettled.
+> Experimental feature: suitable for local trials and workflow dogfooding, but not yet a stable public contract. Remote repository sync, promote-batch, and local scaffolding are available; PR automation and MCP service support are still unsettled.
 
 Team knowledge reuses a small number of reviewed engineering lessons across projects so AI agents can avoid repeating known mistakes during implementation, review, and verification.
 
@@ -17,15 +17,19 @@ It is not:
 The current version supports:
 
 - pinning a local team knowledge path, ref, and packs through `aisee/knowledge.yaml`;
+- creating an independent team knowledge scaffold with `aisee knowledge scaffold --dest <path> --json`;
 - inspecting configuration with `aisee knowledge inspect --json`;
+- validating cards and packs with `aisee knowledge check --json` or `--team-path <path>`;
+- syncing a configured Git checkout with `aisee knowledge install/update --json`;
 - retrieving a small number of guardrails with `aisee knowledge query ... --json`;
+- building project or team lexical caches with `aisee knowledge index --json` and `--team-path`;
 - injecting bounded matches into implementation context with `aisee context pack --knowledge`;
 - creating project-local reusable knowledge candidates with `aisee:reflect`;
-- batch-reviewing candidates and producing card drafts with `aisee:knowledge-curate`.
+- batch-reviewing candidates and producing card drafts with `aisee:knowledge-curate`;
+- writing reviewed drafts into a team knowledge worktree with `aisee knowledge promote-batch --curation <path> --team-path <path> --pack <id> --json`.
 
 It does not currently:
 
-- automatically clone or update a remote team knowledge repository;
 - automatically write project lessons into team knowledge;
 - automatically create branches, commits, merges, or PRs;
 - read full card bodies by default;
@@ -50,10 +54,17 @@ V1 primarily uses the local `path`; `repo` and `ref` record provenance and suppo
 
 ## Retrieval
 
+Create a local team knowledge scaffold:
+
+```bash
+aisee knowledge scaffold --dest .aisee/team-knowledge --json
+```
+
 Inspect configuration first:
 
 ```bash
 aisee knowledge inspect --json
+aisee knowledge check --json
 ```
 
 Query by phase and surface:
@@ -74,6 +85,20 @@ Explicitly enable matches in context packs:
 aisee context pack --change <change> --for ce-work --knowledge --json
 ```
 
+Refresh the local checkout:
+
+```bash
+aisee knowledge install --json
+aisee knowledge update --json
+```
+
+Rebuild caches:
+
+```bash
+aisee knowledge index --json
+aisee knowledge index --team-path .aisee/team-knowledge --json
+```
+
 ## Curation
 
 Knowledge curation is user-triggered by default:
@@ -82,7 +107,8 @@ Knowledge curation is user-triggered by default:
 aisee:reflect
   -> aisee/docs/reflect/knowledge-candidates/
   -> aisee:knowledge-curate
-  -> user confirmation before writing to the independent team knowledge repo
+  -> user confirmation before running aisee knowledge promote-batch
+  -> human review of the diff before commit / PR
 ```
 
 Writing to the team knowledge repo, creating branches, committing, merging, or opening PRs requires explicit user authorization again.
@@ -91,11 +117,8 @@ Writing to the team knowledge repo, creating branches, committing, merging, or o
 
 Before the feature is stable, Aisee still needs:
 
-- an independent `aisee-team-knowledge` repository scaffold;
-- card / pack schema examples and test fixtures;
-- `aisee knowledge install/update` or equivalent sync workflow;
-- `aisee knowledge promote-batch` or equivalent human-reviewed submission helper;
-- stale / deprecated card lifecycle;
+- more real team knowledge card packs;
+- stale card refresh workflow;
 - optional semantic rerank or MCP wrapper without changing the Git + card/pack source of truth.
 
 See [Aisee Team Knowledge Architecture](architecture/aisee-team-knowledge.md) for the underlying architecture.

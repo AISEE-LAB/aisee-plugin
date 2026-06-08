@@ -22,7 +22,7 @@ description: 批量审查项目内 reusable knowledge candidates，把 reflect/s
 - 不替代 `ce-compound`；具体工程问题 solution 仍由 Compound 记录。
 - 不复制 solution 正文。
 - 不把 candidate 自动提升为 active card。
-- 不自动写入 `aisee-team-knowledge`。
+- 不自动写入 `aisee-team-knowledge`；用户授权后可以建议运行 `aisee knowledge promote-batch`。
 - 不创建分支、commit、push、merge 或 PR，除非用户明确授权并提供 team repo 路径。
 - 不让 team knowledge 覆盖 OpenSpec specs、tasks、contracts、source-map 或 baseline。
 
@@ -56,7 +56,8 @@ rg --files aisee/docs/reflect docs/solutions 2>/dev/null | rg 'knowledge-candida
 ## Guardrails
 
 - 默认只输出审查报告，不改 team repo。
-- 写入 team repo、创建分支、提交、合并或 PR 前必须再次确认用户授权和目标路径。
+- 写入 team repo 前必须再次确认用户授权和目标路径；优先使用 `aisee knowledge promote-batch --curation <path> --team-path <path> --pack <id> --json` 写入本地 worktree。
+- `promote-batch` 不会创建分支、commit、push、merge 或 PR；这些 Git 动作仍需用户明确授权。
 - 推荐 batch review：积累 3-10 条真实可复用候选后再提交。
 - 安全、高风险或公开接口类候选可以建议单独 PR，但仍需用户授权。
 - 每条 draft 必须包含 required machine fields：`id`、`title`、`status`、`applies_to`、`trigger`、`recommended_action`、`boundaries`。

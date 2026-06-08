@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Aisee Knowledge Card",
+  "type": "object",
+  "required": ["id", "title", "status", "applies_to", "trigger", "recommended_action", "boundaries"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "title": {"type": "string"},
+    "status": {"type": "string", "enum": ["candidate", "active", "deprecated"]},
+    "applies_to": {
+      "type": "object",
+      "properties": {
+        "stacks": {"type": "array", "items": {"type": "string"}},
+        "frameworks": {"type": "array", "items": {"type": "string"}},
+        "phases": {"type": "array", "items": {"type": "string"}},
+        "schemas": {"type": "array", "items": {"type": "string"}},
+        "surfaces": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "trigger": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "recommended_action": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "boundaries": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "deprecated_by": {"type": "array", "items": {"type": "string"}},
+    "risk_types": {"type": "array", "items": {"type": "string"}},
+    "tags": {"type": "array", "items": {"type": "string"}}
+  }
+}
+
