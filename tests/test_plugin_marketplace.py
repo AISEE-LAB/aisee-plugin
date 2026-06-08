@@ -31,7 +31,7 @@ def test_codex_marketplace_listing_points_to_repository_plugin_root() -> None:
     plugin = marketplace["plugins"][0]
     assert plugin["name"] == "aisee-plugin"
     assert plugin["source"] == {"source": "local", "path": "."}
-    assert plugin["policy"] == {"installation": "AVAILABLE", "authentication": "NONE"}
+    assert plugin["policy"] == {"installation": "AVAILABLE", "authentication": "ON_USE"}
     assert plugin["category"] == "Coding"
 
 

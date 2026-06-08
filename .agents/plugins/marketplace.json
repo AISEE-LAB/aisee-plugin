@@ -14,7 +14,7 @@
       },
       "policy": {
         "installation": "AVAILABLE",
-        "authentication": "NONE"
+        "authentication": "ON_USE"
       },
       "category": "Coding"
     }
