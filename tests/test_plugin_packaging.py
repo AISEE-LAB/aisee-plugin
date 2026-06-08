@@ -67,6 +67,7 @@ def test_plugin_export_writes_codex_bundle(tmp_path: Path) -> None:
     assert (destination / ".codex-plugin" / "plugin.json").exists()
     assert (destination / "skills" / "aisee-srs" / "SKILL.md").exists()
     assert (destination / "skills" / "aisee-knowledge-curate" / "SKILL.md").exists()
+    assert (destination / "skills" / "aisee-verify" / "evals" / "evals.json").exists()
     assert (destination / "references" / "knowledge-card-contract.md").exists()
     metadata = json.loads((destination / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert metadata["skills"] == "./skills/"

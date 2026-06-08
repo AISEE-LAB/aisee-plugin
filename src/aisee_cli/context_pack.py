@@ -17,6 +17,7 @@ from typing import Any
 
 from aisee_cli.paths import id_registry_path, sources_path as aisee_sources_path
 from aisee_cli.source_map import parse_source_map
+from aisee_cli.tool_checks import check_compound_plugin
 
 
 SUPPORTED_TARGETS = {"ce-work", "aisee-verify", "ce-doc-review", "ce-code-review"}
@@ -173,6 +174,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     }
 
     if target == "ce-work":
+        ce_plan_refinement_reason = ce_plan_reason(task_state, code_paths, test_paths, gaps, source_map_required) if requires_ce_plan else None
         pack["facts"]["derived"]["execution"] = {
             "start_from": task_state["open_items"][:1],
             "suggested_order": task_state["open_items"],
@@ -180,7 +182,12 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "unmapped_reference_paths": unmapped_reference_paths,
             "forbidden_scope": pack["facts"]["derived"]["scope"]["out"],
             "requires_ce_plan": requires_ce_plan,
-            "ce_plan_reason": ce_plan_reason(task_state, code_paths, test_paths, gaps, source_map_required) if requires_ce_plan else None,
+            "ce_plan_reason": ce_plan_refinement_reason,
+            "reusable_workflow_candidates": build_reusable_workflow_candidates(
+                requires_ce_plan=requires_ce_plan,
+                ce_plan_refinement_reason=ce_plan_refinement_reason,
+                gaps=gaps,
+            ),
         }
     elif target == "aisee-verify":
         pack["facts"]["derived"]["checks"] = {
@@ -1089,6 +1096,51 @@ def ce_plan_reason(
             return "source-map Affected Paths Index does not identify code or test paths"
         return "schema artifacts do not identify code or test paths"
     return "tasks/source-map need implementation refinement" if source_map_required else "tasks/artifacts need implementation refinement"
+
+
+def build_reusable_workflow_candidates(
+    *,
+    requires_ce_plan: bool,
+    ce_plan_refinement_reason: str | None,
+    gaps: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    compound = check_compound_plugin()
+    compound_skills = compound.get("skills", {})
+    blocker_codes = [str(item.get("code") or "UNKNOWN") for item in gaps if item.get("severity") == "blocker"]
+    if blocker_codes:
+        return [
+            {
+                "name": "aisee:change-author",
+                "kind": "aisee-skill",
+                "status": "required",
+                "reason": f"fix blocking artifact or traceability gaps before execution: {', '.join(blocker_codes)}",
+            }
+        ]
+
+    candidates = [
+        {
+            "name": "aisee:implementation-bridge",
+            "kind": "aisee-skill",
+            "status": "recommended",
+            "reason": "preflight author-check, gaps, context pack, scope guardrails, and review recommendation before CE execution",
+        }
+    ]
+
+    if requires_ce_plan:
+        candidates.append({
+            "name": "ce-plan",
+            "kind": "compound-skill",
+            "status": "available" if compound_skills.get("ce-plan") else "missing",
+            "reason": ce_plan_refinement_reason or "tasks or implementation references need refinement before ce-work",
+        })
+    else:
+        candidates.append({
+            "name": "ce-work",
+            "kind": "compound-skill",
+            "status": "available" if compound_skills.get("ce-work") else "missing",
+            "reason": "current change has executable tasks and accepted implementation path references",
+        })
+    return candidates
 
 
 def summarize_artifact_checks(artifact_entries: list[dict[str, Any]]) -> list[dict[str, Any]]:

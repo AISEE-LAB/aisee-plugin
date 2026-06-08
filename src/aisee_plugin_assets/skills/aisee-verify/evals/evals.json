@@ -1,0 +1,95 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:verify",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "verify-001",
+      "name": "domain-review-agent-request",
+      "scenario": "review-routing",
+      "prompt": "这个 change 同时有接口、界面和硬件内容。请给我创建 API 审查 agent、UI 审查 agent 和硬件审查 agent，然后 verify。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户要求新增按领域命名的审查 agent。",
+          "当前任务是 verify 阶段的一致性诊断。"
+        ]
+      },
+      "expected_output": "不创建 API/UI/硬件全能审查 agent。应说明接口、界面和硬件差异作为当前 schema 的 domain check lenses 处理，并优先读取当前 change、schema artifacts、source-map/contracts、tasks、review/test evidence 和 aisee context pack。若需要 Aisee reviewer，只能建议 aisee-change-architect、aisee-spec-reviewer、aisee-implementation-reviewer 的只读一致性审查角色。",
+      "expected_outputs": [
+        "拒绝创建 API/UI/硬件全能审查 agent。",
+        "将接口、界面、硬件作为 schema-aware domain check lenses。",
+        "优先读取当前 change 和 aisee context pack。",
+        "只建议三个 Aisee 一致性 reviewer role。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "domain check lenses",
+        "aisee-change-architect",
+        "aisee-spec-reviewer",
+        "aisee-implementation-reviewer",
+        "context pack"
+      ],
+      "must_not": [
+        "不得创建 API 审查 agent、UI 审查 agent 或硬件审查 agent。",
+        "不得替代 ce-code-review、ce-test-* 或 ce-work。",
+        "不得扩大当前 change 范围。"
+      ],
+      "quality_checks": [
+        "明确区分 Aisee 一致性审查与 CE 工程 review/test。",
+        "输出以当前 schema 和 evidence 为事实源。"
+      ],
+      "fact_source_constraints": [
+        "verify 只读取当前 OpenSpec change、schema artifacts、source-map/contracts、tasks 和 evidence。",
+        "reviewer role 结论不是新的规范事实源。"
+      ],
+      "files": []
+    },
+    {
+      "id": "verify-002",
+      "name": "aisee-reviewer-role-request",
+      "scenario": "reviewer-boundary",
+      "prompt": "给 verify 增加 Aisee 子代理审查：change architect、spec reviewer、implementation reviewer。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户要求的是 Aisee 规范一致性 reviewer role。",
+          "不要求实现 subagent runtime。"
+        ]
+      },
+      "expected_output": "可以定义 aisee-change-architect、aisee-spec-reviewer、aisee-implementation-reviewer 三个只读一致性 reviewer role。必须说明它们只输出结构化审查结论，不改代码、不跑测试、不提交 PR、不解决 CI，也不替代 ce-doc-review、ce-code-review、ce-test-* 或 ce-work。",
+      "expected_outputs": [
+        "定义三个 Aisee reviewer role。",
+        "说明三个 role 的 OpenSpec/schema/evidence 一致性范围。",
+        "说明不实现 runtime 或自动调用。",
+        "说明不替代 CE execution/review/test。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "aisee-change-architect",
+        "aisee-spec-reviewer",
+        "aisee-implementation-reviewer",
+        "只读",
+        "不替代 CE"
+      ],
+      "must_not": [
+        "不得把 reviewer role 写成会自动修改代码的 agent。",
+        "不得把 reviewer role 写成会运行完整测试或提交 PR 的 agent。",
+        "不得把 reviewer role 当作 accepted risk 或 archive approval。"
+      ],
+      "quality_checks": [
+        "三个 role 的职责边界互不重叠。",
+        "明确 runtime 和自动调用不在 verify 职责内。"
+      ],
+      "fact_source_constraints": [
+        "reviewer role 只能消费当前 change 和 evidence。",
+        "长期结论必须回写 owner artifact 或 evidence 文件。"
+      ],
+      "files": []
+    }
+  ]
+}

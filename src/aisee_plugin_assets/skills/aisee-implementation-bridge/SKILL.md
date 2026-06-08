@@ -7,6 +7,16 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 
 `aisee:implementation-bridge` 是 OpenSpec change 到工程实现阶段的交接器。
 
+## 复用优先
+
+执行前必须优先复用当前 change 的机器可读上下文：
+
+- 先读取 `aisee context pack --change <change> --for ce-work --json`。
+- 优先使用 `facts.derived.execution.reusable_workflow_candidates`、`allowed_paths`、`requires_ce_plan` 和 `ce_plan_reason` 判断下一步。
+- `requires_ce_plan=false` 且 paths/tasks 清楚时，推荐 `ce-work`，不要生成新的长期计划。
+- `requires_ce_plan=true` 时，才按需建议 `ce-plan`；其结论必须回写当前 schema apply tracks，只有 source-map schema 才回写 `source-map.md`。
+- 如果 CE skill 缺失，只说明限制和本地 guardrails，不创建 Aisee 替代 CE 的执行、代码审查或测试 agent。
+
 ## 职责
 
 - 读取单个 OpenSpec change。

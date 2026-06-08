@@ -14,6 +14,13 @@ def write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def install_compound_skills(root: Path, *skills: str) -> Path:
+    skills_dir = root / "compound" / "skills"
+    for skill in skills:
+        write(skills_dir / skill / "SKILL.md", f"# {skill}\n")
+    return skills_dir
+
+
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(
@@ -224,8 +231,9 @@ apply:
     )
 
 
-def test_ce_work_pack_contains_execution_context(tmp_path: Path) -> None:
+def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) -> None:
     create_project(tmp_path)
+    monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-work")))
 
     pack = build_context_pack(tmp_path, "add-auth", "ce-work")
 
@@ -239,6 +247,12 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path) -> None:
         "src/auth/session.py",
         "tests/auth/test_session.py",
     ]
+    candidates = pack["facts"]["derived"]["execution"]["reusable_workflow_candidates"]
+    assert all(set(candidate) == {"name", "kind", "status", "reason"} for candidate in candidates)
+    candidates_by_name = {candidate["name"]: candidate for candidate in candidates}
+    assert candidates_by_name["aisee:implementation-bridge"]["status"] == "recommended"
+    assert candidates_by_name["ce-work"]["kind"] == "compound-skill"
+    assert candidates_by_name["ce-work"]["status"] == "available"
     assert pack["facts"]["derived"]["implementation_references"]["unmapped_reference_paths"] == []
     assert pack["generated"] is None
     assert pack["facts"]["parsed"]["source_map"]["parse_level"] == "structured"
@@ -264,6 +278,44 @@ def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None
     assert "src/auth/side_effect.py" not in execution["allowed_paths"]
     assert references["unmapped_reference_paths"] == ["src/auth/side_effect.py"]
     assert "SOURCE_MAP_UNMAPPED_PATH" in {gap["code"] for gap in pack["gaps"]}
+
+
+def test_ce_work_pack_reports_missing_ce_plan_as_limitation(tmp_path: Path, monkeypatch) -> None:
+    create_project(tmp_path)
+    monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(tmp_path / "missing-compound"))
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
+        "auth:FR-001 is covered.\n",
+    )
+
+    pack = build_context_pack(tmp_path, "add-auth", "ce-work")
+
+    execution = pack["facts"]["derived"]["execution"]
+    candidates = {candidate["name"]: candidate for candidate in execution["reusable_workflow_candidates"]}
+    assert execution["requires_ce_plan"] is True
+    assert candidates["ce-plan"]["status"] == "missing"
+    assert candidates["aisee:implementation-bridge"]["status"] == "recommended"
+
+
+def test_ce_work_pack_routes_blockers_to_change_author_not_ce_plan(tmp_path: Path, monkeypatch) -> None:
+    create_project(tmp_path)
+    monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-plan", "ce-work")))
+    (tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md").unlink()
+
+    pack = build_context_pack(tmp_path, "add-auth", "ce-work")
+
+    execution = pack["facts"]["derived"]["execution"]
+    candidates = execution["reusable_workflow_candidates"]
+    assert execution["requires_ce_plan"] is True
+    assert {gap["code"] for gap in pack["gaps"]} >= {"MISSING_ARTIFACT", "TASK_GAP"}
+    assert candidates == [
+        {
+            "name": "aisee:change-author",
+            "kind": "aisee-skill",
+            "status": "required",
+            "reason": "fix blocking artifact or traceability gaps before execution: MISSING_ARTIFACT, TASK_GAP",
+        }
+    ]
 
 
 def test_quick_fix_pack_does_not_require_source_map(tmp_path: Path) -> None:

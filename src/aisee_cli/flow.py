@@ -89,6 +89,9 @@ def build_flow(project_root: Path, *, change: str | None = None, command: str = 
             "execution": execution,
             "evidence": summarize_evidence(pack["evidence"]),
         },
+        "reuse": {
+            "workflow_candidates": execution.get("reusable_workflow_candidates", []),
+        },
         "checks": {
             "author": {
                 "status": author["status"],

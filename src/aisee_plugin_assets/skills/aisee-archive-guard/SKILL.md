@@ -7,6 +7,14 @@ description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当
 
 `aisee:archive-guard` 是 `openspec archive <change>` 前的最终放行建议器。它不创建新事实源，不替代 `aisee:verify`，也不替代 OpenSpec archive；OpenSpec artifact 合法性和 baseline merge 仍以 `openspec validate` / `openspec archive` 为准。
 
+## Reviewer evidence 边界
+
+Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 CE review/test 的替代品：
+
+- `aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer` 只能证明 OpenSpec / schema / evidence 一致性。
+- CE P0/P1、failed tests、failed validate、安全 High/Critical、设备必需验证缺失等仍按本 skill 的 blocker 规则处理。
+- 接口、UI、硬件、固件、安全和验证 lenses 只帮助判断当前 schema evidence 是否闭合，不产生新的 archive 事实源。
+
 ## 职责
 
 - 识别当前 change schema，并按 schema 判断归档必需 artifacts、tasks、apply tracks、source-map、contracts 和验证证据。

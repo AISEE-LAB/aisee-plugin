@@ -12,6 +12,13 @@ def write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def install_compound_skills(root: Path, *skills: str) -> Path:
+    skills_dir = root / "compound" / "skills"
+    for skill in skills:
+        write(skills_dir / skill / "SKILL.md", f"# {skill}\n")
+    return skills_dir
+
+
 def run_aisee(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     repo_src = Path(__file__).resolve().parents[1] / "src"
@@ -192,8 +199,9 @@ def test_schema_pack_list_check_and_install(tmp_path: Path) -> None:
     assert (tmp_path / "openspec" / "schemas" / "quick-fix" / "schema.yaml").exists()
 
 
-def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Path) -> None:
+def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Path, monkeypatch) -> None:
     create_open_project(tmp_path)
+    monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-work")))
 
     data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
 
@@ -208,6 +216,11 @@ def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Pa
     assert data["inputs"]["source_map_parse_level"] == "metadata"
     assert "SOURCE_MAP_UNSTRUCTURED" in data["inputs"]["source_map_issue_codes"]
     assert data["inputs"]["execution"]["requires_ce_plan"] is False
+    candidates = data["reuse"]["workflow_candidates"]
+    assert all(set(candidate) == {"name", "kind", "status", "reason"} for candidate in candidates)
+    candidates_by_name = {candidate["name"]: candidate for candidate in candidates}
+    assert candidates_by_name["aisee:implementation-bridge"]["status"] == "recommended"
+    assert candidates_by_name["ce-work"]["status"] == "available"
     assert data["checks"]["author"]["status"] == "needs-work"
     assert data["checks"]["gaps"]["status"] == "risk"
     assert data["checks"]["implementation_gaps"]["status"] == "risk"
@@ -225,6 +238,10 @@ def test_flow_inspect_recommends_ce_plan_when_execution_paths_are_missing(tmp_pa
     assert data["stage"] == "change-authored"
     assert data["recommended_path"] == ["aisee:implementation-bridge", "ce-plan"]
     assert data["inputs"]["execution"]["requires_ce_plan"] is True
+    assert {candidate["name"] for candidate in data["reuse"]["workflow_candidates"]} >= {
+        "aisee:implementation-bridge",
+        "ce-plan",
+    }
     assert "SOURCE_MAP_PATHS_MISSING" in data["inputs"]["source_map_issue_codes"]
     assert "SOURCE_MAP_GAP" in data["checks"]["gaps"]["codes"]
     assert "SOURCE_MAP_GAP" in data["checks"]["implementation_gaps"]["codes"]
