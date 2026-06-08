@@ -1,6 +1,6 @@
 {
   "name": "aisee-plugin",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "AI-Enhanced Software Engineering plugin for OpenSpec and Compound Engineering workflows.",
   "author": {
     "name": "Fengliang"
