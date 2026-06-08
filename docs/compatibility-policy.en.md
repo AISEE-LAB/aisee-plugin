@@ -2,7 +2,7 @@
 
 This document defines Aisee Plugin's public contract layers and change rules. The goal is not to freeze every implementation detail, but to make clear which surfaces affect user projects, agent runtimes, OpenSpec changes, and downstream automation.
 
-> Status: pre-release. During `0.x`, Aisee can still evolve quickly, but public contract changes must be documented, tested, and called out in release notes.
+During `0.x`, Aisee can still evolve quickly, but public contract changes must be documented, tested, and called out in release notes.
 
 ## Contract Layers
 

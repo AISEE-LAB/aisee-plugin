@@ -155,15 +155,7 @@ git tag v0.1.0
 
 不要在版本不一致或测试未通过时打 tag。
 
-## Roadmap 状态
-
-首次正式 PyPI 发布已完成：
-
-- `0.1.1` 已发布到正式 PyPI。
-- 已在干净环境中完成 `pipx install aisee-plugin` smoke test。
-- README 安装说明已从 pre-release guidance 更新为 public install guidance。
-
-后续发布必须维护：
+## 后续发布要求
 
 - 发布路径验证通过，并在干净环境中完成 `pipx install aisee-plugin` smoke test。
 - 推荐使用 project-scoped token 或 Trusted Publishing，避免长期使用 account-scoped token。

@@ -2,7 +2,7 @@
 
 本文定义 Aisee Plugin 的公开契约分层和变更规则。目标不是冻结所有实现细节，而是明确哪些内容会影响用户项目、agent runtime、OpenSpec change 和下游自动化。
 
-> 当前状态：pre-release。`0.x` 阶段允许较快演进，但公开契约变更必须被记录、测试并在 release notes 中说明。
+`0.x` 阶段允许较快演进，但公开契约变更必须被记录、测试并在 release notes 中说明。
 
 ## 契约分层
 

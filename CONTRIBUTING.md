@@ -1,6 +1,6 @@
 # Contributing
 
-感谢你改进 Aisee Plugin。这个仓库仍处于 early alpha，贡献时请优先保持 OpenSpec、Aisee 和 Compound Engineering 的职责边界清晰。
+感谢你改进 Aisee Plugin。贡献时请优先保持 OpenSpec、Aisee 和 Compound Engineering 的职责边界清晰。
 
 ## 开发环境
 
