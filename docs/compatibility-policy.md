@@ -148,7 +148,7 @@ Experimental 能力可以变化，但文档必须清楚说明：
 - 向后兼容修复或文档更新：`PATCH`；
 - Experimental Contract 调整：通常 `PATCH` 或 `MINOR`，但必须保持文档准确。
 
-`1.0` 后：
+正式稳定版本后：
 
 - 破坏 Public Contract：`MAJOR`；
 - 新增向后兼容能力：`MINOR`；

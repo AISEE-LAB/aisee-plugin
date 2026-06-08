@@ -148,7 +148,7 @@ During `0.x`:
 - backward-compatible fixes or docs: `PATCH`;
 - Experimental Contract changes: usually `PATCH` or `MINOR`, but documentation must stay accurate.
 
-After `1.0`:
+After a stable public release:
 
 - breaking a Public Contract: `MAJOR`;
 - backward-compatible capabilities: `MINOR`;

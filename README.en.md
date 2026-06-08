@@ -8,7 +8,7 @@ Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It hel
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, stable ID tracking, and engineering handoff rules around OpenSpec.
 
-> Status: early alpha / pre-release. `0.1.0` has been verified through TestPyPI, venv installation, and isolated pipx installation; official PyPI publication and the 1.0 compatibility freeze are still in progress.
+> Status: early alpha / pre-release. `0.1.0` has been verified through TestPyPI, venv installation, and isolated pipx installation; official PyPI publication and ongoing compatibility governance are still in progress.
 
 ## Why Aisee?
 
@@ -529,10 +529,10 @@ python scripts/smoke_release.py --with-pipx
 - Verify `pipx install aisee-plugin` from official PyPI in a clean environment.
 - Update installation docs from pre-release guidance to public install guidance.
 
-### 1.0
+### Ongoing Compatibility Governance
 
-- Freeze compatibility boundaries for CLI JSON, schema packs, context packs, plugin export, and skill contracts.
-- Define deprecation and migration rules for breaking changes.
+- Maintain compatibility boundaries for CLI JSON, schema packs, context packs, plugin export, and skill contracts.
+- Maintain deprecation and migration rules for breaking changes.
 - Decide which hardware and embedded workflows remain experimental and which enter the main Aisee workflow.
 - Add more real-world lifecycle fixtures beyond the app scenario.
 

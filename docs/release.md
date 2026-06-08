@@ -144,7 +144,7 @@ git tag v0.1.0
 - README 安装说明从 pre-release guidance 更新为 public install guidance。
 - 临时 account-scoped token 已撤销，发布认证切换为 project-scoped token 或 Trusted Publishing。
 
-1.0 前必须完成：
+持续兼容治理必须维护：
 
-- 冻结 1.0 兼容边界，明确破坏 CLI JSON、schema packs、context pack、skill contract 和 plugin export 的版本升级规则。
+- 明确 CLI JSON、schema packs、context pack、skill contract 和 plugin export 的兼容边界与版本升级规则。
 - 明确 Public Contract、Experimental Contract 和 Internal Detail 的升级、弃用和迁移规则。
