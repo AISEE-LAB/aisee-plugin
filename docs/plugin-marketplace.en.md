@@ -26,6 +26,8 @@ codex plugin add aisee-plugin@aisee-plugin
 
 The CLI only prints these commands as setup hints. It does not write Codex config, cache, or plugin state.
 
+When reading plugin content, the CLI checks only the Codex install location by default and does not scan across agent runtimes. To choose another runtime, set `AISEE_AGENT_RUNTIME=claude|cursor|agents`; set it to `none` to disable installed plugin content discovery.
+
 ## Manifest vs Marketplace Listing
 
 | File | Responsibility | Current Status |

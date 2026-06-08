@@ -141,6 +141,8 @@ aisee plugin inspect --json
 aisee doctor --json
 ```
 
+CLI 读取插件内容时默认只检查 Codex 安装位置。需要对接其它 agent runtime 时，可设置 `AISEE_AGENT_RUNTIME=claude|cursor|agents`；设置为 `none` 可关闭已安装插件内容发现。
+
 `aisee plugin export`、`aisee schemas install` 和 `aisee knowledge scaffold` 已不再从 PyPI wheel 分发插件内容；这些公开旧命令会返回稳定 JSON blocker，并提示 Codex marketplace 安装路径。
 
 源码仓库也包含多个 agent runtime 的插件元数据：

@@ -141,6 +141,8 @@ aisee plugin inspect --json
 aisee doctor --json
 ```
 
+When reading plugin content, the CLI checks only the Codex install location by default. For other agent runtimes, set `AISEE_AGENT_RUNTIME=claude|cursor|agents`; set it to `none` to disable installed plugin content discovery.
+
 `aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` no longer distribute plugin content from the PyPI wheel. These public legacy commands return stable JSON blockers with the Codex marketplace setup path.
 
 The source repository also includes plugin metadata for multiple agent runtimes:
