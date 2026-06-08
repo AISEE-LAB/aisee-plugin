@@ -1,6 +1,6 @@
 # Aisee Plugin
 
-English | [简体中文](https://cnb.cool/zersproducts/aisee-plugin/-/blob/main/README.md)
+English | [简体中文](https://github.com/AISEE-LAB/aisee-plugin/blob/main/README.md)
 
 **Aisee** stands for **AI-Enhanced Software Engineering**.
 
@@ -99,7 +99,7 @@ python -m pip install aisee-plugin
 For development or local changes, install from source:
 
 ```bash
-git clone https://cnb.cool/zersproducts/aisee-plugin
+git clone https://github.com/AISEE-LAB/aisee-plugin
 cd aisee-plugin
 python -m pip install -e .
 ```

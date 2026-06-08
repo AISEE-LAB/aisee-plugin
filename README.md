@@ -1,6 +1,6 @@
 # Aisee Plugin
 
-[English](https://cnb.cool/zersproducts/aisee-plugin/-/blob/main/README.en.md) | 简体中文
+[English](https://github.com/AISEE-LAB/aisee-plugin/blob/main/README.en.md) | 简体中文
 
 **Aisee** 是 **AI-Enhanced Software Engineering** 的缩写。
 
@@ -99,7 +99,7 @@ python -m pip install aisee-plugin
 开发或本地修改时可以从源码安装：
 
 ```bash
-git clone https://cnb.cool/zersproducts/aisee-plugin
+git clone https://github.com/AISEE-LAB/aisee-plugin
 cd aisee-plugin
 python -m pip install -e .
 ```

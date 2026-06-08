@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aisee-plugin"
 version = "0.1.1"
-description = "AI-Enhanced Software Engineering plugin for OpenSpec-driven workflows."
+description = "AI-Enhanced Software Engineering plugin for OpenSpec and Compound Engineering workflows."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -39,8 +39,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://cnb.cool/zersproducts/aisee-plugin"
-Source = "https://cnb.cool/zersproducts/aisee-plugin"
+Homepage = "https://github.com/AISEE-LAB/aisee-plugin"
+Source = "https://github.com/AISEE-LAB/aisee-plugin"
 
 [project.scripts]
 aisee = "aisee_cli.__main__:main"
