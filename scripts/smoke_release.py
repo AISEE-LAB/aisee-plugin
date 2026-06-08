@@ -92,8 +92,8 @@ def assert_no_forbidden_package_content(archive_path: Path, names: list[str]) ->
         raise RuntimeError(f"{archive_path.name} contains plugin content that must not ship in the PyPI package:\n{sample}")
 
 
-def assert_json_command(command: list[str], *, cwd: Path = ROOT) -> dict[str, object]:
-    result = run(command, cwd=cwd)
+def assert_json_command(command: list[str], *, cwd: Path = ROOT, env: dict[str, str] | None = None) -> dict[str, object]:
+    result = run(command, cwd=cwd, env=env)
     print_output(result)
     try:
         return json.loads(result.stdout)
@@ -149,12 +149,22 @@ def run_pipx_smoke(wheel: Path) -> int:
 
 
 def run_cli_smoke(aisee: Path, project_dir: Path) -> None:
-    print_output(run([str(aisee), "--version"]))
-    doctor = assert_json_command([str(aisee), "doctor", "--json"], cwd=project_dir)
-    inspect = assert_json_command([str(aisee), "plugin", "inspect", "--json"], cwd=project_dir)
-    export = assert_json_command([str(aisee), "plugin", "export", "--target", "codex", "--dest", str(project_dir / "plugin-bundle"), "--json"], cwd=project_dir)
-    schemas = assert_json_command([str(aisee), "schemas", "list", "--json"], cwd=project_dir)
-    assert_json_command([str(aisee), "schemas", "check", "--json"], cwd=project_dir)
+    agent_home = project_dir.parent / "agent-home"
+    codex_home = agent_home / ".codex"
+    codex_home.mkdir(parents=True)
+    env = os.environ.copy()
+    env.update({
+        "HOME": str(agent_home),
+        "CODEX_HOME": str(codex_home),
+        "AISEE_AGENT_RUNTIME": "codex",
+    })
+
+    print_output(run([str(aisee), "--version"], env=env))
+    doctor = assert_json_command([str(aisee), "doctor", "--json"], cwd=project_dir, env=env)
+    inspect = assert_json_command([str(aisee), "plugin", "inspect", "--json"], cwd=project_dir, env=env)
+    export = assert_json_command([str(aisee), "plugin", "export", "--target", "codex", "--dest", str(project_dir / "plugin-bundle"), "--json"], cwd=project_dir, env=env)
+    schemas = assert_json_command([str(aisee), "schemas", "list", "--json"], cwd=project_dir, env=env)
+    assert_json_command([str(aisee), "schemas", "check", "--json"], cwd=project_dir, env=env)
     if "codex_marketplace" not in doctor:
         raise RuntimeError("doctor output did not include codex_marketplace")
     if inspect.get("mode") != "cli-only":

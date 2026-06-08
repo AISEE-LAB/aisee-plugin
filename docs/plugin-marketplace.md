@@ -26,6 +26,8 @@ codex plugin add aisee-plugin@aisee-plugin
 
 CLI 只会提示这些命令，不会写 Codex config、cache 或 plugin state。
 
+CLI 读取插件内容时默认只检查 Codex 安装位置；不会跨 agent runtime 扫描。需要指定其它运行时，可设置 `AISEE_AGENT_RUNTIME=claude|cursor|agents`；设置为 `none` 可关闭已安装插件内容发现。
+
 ## Manifest 与 Marketplace Listing
 
 | 文件 | 职责 | 当前状态 |
