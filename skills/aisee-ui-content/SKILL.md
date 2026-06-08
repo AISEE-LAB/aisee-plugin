@@ -7,6 +7,10 @@ description: 根据 SRS、模块需求文档、已确认功能需求或现有系
 
 从已确认需求中推导页面清单、页面内容、页面元素、状态反馈、权限可见性、跨页面流程和多端差异，生成可交给 `aisee:change-plan`、UI 设计规范阶段或后续实现规划使用的 UI 内容规格。
 
+## CLI preflight
+
+调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；缺失时停止并提示用户通过 PyPI / pipx 安装 CLI。
+
 ## 输入
 
 用户提供以下任意一种输入：

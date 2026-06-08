@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -33,30 +32,13 @@ def test_version_check_script_passes() -> None:
     assert read_pyproject_version() in result.stdout
 
 
-def test_exported_plugin_metadata_uses_package_version(tmp_path: Path) -> None:
-    destination = tmp_path / "bundle"
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(ROOT / "src")
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "aisee_cli.__main__",
-            "plugin",
-            "export",
-            "--target",
-            "codex",
-            "--dest",
-            str(destination),
-            "--json",
-        ],
-        cwd=ROOT,
-        env=env,
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-
-    metadata = json.loads((destination / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
-    assert metadata["version"] == read_pyproject_version()
+def test_marketplace_and_plugin_metadata_use_package_version() -> None:
+    expected = read_pyproject_version()
+    for path in (
+        ".agents/plugins/marketplace.json",
+        ".codex-plugin/plugin.json",
+        ".claude-plugin/plugin.json",
+        ".cursor-plugin/plugin.json",
+    ):
+        metadata = json.loads((ROOT / path).read_text(encoding="utf-8"))
+        assert metadata["version"] == expected

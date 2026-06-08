@@ -8,7 +8,7 @@
 
 | 层级 | 含义 | 示例 | 变更要求 |
 | --- | --- | --- | --- |
-| Public Contract | 用户或自动化会依赖的公开接口 | CLI 命令、JSON 输出语义、schema artifact DAG、context pack 字段、plugin export 布局 | 必须测试；破坏性变更必须升级版本并写入 changelog |
+| Public Contract | 用户或自动化会依赖的公开接口 | CLI 命令、JSON 输出语义、schema artifact DAG、context pack 字段、plugin manifest / marketplace listing | 必须测试；破坏性变更必须升级版本并写入 changelog |
 | Experimental Contract | 可试用但未承诺稳定的能力 | team knowledge 远程安装、promote-batch、可选 MCP、硬件主工作流整合 | 必须标注 experimental；允许调整，但要避免伪装成稳定能力 |
 | Internal Detail | 可随实现变化的内部细节 | parser helper、缓存文件内容、临时索引、内部评分权重、测试 fixture 结构 | 不承诺兼容；不得作为用户事实源 |
 
@@ -83,16 +83,16 @@
 - context pack 可以变大，但默认输出必须保持可控；
 - 新 target 必须说明消费方、读取顺序和缺失字段处理方式。
 
-### Plugin Export
+### Plugin Content
 
 以下属于公开契约：
 
-- `aisee plugin inspect --json` 能找到 packaged asset root；
-- `aisee plugin export --target codex|claude|cursor` 输出对应 runtime metadata；
-- 导出目录包含 runtime metadata、`skills/` 和 `references/`；
-- package assets 与源码 `skills/`、`references/`、plugin metadata 同步。
+- GitHub 仓库中的 `.codex-plugin/plugin.json`、`skills/`、`references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
+- `aisee plugin inspect --json` 在 CLI-only 安装中返回稳定状态和 setup hint；
+- `aisee plugin export --target codex|claude|cursor` 在迁移期返回稳定 deprecation/blocker JSON，不从 wheel 写 plugin bundle；
+- PyPI wheel 不再承诺包含 skills、references、schema packs、team knowledge templates 或 plugin metadata 副本。
 
-破坏性变更包括导出布局变化、target 名称变化、metadata 路径变化或遗漏 skills。
+破坏性变更包括重命名插件、移除 Codex manifest、破坏 marketplace plugin root 布局，或改变旧公开命令的 JSON blocker 语义。
 
 ### Plugin Marketplace
 

@@ -5,6 +5,10 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 
 # aisee:implementation-bridge
 
+## CLI preflight
+
+调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；缺失时停止并提示用户通过 PyPI / pipx 安装 CLI。
+
 `aisee:implementation-bridge` 是 OpenSpec change 到工程实现阶段的交接器。
 
 ## 复用优先

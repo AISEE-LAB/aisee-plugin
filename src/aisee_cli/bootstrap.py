@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from aisee_cli.doctor import build_doctor
+from aisee_cli.marketplace import MARKETPLACE_ADD_COMMAND, PLUGIN_ADD_COMMAND
 from aisee_cli.paths import id_registry_path, inspect_layout, sources_path
 from aisee_cli.project import rel
 
@@ -43,7 +44,11 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
     if not registry.exists():
         actions.append(action("create", rel(root, registry), "Create empty ID lifecycle registry."))
     if not (root / "openspec" / "schemas").exists():
-        actions.append(action("install", "openspec/schemas", "Install selected schema pack with aisee schemas install."))
+        actions.append(action(
+            "install",
+            "aisee-plugin marketplace",
+            f"Install Aisee plugin content with `{MARKETPLACE_ADD_COMMAND}` and `{PLUGIN_ADD_COMMAND}`; the CLI no longer installs schema packs from PyPI.",
+        ))
 
     return {
         "status": "ready" if actions else "noop",

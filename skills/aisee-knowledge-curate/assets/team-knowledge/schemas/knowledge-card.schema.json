@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "title", "status", "applies_to", "trigger", "recommended_action", "boundaries"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "status": { "enum": ["candidate", "active", "deprecated"] },
+    "applies_to": { "type": "object" },
+    "trigger": { "type": "string" },
+    "recommended_action": { "type": "string" },
+    "boundaries": { "type": "string" }
+  },
+  "additionalProperties": true
+}

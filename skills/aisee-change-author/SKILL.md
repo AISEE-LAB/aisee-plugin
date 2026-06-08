@@ -7,6 +7,10 @@ description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifac
 
 `aisee:change-author` 是 OpenSpec change 产物编排器。它只处理单个已确认 change，把当前 schema 声明的 artifacts 补齐为可验证初稿。
 
+## CLI preflight
+
+调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；缺失时停止并提示用户通过 PyPI / pipx 安装 CLI。
+
 ## 职责边界
 
 负责：

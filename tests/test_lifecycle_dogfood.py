@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "scenarios" / "app-full-lifecycle"
+SCHEMA_PACK_ROOT = ROOT / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
 
 
 def run_aisee(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -34,6 +35,10 @@ def run_json(root: Path, *args: str) -> dict:
 def copy_fixture(tmp_path: Path) -> Path:
     project = tmp_path / "project"
     shutil.copytree(FIXTURE_ROOT, project)
+    shutil.copytree(
+        SCHEMA_PACK_ROOT / "aisee-app-spec-driven",
+        project / "openspec" / "schemas" / "aisee-app-spec-driven",
+    )
     return project
 
 
@@ -41,7 +46,7 @@ def test_app_full_lifecycle_fixture_reaches_archive_ready(tmp_path: Path) -> Non
     project = copy_fixture(tmp_path)
     change = "add-passwordless-login"
 
-    installed = run_json(project, "schemas", "install", "--schema", "aisee-app-spec-driven", "--json")
+    schema_check = run_json(project, "schemas", "check", "--json")
     doctor = run_json(project, "doctor", "--json")
     sources = run_json(project, "sources", "check", "--json")
     ids = run_json(project, "id", "check", "--json")
@@ -65,7 +70,7 @@ def test_app_full_lifecycle_fixture_reaches_archive_ready(tmp_path: Path) -> Non
     verify = run_json(project, "change", "verify-check", change, "--json")
     archive = run_json(project, "change", "archive-check", change, "--json")
 
-    assert installed["installed"][0]["state"] == "installed"
+    assert schema_check["status"] == "ok"
     assert doctor["status"] == "ok"
     assert sources["status"] == "ok"
     assert ids["status"] == "ok"
@@ -86,7 +91,6 @@ def test_app_full_lifecycle_fixture_reaches_archive_ready(tmp_path: Path) -> Non
 def test_app_full_lifecycle_fixture_context_pack_is_schema_aware(tmp_path: Path) -> None:
     project = copy_fixture(tmp_path)
     change = "add-passwordless-login"
-    run_json(project, "schemas", "install", "--schema", "aisee-app-spec-driven", "--json")
 
     pack = run_json(project, "context", "pack", "--change", change, "--for", "aisee-verify", "--json")
 

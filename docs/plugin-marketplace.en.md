@@ -1,97 +1,57 @@
 # Plugin Marketplace
 
-This document explains how Aisee aligns with agent plugin marketplace conventions and how that relates to PyPI / pipx installation.
+This document explains the boundary between Aisee plugin content, the Codex marketplace, and the PyPI / pipx CLI.
 
 ## Summary
 
-Aisee currently uses two distribution channels:
-
 ```text
+GitHub / Codex marketplace
+  -> distributes Aisee skills / references / schema packs / team knowledge templates / plugin metadata
+
 PyPI / pipx
   -> installs the Aisee CLI
-  -> includes default skills / references / schema packs / plugin metadata
-
-Plugin marketplace
-  -> lets agent runtimes discover, install, or order the Aisee plugin entry
-  -> describes display metadata, category, installation policy, and authentication policy
+  -> provides project-local JSON context tooling, OpenSpec companion checks, registry, ID, and knowledge query commands
 ```
 
-Before Public Beta, skills remain packaged in the Python wheel. The plugin marketplace is a runtime distribution and discovery channel, not a hard dependency for the CLI.
+Marketplace installation does not install the `aisee` CLI. PyPI / pipx installation does not install bundled skills, schema packs, references, or team knowledge templates.
+
+## Codex Install
+
+Add the GitHub marketplace and install the plugin in Codex:
+
+```bash
+codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+codex plugin add aisee-plugin@aisee-plugin
+```
+
+The CLI only prints these commands as setup hints. It does not write Codex config, cache, or plugin state.
 
 ## Manifest vs Marketplace Listing
-
-There are two different file types:
 
 | File | Responsibility | Current Status |
 | --- | --- | --- |
 | `.codex-plugin/plugin.json` | Plugin manifest with name, version, skills path, and UI metadata | Provided in this repository |
-| `marketplace.json` | Marketplace listing with source, installation policy, authentication policy, and category | Not embedded by default; this document provides an example |
+| `.agents/plugins/marketplace.json` | Codex marketplace listing pointing at the repository plugin root | Provided in this repository |
 
-`.codex-plugin/plugin.json` belongs to the plugin itself. The source repository and `aisee plugin export --target codex` both provide this file.
-
-`marketplace.json` belongs to a marketplace root. Aisee should not force one into the source repository because different users, teams, and marketplaces may need different `source.path`, policies, and ordering.
-
-## Current Codex Manifest
-
-The source repository contains:
-
-```text
-.codex-plugin/plugin.json
-.claude-plugin/plugin.json
-.cursor-plugin/plugin.json
-```
-
-The Codex manifest declares:
+`.codex-plugin/plugin.json` belongs to the plugin itself:
 
 ```json
 {
   "name": "aisee-plugin",
-  "version": "0.1.0",
-  "skills": "./skills/",
-  "interface": {
-    "displayName": "Aisee",
-    "category": "Coding"
-  }
+  "skills": "./skills/"
 }
 ```
 
-Runtime export:
-
-```bash
-aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
-```
-
-Exported directory:
-
-```text
-aisee-plugin-bundle/
-  .codex-plugin/plugin.json
-  skills/
-  references/
-```
-
-## Marketplace Listing Example
-
-A personal or team marketplace can point to the exported plugin directory or to a plugin directory arranged according to marketplace conventions.
-
-Example:
+`.agents/plugins/marketplace.json` is the marketplace entry. Its source points at the repository root:
 
 ```json
 {
-  "name": "team",
-  "interface": {
-    "displayName": "Team Plugins"
-  },
   "plugins": [
     {
       "name": "aisee-plugin",
       "source": {
         "source": "local",
-        "path": "./plugins/aisee-plugin"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
+        "path": "."
       },
       "category": "Coding"
     }
@@ -99,21 +59,19 @@ Example:
 }
 ```
 
-If a non-default marketplace file is used, the runtime must first install or recognize that marketplace. Default personal marketplace and team marketplace management are runtime concerns.
-
 ## Relationship to PyPI / pipx
 
 Recommended relationship:
 
-- `pipx install aisee-plugin` installs the CLI and default resources.
-- `aisee plugin export` exports an agent-runtime-loadable plugin directory from the installed package.
-- marketplace listings point to the exported plugin directory or to a team-managed plugin directory.
+- `pipx install aisee-plugin` installs the CLI.
+- Codex marketplace installs plugin content.
+- `aisee doctor --json` and legacy content distribution commands may print marketplace setup hints, but they do not perform installation.
 
 Not recommended:
 
-- making CLI execution depend on marketplace availability;
-- removing default skills from the wheel;
-- treating marketplace listings as schema pack or OpenSpec artifact sources of truth;
+- letting the CLI write Codex marketplace or plugin cache state;
+- bundling a second copy of skills, references, schema packs, or team knowledge templates in the PyPI wheel;
+- treating marketplace listings as project sources of truth for OpenSpec, schemas, source-map, or team knowledge;
 - forcing Codex marketplace fields onto Claude / Cursor metadata.
 
 ## Compatibility Commitments
@@ -122,17 +80,16 @@ The following are Aisee public contracts:
 
 - plugin name `aisee-plugin`;
 - Codex manifest `skills` points to a loadable skills directory;
-- `aisee plugin export --target codex|claude|cursor` target names;
-- exported directory contains target runtime metadata, `skills/`, and `references/`;
-- marketplace examples use `policy.installation`, `policy.authentication`, and `category`.
+- Codex marketplace setup commands;
+- base JSON semantics for CLI `status`, `issues`, `summary`, `meta`, and setup hints;
+- public legacy commands return stable deprecation/blocker JSON during migration instead of silently writing old wheel assets.
 
-The following are not yet stable:
+The following are not stable:
 
-- concrete marketplace file location;
+- Codex internal cache paths;
 - marketplace display ordering;
-- team marketplace source path;
-- remote marketplace distribution;
-- automatic install, update, or authentication flows.
+- Codex config file internal schema;
+- Claude / Cursor marketplace-native distribution.
 
 ## Pre-Release Checks
 
@@ -146,5 +103,5 @@ python scripts/smoke_release.py
 Also confirm manually:
 
 - `.codex-plugin/plugin.json` has no unsupported fields;
-- `aisee plugin export --target codex` exports a directory that the runtime can recognize;
-- marketplace listing examples are not presented as the only installation path.
+- `.agents/plugins/marketplace.json` points at the repository plugin root;
+- `pipx install aisee-plugin` validates the CLI only and does not assume plugin content exists inside the wheel.

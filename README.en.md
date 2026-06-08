@@ -125,44 +125,23 @@ You can also run the repository-local entrypoint without installing:
 
 ## Plugin Usage
 
-The Python package includes Aisee skills, schema packs, references, and agent plugin metadata. Inspect packaged plugin resources:
+PyPI / pipx installs only the `aisee` CLI. Aisee skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the GitHub-backed Codex marketplace.
+
+Add the marketplace and install the plugin in Codex:
+
+```bash
+codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+codex plugin add aisee-plugin@aisee-plugin
+```
+
+Check CLI-only state and marketplace setup hints:
 
 ```bash
 aisee plugin inspect --json
+aisee doctor --json
 ```
 
-Export a plugin directory that can be loaded by an agent runtime:
-
-```bash
-aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
-```
-
-Supported targets:
-
-```text
-codex
-claude
-cursor
-```
-
-The exported directory contains:
-
-```text
-aisee-plugin-bundle/
-  .codex-plugin/plugin.json
-  skills/
-  references/
-```
-
-If your agent runtime supports loading local plugins, point it to the exported directory or the corresponding plugin metadata file.
-
-To manually confirm runtime loading, check at least:
-
-- the exported directory contains the target runtime metadata file;
-- the agent runtime recognizes `skills/` in the exported directory;
-- a core skill such as `aisee:srs` or `aisee:change-plan` can be triggered in the agent.
-
-Plugin marketplaces are optional runtime discovery and distribution channels. They do not replace PyPI / pipx installation. Aisee does not embed a `marketplace.json` by default; personal or team marketplaces can point to the exported plugin directory as needed. See [Plugin Marketplace](docs/plugin-marketplace.en.md).
+`aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` no longer distribute plugin content from the PyPI wheel. These public legacy commands return stable JSON blockers with the Codex marketplace setup path.
 
 The source repository also includes plugin metadata for multiple agent runtimes:
 
@@ -203,11 +182,7 @@ openspec init . --tools none --profile core
 openspec config profile core
 ```
 
-Then install the schema packs provided by this plugin:
-
-```bash
-aisee schemas install --all --json
-```
+Schema packs come from the marketplace-installed plugin. `aisee schemas list/check` only reports project-installed schema state or source-checkout development schema state; it does not install schemas from the PyPI wheel.
 
 Check the project state again:
 
@@ -221,8 +196,8 @@ aisee flow inspect --json
 - [Documentation site](https://aisee.wiki): Aisee guides, workflows, and release notes.
 - [Aisee Workflow](docs/workflow.en.md): end-to-end guidance from setup, requirement clarification, change authoring, implementation handoff, verification, and archive.
 - [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, schemas, contracts, context packs, reuse-first routing, review, and archive when using Aisee with OpenSpec.
-- [Compatibility Policy](docs/compatibility-policy.en.md): compatibility boundaries for CLI JSON, schema packs, context packs, plugin export, and experimental capabilities.
-- [Plugin Marketplace](docs/plugin-marketplace.en.md): responsibilities of plugin manifests, marketplace listings, PyPI/pipx, and runtime export.
+- [Compatibility Policy](docs/compatibility-policy.en.md): compatibility boundaries for CLI JSON, schema packs, context packs, plugin content, and experimental capabilities.
+- [Plugin Marketplace](docs/plugin-marketplace.en.md): responsibilities of plugin manifests, marketplace listings, PyPI/pipx, and the Codex install path.
 - [Team Knowledge Guardrails](docs/team-knowledge.en.md): experimental status, usage, and gaps before stability for shared team knowledge.
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, and read model.
 - [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, ID/source-map rules, and contract attachment boundaries.
@@ -261,7 +236,7 @@ For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline spec
 | `aisee:ui-content` | Produce UI content specs for pages, elements, states, flows, permissions, and platform differences. |
 | `aisee:architecture` | Capture software architecture context, technical constraints, reusable capabilities, and artifact hints. |
 | `aisee:change-plan` | Plan independent OpenSpec changes and choose schemas. |
-| `aisee-schema-pack` | Install and maintain OpenSpec schema packs. |
+| `aisee-schema-pack` | Provide and maintain OpenSpec schema packs through the marketplace plugin. |
 | `aisee:implementation-bridge` | Produce implementation briefs and context pack summaries for a single change. |
 | `aisee:verify` | Diagnose artifact, task, source-map, ID, and evidence gaps. |
 | `aisee:archive-guard` | Provide the final recommendation before `openspec archive`. |
@@ -303,21 +278,10 @@ Current schemas:
 | `quick-research` | Technical research and recommendations. |
 | `opsx-collab-pr-loop` | Collaboration and PR loop workflow. |
 
-Install one schema:
+Check project schema state:
 
 ```bash
-aisee schemas install --schema aisee-app-spec-driven --json
-```
-
-Install all schemas:
-
-```bash
-aisee schemas install --all --json
-```
-
-Check schema packs:
-
-```bash
+aisee schemas list --json
 aisee schemas check --json --fail-on-blocker
 ```
 
@@ -328,11 +292,8 @@ aisee doctor --json
 aisee bootstrap --plan --json
 aisee openspec ensure --json
 aisee plugin inspect --json
-aisee plugin path --target codex --json
-aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
 aisee schemas list --json
 aisee schemas check --json
-aisee schemas install --all --json
 aisee sources list --json
 aisee sources check --json
 aisee index --json
@@ -344,7 +305,6 @@ aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
-aisee knowledge scaffold --dest .aisee/team-knowledge --update-config --json
 aisee knowledge inspect --json
 aisee knowledge doctor --json
 aisee knowledge check --json
@@ -428,7 +388,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 Rules:
 
-- `install`, `update`, `promote-batch`, and local scaffolding are available but still experimental. PR automation and MCP service support are still unsettled.
+- `install`, `update`, and `promote-batch` are experimental. The PyPI CLI no longer provides local default scaffolding. PR automation and MCP service support are still unsettled.
 - Query through the CLI instead of letting AI scan `knowledge/cards/**/*.md` directly.
 - Return a small number of bounded matches as implementation, review, or verification reminders.
 - Project-local `aisee/docs/reflect/knowledge-candidates/` remains a candidate area and is not promoted automatically.
@@ -443,7 +403,7 @@ Rules:
 bin/                 Local CLI entrypoint
 src/aisee_cli/       Aisee Python CLI
 src/aisee_plugin_assets/
-                     Skills, schemas, references, and plugin metadata packaged into wheels
+                     Minimal compatibility package; no bundled skills, schemas, references, or plugin metadata
 skills/              Aisee skills and skill assets
 references/          Cross-skill contracts and references
 docs/                User workflow, best practices, architecture, plans, and review docs
@@ -472,12 +432,6 @@ Show CLI help:
 
 ```bash
 python -m aisee_cli.__main__ --help
-```
-
-Sync packaged plugin assets:
-
-```bash
-python scripts/sync_package_assets.py
 ```
 
 Check and sync versions:
@@ -524,7 +478,7 @@ python scripts/smoke_release.py --with-pipx
 
 ### Ongoing Compatibility Governance
 
-- Maintain compatibility boundaries for CLI JSON, schema packs, context packs, plugin export, and skill contracts.
+- Maintain compatibility boundaries for CLI JSON, schema packs, context packs, marketplace plugin content, and skill contracts.
 - Maintain deprecation and migration rules for breaking changes.
 - Decide which hardware and embedded workflows remain experimental and which enter the main Aisee workflow.
 - Add more real-world lifecycle fixtures beyond the app scenario.

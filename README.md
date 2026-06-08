@@ -125,44 +125,23 @@ aisee doctor --json
 
 ## 插件使用
 
-Python 包会同时携带 Aisee skills、schema pack、references 和 agent plugin metadata。可以先检查包内插件资源：
+PyPI / pipx 只安装 `aisee` CLI。Aisee skills、references、schema packs、team knowledge templates 和 plugin metadata 通过 GitHub-backed Codex marketplace 分发。
+
+在 Codex 中添加 marketplace 并安装插件：
+
+```bash
+codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+codex plugin add aisee-plugin@aisee-plugin
+```
+
+检查 CLI-only 状态和 marketplace 提示：
 
 ```bash
 aisee plugin inspect --json
+aisee doctor --json
 ```
 
-导出一个可被 agent runtime 加载的插件目录：
-
-```bash
-aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
-```
-
-当前支持的 target：
-
-```text
-codex
-claude
-cursor
-```
-
-导出后的目录包含：
-
-```text
-aisee-plugin-bundle/
-  .codex-plugin/plugin.json
-  skills/
-  references/
-```
-
-如果你的 agent runtime 支持加载本地插件，可以指向导出的目录或对应的 plugin metadata 文件。
-
-手动确认 runtime loading 时，至少检查：
-
-- 导出目录包含目标 runtime 的 metadata 文件；
-- agent runtime 能识别导出目录下的 `skills/`；
-- 能在 agent 中触发 `aisee:srs` 或 `aisee:change-plan` 这类核心 skill。
-
-插件市场是可选的 runtime 发现和分发通道，不替代 PyPI / pipx 安装。Aisee 当前不内置 `marketplace.json`；团队或个人 marketplace 可以按需引用导出的插件目录。更多说明见 [Plugin Marketplace](docs/plugin-marketplace.md)。
+`aisee plugin export`、`aisee schemas install` 和 `aisee knowledge scaffold` 已不再从 PyPI wheel 分发插件内容；这些公开旧命令会返回稳定 JSON blocker，并提示 Codex marketplace 安装路径。
 
 源码仓库也包含多个 agent runtime 的插件元数据：
 
@@ -203,11 +182,7 @@ openspec init . --tools none --profile core
 openspec config profile core
 ```
 
-然后安装本插件提供的 schemas：
-
-```bash
-aisee schemas install --all --json
-```
+Schema packs 来自 marketplace-installed plugin。`aisee schemas list/check` 只报告项目已安装 schema 状态或开发期源码 schema 状态；不会从 PyPI wheel 安装 schema。
 
 再次检查项目状态：
 
@@ -221,8 +196,8 @@ aisee flow inspect --json
 - [文档站](https://aisee.wiki)：Aisee 使用指南、工作流和发布说明入口。
 - [Aisee Workflow](docs/workflow.md)：端到端说明如何从初始化、需求澄清、change authoring、实现交接、验证到 archive。
 - [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、schema、contract、context pack、复用优先、review 和 archive 约定。
-- [Compatibility Policy](docs/compatibility-policy.md)：说明 CLI JSON、schema pack、context pack、plugin export 和实验性能力的兼容边界。
-- [Plugin Marketplace](docs/plugin-marketplace.md)：说明插件 manifest、marketplace listing、PyPI/pipx 和 runtime export 的分工。
+- [Compatibility Policy](docs/compatibility-policy.md)：说明 CLI JSON、schema pack、context pack、plugin content 和实验性能力的兼容边界。
+- [Plugin Marketplace](docs/plugin-marketplace.md)：说明插件 manifest、marketplace listing、PyPI/pipx 和 Codex 安装路径的分工。
 - [Team Knowledge Guardrails](docs/team-knowledge.md)：说明团队共享知识的实验性状态、使用方式和稳定前缺口。
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md)：说明 team knowledge 的 guardrail retrieval 定位、card/pack 边界和读取模型。
 - [Schema Packs](docs/schema-packs.md)：说明 schema 选择、app schema artifact DAG、ID/source-map 规则和契约附件边界。
@@ -261,7 +236,7 @@ aisee flow inspect --json
 | `aisee:ui-content` | 生成页面、元素、状态、流程、权限和平台差异等 UI 内容规格。 |
 | `aisee:architecture` | 捕获软件架构上下文、技术约束、可复用能力和 artifact hints。 |
 | `aisee:change-plan` | 规划独立 OpenSpec changes 并选择 schema。 |
-| `aisee-schema-pack` | 安装和维护 OpenSpec schema packs。 |
+| `aisee-schema-pack` | 通过 marketplace plugin 提供并维护 OpenSpec schema packs。 |
 | `aisee:implementation-bridge` | 生成单个 change 的实现交接 brief 和 context pack 摘要。 |
 | `aisee:verify` | 诊断 artifact、task、source-map、ID 和 evidence 缺口。 |
 | `aisee:archive-guard` | 在 `openspec archive` 前给出最终归档建议。 |
@@ -303,21 +278,10 @@ skills/aisee-schema-pack/assets/schema-pack/
 | `quick-research` | 技术调研和建议。 |
 | `opsx-collab-pr-loop` | 协作和 PR loop 工作流。 |
 
-安装单个 schema：
+检查项目 schema 状态：
 
 ```bash
-aisee schemas install --schema aisee-app-spec-driven --json
-```
-
-安装全部 schemas：
-
-```bash
-aisee schemas install --all --json
-```
-
-检查 schema pack：
-
-```bash
+aisee schemas list --json
 aisee schemas check --json --fail-on-blocker
 ```
 
@@ -328,11 +292,8 @@ aisee doctor --json
 aisee bootstrap --plan --json
 aisee openspec ensure --json
 aisee plugin inspect --json
-aisee plugin path --target codex --json
-aisee plugin export --target codex --dest ./aisee-plugin-bundle --json
 aisee schemas list --json
 aisee schemas check --json
-aisee schemas install --all --json
 aisee sources list --json
 aisee sources check --json
 aisee index --json
@@ -344,7 +305,6 @@ aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
-aisee knowledge scaffold --dest .aisee/team-knowledge --update-config --json
 aisee knowledge inspect --json
 aisee knowledge doctor --json
 aisee knowledge check --json
@@ -428,7 +388,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 使用原则：
 
-- `install`、`update`、`promote-batch` 和本地 scaffold 已可用但仍是实验性能力；PR 自动化和 MCP 服务仍未稳定。
+- `install`、`update` 和 `promote-batch` 是实验性能力；本地默认 scaffold 不再由 PyPI CLI 提供。PR 自动化和 MCP 服务仍未稳定。
 - 通过 CLI 查询，不让 AI 直接扫描 `knowledge/cards/**/*.md`。
 - 只返回少量带边界的 matches，作为实现、review 或 verify 的提醒。
 - 项目内 `aisee/docs/reflect/knowledge-candidates/` 仍是候选区，不自动进入 team knowledge。
@@ -443,7 +403,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 bin/                 本地 CLI 入口
 src/aisee_cli/       Aisee Python CLI
 src/aisee_plugin_assets/
-                     打包进 wheel 的 skills、schemas、references 和 plugin metadata
+                     最小兼容 package；不再携带 skills、schemas、references 或 plugin metadata
 skills/              Aisee skills 和 skill assets
 references/          跨 skill contracts 和 references
 docs/                用户 workflow、最佳实践、架构、计划和 review 文档
@@ -472,12 +432,6 @@ python -m pytest tests/test_skill_eval_schema.py
 
 ```bash
 python -m aisee_cli.__main__ --help
-```
-
-同步包内插件资源：
-
-```bash
-python scripts/sync_package_assets.py
 ```
 
 检查和同步版本号：
@@ -524,7 +478,7 @@ python scripts/smoke_release.py --with-pipx
 
 ### 持续兼容治理
 
-- 持续维护 CLI JSON、schema packs、context packs、plugin export 和 skill contracts 的兼容边界。
+- 持续维护 CLI JSON、schema packs、context packs、marketplace plugin content 和 skill contracts 的兼容边界。
 - 持续维护破坏性变更的弃用、迁移和版本升级规则。
 - 明确哪些硬件和嵌入式工作流继续保持实验性，哪些进入 Aisee 主工作流。
 - 增加 app 场景之外的真实生命周期 fixtures。

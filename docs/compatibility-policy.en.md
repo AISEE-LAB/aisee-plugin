@@ -8,7 +8,7 @@ During `0.x`, Aisee can still evolve quickly, but public contract changes must b
 
 | Layer | Meaning | Examples | Change Requirement |
 | --- | --- | --- | --- |
-| Public Contract | Interfaces users or automation can depend on | CLI commands, JSON output semantics, schema artifact DAGs, context pack fields, plugin export layout | Must be tested; breaking changes require versioning and changelog notes |
+| Public Contract | Interfaces users or automation can depend on | CLI commands, JSON output semantics, schema artifact DAGs, context pack fields, plugin manifest / marketplace listing | Must be tested; breaking changes require versioning and changelog notes |
 | Experimental Contract | Usable but not yet stable capabilities | team knowledge remote install, promote-batch, optional MCP, hardware workflow integration | Must be marked experimental; can change, but must not appear stable |
 | Internal Detail | Implementation details that can change freely | parser helpers, cache contents, temporary indexes, scoring weights, fixture layout | No compatibility promise; must not become a user source of truth |
 
@@ -83,16 +83,16 @@ Rules:
 - context packs may grow, but default output must stay bounded;
 - new targets must document consumer, read order, and missing-field behavior.
 
-### Plugin Export
+### Plugin Content
 
 The following are public contracts:
 
-- `aisee plugin inspect --json` can locate the packaged asset root;
-- `aisee plugin export --target codex|claude|cursor` emits runtime metadata;
-- exported directories include runtime metadata, `skills/`, and `references/`;
-- package assets stay synced with source `skills/`, `references/`, and plugin metadata.
+- `.codex-plugin/plugin.json`, `skills/`, `references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
+- `aisee plugin inspect --json` returns stable status and setup hints in CLI-only installs;
+- `aisee plugin export --target codex|claude|cursor` returns stable deprecation/blocker JSON during migration and does not write plugin bundles from the wheel;
+- the PyPI wheel no longer promises bundled copies of skills, references, schema packs, team knowledge templates, or plugin metadata.
 
-Breaking changes include export layout changes, target name changes, metadata path changes, or missing skills.
+Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or changing the JSON blocker semantics of public legacy commands.
 
 ### Plugin Marketplace
 

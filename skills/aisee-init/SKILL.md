@@ -7,6 +7,10 @@ description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。用于创
 
 对外 skill 名称是 `aisee:init`；目录名保持 `aisee-init/`。执行脚本时从当前 skill 目录解析 `<skill-dir>/scripts/...`；安装后的 hook 命令只引用目标项目内 `aisee/hooks/`。
 
+## CLI preflight
+
+调用 `aisee ...` 前先按 `references/cli-preflight.md` 确认 CLI 可用；缺失时停止并提示用户通过 PyPI / pipx 安装 CLI。
+
 ## 目标
 
 把一个项目整理成 OpenSpec 驱动的 Aisee 项目配置：

@@ -18,7 +18,8 @@
 aisee doctor --json
 aisee bootstrap --plan --json
 aisee openspec ensure --json
-aisee schemas install --all --json
+codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
+codex plugin add aisee-plugin@aisee-plugin
 aisee doctor --json
 ```
 

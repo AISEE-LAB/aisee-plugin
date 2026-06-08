@@ -21,7 +21,6 @@ python -m pip install -e .
 ```bash
 python -m pytest
 python scripts/check_versions.py
-python scripts/sync_package_assets.py
 ```
 
 发布前 smoke test 见 [docs/release.md](docs/release.md)。
@@ -43,7 +42,6 @@ python scripts/sync_package_assets.py
 - 修改 `skills/` 后运行：
 
 ```bash
-python scripts/sync_package_assets.py
 python -m pytest tests/test_plugin_packaging.py tests/test_skill_eval_schema.py
 ```
 
