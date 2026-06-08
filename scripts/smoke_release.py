@@ -17,6 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN_PACKAGE_CONTENT_PARTS = (
+    "/plugins/aisee-plugin/",
     "/skills/",
     "/references/",
     "/team-knowledge/",

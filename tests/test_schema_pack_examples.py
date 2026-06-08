@@ -7,7 +7,7 @@ from aisee_cli.context_pack import parse_schema
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_PACK_ROOT = ROOT / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
+SCHEMA_PACK_ROOT = ROOT / "plugins" / "aisee-plugin" / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
 PACKAGED_SCHEMA_PACK_ROOT = ROOT / "src" / "aisee_plugin_assets" / "skills"
 ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-\d+\b")
 

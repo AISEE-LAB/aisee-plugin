@@ -6,12 +6,12 @@
 
 本文不作为字段级契约清单维护。字段、解析规则和校验细节以以下文件为准：
 
-- context pack 核心输出契约：[../../references/context-pack-contract.md](../../references/context-pack-contract.md)
-- context pack target 规则：[../../references/context-pack-targets.md](../../references/context-pack-targets.md)
-- context pack gaps 规则：[../../references/context-pack-gaps.md](../../references/context-pack-gaps.md)
-- ID 分配和生命周期规则：[../../references/id-policy.md](../../references/id-policy.md)
-- source-map 解析契约：[../../references/source-map-contract.md](../../references/source-map-contract.md)
-- schema artifact 事实：`skills/aisee-schema-pack/assets/schema-pack/`
+- context pack 核心输出契约：[../../plugins/aisee-plugin/references/context-pack-contract.md](../../plugins/aisee-plugin/references/context-pack-contract.md)
+- context pack target 规则：[../../plugins/aisee-plugin/references/context-pack-targets.md](../../plugins/aisee-plugin/references/context-pack-targets.md)
+- context pack gaps 规则：[../../plugins/aisee-plugin/references/context-pack-gaps.md](../../plugins/aisee-plugin/references/context-pack-gaps.md)
+- ID 分配和生命周期规则：[../../plugins/aisee-plugin/references/id-policy.md](../../plugins/aisee-plugin/references/id-policy.md)
+- source-map 解析契约：[../../plugins/aisee-plugin/references/source-map-contract.md](../../plugins/aisee-plugin/references/source-map-contract.md)
+- schema artifact 事实：`plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/`
 - CLI 实际行为：`src/aisee_cli/` 与 `tests/`
 
 只有 CLI 职责、命令分层、事实源策略、迁移策略或与 OpenSpec/Compound 的边界变化时，才需要更新本文。
@@ -56,7 +56,7 @@ Aisee CLI is an OpenSpec context companion, not an OpenSpec parser.
 - 对 OpenSpec artifacts，Aisee CLI 默认只做 metadata scan：路径、存在性、hash、heading、ID 引用、路径引用、checkbox 状态和 evidence 入口。
 - 当 OpenSpec CLI 提供可用 JSON 输出时，Aisee CLI 应优先消费 OpenSpec CLI 输出；缺少结构化输出时才做保守 metadata scan。
 
-`source-map.md` 是例外中的重点：它是 Aisee 自己定义的 OpenSpec companion 路由表，因此 Aisee CLI 可以结构化解析它。解析范围维护在 [source-map-contract.md](../../references/source-map-contract.md)，覆盖 upstream sources、ID trace、artifact applicability、Contract Ownership / Sync、Affected Paths Index、Expected Evidence Index 和 out-of-scope/follow-up，不扩展到其它 OpenSpec artifact 的业务语义。
+`source-map.md` 是例外中的重点：它是 Aisee 自己定义的 OpenSpec companion 路由表，因此 Aisee CLI 可以结构化解析它。解析范围维护在 [source-map-contract.md](../../plugins/aisee-plugin/references/source-map-contract.md)，覆盖 upstream sources、ID trace、artifact applicability、Contract Ownership / Sync、Affected Paths Index、Expected Evidence Index 和 out-of-scope/follow-up，不扩展到其它 OpenSpec artifact 的业务语义。
 
 ## 设计原则
 

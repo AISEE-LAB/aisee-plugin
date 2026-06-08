@@ -146,9 +146,9 @@ aisee doctor --json
 The source repository also includes plugin metadata for multiple agent runtimes:
 
 ```text
-.codex-plugin/plugin.json
-.claude-plugin/plugin.json
-.cursor-plugin/plugin.json
+plugins/aisee-plugin/.codex-plugin/plugin.json
+plugins/aisee-plugin/.claude-plugin/plugin.json
+plugins/aisee-plugin/.cursor-plugin/plugin.json
 ```
 
 Codex plugin metadata declares the skills directory directly:
@@ -262,7 +262,7 @@ hw-change-plan
 Schema pack source:
 
 ```text
-skills/aisee-schema-pack/assets/schema-pack/
+plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/
 ```
 
 Current schemas:
@@ -397,15 +397,18 @@ Rules:
 ## Repository Layout
 
 ```text
-.codex-plugin/       Codex plugin metadata
-.claude-plugin/      Claude plugin metadata
-.cursor-plugin/      Cursor plugin metadata
+.agents/plugins/marketplace.json
+                     Codex marketplace listing
+plugins/aisee-plugin/
+  .codex-plugin/     Codex plugin metadata
+  .claude-plugin/    Claude plugin metadata
+  .cursor-plugin/    Cursor plugin metadata
+  skills/            Aisee skills and skill assets
+  references/        Cross-skill contracts and references
 bin/                 Local CLI entrypoint
 src/aisee_cli/       Aisee Python CLI
 src/aisee_plugin_assets/
                      Minimal compatibility package; no bundled skills, schemas, references, or plugin metadata
-skills/              Aisee skills and skill assets
-references/          Cross-skill contracts and references
 docs/                User workflow, best practices, architecture, plans, and review docs
 docs/architecture/   Architecture and historical decision docs
 docs/plans/          Development plans

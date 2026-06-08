@@ -15,9 +15,9 @@ pyproject.toml [project].version
 ```text
 src/aisee_cli/__init__.py
 .agents/plugins/marketplace.json
-.codex-plugin/plugin.json
-.claude-plugin/plugin.json
-.cursor-plugin/plugin.json
+plugins/aisee-plugin/.codex-plugin/plugin.json
+plugins/aisee-plugin/.claude-plugin/plugin.json
+plugins/aisee-plugin/.cursor-plugin/plugin.json
 ```
 
 ## 版本号规则

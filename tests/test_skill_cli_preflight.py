@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_skills_do_not_reference_shared_cli_preflight() -> None:
-    skill_files = sorted((ROOT / "skills").glob("*/SKILL.md"))
+    skill_files = sorted((ROOT / "plugins" / "aisee-plugin" / "skills").glob("*/SKILL.md"))
     offenders = []
     for path in skill_files:
         text = path.read_text(encoding="utf-8")
@@ -18,7 +18,7 @@ def test_skills_do_not_reference_shared_cli_preflight() -> None:
 
 
 def test_shared_cli_preflight_document_is_not_part_of_skill_context() -> None:
-    assert not (ROOT / "references" / "cli-preflight.md").exists()
+    assert not (ROOT / "plugins" / "aisee-plugin" / "references" / "cli-preflight.md").exists()
 
 
 def test_cli_outputs_keep_marketplace_recovery_hints() -> None:

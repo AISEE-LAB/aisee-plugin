@@ -14,7 +14,10 @@ DEV_ASSET_ENV = "AISEE_PLUGIN_ASSET_ROOT"
 
 def repo_asset_root(project_root: Path) -> Path | None:
     root = project_root.resolve()
-    return root if is_aisee_source_checkout(root) else None
+    if not (root / "src" / "aisee_cli").is_dir():
+        return None
+    plugin_root = root / "plugins" / "aisee-plugin"
+    return plugin_root if is_aisee_asset_root(plugin_root) else None
 
 
 def first_existing(paths: Iterable[Path]) -> Path | None:
@@ -34,7 +37,7 @@ def explicit_dev_asset_root() -> Path | None:
 
 def is_aisee_source_checkout(root: Path) -> bool:
     manifest = root / ".codex-plugin" / "plugin.json"
-    if not manifest.exists() or not (root / "src" / "aisee_cli").is_dir():
+    if not manifest.exists():
         return False
     try:
         data = json.loads(manifest.read_text(encoding="utf-8"))
