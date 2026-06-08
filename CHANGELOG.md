@@ -8,6 +8,13 @@
 
 - 暂无。
 
+## [0.1.2] - 2026-06-08
+
+### Changed
+
+- 更新 README 和 PyPI metadata，增加 `https://aisee.wiki` 文档站入口。
+- 将项目 Homepage 切换到文档站，并保留 GitHub Source 链接。
+
 ## [0.1.1] - 2026-06-08
 
 ### Changed
