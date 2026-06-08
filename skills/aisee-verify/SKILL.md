@@ -17,6 +17,12 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 
 这些 role 不修改代码、不运行测试、不提交 PR、不解决 CI，也不替代 `ce-doc-review`、`ce-code-review`、`ce-test-*` 或 `ce-work`。接口、UI、硬件、固件、安全和验证差异只能作为 schema-aware check lenses。
 
+触发时机：
+
+- `aisee-spec-reviewer`：实现前发现 artifacts/contracts/tasks/source-map 一致性不清时，可建议回到该 role 先审。
+- `aisee-implementation-reviewer`：`ce-work` 完成后、正式输出 verify 结论前建议触发或消费其结果。
+- `aisee-change-architect`：verify 阶段只在发现当前实现暴露 change 边界错误时建议回退触发，不作为常规 verify 子步骤。
+
 ## 职责
 
 - 识别当前 change 使用的 schema，并只检查该 schema 声明的 artifacts、requires、apply tracks 和验证证据。

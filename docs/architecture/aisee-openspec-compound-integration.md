@@ -690,6 +690,14 @@ aisee:image-object
 
 这三个 role 只产出结构化审查结论，不修改代码、不运行测试、不提交 PR、不解决 CI，也不替代 `ce-doc-review`、`ce-code-review`、`ce-test-*` 或 `ce-work`。接口、UI、硬件、固件、安全和验证等具体领域差异挂在这些 reviewer 的 schema-aware check lenses 下，而不是新增独立全能 agent。
 
+### 触发时机
+
+- `aisee-change-architect`：在 `aisee:change-plan` 后、`aisee:change-author` 前按需触发；当 change 边界复杂、跨模块、跨 schema、依赖不清或粒度不确定时触发。
+- `aisee-spec-reviewer`：在 `aisee:change-author` 后、`aisee:implementation-bridge` / `ce-work` 前建议触发；用于确认 artifacts、contracts、source-map、tasks 已达到可执行状态。
+- `aisee-implementation-reviewer`：在 `ce-work` 完成后、`aisee:verify` / `aisee:archive-guard` 前建议触发；用于确认实现、tasks、spec/source-map 和 evidence 没有 drift。
+
+`aisee:flow` 可以输出这些 reviewer role 的触发建议，但不自动运行 runtime；是否真正启动审查由当前 agent/harness 能力和用户授权决定。
+
 ## App/Web 与硬件/嵌入式的冲突风险
 
 硬件/嵌入式不能直接套 App/Web 链路。主要冲突包括：

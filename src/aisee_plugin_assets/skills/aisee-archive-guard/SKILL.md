@@ -15,6 +15,12 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 - CE P0/P1、failed tests、failed validate、安全 High/Critical、设备必需验证缺失等仍按本 skill 的 blocker 规则处理。
 - 接口、UI、硬件、固件、安全和验证 lenses 只帮助判断当前 schema evidence 是否闭合，不产生新的 archive 事实源。
 
+触发时机：
+
+- `aisee-implementation-reviewer`：archive guard 前可消费其结论，作为实现/evidence 一致性输入。
+- `aisee-spec-reviewer`：仅在 archive guard 发现 artifacts/contracts/source-map/tasks 仍不闭合时建议回退触发。
+- `aisee-change-architect`：仅在 archive guard 发现 change 边界或拆分错误时建议回退触发。
+
 ## 职责
 
 - 识别当前 change schema，并按 schema 判断归档必需 artifacts、tasks、apply tracks、source-map、contracts 和验证证据。
