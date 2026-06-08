@@ -220,6 +220,7 @@ aisee flow inspect --json
 
 ## 文档
 
+- [文档站](https://aisee.wiki)：Aisee 使用指南、工作流和发布说明入口。
 - [Aisee Workflow](docs/workflow.md)：端到端说明如何从初始化、需求澄清、change authoring、实现交接、验证到 archive。
 - [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、schema、contract、context pack、复用优先、review 和 archive 约定。
 - [Compatibility Policy](docs/compatibility-policy.md)：说明 CLI JSON、schema pack、context pack、plugin export 和实验性能力的兼容边界。

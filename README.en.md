@@ -220,6 +220,7 @@ aisee flow inspect --json
 
 ## Documentation
 
+- [Documentation site](https://aisee.wiki): Aisee guides, workflows, and release notes.
 - [Aisee Workflow](docs/workflow.en.md): end-to-end guidance from setup, requirement clarification, change authoring, implementation handoff, verification, and archive.
 - [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, schemas, contracts, context packs, reuse-first routing, review, and archive when using Aisee with OpenSpec.
 - [Compatibility Policy](docs/compatibility-policy.en.md): compatibility boundaries for CLI JSON, schema packs, context packs, plugin export, and experimental capabilities.

@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/AISEE-LAB/aisee-plugin"
+Homepage = "https://aisee.wiki"
 Source = "https://github.com/AISEE-LAB/aisee-plugin"
 
 [project.scripts]
