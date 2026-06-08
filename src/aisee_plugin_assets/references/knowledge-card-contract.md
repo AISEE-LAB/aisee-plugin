@@ -22,7 +22,7 @@ CLI 的默认读取入口固定为：
 <team-knowledge>/knowledge/cards/**/*.yaml
 ```
 
-独立 team knowledge 仓库可以通过 `aisee knowledge scaffold --dest <path> --json` 生成初始结构，再用 `aisee knowledge check --team-path <path> --json` 校验。
+独立 team knowledge 仓库可以通过 `aisee knowledge scaffold --dest <path> --update-config --json` 生成初始结构并写入项目配置，再用 `aisee knowledge doctor --json` 检查配置 path 与实际目录是否一致。
 
 读取顺序：
 

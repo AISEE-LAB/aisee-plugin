@@ -19,6 +19,7 @@ from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, nex
 from aisee_cli.index import build_index
 from aisee_cli.knowledge import (
     build_knowledge_check,
+    build_knowledge_doctor,
     build_knowledge_index,
     build_knowledge_inspect,
     build_knowledge_install,
@@ -139,9 +140,14 @@ def main() -> int:
     knowledge_check_parser = knowledge_subparsers.add_parser("check")
     knowledge_check_parser.add_argument("--team-path", help="team knowledge repository path")
     knowledge_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_doctor_parser = knowledge_subparsers.add_parser("doctor")
+    knowledge_doctor_parser.add_argument("--team-path", help="team knowledge repository path to compare with config")
+    knowledge_doctor_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_scaffold_parser = knowledge_subparsers.add_parser("scaffold")
     knowledge_scaffold_parser.add_argument("--dest", required=True, help="destination directory for scaffold")
     knowledge_scaffold_parser.add_argument("--force", action="store_true", help="overwrite destination when it already exists")
+    knowledge_scaffold_parser.add_argument("--update-config", action="store_true", help="write the scaffold path into aisee/knowledge.yaml")
+    knowledge_scaffold_parser.add_argument("--pack", action="append", default=[], help="pack to enable when writing config; can be repeated")
     knowledge_scaffold_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_install_parser = knowledge_subparsers.add_parser("install")
     knowledge_install_parser.add_argument("--allow-dirty", action="store_true", help="allow dirty existing checkout")
@@ -307,7 +313,7 @@ def main() -> int:
         return 0
 
     if args.command == "knowledge" and args.knowledge_command is None:
-        print_json(error_response("Use one of: inspect, check, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+        print_json(error_response("Use one of: inspect, check, doctor, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "knowledge":
@@ -317,8 +323,10 @@ def main() -> int:
                 result = build_knowledge_inspect(root)
             elif args.knowledge_command == "check":
                 result = build_knowledge_check(root, team_path=args.team_path)
+            elif args.knowledge_command == "doctor":
+                result = build_knowledge_doctor(root, team_path=args.team_path)
             elif args.knowledge_command == "scaffold":
-                result = build_knowledge_scaffold(root, args.dest, force=args.force)
+                result = build_knowledge_scaffold(root, args.dest, force=args.force, update_config=args.update_config, packs=args.pack)
             elif args.knowledge_command == "install":
                 result = build_knowledge_install(root, allow_dirty=args.allow_dirty)
             elif args.knowledge_command == "update":
@@ -348,7 +356,7 @@ def main() -> int:
             elif args.knowledge_command == "index":
                 result = build_knowledge_index(root, write_cache=True, team_path=args.team_path)
             else:
-                print_json(error_response("Use one of: inspect, check, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+                print_json(error_response("Use one of: inspect, check, doctor, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
                 return 2
         except ValueError as error:
             print_json(error_response(str(error), "KNOWLEDGE_ERROR"), stderr=True)

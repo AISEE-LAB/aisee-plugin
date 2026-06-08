@@ -146,6 +146,18 @@ def test_knowledge_inspect_reads_configured_packs_and_cards(tmp_path: Path) -> N
     assert "ignored-doc" not in ids
 
 
+def test_knowledge_doctor_reports_team_path_mismatch(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+    configure_project(tmp_path, team)
+    other = tmp_path / ".aisee" / "other-team-knowledge"
+    other.mkdir(parents=True)
+
+    data = run_json(tmp_path, "knowledge", "doctor", "--team-path", str(other), "--json")
+
+    assert data["status"] == "blocked"
+    assert "KNOWLEDGE_PATH_MISMATCH" in {item["code"] for item in data["issues"]}
+
+
 def test_knowledge_inspect_reports_missing_pack(tmp_path: Path) -> None:
     team = create_team_knowledge(tmp_path)
     configure_project(tmp_path, team)

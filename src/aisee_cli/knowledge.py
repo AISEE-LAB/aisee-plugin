@@ -231,7 +231,60 @@ def build_knowledge_check(root: Path, *, team_path: str | None = None) -> dict[s
     }
 
 
-def build_knowledge_scaffold(root: Path, dest: str, *, force: bool = False) -> dict[str, Any]:
+def build_knowledge_doctor(root: Path, *, team_path: str | None = None) -> dict[str, Any]:
+    config, config_issues = load_knowledge_config(root)
+    configured_root = resolve_team_root(root, config)
+    explicit_root = resolve_user_path(root, Path(team_path)) if team_path else None
+    team_root = explicit_root or configured_root
+    issues = list(config_issues)
+    if not config.get("available"):
+        issues.append(issue("KNOWLEDGE_CONFIG_MISSING", "blocker", "aisee/knowledge.yaml was not found", rel(root, knowledge_config_path(root))))
+    if config.get("available") and configured_root is None:
+        issues.append(issue("KNOWLEDGE_PATH_MISSING", "blocker", "aisee/knowledge.yaml does not declare path", config.get("path") or rel(root, knowledge_config_path(root))))
+    if explicit_root is not None and configured_root is not None and explicit_root.resolve() != configured_root.resolve():
+        issues.append(issue(
+            "KNOWLEDGE_PATH_MISMATCH",
+            "blocker",
+            f"--team-path does not match aisee/knowledge.yaml path: {rel(root, explicit_root)} != {rel(root, configured_root)}",
+            rel(root, knowledge_config_path(root)),
+        ))
+    if team_root is not None:
+        if not team_root.exists():
+            issues.append(issue("KNOWLEDGE_REPO_MISSING", "blocker", f"team knowledge path does not exist: {team_root}", rel(root, team_root)))
+        elif not (team_root / SCAFFOLD_MARKER).exists():
+            issues.append(issue("KNOWLEDGE_SCAFFOLD_MARKER_MISSING", "risk", f"team knowledge path is missing {SCAFFOLD_MARKER}", rel(root, team_root)))
+    packs, cards, check_issues = load_configured_knowledge(root, config, configured_root) if config.get("available") else ([], [], [])
+    issues.extend(check_issues)
+    command = f"aisee knowledge doctor --team-path {team_path} --json" if team_path else "aisee knowledge doctor --json"
+    return {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": status_from_issues(issues),
+        "config": config_public(root, config, configured_root),
+        "team_knowledge": {
+            "configured_path": rel(root, configured_root) if configured_root else None,
+            "checked_path": rel(root, team_root) if team_root else None,
+            "exists": bool(team_root and team_root.exists()),
+            "marker_exists": bool(team_root and (team_root / SCAFFOLD_MARKER).exists()),
+        },
+        "packs": packs,
+        "cards": summarize_cards(cards),
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "meta": {
+            "command": command,
+            "cache_is_fact_source": False,
+        },
+    }
+
+
+def build_knowledge_scaffold(
+    root: Path,
+    dest: str,
+    *,
+    force: bool = False,
+    update_config: bool = False,
+    packs: list[str] | None = None,
+) -> dict[str, Any]:
     destination = resolve_user_path(root, Path(dest))
     source = packaged_asset_root() / TEAM_KNOWLEDGE_ASSET_DIR
     if not source.exists():
@@ -243,12 +296,17 @@ def build_knowledge_scaffold(root: Path, dest: str, *, force: bool = False) -> d
         shutil.rmtree(destination)
     shutil.copytree(source, destination)
     written = sorted(rel(root, path) for path in destination.rglob("*") if path.is_file())
+    config_update = None
+    if update_config:
+        config_update = write_knowledge_config_for_scaffold(root, destination, packs or [])
+        written.append(config_update["path"])
     check = build_knowledge_check(root, team_path=str(destination))
     return {
         "schema_version": KNOWLEDGE_SCHEMA_VERSION,
         "status": check["status"],
         "destination": rel(root, destination),
         "source": rel(root, source),
+        "config_update": config_update,
         "written": written,
         "issues": check["issues"],
         "summary": check["summary"],
@@ -256,6 +314,7 @@ def build_knowledge_scaffold(root: Path, dest: str, *, force: bool = False) -> d
             "command": f"aisee knowledge scaffold --dest {dest} --json",
             "writes": True,
             "force": force,
+            "updates_config": update_config,
         },
     }
 
@@ -455,6 +514,37 @@ def load_knowledge_config(root: Path) -> tuple[dict[str, Any], list[dict[str, st
             "vector": retrieval.get("vector") if isinstance(retrieval, dict) else None,
         },
     }, issues
+
+
+def write_knowledge_config_for_scaffold(root: Path, destination: Path, packs: list[str]) -> dict[str, Any]:
+    path = knowledge_config_path(root)
+    if path.exists():
+        data, parse_error = load_yaml_file(path)
+        if parse_error:
+            raise ValueError(f"refusing to update invalid knowledge config: {parse_error}")
+        config_data = data if isinstance(data, dict) else {}
+    else:
+        config_data = {}
+    selected_packs = normalize_string_list(packs) or normalize_string_list(config_data.get("packs")) or ["web-app"]
+    config_data["path"] = rel(root, destination)
+    config_data["packs"] = selected_packs
+    retrieval = config_data.get("retrieval")
+    if not isinstance(retrieval, dict):
+        config_data["retrieval"] = {
+            "max_cards": DEFAULT_MAX_CARDS,
+            "include_project_candidates": True,
+        }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rendered = yaml.safe_dump(config_data, allow_unicode=True, sort_keys=False)
+    changed = not path.exists() or path.read_text(encoding="utf-8") != rendered
+    if changed:
+        path.write_text(rendered, encoding="utf-8")
+    return {
+        "path": rel(root, path),
+        "changed": changed,
+        "team_path": rel(root, destination),
+        "packs": selected_packs,
+    }
 
 
 def resolve_user_path(root: Path, path: Path) -> Path:

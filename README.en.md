@@ -343,8 +343,9 @@ aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
-aisee knowledge scaffold --dest .aisee/team-knowledge --json
+aisee knowledge scaffold --dest .aisee/team-knowledge --update-config --json
 aisee knowledge inspect --json
+aisee knowledge doctor --json
 aisee knowledge check --json
 aisee knowledge check --team-path .aisee/team-knowledge --json
 aisee knowledge install --json

@@ -17,8 +17,9 @@ It is not:
 The current version supports:
 
 - pinning a local team knowledge path, ref, and packs through `aisee/knowledge.yaml`;
-- creating an independent team knowledge scaffold with `aisee knowledge scaffold --dest <path> --json`;
+- creating an independent team knowledge scaffold and writing project config with `aisee knowledge scaffold --dest <path> --update-config --json`;
 - inspecting configuration with `aisee knowledge inspect --json`;
+- checking that the configured path and actual team knowledge directory match with `aisee knowledge doctor --json`;
 - validating cards and packs with `aisee knowledge check --json` or `--team-path <path>`;
 - syncing a configured Git checkout with `aisee knowledge install/update --json`;
 - retrieving a small number of guardrails with `aisee knowledge query ... --json`;
@@ -57,13 +58,14 @@ V1 primarily uses the local `path`; `repo` and `ref` record provenance and suppo
 Create a local team knowledge scaffold:
 
 ```bash
-aisee knowledge scaffold --dest .aisee/team-knowledge --json
+aisee knowledge scaffold --dest .aisee/team-knowledge --update-config --json
 ```
 
 Inspect configuration first:
 
 ```bash
 aisee knowledge inspect --json
+aisee knowledge doctor --json
 aisee knowledge check --json
 ```
 

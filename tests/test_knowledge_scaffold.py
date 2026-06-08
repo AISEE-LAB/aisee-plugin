@@ -23,6 +23,21 @@ def test_knowledge_scaffold_writes_packaged_team_repo(tmp_path: Path) -> None:
     }
 
 
+def test_knowledge_scaffold_update_config_writes_matching_path(tmp_path: Path) -> None:
+    destination = tmp_path / ".aisee" / "team-knowledge"
+
+    data = run_json(tmp_path, "knowledge", "scaffold", "--dest", str(destination), "--update-config", "--pack", "openspec", "--json")
+
+    assert data["status"] == "ok"
+    assert data["config_update"]["changed"] is True
+    config = (tmp_path / "aisee" / "knowledge.yaml").read_text(encoding="utf-8")
+    assert "path: .aisee/team-knowledge" in config
+    assert "openspec" in config
+    doctor = run_json(tmp_path, "knowledge", "doctor", "--json")
+    assert doctor["status"] == "ok"
+    assert doctor["team_knowledge"]["configured_path"] == ".aisee/team-knowledge"
+
+
 def test_knowledge_scaffold_refuses_existing_destination_without_force(tmp_path: Path) -> None:
     destination = tmp_path / "team-knowledge"
     destination.mkdir()
