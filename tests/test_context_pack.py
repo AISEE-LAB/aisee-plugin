@@ -24,65 +24,27 @@ def install_compound_skills(root: Path, *skills: str) -> Path:
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(
-        root / ".aisee" / "id-registry.json",
+        root / "aisee" / "registry" / "sources.json",
         json.dumps(
             {
                 "version": 1,
-                "scopes": {
-                    "auth": {
-                        "counters": {
-                            "FR": 1,
-                            "API": 1,
-                            "SPEC": 1,
-                            "TASK": 1,
-                            "TEST": 1,
-                        },
-                        "ids": {
-                            "auth:FR-001": {
-                                "type": "FR",
-                                "number": 1,
-                                "status": "active",
-                                "title": "登录",
-                                "owner": "docs/requirements/auth-srs.md",
-                            },
-                            "auth:API-001": {
-                                "type": "API",
-                                "number": 1,
-                                "status": "active",
-                                "title": "登录接口",
-                                "owner": "openspec/changes/add-auth/service-contract.md",
-                            },
-                            "auth:SPEC-001": {
-                                "type": "SPEC",
-                                "number": 1,
-                                "status": "active",
-                                "title": "登录行为",
-                                "owner": "openspec/changes/add-auth/specs/auth.md",
-                            },
-                            "auth:TASK-001": {
-                                "type": "TASK",
-                                "number": 1,
-                                "status": "active",
-                                "title": "实现登录",
-                                "owner": "openspec/changes/add-auth/tasks.md",
-                            },
-                            "auth:TEST-001": {
-                                "type": "TEST",
-                                "number": 1,
-                                "status": "active",
-                                "title": "验证登录",
-                                "owner": "openspec/changes/add-auth/tasks.md",
-                            },
-                        },
+                "sources": [
+                    {
+                        "scope": "auth",
+                        "type": "srs",
+                        "path": "docs/requirements/auth-srs.md",
+                        "alias": "srs:auth-login",
+                        "template": "aisee-srs",
+                        "parser": "srs",
                     }
-                },
+                ],
             },
             ensure_ascii=False,
             indent=2,
         )
         + "\n",
     )
-    write(root / "docs" / "requirements" / "auth-srs.md", "覆盖需求：auth:FR-001\n")
+    write(root / "docs" / "requirements" / "auth-srs.md", "# Auth SRS\n\n## 登录\n\n覆盖需求：FR-001\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
@@ -129,9 +91,9 @@ apply:
 
 ## 变更范围
 
-| 类型 | 完整 ID | 说明 |
+| 类型 | Ref | 说明 |
 |---|---|---|
-| 功能需求 | auth:FR-001 | 登录 |
+| 功能需求 | docs/requirements/auth-srs.md#FR-001 | 登录 |
 
 ## 不在范围
 
@@ -142,14 +104,30 @@ apply:
         change / "source-map.md",
         """# Source Map
 
-| 类型 | 完整 ID | 标题 | 来源 | 处理方式 | 后续 artifact |
+## Upstream Sources
+
+| Source | Path / Description | Ref | Status | Notes |
+|---|---|---|---|---|
+| SRS | docs/requirements/auth-srs.md | docs/requirements/auth-srs.md#FR-001 | confirmed | |
+
+## Anchor Trace
+
+| Type | Ref | Title | Source | Handling | Artifact |
 |---|---|---|---|---|---|
-| FR | auth:FR-001 | 登录 | SRS | 覆盖 | specs / tasks |
-| API | auth:API-001 | 登录接口 | service-contract.md | 新增 | src/auth/session.py / tests/auth/test_session.py |
+| FR | docs/requirements/auth-srs.md#FR-001 | 登录 | SRS | 覆盖 | specs / tasks |
 
 ## Artifact 适用性
 
-| service-contract.md | yes | auth:API-001 | 需要后端接口 | tasks.md |
+| Artifact | Required | Refs | Reason | Handoff |
+|---|---|---|---|---|
+| service-contract.md | yes | docs/requirements/auth-srs.md#FR-001 | 需要后端接口 | tasks.md |
+
+## Affected Paths Index
+
+| Kind | Path | Refs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/auth/session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
+| test | tests/auth/test_session.py | docs/requirements/auth-srs.md#FR-001 | add | |
 
 ## Contract Ownership / Sync
 
@@ -167,7 +145,7 @@ apply:
         change / "specs" / "auth.md",
         """## ADDED Requirements
 
-### Requirement: auth:SPEC-001 Login
+### Requirement: SPEC-001 Login
 
 系统 MUST allow login.
 """,
@@ -177,17 +155,17 @@ apply:
         change / "service-contract.md",
         """# Service Contract
 
-auth:API-001 uses src/auth/session.py and tests/auth/test_session.py.
+docs/requirements/auth-srs.md#FR-001 uses src/auth/session.py and tests/auth/test_session.py.
 """,
     )
     write(
         change / "tasks.md",
         """# Tasks
 
-- [ ] auth:TASK-001 Provider implementation: implement src/auth/session.py.
-- [ ] auth:TASK-001 Consumer integration: update frontend caller.
-- [ ] auth:TEST-001 Contract test: verify tests/auth/test_session.py.
-- [ ] auth:TEST-001 Backward compatibility check: confirm login contract compatibility.
+- [ ] TASK-001 Provider implementation: implement src/auth/session.py.
+- [ ] TASK-001 Consumer integration: update frontend caller.
+- [ ] TEST-001 Contract test: verify tests/auth/test_session.py.
+- [ ] TEST-001 Backward compatibility check: confirm login contract compatibility.
 """,
     )
 
@@ -265,9 +243,9 @@ def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None
         tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md",
         """# Tasks
 
-- [ ] auth:TASK-001 Implement src/auth/session.py.
-- [ ] auth:TEST-001 Verify tests/auth/test_session.py.
-- [ ] auth:TASK-001 Investigate src/auth/side_effect.py.
+- [ ] TASK-001 Implement src/auth/session.py.
+- [ ] TEST-001 Verify tests/auth/test_session.py.
+- [ ] TASK-001 Investigate src/auth/side_effect.py.
 """,
     )
 
@@ -285,7 +263,7 @@ def test_ce_work_pack_reports_missing_ce_plan_as_limitation(tmp_path: Path, monk
     monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(tmp_path / "missing-compound"))
     write(
         tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
-        "auth:FR-001 is covered.\n",
+        "docs/requirements/auth-srs.md#FR-001 is covered.\n",
     )
 
     pack = build_context_pack(tmp_path, "add-auth", "ce-work")
@@ -365,14 +343,14 @@ def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:
 
 def test_context_pack_reports_unregistered_change_ids(tmp_path: Path) -> None:
     create_project(tmp_path)
-    write(tmp_path / ".aisee" / "id-registry.json", "{}\n")
+    write(tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md", "docs/requirements/missing.md#FR-999 is covered.\n")
 
     pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
 
     gap_codes = {gap["code"] for gap in pack["gaps"]}
-    assert "ID_UNREGISTERED_REFERENCE" in gap_codes
-    id_registry = pack["facts"]["parsed"]["id_registry"]
-    assert "auth:FR-001" in id_registry["missing_ids"]
+    assert "ANCHOR_RESOLUTION_MISSING" in gap_codes
+    anchor_index = pack["facts"]["parsed"]["anchor_index"]
+    assert "docs/requirements/missing.md#FR-999" in anchor_index["missing_references"]
 
 
 def test_cli_context_pack_outputs_json(tmp_path: Path) -> None:
@@ -461,10 +439,9 @@ def test_cli_change_inspect_outputs_summary(tmp_path: Path) -> None:
     data = json.loads(result.stdout)
     assert data["change"]["id"] == "add-auth"
     assert data["schema"]["name"] == "aisee-app-spec-driven"
-    assert data["ids"]["upstream"] == ["auth:API-001", "auth:FR-001"]
-    assert "auth:SPEC-001" in data["ids"]["produced"]
-    assert data["ids"]["registry"]["missing"] == []
-    assert data["ids"]["registry"]["status_counts"]["active"] == 5
+    assert data["anchors"]["upstream_refs"] == ["docs/requirements/auth-srs.md#FR-001"]
+    assert "SPEC-001" in data["anchors"]["produced_local_ids"]
+    assert data["anchors"]["resolution"]["missing_references"] == []
     assert data["task_state"]["total"] == 4
     assert "src/auth/session.py" in data["paths"]["code"]
 
@@ -496,7 +473,7 @@ def test_cli_change_author_check_reports_ready_change(tmp_path: Path) -> None:
     assert data["status"] == "ready"
     assert data["schema"]["valid"] is True
     assert data["missing_artifacts"] == []
-    assert data["ids"]["actions"]["reserve"] == []
+    assert data["anchors"]["actions"]["finalize_local_ids"] == []
     assert data["next_actions"] == ["continue authoring or run openspec validate"]
 
 
@@ -539,22 +516,22 @@ def test_author_check_allows_missing_not_required_artifact(tmp_path: Path) -> No
         tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
         """# Source Map
 
-## ID Trace
+## Anchor Trace
 
-| 类型 | 完整 ID | 标题 | 来源 | 处理方式 | 后续 artifact |
+| 类型 | Ref | 标题 | 来源 | 处理方式 | 后续 artifact |
 |---|---|---|---|---|---|
-| FR | auth:FR-001 | 登录 | SRS | 覆盖 | specs / tasks |
+| FR | docs/requirements/auth-srs.md#FR-001 | 登录 | SRS | 覆盖 | specs / tasks |
 
 ## Implementation Paths
 
-| Kind | Path | IDs | Mode | Notes |
+| Kind | Path | Refs | Mode | Notes |
 |---|---|---|---|---|
-| code | src/auth/session.py | auth:FR-001 | modify | |
-| test | tests/auth/test_session.py | auth:TEST-001 | modify | |
+| code | src/auth/session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
+| test | tests/auth/test_session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
 
 ## Artifact 适用性
 
-| Artifact | Required | 依据上游 ID | 原因 / N/A 说明 | 相关约束转交 |
+| Artifact | Required | Refs | 原因 / N/A 说明 | 相关约束转交 |
 |---|---|---|---|---|
 | service-contract.md | no | N/A | 本 change 不涉及 API 或后端服务能力 | N/A |
 """,
@@ -594,7 +571,7 @@ def test_author_check_does_not_allow_missing_core_artifact_even_if_marked_not_re
 
 ## Artifact 适用性
 
-| Artifact | Required | 依据上游 ID | 原因 / N/A 说明 | 相关约束转交 |
+| Artifact | Required | Refs | 原因 / N/A 说明 | 相关约束转交 |
 |---|---|---|---|---|
 | tasks.md | no | N/A | 错误地试图跳过核心 artifact | N/A |
 """,

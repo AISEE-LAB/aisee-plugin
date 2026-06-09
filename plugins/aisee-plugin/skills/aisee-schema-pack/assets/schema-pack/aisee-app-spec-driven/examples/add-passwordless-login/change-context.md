@@ -4,8 +4,8 @@
 
 | ID | Source | Constraint |
 |---|---|---|
-| auth:ARCH-001 | aisee/docs/architecture/auth-architecture.md | Session creation remains owned by backend auth service |
-| auth:DEC-001 | aisee/docs/architecture/auth-architecture.md | Browser client stores only the issued session token, not verification codes |
+| ARCH-001 | aisee/docs/architecture/auth-architecture.md#ARCH-001 | Session creation remains owned by backend auth service |
+| DEC-001 | aisee/docs/architecture/auth-architecture.md#DEC-001 | Browser client stores only the issued session token, not verification codes |
 
 ## Local Decisions
 

@@ -4,8 +4,8 @@
 
 | ID | Source | Constraint |
 |---|---|---|
-| auth:ARCH-001 | aisee/docs/architecture/auth-architecture.md | Backend auth service owns session creation |
-| auth:DEC-001 | aisee/docs/architecture/auth-architecture.md | Browser client does not persist one-time codes |
+| ARCH-001 | aisee/docs/architecture/auth-architecture.md#ARCH-001 | Backend auth service owns session creation |
+| DEC-001 | aisee/docs/architecture/auth-architecture.md#DEC-001 | Browser client does not persist one-time codes |
 
 ## Handoff
 

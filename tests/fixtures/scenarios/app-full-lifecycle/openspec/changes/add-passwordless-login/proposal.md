@@ -6,10 +6,10 @@ Current users sign in with password credentials. Add passwordless login so exist
 
 ## Scope
 
-- Cover `auth:FR-001`.
-- Add `auth:API-001`.
-- Update UI state for `auth:PAGE-001`, `auth:FLOW-001`, and `auth:STATE-001`.
-- Add token persistence contract `auth:DATA-001`.
+- Cover `aisee/docs/requirements/auth-srs.md#FR-001`.
+- Add `API-001`.
+- Update UI state for `PAGE-001`, `FLOW-001`, and `STATE-001`.
+- Add token persistence contract `DATA-001`.
 
 ## Out of Scope
 

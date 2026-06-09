@@ -23,7 +23,7 @@ N/A 原因：
 
 ## 本 Change 局部决策
 
-- {{scope}}:DEC-NEW-001 [ID-RESERVATION-REQUIRED]：
+- DEC-NEW-001 [ID-FINALIZATION-REQUIRED]：
   - 决策：
   - 依据：
   - 影响：

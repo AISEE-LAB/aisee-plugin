@@ -52,7 +52,15 @@ def check_sources(root: Path) -> dict[str, Any]:
     return result
 
 
-def add_source(root: Path, scope: str, source_type: str, path: str, template: str | None, parser: str | None) -> dict[str, Any]:
+def add_source(
+    root: Path,
+    scope: str,
+    source_type: str,
+    path: str,
+    template: str | None,
+    parser: str | None,
+    alias: str | None,
+) -> dict[str, Any]:
     if not scope:
         raise ValueError("--scope is required")
     if source_type not in VALID_TYPES:
@@ -75,6 +83,8 @@ def add_source(root: Path, scope: str, source_type: str, path: str, template: st
         "template": template or source_type,
         "parser": parser or source_type,
     }
+    if alias:
+        entry["alias"] = alias
     for current in sources:
         if not isinstance(current, dict):
             continue
@@ -183,6 +193,7 @@ def validate_sources(root: Path, sources: Any) -> list[dict[str, str]]:
         scope = str(item.get("scope") or "")
         source_type = str(item.get("type") or "")
         path = str(item.get("path") or "")
+        alias = str(item.get("alias") or "")
         if not scope:
             issues.append(issue("SOURCE_SCOPE_MISSING", "blocker", "source scope is missing", owner))
         if not source_type:
@@ -193,6 +204,8 @@ def validate_sources(root: Path, sources: Any) -> list[dict[str, str]]:
             issues.append(issue("SOURCE_PATH_MISSING", "blocker", "source path is missing", owner))
         elif not (root / path).exists():
             issues.append(issue("SOURCE_PATH_NOT_FOUND", "risk", f"source path does not exist: {path}", path))
+        if alias and ":" not in alias:
+            issues.append(issue("SOURCE_ALIAS_INVALID", "risk", f"source alias must use kind:slug form: {alias}", owner))
         key = (scope, source_type, path)
         if key in seen:
             issues.append(issue("SOURCE_DUPLICATE", "risk", f"duplicate source: {scope}/{source_type}/{path}", owner))

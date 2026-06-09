@@ -101,16 +101,18 @@ source-map.md + specs/**/*.md
 
 ## ID 与 Source Map
 
-正式 ID 必须来自：
+当前正式模型只使用：
 
 ```text
-aisee/registry/id-registry.json
+LOCAL-ID
+doc-ref#LOCAL-ID
+alias#LOCAL-ID
 ```
 
-AI 不应临时发明正式编号。工具不可用时只能使用临时占位符：
+AI 不应临时发明 full ID。工具不可用时只能使用临时 local placeholder：
 
 ```text
-{{scope}}:<TYPE>-NEW-001 [ID-RESERVATION-REQUIRED]
+TYPE-NEW-001 [ID-FINALIZATION-REQUIRED]
 ```
 
 `source-map.md` 负责连接：

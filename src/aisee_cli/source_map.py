@@ -6,8 +6,9 @@ import re
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids
 
-ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-(?:NEW-)?\d+\b")
+
 PATH_PATTERN = re.compile(
     r"(?<![\w./-])"
     r"((?:src|app|apps|lib|libs|packages|tests|test|docs|openspec|assets|config|contracts)"
@@ -38,22 +39,24 @@ def parse_source_map(change_path: Path) -> dict[str, Any]:
     evidence = extract_evidence(tables)
     artifact_applicability = extract_artifact_applicability(tables)
     contract_sync = extract_contract_sync(tables)
-    id_trace = extract_id_trace(tables)
+    anchor_trace = extract_anchor_trace(tables)
     upstream_sources = extract_upstream_sources(tables)
     out_of_scope = extract_bullets(sections, {"不在本 Change 范围", "不在范围", "Out of Scope", "Follow-up", "后续处理"})
-    issues = build_issues(path.exists(), tables, implementation_paths, artifact_applicability)
+    issues = build_issues(path.exists(), tables, implementation_paths, artifact_applicability, text)
     return {
         "path": "source-map.md",
         "status": "present" if path.exists() else "missing",
         "parse_level": "structured" if tables else ("metadata" if text else "missing"),
         "upstream_sources": upstream_sources,
-        "id_trace": id_trace,
+        "anchor_trace": anchor_trace,
         "artifact_applicability": artifact_applicability,
         "contract_sync": contract_sync,
         "implementation_paths": implementation_paths,
         "verification_evidence": evidence,
         "out_of_scope": out_of_scope,
-        "ids": sorted(set(ID_PATTERN.findall(text))),
+        "anchor_refs": sorted(extract_anchor_refs(text)),
+        "local_ids": sorted(extract_local_ids(text)),
+        "legacy_full_ids": sorted(extract_legacy_full_ids(text)),
         "paths": sorted(set(PATH_PATTERN.findall(text))),
         "issues": issues,
     }
@@ -112,14 +115,15 @@ def normalize_key(key: str) -> str:
         "path / command": "path",
         "sources.json id": "source_id",
         "source id": "source_id",
+        "文档引用": "ref",
+        "anchor ref": "ref",
+        "ref": "ref",
         "状态": "status",
         "status": "status",
         "备注": "notes",
         "notes": "notes",
         "类型": "type",
         "type": "type",
-        "完整 id": "id",
-        "id": "id",
         "标题 / 名称": "title",
         "title": "title",
         "本 change 处理方式": "handling",
@@ -128,8 +132,9 @@ def normalize_key(key: str) -> str:
         "产生 artifact": "artifact",
         "artifact": "artifact",
         "required": "required",
-        "依据上游 id": "ids",
-        "ids": "ids",
+        "依据上游 ref": "refs",
+        "关联 ref": "refs",
+        "refs": "refs",
         "原因 / n/a 说明": "reason",
         "原因": "reason",
         "reason": "reason",
@@ -151,9 +156,11 @@ def extract_upstream_sources(tables: dict[str, list[dict[str, str]]]) -> list[di
     for title, table in tables.items():
         if any(token in title for token in ("上游来源", "上游规划来源", "上游事实来源", "Upstream Sources")):
             for row in table:
+                ref_value = row.get("ref") or ""
                 rows.append({
-                    "source": row.get("source") or row.get("来源") or "",
+                    "source": row.get("source") or "",
                     "path": row.get("path") or "",
+                    "ref": ref_value,
                     "source_id": row.get("source_id") or "",
                     "status": normalize_status(row.get("status") or ""),
                     "notes": row.get("notes") or "",
@@ -161,15 +168,17 @@ def extract_upstream_sources(tables: dict[str, list[dict[str, str]]]) -> list[di
     return rows
 
 
-def extract_id_trace(tables: dict[str, list[dict[str, str]]]) -> list[dict[str, Any]]:
+def extract_anchor_trace(tables: dict[str, list[dict[str, str]]]) -> list[dict[str, Any]]:
     rows = []
     for title, table in tables.items():
-        if any(token in title for token in ("上游输入 ID", "本 Change 覆盖", "本 Change 产出 ID", "ID Trace")):
+        if any(token in title for token in ("上游输入", "本 Change 覆盖", "本 Change 产出", "Anchor Trace", "ID Trace")):
             for row in table:
                 text = " ".join(row.values())
                 rows.append({
                     "type": row.get("type") or "",
-                    "ids": sorted(set(ID_PATTERN.findall(text))),
+                    "refs": sorted(extract_anchor_refs(text)),
+                    "local_ids": sorted(extract_local_ids(text)),
+                    "legacy_full_ids": sorted(extract_legacy_full_ids(text)),
                     "title": row.get("title") or "",
                     "source": row.get("source") or "",
                     "handling": row.get("handling") or "",
@@ -189,7 +198,7 @@ def extract_artifact_applicability(tables: dict[str, list[dict[str, str]]]) -> l
                 rows.append({
                     "artifact": artifact,
                     "required": normalize_required(row.get("required") or ""),
-                    "ids": row.get("ids") or "",
+                    "refs": row.get("refs") or "",
                     "reason": row.get("reason") or "",
                     "handoff": row.get("handoff") or "",
                 })
@@ -247,10 +256,12 @@ def extract_implementation_paths(tables: dict[str, list[dict[str, str]]], text: 
                 path = row.get("path") or ""
                 if not path:
                     continue
+                combined = " ".join(row.values())
                 rows.append({
                     "kind": normalize_kind(row.get("kind") or path),
                     "path": path,
-                    "ids": sorted(set(ID_PATTERN.findall(" ".join(row.values())))),
+                    "refs": sorted(extract_anchor_refs(combined)),
+                    "local_ids": sorted(extract_local_ids(combined)),
                     "mode": row.get("mode") or "",
                     "notes": row.get("notes") or "",
                 })
@@ -260,7 +271,8 @@ def extract_implementation_paths(tables: dict[str, list[dict[str, str]]], text: 
         {
             "kind": normalize_kind(path),
             "path": path,
-            "ids": [],
+            "refs": [],
+            "local_ids": [],
             "mode": "",
             "notes": "fallback path scan",
         }
@@ -279,7 +291,8 @@ def extract_evidence(tables: dict[str, list[dict[str, str]]]) -> list[dict[str, 
                     "type": row.get("type") or "",
                     "path": row.get("path") or "",
                     "status": normalize_status(row.get("status") or ""),
-                    "ids": sorted(set(ID_PATTERN.findall(text))),
+                    "refs": sorted(extract_anchor_refs(text)),
+                    "local_ids": sorted(extract_local_ids(text)),
                     "notes": row.get("notes") or "",
                 })
     return rows
@@ -299,6 +312,7 @@ def build_issues(
     tables: dict[str, list[dict[str, str]]],
     implementation_paths: list[dict[str, Any]],
     applicability: list[dict[str, str]],
+    text: str,
 ) -> list[dict[str, str]]:
     issues = []
     if not exists:
@@ -310,6 +324,8 @@ def build_issues(
     for row in applicability:
         if row["required"] == "no" and not row["reason"]:
             issues.append(source_map_issue("SOURCE_MAP_NA_REASON_MISSING", "risk", f"{row['artifact']} is not required without reason"))
+    if extract_legacy_full_ids(text):
+        issues.append(source_map_issue("SOURCE_MAP_LEGACY_FULL_ID", "risk", "source-map.md still uses legacy full ID references"))
     return issues
 
 

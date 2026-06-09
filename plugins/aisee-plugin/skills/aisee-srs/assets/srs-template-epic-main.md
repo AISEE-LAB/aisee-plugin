@@ -12,7 +12,7 @@
 **作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}
 **ID Scope**：{scope}
 
-> 正式 ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式写法只使用文档内 local ID，例如 `FR-001`、`RULE-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
 
 ---
 
@@ -64,9 +64,9 @@
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已读取 `aisee/registry/id-registry.json` | yes / no | `aisee id check --json` | |
-| 已为新增 FR / NFR / RULE / FLOW / STATE 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
-| 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
+| local ID 已稳定 | yes / no | 文档内编号检查 | |
+| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#FR-001` / `srs:...#FR-001` | |
+| 存在临时 ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
 
 ### 2.1 产品概述
 {系统定位、解决的核心问题、与现有系统的关系}

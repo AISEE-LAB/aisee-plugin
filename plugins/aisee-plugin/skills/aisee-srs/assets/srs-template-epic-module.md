@@ -35,14 +35,13 @@ Epic 模式下，每份模块文档使用本模板。
 
 ## 3. 功能需求
 
-> 每条需求使用来自 `aisee/registry/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker。
+> 每条需求只使用文档内 local ID。跨文档引用由 `doc-ref#LOCAL-ID` 或 alias anchor 处理；不要再保留 `<!-- aisee:id ... -->` marker。
 
 ### 3.{N} {能力模块名称}
 
 > 模块名称必须来自业务能力、用户任务、设备能力或状态生命周期；不要直接使用输入文档章节、页面类型、技术层或任务阶段。
 
 #### FR-{XXX} {需求标题}
-<!-- aisee:id {scope}:FR-{XXX} -->
 
 **描述**：{一句话说明该需求交付什么}
 

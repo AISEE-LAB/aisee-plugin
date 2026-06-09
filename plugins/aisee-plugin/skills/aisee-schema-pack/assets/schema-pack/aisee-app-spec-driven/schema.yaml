@@ -4,7 +4,7 @@ description: |
   适用场景：App、小程序、Web、桌面软件、后端/API、CLI/工具、异步任务和常规全栈开发。
   本 schema 承接 change 前的 SRS、UI Content、Architecture 和 Change Plan，把它们压缩成
   单个 OpenSpec change 内可实现、可验证、可追踪的 artifacts。
-  与官方 spec-driven 的区别：增加 source-map.md 作为 ID 路由表，增加 change-context.md 承接
+  与官方 spec-driven 的区别：增加 source-map.md 作为 anchor 路由表，增加 change-context.md 承接
   本 change 相关架构约束，并按需生成 ui-contract.md、service-contract.md、data-model.md。
   当前后端分仓或存在独立契约仓库时，source-map.md 与 service-contract.md 必须记录契约 owner、
   provider / consumer、同步模式和机器可读契约附件路径；OpenAPI、events、webhooks、proto 等文件
@@ -13,8 +13,8 @@ description: |
   change-context.md、ui-contract.md、service-contract.md、data-model.md 是按需 artifacts；
   source-map.md 的 Artifact 适用性表明确 Required=no 且写明原因时，可以不展开对应 contract。
   这避免前端-only、后端-only、CLI-only、job-only 或极小 change 被无效流程拖慢。
-  正式 ID 必须来自 aisee/registry/id-registry.json。AI 不得临时发明正式 ID；工具不可用时只能使用
-  {{scope}}:<TYPE>-NEW-001 形式的临时占位符并标注 [ID-RESERVATION-REQUIRED]。
+  正式 authoring 只使用 local ID 与 `doc-ref#LOCAL-ID` / alias anchor。AI 不得临时发明 full ID；
+  工具不可用时只能使用 TYPE-NEW-001 形式的临时占位符并标注 [ID-FINALIZATION-REQUIRED]。
   创建时间：2026-05-24
   更新：2026-06-01
   维护人：@aisee
@@ -29,8 +29,8 @@ artifacts:
       proposal.md 必须明确：
       - 背景、问题、目标和非目标
       - 上下文读取顺序：source-map.md、specs、Required=yes 的 artifacts、tasks.md
-      - 本 change 覆盖的上游完整 ID 摘要，包括 FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK；完整路由由 source-map.md 维护
-      - 正式 ID 必须来自 aisee/registry/id-registry.json；未分配 ID 时只使用临时占位符并标注 [ID-RESERVATION-REQUIRED]
+      - 本 change 覆盖的上游 planning anchors 摘要，包括 FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK；完整路由由 source-map.md 维护
+      - 正式 authoring 只使用 local ID 与 anchor refs；未分配 ID 时只使用临时占位符并标注 [ID-FINALIZATION-REQUIRED]
       - 成功标准必须是可验证结果，不写验证执行记录
       - 不要复制 SRS、UI Content 或 Architecture 全文
       - 不要写实现细节、接口字段、数据库字段或任务步骤；这些分别进入 contract artifacts 和 tasks.md
@@ -44,9 +44,8 @@ artifacts:
       source-map.md 是本 schema 的追踪核心，必须：
       - 记录 `aisee change author-check <change> --json` 的状态、blockers、missing_artifacts 和 next_actions
       - 列出上游来源：SRS、UI Content、Design Spec / Design Assets、Architecture、Change Plan、Issue 或用户输入
-      - 使用完整 ID（如 auth:FR-001）建立追踪关系；短 ID 只用于人类阅读
-      - 生成或引用正式 ID 前必须通过 Aisee CLI / aisee/registry/id-registry.json 校验；不得由 AI 临时编正式编号
-      - 记录需要执行的 ID 动作：reserve、activate、fix missing、replace inactive
+      - 使用 `doc-ref#LOCAL-ID` 或 alias anchor 建立跨文档追踪；当前 change 内新产物使用 local ID
+      - 不得再要求 `aisee id reserve/activate`；只记录 local ID finalization、missing anchor 和 legacy full ID replacement 动作
       - 映射上游输入 ID：FR / NFR / RULE / PAGE / FLOW / STATE / ARCH / DEC / CONSTRAINT / RISK
       - 映射本 change 产出 ID：SPEC / API / DATA / TASK / TEST
       - 明确不在范围内的上游条目
@@ -55,8 +54,8 @@ artifacts:
       - Required=no 的 contract 不需要展开完整模板；如项目要求保留文件，只写状态和 N/A 原因即可
       - 候选影响路径只作为索引，不写具体实现步骤
       - 预期证据只作为索引，不写最终验证结论
-      - 记录 ID 是否来自 aisee/registry/id-registry.json；不得让 AI 临时发明编号
-      - 工具不可用时使用 {{scope}}:<TYPE>-NEW-001 临时占位符，并标注 [ID-RESERVATION-REQUIRED]
+      - 记录 local ID 是否已稳定、anchor 是否可解析；不得让 AI 临时发明 full ID
+      - 工具不可用时使用 TYPE-NEW-001 临时占位符，并标注 [ID-FINALIZATION-REQUIRED]
       - 保留 [ASSUMPTION]、[SPEC-GAP]、[STACK-CONTEXT-MISSING]、[STACK-DECISION-REQUIRED]、[ARCHITECTURE-DECISION-REQUIRED]、[STACK-CONFLICT] 等阻塞标签
 
   - id: specs
@@ -67,7 +66,7 @@ artifacts:
     instruction: |
       specs 必须只描述用户可观察行为和验收条件：
       - 使用 SHALL/MUST 或 Given/When/Then 场景表达行为
-      - SPEC ID 必须来自 aisee/registry/id-registry.json；未分配时使用临时占位符并标注 [ID-RESERVATION-REQUIRED]
+      - SPEC 只使用 local ID；未分配时使用临时占位符并标注 [ID-FINALIZATION-REQUIRED]
       - 覆盖 source-map.md 中本 change 的 FR / NFR / RULE / FLOW / STATE
       - Context References 只能写 Source IDs 和相关 artifact 引用；完整追踪由 source-map.md 维护
       - 可以引用 PAGE / API / DATA / CONSTRAINT ID 作为上下文，但不要写布局、接口字段、数据库字段、设计规范、代码路径或任务步骤

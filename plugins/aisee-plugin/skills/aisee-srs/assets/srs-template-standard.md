@@ -12,7 +12,7 @@
 **作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}
 **ID Scope**：{scope}
 
-> 正式 ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式写法只使用文档内 local ID，例如 `FR-001`、`RULE-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
 
 ---
 
@@ -44,13 +44,13 @@
 
 ## 2. 整体描述
 
-### 2.0 ID Registry 状态
+### 2.0 Anchor / Local ID 状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已读取 `aisee/registry/id-registry.json` | yes / no | `aisee id check --json` | |
-| 已为新增 FR / NFR / RULE / FLOW / STATE 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
-| 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
+| local ID 已稳定 | yes / no | 文档内编号检查 | |
+| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#FR-001` / `srs:...#FR-001` | |
+| 存在临时 ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
 
 ### 2.1 产品概述
 {系统定位、解决的核心问题、与现有系统的关系}
@@ -90,14 +90,13 @@
 
 ## 3. 功能需求
 
-> 每条需求使用来自 `aisee/registry/id-registry.json` 的完整 ID。标题可显示短 ID，但必须保留 `<!-- aisee:id ... -->` marker，便于 `aisee:change-plan` 引用和追踪。
+> 每条需求只使用文档内 local ID。跨文档引用由 `doc-ref#LOCAL-ID` 或 alias anchor 处理；不要再保留 `<!-- aisee:id ... -->` marker。
 
 ### 3.1 {能力模块名称}
 
 > 模块名称必须来自业务能力、用户任务或状态生命周期；设备相关内容只能作为软件可见约束或协作能力，不要直接使用输入文档章节、页面类型、技术层或任务阶段。
 
 #### FR-001 {需求标题}
-<!-- aisee:id {scope}:FR-001 -->
 
 **描述**：{一句话说明该需求交付什么}
 

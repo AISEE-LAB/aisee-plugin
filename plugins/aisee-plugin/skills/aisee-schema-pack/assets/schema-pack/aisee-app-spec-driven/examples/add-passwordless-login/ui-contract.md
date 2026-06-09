@@ -8,14 +8,14 @@
 
 | ID | Surface | Change |
 |---|---|---|
-| auth:PAGE-001 | Login page | Add passwordless code request and verification states |
+| PAGE-001 | Login page | Add passwordless code request and verification states |
 
 ## Flow And State
 
 | ID | Description | Trigger | Next State |
 |---|---|---|---|
-| auth:FLOW-001 | Request code then verify code | User submits email | `auth:STATE-001` |
-| auth:STATE-001 | Code sent state | Code request succeeds | Show code input, resend timer, and error feedback |
+| FLOW-001 | Request code then verify code | User submits email | `STATE-001` |
+| STATE-001 | Code sent state | Code request succeeds | Show code input, resend timer, and error feedback |
 
 ## Operations
 
@@ -28,6 +28,6 @@
 
 | Need | Source |
 |---|---|
-| Whether code request succeeded | `auth:API-001` |
-| Verification errors and retry state | `auth:API-001` |
-| Session token after successful verification | `auth:API-001` |
+| Whether code request succeeded | `API-001` |
+| Verification errors and retry state | `API-001` |
+| Session token after successful verification | `API-001` |

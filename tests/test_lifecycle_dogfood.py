@@ -49,7 +49,6 @@ def test_app_full_lifecycle_fixture_reaches_archive_ready(tmp_path: Path) -> Non
     schema_check = run_json(project, "schemas", "check", "--json")
     doctor = run_json(project, "doctor", "--json")
     sources = run_json(project, "sources", "check", "--json")
-    ids = run_json(project, "id", "check", "--json")
     flow = run_json(project, "flow", "inspect", "--change", change, "--json")
     inspected = run_json(project, "change", "inspect", change, "--json")
     pack = run_json(project, "context", "pack", "--change", change, "--for", "ce-work", "--json")
@@ -73,7 +72,6 @@ def test_app_full_lifecycle_fixture_reaches_archive_ready(tmp_path: Path) -> Non
     assert schema_check["status"] == "ok"
     assert doctor["status"] == "ok"
     assert sources["status"] == "ok"
-    assert ids["status"] == "ok"
     assert flow["stage"] == "archive-ready"
     assert flow["recommended_path"] == ["openspec archive"]
     assert inspected["schema"]["name"] == "aisee-app-spec-driven"
@@ -98,5 +96,5 @@ def test_app_full_lifecycle_fixture_context_pack_is_schema_aware(tmp_path: Path)
     assert pack["facts"]["parsed"]["source_map"]["parse_level"] == "structured"
     assert pack["facts"]["parsed"]["source_map"]["contract_sync"]["values"]["provider_repo"]["value"] == "backend-api"
     assert pack["facts"]["parsed"]["source_map"]["contract_sync"]["machine_readable_contracts"] == ["contracts/openapi.yaml"]
-    assert pack["facts"]["parsed"]["id_registry"]["missing_ids"] == []
+    assert pack["facts"]["parsed"]["anchor_index"]["missing_references"] == []
     assert pack["facts"]["derived"]["implementation_references"]["unmapped_reference_paths"] == []

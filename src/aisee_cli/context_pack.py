@@ -15,8 +15,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref
 from aisee_cli.assets import repo_asset_root
-from aisee_cli.paths import id_registry_path, sources_path as aisee_sources_path
+from aisee_cli.index import build_index
+from aisee_cli.paths import sources_path as aisee_sources_path
 from aisee_cli.source_map import parse_source_map
 from aisee_cli.tool_checks import check_compound_plugin
 
@@ -24,7 +26,6 @@ from aisee_cli.tool_checks import check_compound_plugin
 SUPPORTED_TARGETS = {"ce-work", "aisee-verify", "ce-doc-review", "ce-code-review"}
 CONTEXT_SCHEMA_VERSION = "1.0"
 
-ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-(?:NEW-)?\d+\b")
 PATH_PATTERN = re.compile(
     r"(?<![\w./-])"
     r"((?:src|app|apps|lib|libs|packages|tests|test|aisee/docs|docs|openspec|assets|config|contracts)"
@@ -90,10 +91,10 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
 
     sources = inspect_sources(root, source_map_text)
     task_state = parse_task_state(tasks_text)
-    upstream_ids = sorted(extract_ids(source_map_text))
-    produced_ids = sorted(extract_ids(tasks_text) | extract_ids(combined_text))
-    all_change_ids = sorted(extract_ids(combined_text))
-    id_registry = inspect_id_registry(root, all_change_ids)
+    upstream_refs = sorted(extract_anchor_refs(source_map_text))
+    produced_local_ids = sorted(extract_ids(tasks_text) | extract_ids(combined_text))
+    all_change_local_ids = sorted(extract_ids(combined_text))
+    anchor_index = inspect_anchor_index(root, upstream_refs, all_change_local_ids)
 
     gaps = build_gaps(
         change_path=change_path,
@@ -102,7 +103,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         code_paths=code_paths,
         test_paths=test_paths,
         target=target,
-        id_registry=id_registry,
+        anchor_index=anchor_index,
         source_map=source_map,
         source_map_required=source_map_required,
         unmapped_reference_paths=unmapped_reference_paths,
@@ -138,15 +139,18 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 "artifacts": parsed_artifacts,
                 "source_map": source_map,
                 "sources": sources,
-                "id_registry": id_registry,
+                "anchor_index": anchor_index,
             },
             "derived": {
                 "read_order": read_order,
                 "scope": derive_scope(read_text(change_path / "proposal.md"), source_map_text),
                 "traceability": {
-                    "upstream_ids": upstream_ids,
-                    "produced_ids": produced_ids,
-                    "id_links": derive_id_links(source_map_text, tasks_text),
+                    "upstream_refs": upstream_refs,
+                    "produced_local_ids": produced_local_ids,
+                    "resolved_anchors": anchor_index["resolved"],
+                    "unresolved_anchors": anchor_index["missing_references"],
+                    "legacy_full_ids": anchor_index["legacy_full_ids"],
+                    "anchor_links": derive_id_links(source_map_text, tasks_text),
                 },
                 "artifact_applicability": source_map["artifact_applicability"] or derive_artifact_applicability(source_map_text),
                 "code_paths": code_paths,
@@ -193,7 +197,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     elif target == "aisee-verify":
         pack["facts"]["derived"]["checks"] = {
             "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(upstream_ids, produced_ids),
+            "traceability": summarize_trace_checks(upstream_refs, produced_local_ids),
             "tasks": summarize_task_checks(task_state),
             "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
             "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
@@ -204,7 +208,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         pack["facts"]["derived"]["review"] = {
             "focus": ["schema_artifacts", "traceability", "tasks", "contracts", "open_questions"],
             "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(upstream_ids, produced_ids),
+            "traceability": summarize_trace_checks(upstream_refs, produced_local_ids),
             "tasks": summarize_task_checks(task_state),
             "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
         }
@@ -348,13 +352,15 @@ def not_applicable_source_map() -> dict[str, Any]:
         "status": "not_applicable",
         "parse_level": "not_applicable",
         "upstream_sources": [],
-        "id_trace": [],
+        "anchor_trace": [],
         "artifact_applicability": [],
         "contract_sync": {"available": False, "values": {}, "machine_readable_contracts": []},
         "implementation_paths": [],
         "verification_evidence": [],
         "out_of_scope": [],
-        "ids": [],
+        "anchor_refs": [],
+        "local_ids": [],
+        "legacy_full_ids": [],
         "paths": [],
         "issues": [],
     }
@@ -452,61 +458,46 @@ def inspect_project_rules(root: Path) -> dict[str, Any]:
     }
 
 
-def inspect_id_registry(root: Path, ids: list[str]) -> dict[str, Any]:
-    path = id_registry_path(root)
-    result: dict[str, Any] = {
-        "available": path.exists(),
-        "checked": path.exists(),
-        "path": rel(root, path) if path.exists() else None,
-        "queried_ids": sorted(ids),
-        "registered_ids": [],
-        "missing_ids": [],
-        "temporary_ids": sorted([item for item in ids if "-NEW-" in item]),
-        "inactive_ids": [],
-        "status_counts": {},
-    }
-    if not path.exists():
-        return result
-
-    try:
-        data = json.loads(read_text(path))
-    except json.JSONDecodeError as error:
-        result["error"] = f"invalid-json: {error}"
-        return result
-
-    registry_ids: dict[str, dict[str, Any]] = {}
-    scopes = data.get("scopes", {}) if isinstance(data, dict) else {}
-    if isinstance(scopes, dict):
-        for scope_data in scopes.values():
-            if isinstance(scope_data, dict) and isinstance(scope_data.get("ids"), dict):
-                for full_id, entry in scope_data["ids"].items():
-                    if isinstance(entry, dict):
-                        registry_ids[full_id] = entry
-
-    formal_ids = [item for item in ids if "-NEW-" not in item]
-    registered: list[str] = []
-    missing: list[str] = []
-    inactive: list[dict[str, str]] = []
-    status_counts: dict[str, int] = {}
-    for full_id in formal_ids:
-        entry = registry_ids.get(full_id)
-        if entry is None:
-            missing.append(full_id)
+def inspect_anchor_index(root: Path, references: list[str], local_ids: list[str]) -> dict[str, Any]:
+    index = build_index(root, write_cache=False)
+    aliases = index.get("aliases", {})
+    documents = {item.get("path"): item for item in index.get("documents", []) if isinstance(item, dict)}
+    anchors = index.get("anchors", {})
+    resolved: list[dict[str, Any]] = []
+    missing_references: list[str] = []
+    errors: list[str] = []
+    for reference in references:
+        try:
+            parsed = parse_anchor_ref(reference)
+        except ValueError as error:
+            errors.append(str(error))
+            missing_references.append(reference)
             continue
-        registered.append(full_id)
-        status = str(entry.get("status") or "unknown")
-        status_counts[status] = status_counts.get(status, 0) + 1
-        if status in {"deprecated", "merged", "split", "removed"}:
-            inactive.append({"id": full_id, "status": status})
-
-    result.update({
-        "registered_ids": sorted(registered),
-        "missing_ids": sorted(missing),
-        "inactive_ids": sorted(inactive, key=lambda item: item["id"]),
-        "status_counts": status_counts,
-    })
+        document = parsed["document"] or aliases.get(parsed["alias"])
+        canonical_ref = f"{document}#{parsed['local_id']}" if document else None
+        occurrences = anchors.get(canonical_ref, []) if canonical_ref else []
+        if document and any(item.get("document") == document for item in occurrences):
+            resolved.append({
+                "reference": reference,
+                "canonical_reference": canonical_ref,
+                "document": document,
+                "local_id": parsed["local_id"],
+                "reference_type": parsed["reference_type"],
+            })
+        else:
+            missing_references.append(reference)
     return {
-        **result,
+        "available": True,
+        "checked": True,
+        "path": index["index"]["path"],
+        "queried_references": sorted(references),
+        "queried_local_ids": sorted(local_ids),
+        "resolved": sorted(resolved, key=lambda item: item["reference"]),
+        "missing_references": sorted(set(missing_references)),
+        "temporary_local_ids": sorted([item for item in local_ids if "-NEW-" in item]),
+        "legacy_full_ids": sorted(set(extract_legacy_full_ids("\n".join(references)))),
+        "documents": sorted(path for path in documents if isinstance(path, str)),
+        "errors": errors,
     }
 
 
@@ -570,7 +561,7 @@ def build_gaps(
     code_paths: list[str],
     test_paths: list[str],
     target: str,
-    id_registry: dict[str, Any],
+    anchor_index: dict[str, Any],
     source_map: dict[str, Any],
     source_map_required: bool,
     unmapped_reference_paths: list[str],
@@ -598,46 +589,40 @@ def build_gaps(
                 )
             )
 
-    has_change_ids = bool(id_registry.get("queried_ids"))
-    id_owner_artifact = "source-map.md" if source_map_required else "schema artifacts"
-    if not id_registry["available"] and (source_map_required or has_change_ids):
-        gaps.append(gap("ID_REGISTRY_GAP", "risk", "Aisee ID registry is missing", "aisee/registry/id-registry.json"))
-    elif id_registry.get("error"):
-        gaps.append(gap("ID_REGISTRY_INVALID", "blocker", str(id_registry["error"]), "aisee/registry/id-registry.json"))
-    else:
-        temporary_ids = id_registry.get("temporary_ids", [])
-        if temporary_ids:
-            gaps.append(
-                gap(
-                    "ID_RESERVATION_REQUIRED",
-                    "risk",
-                    "Change contains temporary IDs that must be reserved before final authoring",
-                    id_owner_artifact,
-                    temporary_ids,
-                )
+    anchor_owner_artifact = "source-map.md" if source_map_required else "schema artifacts"
+    temporary_ids = anchor_index.get("temporary_local_ids", [])
+    if temporary_ids:
+        gaps.append(
+            gap(
+                "LOCAL_ID_FINALIZATION_REQUIRED",
+                "risk",
+                "Change contains temporary local IDs that must be finalized before authoring completes",
+                anchor_owner_artifact,
+                temporary_ids,
             )
-        missing_ids = id_registry.get("missing_ids", [])
-        if missing_ids:
-            gaps.append(
-                gap(
-                    "ID_UNREGISTERED_REFERENCE",
-                    "risk",
-                    "Change references IDs that are not registered in the Aisee ID registry",
-                    id_owner_artifact,
-                    missing_ids,
-                )
+        )
+    missing_references = anchor_index.get("missing_references", [])
+    if missing_references:
+        gaps.append(
+            gap(
+                "ANCHOR_RESOLUTION_MISSING",
+                "risk",
+                "Change references anchor refs that could not be resolved",
+                anchor_owner_artifact,
+                missing_references,
             )
-        inactive_ids = id_registry.get("inactive_ids", [])
-        if inactive_ids:
-            gaps.append(
-                gap(
-                    "ID_INACTIVE_REFERENCE",
-                    "blocker",
-                    "Change references deprecated, merged, split, or removed IDs",
-                    id_owner_artifact,
-                    [item["id"] for item in inactive_ids],
-                )
+        )
+    legacy_full_ids = source_map.get("legacy_full_ids", [])
+    if legacy_full_ids:
+        gaps.append(
+            gap(
+                "LEGACY_FULL_ID_REFERENCE",
+                "risk",
+                "Change still contains legacy full ID references",
+                anchor_owner_artifact,
+                legacy_full_ids,
             )
+        )
 
     if target == "ce-work":
         if task_state["total"] == 0:
@@ -846,9 +831,10 @@ def derive_scope(proposal_text: str, source_map_text: str) -> dict[str, list[str
 def derive_id_links(source_map_text: str, tasks_text: str) -> list[dict[str, Any]]:
     links: list[dict[str, Any]] = []
     for line in (source_map_text + "\n" + tasks_text).splitlines():
-        ids = sorted(extract_ids(line))
-        if len(ids) >= 2:
-            links.append({"ids": ids, "source": line.strip()})
+        refs = sorted(extract_anchor_refs(line))
+        local_ids = sorted(extract_ids(line))
+        if len(refs) + len(local_ids) >= 2:
+            links.append({"refs": refs, "local_ids": local_ids, "source": line.strip()})
     return links
 
 
@@ -1079,6 +1065,8 @@ def should_require_ce_plan(task_state: dict[str, Any], code_paths: list[str], te
         return True
     if task_state["total"] == 0:
         return True
+    if any(item["code"] in {"SOURCE_MAP_UNSTRUCTURED", "SOURCE_MAP_GAP", "SOURCE_MAP_UNMAPPED_PATH"} for item in gaps):
+        return True
     return not code_paths and not test_paths
 
 
@@ -1150,8 +1138,8 @@ def summarize_artifact_checks(artifact_entries: list[dict[str, Any]]) -> list[di
     return [{"artifact": entry["id"], "status": entry["status"], "path": entry.get("path")} for entry in artifact_entries]
 
 
-def summarize_trace_checks(upstream_ids: list[str], produced_ids: list[str]) -> list[dict[str, Any]]:
-    return [{"upstream_id_count": len(upstream_ids), "produced_id_count": len(produced_ids)}]
+def summarize_trace_checks(upstream_refs: list[str], produced_local_ids: list[str]) -> list[dict[str, Any]]:
+    return [{"upstream_ref_count": len(upstream_refs), "produced_local_id_count": len(produced_local_ids)}]
 
 
 def summarize_task_checks(task_state: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1207,7 +1195,7 @@ def extract_paths(text: str) -> set[str]:
 
 
 def extract_ids(text: str) -> set[str]:
-    return set(ID_PATTERN.findall(text))
+    return extract_local_ids(text)
 
 
 def extract_tagged_lines(text: str, tags: tuple[str, ...]) -> list[str]:

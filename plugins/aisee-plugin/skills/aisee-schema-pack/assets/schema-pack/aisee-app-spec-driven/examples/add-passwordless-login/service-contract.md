@@ -14,7 +14,7 @@
 
 ## 能力契约
 
-### auth:API-001 Request login code
+### API-001 Request login code
 
 - Method: `POST`
 - Path: `/auth/passwordless/request`
@@ -22,7 +22,7 @@
 - Response: request id, resend cooldown seconds
 - Errors: unknown user, rate limited, invalid email
 
-### auth:API-001 Verify login code
+### API-001 Verify login code
 
 - Method: `POST`
 - Path: `/auth/passwordless/verify`

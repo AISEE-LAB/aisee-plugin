@@ -9,6 +9,8 @@ This document describes the recommended software development workflow for Aisee 
 - Aisee CLI emits JSON context views. It does not create a second specification source.
 - Implementation, review, and test work can be handled by Compound Engineering or another coding agent.
 - `openspec archive <change>` is the final operation that merges a verified change into the baseline.
+- planning docs serve the current version or iteration only; they do not replace baseline facts.
+- formal authoring uses local IDs inside documents and anchor refs across documents.
 
 ## 0. Project Setup
 
@@ -55,11 +57,11 @@ Artifact roles:
 | Design Spec / Assets | Describes or generates visual rules, references, assets, and style inputs | Does not duplicate page content |
 | Architecture | Records technical facts, architecture boundaries, platform constraints, shared conventions, and risks | Does not replace change artifacts |
 
-These documents are planning inputs, not OpenSpec baseline facts.
+These documents are planning docs for the current version or iteration. They are planning inputs, not OpenSpec baseline facts.
 
 ## 2. Change Planning
 
-Use `aisee:change-plan` to map confirmed inputs into independently deliverable OpenSpec changes.
+Use `aisee:change-plan` to map confirmed inputs into independently deliverable OpenSpec changes. One version or iteration can be split into one or more changes.
 
 ```text
 aisee:change-plan
@@ -75,6 +77,7 @@ Splitting rules:
 - Do not treat source document sections, technical layers, page types, schema artifacts, or task phases as changes.
 - Large work may have dependency ordering, but a single change should not carry the whole product.
 - Low-risk fixes can use `quick-fix` instead of the app schema.
+- Small, bounded, low-risk work can skip heavy upfront docs such as SRS, UI Content, or Architecture and enter an appropriate lightweight schema directly.
 - When frontend and backend share APIs, events, data models, or SDKs, prefer a prerequisite contract change.
 
 ## 3. Change Creation And Authoring
@@ -107,6 +110,7 @@ data-model.md            # as needed
 - Required=yes: expand the artifact.
 - Required=no: provide a concrete N/A reason.
 - Do not generate unrelated contracts for completeness.
+- Use `Ref` / `Refs` for formal cross-document traceability in upstream tables; use local IDs for new objects created inside the current change.
 
 ## 4. Implementation Handoff
 
@@ -173,7 +177,7 @@ Then use `aisee:verify` to produce a schema-aware report that checks:
 
 - whether schema artifacts exist;
 - whether Required=yes contracts are closed;
-- whether source-map, IDs, code paths, test paths, and evidence are consistent;
+- whether source-map, anchor refs / local IDs, code paths, test paths, and evidence are consistent;
 - whether `tasks.md` or apply tracks are truly complete;
 - whether OpenSpec validate passed;
 - whether review/test/manual evidence is sufficient;

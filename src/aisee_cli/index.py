@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref, source_aliases
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import context_index_path
 from aisee_cli.project import inspect_project_rules, rel
@@ -16,7 +17,6 @@ from aisee_cli.sources import load_sources, sources_path, validate_sources
 
 
 INDEX_SCHEMA_VERSION = "1.0"
-ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-(?:NEW-)?\d+\b")
 PATH_PATTERN = re.compile(
     r"(?<![\w./-])"
     r"((?:src|app|apps|lib|libs|packages|tests|test|aisee/docs|docs|openspec|assets|config)"
@@ -36,7 +36,7 @@ def build_index(root: Path, *, write_cache: bool) -> dict[str, Any]:
     source_entries = sources_data.get("sources", []) if isinstance(sources_data, dict) else []
     source_issues = source_load_issues + validate_sources(root, source_entries)
     documents = scan_documents(root, source_entries)
-    id_occurrences = collect_id_occurrences(documents)
+    anchors = collect_anchor_occurrences(documents)
     duplicate_sources = find_duplicate_sources(source_entries)
     issues = source_issues + duplicate_sources
 
@@ -55,7 +55,8 @@ def build_index(root: Path, *, write_cache: bool) -> dict[str, Any]:
             "items": source_entries if isinstance(source_entries, list) else [],
         },
         "documents": documents,
-        "ids": id_occurrences,
+        "anchors": anchors,
+        "aliases": build_alias_index(documents),
         "issues": issues,
         "summary": summarize_issues(issues),
         "meta": {
@@ -92,19 +93,24 @@ def scan_documents(root: Path, source_entries: Any) -> list[dict[str, Any]]:
             documents.append({
                 "path": rel_path,
                 "status": "missing",
-                "ids": [],
+                "local_ids": [],
+                "anchor_refs": [],
+                "aliases": [],
+                "legacy_full_ids": [],
                 "paths": [],
                 "headings": [],
                 "hash": None,
             })
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
-        documents.append(parse_document(rel_path, text))
+        documents.append(parse_document(rel_path, text, source_entries))
     return documents
 
 
-def parse_document(path: str, text: str) -> dict[str, Any]:
-    ids = sorted(set(ID_PATTERN.findall(text)))
+def parse_document(path: str, text: str, source_entries: Any) -> dict[str, Any]:
+    local_ids = sorted(extract_local_ids(text))
+    anchor_refs = sorted(extract_anchor_refs(text))
+    legacy_full_ids = sorted(extract_legacy_full_ids(text))
     paths = sorted(set(PATH_PATTERN.findall(text)))
     headings: list[dict[str, Any]] = []
     current_heading: dict[str, Any] | None = None
@@ -120,14 +126,18 @@ def parse_document(path: str, text: str) -> dict[str, Any]:
             }
             headings.append(current_heading)
 
-        line_ids = sorted(set(ID_PATTERN.findall(line)))
-        if not line_ids:
+        line_local_ids = sorted(extract_local_ids(line))
+        line_anchor_refs = sorted(extract_anchor_refs(line))
+        line_legacy_full_ids = sorted(extract_legacy_full_ids(line))
+        if not line_local_ids and not line_anchor_refs and not line_legacy_full_ids:
             continue
         line_paths = sorted(set(PATH_PATTERN.findall(line)))
         occurrences.append({
             "line": line_number,
             "heading": current_heading,
-            "ids": line_ids,
+            "local_ids": line_local_ids,
+            "anchor_refs": line_anchor_refs,
+            "legacy_full_ids": line_legacy_full_ids,
             "paths": line_paths,
             "text": line.strip(),
         })
@@ -136,33 +146,85 @@ def parse_document(path: str, text: str) -> dict[str, Any]:
         "path": path,
         "status": "present",
         "hash": "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest(),
-        "ids": ids,
+        "local_ids": local_ids,
+        "anchor_refs": anchor_refs,
+        "aliases": source_aliases(source_entries, path),
+        "legacy_full_ids": legacy_full_ids,
         "paths": paths,
         "headings": headings,
         "occurrences": occurrences,
     }
 
 
-def collect_id_occurrences(documents: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
-    ids: dict[str, list[dict[str, Any]]] = {}
+def collect_anchor_occurrences(documents: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    anchors: dict[str, list[dict[str, Any]]] = {}
     for document in documents:
         if document.get("status") != "present":
             continue
         for occurrence in document.get("occurrences", []):
             if not isinstance(occurrence, dict):
                 continue
-            line_ids = [item for item in occurrence.get("ids", []) if isinstance(item, str)]
-            document_ids = [item for item in document.get("ids", []) if isinstance(item, str)]
-            for full_id in line_ids:
-                ids.setdefault(full_id, []).append({
-                    "path": document["path"],
-                    "line": occurrence["line"],
-                    "heading": occurrence.get("heading"),
-                    "text": occurrence.get("text", ""),
-                    "related_ids": sorted({item for item in [*line_ids, *document_ids] if item != full_id}),
-                    "paths": occurrence.get("paths", []),
-                })
-    return {key: value for key, value in sorted(ids.items())}
+            line_local_ids = [item for item in occurrence.get("local_ids", []) if isinstance(item, str)]
+            document_local_ids = [item for item in document.get("local_ids", []) if isinstance(item, str)]
+            for local_id in line_local_ids:
+                append_anchor_occurrence(
+                    anchors,
+                    canonical_ref=f"{document['path']}#{local_id}",
+                    document=document,
+                    occurrence=occurrence,
+                    related_local_ids=sorted({item for item in [*line_local_ids, *document_local_ids] if item != local_id}),
+                )
+            for anchor_ref in occurrence.get("anchor_refs", []):
+                if not isinstance(anchor_ref, str):
+                    continue
+                try:
+                    parsed = parse_anchor_ref(anchor_ref)
+                except ValueError:
+                    continue
+                append_anchor_occurrence(
+                    anchors,
+                    canonical_ref=str(parsed["canonical_reference"] or anchor_ref),
+                    document=document,
+                    occurrence=occurrence,
+                    related_local_ids=[],
+                )
+    return {key: value for key, value in sorted(anchors.items())}
+
+
+def append_anchor_occurrence(
+    anchors: dict[str, list[dict[str, Any]]],
+    *,
+    canonical_ref: str,
+    document: dict[str, Any],
+    occurrence: dict[str, Any],
+    related_local_ids: list[str],
+) -> None:
+    local_id = canonical_ref.rsplit("#", 1)[-1]
+    anchors.setdefault(canonical_ref, []).append({
+        "reference": canonical_ref,
+        "path": document["path"],
+        "document": document["path"],
+        "local_id": local_id,
+        "line": occurrence["line"],
+        "heading": occurrence.get("heading"),
+        "text": occurrence.get("text", ""),
+        "related_local_ids": related_local_ids,
+        "anchor_refs": occurrence.get("anchor_refs", []),
+        "aliases": document.get("aliases", []),
+        "legacy_full_ids": occurrence.get("legacy_full_ids", []),
+        "paths": occurrence.get("paths", []),
+    })
+
+
+def build_alias_index(documents: list[dict[str, Any]]) -> dict[str, str]:
+    aliases: dict[str, str] = {}
+    for document in documents:
+        if document.get("status") != "present":
+            continue
+        for alias in document.get("aliases", []):
+            if isinstance(alias, str) and alias:
+                aliases[alias] = document["path"]
+    return dict(sorted(aliases.items()))
 
 
 def find_duplicate_sources(source_entries: Any) -> list[dict[str, str]]:

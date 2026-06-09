@@ -45,7 +45,6 @@
 ## 4. 本模块用户路径
 
 ### FLOW-001 {流程名称}
-<!-- aisee:id {scope}:FLOW-001 -->
 
 1. {step}
 2. {step}
@@ -60,7 +59,6 @@
 > 单个模块文档最多包含 8 个页面详情；超过时继续按子模块拆分。二开场景只展开 Changed / New / Deprecated 页面，Existing 页面只引用来源。
 
 ### PAGE-001 {页面名称}
-<!-- aisee:id {scope}:PAGE-001 -->
 
 **变化状态**：{New / Changed / Existing / Deprecated / Unknown}
 **当前来源**：{现有页面/路由/source-map/baseline/历史文档；新建则写“无”}

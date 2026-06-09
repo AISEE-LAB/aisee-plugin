@@ -49,7 +49,7 @@
 - [ ] 技术栈 / 工具链状态已标注：已确定 / 部分确定 / 未确定
 - [ ] 每条关键技术事实都有来源和可信度
 - [ ] 架构概览和架构决策已区分事实、已确认决策与待确认决策
-- [ ] ARCH / DEC / CONSTRAINT / RISK ID 已来自 `aisee/registry/id-registry.json`，或已标注 `[ID-RESERVATION-REQUIRED]`
+- [ ] ARCH / DEC / CONSTRAINT / RISK 使用 local ID，或已标注 `[ID-FINALIZATION-REQUIRED]`
 - [ ] 全局工程约定只记录已有事实或待决策缺口，没有创造新契约
 - [ ] Schema Artifact Hints 只提示后续契约类型，不绑定具体 schema 文件名
 - [ ] 技术栈缺失时使用 `[STACK-CONTEXT-MISSING]` 或 `[STACK-DECISION-REQUIRED]`

@@ -58,7 +58,7 @@
 - [ ] 二开场景没有重写未变化的既有 UI，只引用来源并展开差异
 - [ ] 盘点场景没有设计新需求，只整理已确认的现有 UI
 - [ ] 所有页面都有页面 ID、页面目标、入口、完成后去向、关联 FR 或现有事实来源
-- [ ] PAGE / FLOW / STATE ID 已来自 `aisee/registry/id-registry.json`，或已标注 `[ID-RESERVATION-REQUIRED]`
+- [ ] PAGE / FLOW / STATE 使用 local ID，或已标注 `[ID-FINALIZATION-REQUIRED]`
 - [ ] 页面详情内保留了入口来源、返回规则、参与流程和去向规则
 - [ ] `shared-flows.md` 只用于跨模块、跨端、跨角色或长链路流程
 - [ ] 所有 FR 都能追踪到页面、元素、操作或非页面型系统行为

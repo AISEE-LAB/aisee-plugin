@@ -36,31 +36,11 @@ def create_change_project(root: Path, *, task_mark: str = " ") -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(
-        root / ".aisee" / "id-registry.json",
+        root / "aisee" / "registry" / "sources.json",
         json.dumps(
             {
                 "version": 1,
-                "scopes": {
-                    "auth": {
-                        "counters": {"API": 1, "TEST": 1},
-                        "ids": {
-                            "auth:API-001": {
-                                "type": "API",
-                                "number": 1,
-                                "status": "active",
-                                "title": "登录接口",
-                                "owner": "openspec/changes/add-auth/source-map.md",
-                            },
-                            "auth:TEST-001": {
-                                "type": "TEST",
-                                "number": 1,
-                                "status": "active",
-                                "title": "登录验证",
-                                "owner": "openspec/changes/add-auth/source-map.md",
-                            },
-                        },
-                    }
-                },
+                "sources": [],
             },
             ensure_ascii=False,
         )
@@ -105,16 +85,16 @@ apply:
 
 ## Implementation Paths
 
-| Kind | Path | IDs | Mode | Notes |
+| Kind | Path | Refs | Mode | Notes |
 |---|---|---|---|---|
-| code | src/auth/session.py | auth:API-001 | modify | |
-| test | tests/auth/test_session.py | auth:TEST-001 | add | |
+| code | src/auth/session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
+| test | tests/auth/test_session.py | docs/requirements/auth-srs.md#FR-001 | add | |
 
 ## Artifact Applicability
 
-| Artifact | Required | IDs | Reason | Handoff |
+| Artifact | Required | Refs | Reason | Handoff |
 |---|---|---|---|---|
-| service-contract.md | yes | auth:API-001 | 需要接口 | tasks.md |
+| service-contract.md | yes | docs/requirements/auth-srs.md#FR-001 | 需要接口 | tasks.md |
 
 ## Contract Ownership / Sync
 
@@ -128,7 +108,8 @@ apply:
 | machine_readable_contract | contracts/openapi.yaml | confirmed | |
 """,
     )
-    write(change / "specs" / "auth.md", "## ADDED Requirements\n")
+    write(root / "docs" / "requirements" / "auth-srs.md", "# Auth SRS\n\n## 登录\n\n覆盖需求：FR-001\n")
+    write(change / "specs" / "auth.md", "## ADDED Requirements\n\n### Requirement: SPEC-001 Login\n")
     write(change / "service-contract.md", "src/auth/session.py\n")
     write(
         change / "tasks.md",
@@ -405,16 +386,16 @@ def test_verify_check_warns_when_required_service_contract_lacks_sync_metadata(t
 
 ## Implementation Paths
 
-| Kind | Path | IDs | Mode | Notes |
+| Kind | Path | Refs | Mode | Notes |
 |---|---|---|---|---|
-| code | src/auth/session.py | auth:API-001 | modify | |
-| test | tests/auth/test_session.py | auth:TEST-001 | add | |
+| code | src/auth/session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
+| test | tests/auth/test_session.py | docs/requirements/auth-srs.md#FR-001 | add | |
 
 ## Artifact Applicability
 
-| Artifact | Required | IDs | Reason | Handoff |
+| Artifact | Required | Refs | Reason | Handoff |
 |---|---|---|---|---|
-| service-contract.md | yes | auth:API-001 | 需要接口 | tasks.md |
+| service-contract.md | yes | docs/requirements/auth-srs.md#FR-001 | 需要接口 | tasks.md |
 """,
     )
     write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "passed\n")

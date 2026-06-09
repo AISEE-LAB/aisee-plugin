@@ -9,7 +9,8 @@ from aisee_cli.context_pack import parse_schema
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PACK_ROOT = ROOT / "plugins" / "aisee-plugin" / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
 PACKAGED_SCHEMA_PACK_ROOT = ROOT / "src" / "aisee_plugin_assets" / "skills"
-ID_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9_-]*:[A-Z]+-\d+\b")
+LOCAL_ID_PATTERN = re.compile(r"(?<![A-Za-z0-9_:-])[A-Z]+-(?:NEW-)?\d+\b")
+ANCHOR_PATTERN = re.compile(r"(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.[A-Za-z0-9_.-]+#[A-Z]+-(?:NEW-)?\d+\b")
 
 
 def test_app_schema_sample_change_matches_schema_artifacts() -> None:
@@ -35,25 +36,27 @@ def test_app_schema_sample_change_matches_schema_artifacts() -> None:
     assert "Backward compatibility check" in tasks
 
 
-def test_app_schema_sample_change_has_registered_style_ids() -> None:
+def test_app_schema_sample_change_uses_anchor_refs_and_local_ids() -> None:
     example = SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "examples" / "add-passwordless-login"
     text = "\n".join(path.read_text(encoding="utf-8") for path in example.rglob("*.md"))
-    ids = set(ID_PATTERN.findall(text))
+    local_ids = set(LOCAL_ID_PATTERN.findall(text))
+    anchors = set(ANCHOR_PATTERN.findall(text))
 
     assert {
-        "auth:FR-001",
-        "auth:PAGE-001",
-        "auth:FLOW-001",
-        "auth:STATE-001",
-        "auth:ARCH-001",
-        "auth:DEC-001",
-        "auth:SPEC-001",
-        "auth:API-001",
-        "auth:DATA-001",
-        "auth:TASK-001",
-        "auth:TEST-001",
-    } <= ids
-    assert not any("-NEW-" in item for item in ids)
+        "FR-001",
+        "PAGE-001",
+        "FLOW-001",
+        "STATE-001",
+        "ARCH-001",
+        "DEC-001",
+        "SPEC-001",
+        "API-001",
+        "DATA-001",
+        "TASK-001",
+        "TEST-001",
+    } <= local_ids
+    assert "aisee/docs/requirements/auth-srs.md#FR-001" in anchors
+    assert not any("-NEW-" in item for item in local_ids)
 
 
 def test_schema_examples_are_repository_plugin_content_not_packaged_assets() -> None:
