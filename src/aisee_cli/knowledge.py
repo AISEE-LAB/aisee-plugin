@@ -1637,7 +1637,8 @@ def pack_path_for_id(team_root: Path, pack_id: str) -> Path:
 
 def render_card_markdown(metadata: dict[str, Any], *, body: str | None = None) -> str:
     frontmatter = yaml.safe_dump(metadata, allow_unicode=True, sort_keys=False).strip()
-    return f"---\n{frontmatter}\n---\n\n{body or '## Guardrail\\n\\n待团队 review 后补充说明。\\n'}"
+    fallback_body = "## Guardrail\n\n待团队 review 后补充说明。\n"
+    return f"---\n{frontmatter}\n---\n\n{body or fallback_body}"
 
 
 def add_card_to_pack_data(data: dict[str, Any], card_id: str) -> bool:
