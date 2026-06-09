@@ -1,3 +1,20 @@
+---
+title: "Auth Architecture"
+doc_type: "architecture"
+status: "active"
+date: "2026-06-09"
+scope: "auth"
+owner: "Aisee"
+source_refs:
+  - "aisee/docs/requirements/auth-srs.md#FR-001"
+  - "aisee/docs/ui-content/auth-ui.md#FLOW-001"
+change_refs:
+  - "openspec/changes/add-passwordless-login"
+anchors:
+  - "aisee/docs/architecture/auth-architecture.md#ARCH-001"
+  - "aisee/docs/architecture/auth-architecture.md#DEC-001"
+---
+
 # Auth Architecture
 
 ## ARCH-001 Session Boundary

@@ -61,7 +61,14 @@ def trace_anchor(project_root: Path, reference: str) -> dict[str, Any]:
 
 def choose_primary_source(references: list[dict[str, Any]], document: str | None, local_id: str) -> dict[str, Any] | None:
     if references:
-        reference = references[0]
+        reference = min(
+            references,
+            key=lambda item: (
+                0 if item.get("heading") else 1,
+                0 if item.get("path") == document else 1,
+                int(item.get("line") or 10**9),
+            ),
+        )
         return {
             "path": reference.get("path"),
             "line": reference.get("line"),

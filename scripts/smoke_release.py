@@ -101,6 +101,16 @@ def assert_json_command(command: list[str], *, cwd: Path = ROOT, env: dict[str, 
         raise RuntimeError(f"命令没有输出合法 JSON: {' '.join(command)}") from exc
 
 
+def assert_invalid_choice(command: list[str], *, cwd: Path = ROOT, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    print(f"+ {' '.join(command)}")
+    result = subprocess.run(command, cwd=cwd, env=env, text=True, capture_output=True)
+    if result.returncode != 2 or "invalid choice" not in result.stderr:
+        print_output(result)
+        raise RuntimeError(f"命令应返回 argparse invalid choice: {' '.join(command)}")
+    print_output(result)
+    return result
+
+
 def run_venv_smoke(wheel: Path) -> None:
     with tempfile.TemporaryDirectory(prefix="aisee-release-smoke-") as temp:
         temp_dir = Path(temp)
@@ -162,15 +172,22 @@ def run_cli_smoke(aisee: Path, project_dir: Path) -> None:
     print_output(run([str(aisee), "--version"], env=env))
     doctor = assert_json_command([str(aisee), "doctor", "--json"], cwd=project_dir, env=env)
     inspect = assert_json_command([str(aisee), "plugin", "inspect", "--json"], cwd=project_dir, env=env)
-    export = assert_json_command([str(aisee), "plugin", "export", "--target", "codex", "--dest", str(project_dir / "plugin-bundle"), "--json"], cwd=project_dir, env=env)
+    export_dest = project_dir / "plugin-bundle"
+    export = assert_invalid_choice(
+        [str(aisee), "plugin", "export", "--target", "codex", "--dest", str(export_dest), "--json"],
+        cwd=project_dir,
+        env=env,
+    )
     schemas = assert_json_command([str(aisee), "schemas", "list", "--json"], cwd=project_dir, env=env)
     assert_json_command([str(aisee), "schemas", "check", "--json"], cwd=project_dir, env=env)
     if "codex_marketplace" not in doctor:
         raise RuntimeError("doctor output did not include codex_marketplace")
     if inspect.get("mode") != "cli-only":
         raise RuntimeError("plugin inspect should report CLI-only mode in installed wheel")
-    if export.get("status") != "blocked" or export.get("meta", {}).get("writes") is not False:
-        raise RuntimeError("plugin export should return a non-writing blocker in installed wheel")
+    if "export" not in export.stderr:
+        raise RuntimeError("plugin export invalid choice output should mention the removed subcommand")
+    if export_dest.exists():
+        raise RuntimeError("plugin export invalid choice should not create the destination directory")
     if schemas.get("source") is not None:
         raise RuntimeError("schema list should not report packaged schema source in installed wheel")
 

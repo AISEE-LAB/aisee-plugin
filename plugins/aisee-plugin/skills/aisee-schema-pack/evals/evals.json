@@ -1,0 +1,47 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee-schema-pack",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "schema-pack-001",
+      "name": "choose-lightweight-schema-for-small-fix",
+      "scenario": "schema-selection",
+      "prompt": "我要做一个登录页按钮文案修复，没有接口变化也没有跨模块影响。帮我判断该用哪个 schema，并检查 schema pack 约束是否齐。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "这是小范围、低风险修复。"
+        ]
+      },
+      "expected_output": "应优先推荐轻量 schema，如 quick-fix，并检查 schema pack 合同、artifact requires 和模板覆盖；不得默认把所有工作升级成 aisee-app-spec-driven。",
+      "expected_outputs": [
+        "按风险推荐 schema。",
+        "检查 schema pack 合同和模板覆盖。",
+        "说明为何不需要重流程。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "schema 推荐",
+        "约束检查",
+        "轻路径理由"
+      ],
+      "must_not": [
+        "不得默认套用 aisee-app-spec-driven。",
+        "不得把 schema pack 检查变成代码实现或 change authoring。"
+      ],
+      "quality_checks": [
+        "选择与风险和范围匹配的 schema。",
+        "强调 schema pack 只是模板与合同层。"
+      ],
+      "fact_source_constraints": [
+        "schema pack 约束服务 change authoring，不替代 OpenSpec change facts。"
+      ],
+      "files": []
+    }
+  ]
+}

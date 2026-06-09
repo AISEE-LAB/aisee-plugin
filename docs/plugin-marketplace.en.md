@@ -65,6 +65,8 @@ When reading plugin content, the CLI checks only the Codex install location by d
 }
 ```
 
+The manifest continues to expose the whole `./skills/` directory. Marketplace installations therefore see all 22 public skills, while the difference between the default happy path and on-demand extensions is governed by [Skill Taxonomy](../plugins/aisee-plugin/references/skill-taxonomy.md), README, workflow docs, and tests rather than by splitting the plugin into multiple installs.
+
 ## Relationship to PyPI / pipx
 
 Recommended relationship:
@@ -72,6 +74,7 @@ Recommended relationship:
 - `pipx install aisee-plugin` installs the CLI.
 - Codex marketplace installs plugin content.
 - `aisee doctor --json` and legacy content distribution commands may print marketplace setup hints, but they do not perform installation.
+- The single `aisee-plugin` continues to carry core workflow, optional extensions, knowledge loop, and hardware / experimental skills in one install topology.
 
 Not recommended:
 

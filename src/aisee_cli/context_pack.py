@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +18,7 @@ from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, 
 from aisee_cli.assets import repo_asset_root
 from aisee_cli.index import build_index
 from aisee_cli.paths import sources_path as aisee_sources_path
+from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.source_map import parse_source_map
 from aisee_cli.tool_checks import check_compound_plugin
 
@@ -221,21 +221,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         }
 
     return pack
-
-
-def resolve_project_root(cwd: Path) -> Path:
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            cwd=cwd,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            text=True,
-        )
-        return Path(result.stdout.strip())
-    except Exception:
-        return cwd
 
 
 def resolve_change_schema(root: Path, change_path: Path) -> str:

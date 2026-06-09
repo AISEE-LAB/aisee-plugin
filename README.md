@@ -66,6 +66,30 @@ Aisee CLI = JSON context bus，不是第二份事实源
 Compound Engineering = 可选的执行 / 审查 / 测试消费方
 ```
 
+## Skill 分层
+
+`plugins/aisee-plugin/.codex-plugin/plugin.json` 继续通过 `skills: "./skills/"` 暴露全部 22 个公开 skill，但默认 happy path 只包含 **11 个核心主流程 skill**。完整分类合同见 [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md)。
+
+核心主流程：
+
+- `aisee:flow`
+- `aisee:init`
+- `aisee:srs`
+- `aisee:ui-content`
+- `aisee:architecture`
+- `aisee:change-plan`
+- `aisee:change-author`
+- `aisee-schema-pack`
+- `aisee:implementation-bridge`
+- `aisee:verify`
+- `aisee:archive-guard`
+
+按需扩展：
+
+- 可选扩展：`aisee:design-spec`、`aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object`、`aisee:spec-migrate`
+- 知识循环：`aisee:reflect`、`aisee:knowledge-curate`
+- 硬件 / 实验域：`hw:srs`、`hw:architecture`、`hw:init`、`hw:change-plan`
+
 ## 功能特性
 
 - **结构化需求澄清**：`aisee:srs` 通过对话澄清业务需求，并生成规划级 SRS。

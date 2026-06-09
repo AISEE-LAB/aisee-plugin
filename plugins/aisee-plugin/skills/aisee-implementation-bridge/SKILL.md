@@ -18,6 +18,7 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 - `requires_ce_plan=false` 且 paths/tasks 清楚时，推荐 `ce-work`，不要生成新的长期计划。
 - `requires_ce_plan=true` 时，才按需建议 `ce-plan`；其结论必须回写当前 schema apply tracks，只有 source-map schema 才回写 `source-map.md`。
 - 如果 CE skill 缺失，只说明限制和本地 guardrails，不创建 Aisee 替代 CE 的执行、代码审查或测试 agent。
+- `design-spec`、`design-assets`、`reflect`、`knowledge-curate`、`hw:*` 等扩展能力只有在当前 change 或 context pack 明确引用时才读取；不要自动把它们塞进默认实现交接路径。
 
 ## 职责
 

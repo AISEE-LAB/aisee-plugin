@@ -1,0 +1,47 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "hw:srs",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "hw-srs-001",
+      "name": "clarify-embedded-device-requirements",
+      "scenario": "hardware-requirements",
+      "prompt": "帮我整理一份设备需求：电池供电的数据采集终端需要每 5 分钟上报一次温湿度，异常时本地蜂鸣并存日志，维护人员能在现场快速判断传感器状态。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "这是硬件/嵌入式需求澄清，不是软件 app SRS。"
+        ]
+      },
+      "expected_output": "应围绕硬件候选、功耗、体积、采集频率、告警、维护可观测性和验收方式澄清需求；明确这是硬件域专用 skill，不进入 app 默认路径；不得写寄存器、驱动代码或前端页面实现。",
+      "expected_outputs": [
+        "澄清硬件目标与边界。",
+        "覆盖功耗、采集、告警和维护要求。",
+        "指出后续进入硬件架构与硬件 change-plan。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "硬件需求澄清",
+        "验收方式",
+        "后续硬件流程"
+      ],
+      "must_not": [
+        "不得把硬件需求改写成通用 app SRS。",
+        "不得输出寄存器、驱动结构或前端页面实现。"
+      ],
+      "quality_checks": [
+        "围绕设备与平台适配，不混入软件默认主路径。",
+        "保留需求与实现分离。"
+      ],
+      "fact_source_constraints": [
+        "硬件 SRS 是硬件域规划输入，不替代 app 默认 OpenSpec 事实源。"
+      ],
+      "files": []
+    }
+  ]
+}

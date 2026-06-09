@@ -65,6 +65,8 @@ CLI 读取插件内容时默认只检查 Codex 安装位置；不会跨 agent ru
 }
 ```
 
+manifest 继续暴露整个 `./skills/` 目录。这意味着 marketplace 会看到全部 22 个公开 skill；但默认主路径与按需扩展的层级差异由 [Skill Taxonomy](../plugins/aisee-plugin/references/skill-taxonomy.md)、README、workflow 和测试共同约束，而不是通过拆分多个插件实现。
+
 ## 与 PyPI / pipx 的关系
 
 推荐关系：
@@ -72,6 +74,7 @@ CLI 读取插件内容时默认只检查 Codex 安装位置；不会跨 agent ru
 - `pipx install aisee-plugin` 安装 CLI。
 - Codex marketplace 安装 plugin content。
 - `aisee doctor --json` 和旧内容分发命令可以提示 marketplace setup，但不执行安装。
+- 单一 `aisee-plugin` 同时承载 core workflow、可选扩展、知识循环和硬件 / 实验域；安装拓扑不因 taxonomy 分层而变化。
 
 不推荐：
 

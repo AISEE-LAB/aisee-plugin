@@ -1,0 +1,48 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "hw:change-plan",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "hw-change-plan-001",
+      "name": "split-hardware-work-into-changes",
+      "scenario": "hardware-change-planning",
+      "prompt": "基于已经确认的硬件 SRS 和整体架构，帮我拆 OpenSpec changes，标依赖顺序和 aisee-device-spec-driven schema。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "输入已经是硬件域稳定需求和架构。"
+        ]
+      },
+      "expected_output": "应把硬件/嵌入式工作拆成可独立交付的 changes，规划依赖和 source-map seed；明确它是硬件域路径，不影响 app 默认 change-plan；不得重写需求或写实现代码。",
+      "expected_outputs": [
+        "拆分硬件 changes。",
+        "标记依赖顺序。",
+        "推荐硬件域 schema。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "change 边界",
+        "依赖顺序",
+        "schema 推荐",
+        "域边界声明"
+      ],
+      "must_not": [
+        "不得把硬件域规划回退成通用 app workflow。",
+        "不得直接生成实现代码。"
+      ],
+      "quality_checks": [
+        "按硬件可交付边界拆分，不按模块名机械切。",
+        "说明 domain-specific / experimental 定位。"
+      ],
+      "fact_source_constraints": [
+        "硬件 change plan 只是规划输入，正式事实仍由后续 OpenSpec change artifacts 承载。"
+      ],
+      "files": []
+    }
+  ]
+}

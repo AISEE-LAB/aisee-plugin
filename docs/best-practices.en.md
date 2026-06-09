@@ -21,6 +21,10 @@ Aisee documents, CLI JSON, Implementation Briefs, review reports, and chat summa
 
 Any conclusion that must persist should be written back to the current OpenSpec change, baseline specs, schema apply tracks, source-map, or other formal sources such as `sources.json`.
 
+## 1.1 Use The Core Workflow By Default
+
+The default new-feature happy path should start with the core workflow only. `design-*`, `svg-assets`, `image-object`, `spec-migrate`, `reflect`, `knowledge-curate`, and `hw:*` are on-demand extensions; do not flatten them into mandatory steps for every iteration.
+
 ## 2. Do Not Let Upfront Documents Replace Change Artifacts
 
 SRS, UI Content, Design Spec, and Architecture help plan the current version or iteration's changes.

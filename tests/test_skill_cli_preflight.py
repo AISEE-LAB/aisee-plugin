@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from skill_contract_helpers import EXPECTED_TAXONOMY_SECTIONS, public_skill_names, read_taxonomy
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -52,3 +54,35 @@ def test_cli_outputs_keep_marketplace_recovery_hints() -> None:
 
     assert MARKETPLACE_ADD_COMMAND == "codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main"
     assert PLUGIN_ADD_COMMAND == "codex plugin add aisee-plugin@aisee-plugin"
+
+
+def test_skill_taxonomy_contract_covers_all_public_skills() -> None:
+    taxonomy = read_taxonomy()
+
+    assert set(taxonomy) == EXPECTED_TAXONOMY_SECTIONS
+    assert len(taxonomy["Core Workflow"]) == 11
+    assert set(taxonomy["Core Workflow"]) == {
+        "aisee:flow",
+        "aisee:init",
+        "aisee:srs",
+        "aisee:ui-content",
+        "aisee:architecture",
+        "aisee:change-plan",
+        "aisee:change-author",
+        "aisee-schema-pack",
+        "aisee:implementation-bridge",
+        "aisee:verify",
+        "aisee:archive-guard",
+    }
+
+    classified = {skill for skills in taxonomy.values() for skill in skills}
+    assert classified == public_skill_names()
+
+
+def test_readme_highlights_core_workflow_taxonomy() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "## Skill 分层" in readme
+    assert "11 个核心主流程 skill" in readme
+    for skill in read_taxonomy()["Core Workflow"]:
+        assert f"`{skill}`" in readme

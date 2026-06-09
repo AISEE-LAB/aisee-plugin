@@ -88,11 +88,12 @@
 以下属于公开契约：
 
 - GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
+- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 core / optional / knowledge / hardware 分层，以及 core 11 skill 集合；
 - `aisee plugin inspect --json` 在 CLI-only 安装中返回稳定状态和 setup hint；
 - `aisee plugin export`、`aisee schemas install`、`aisee knowledge scaffold` 已从公开 CLI 命令面移除；
 - PyPI wheel 不再承诺包含 skills、references、schema packs、team knowledge templates 或 plugin metadata 副本。
 
-破坏性变更包括重命名插件、移除 Codex manifest、破坏 marketplace plugin root 布局，或改变旧公开命令的 JSON blocker 语义。
+破坏性变更包括重命名插件、移除 Codex manifest、破坏 marketplace plugin root 布局、改变 core 11 skill 集合，或改变旧公开命令的 JSON blocker 语义。
 
 ### Plugin Marketplace
 
@@ -107,6 +108,17 @@
 破坏性变更包括重命名插件、移除 Codex manifest、改变 marketplace listing 的策略语义，或把 marketplace listing 变成 OpenSpec、schema 或 source-map 的事实源。
 
 具体说明见 [Plugin Marketplace](plugin-marketplace.md)。
+
+### Planning Docs And Root Resolution
+
+以下属于公开契约：
+
+- 普通 planning docs 的 frontmatter 合同和 `aisee index --json` / `aisee doctor --json` 的只读 lifecycle diagnostics；
+- `status`、`doc_type`、`source_refs`、`change_refs`、`anchors` 等 planning doc 索引字段的基本语义；
+- `resolve_project_root` 以最近的 Aisee/OpenSpec project marker 优先，再 fallback 到 Git 顶层的语义；
+- release smoke 对 CLI-only wheel、marketplace setup hint、removed command invalid choice 和 root resolver fixture 的检查重点。
+
+破坏性变更包括把 planning doc diagnostics 变成写入命令、改变 root resolution 使 monorepo 子项目误读为仓库顶层，或恢复对已删除命令的旧 blocker JSON 假设。
 
 ## Experimental Contracts
 
@@ -159,6 +171,7 @@ Experimental 能力可以变化，但文档必须清楚说明：
 涉及 Public Contract 的 PR 或提交必须至少考虑：
 
 - 是否更新 README / workflow / best practices / release 文档；
+- 是否更新 skill taxonomy reference；
 - 是否更新 schema pack 文档；
 - 是否更新 context pack reference；
 - 是否新增或调整 CLI contract tests；

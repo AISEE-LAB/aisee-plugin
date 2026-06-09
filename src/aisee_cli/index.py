@@ -12,6 +12,7 @@ from typing import Any
 from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref, source_aliases
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import context_index_path
+from aisee_cli.planning_docs import inspect_planning_docs
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.sources import load_sources, sources_path, validate_sources
 
@@ -36,9 +37,10 @@ def build_index(root: Path, *, write_cache: bool) -> dict[str, Any]:
     source_entries = sources_data.get("sources", []) if isinstance(sources_data, dict) else []
     source_issues = source_load_issues + validate_sources(root, source_entries)
     documents = scan_documents(root, source_entries)
+    planning_docs = inspect_planning_docs(root)
     anchors = collect_anchor_occurrences(documents)
     duplicate_sources = find_duplicate_sources(source_entries)
-    issues = source_issues + duplicate_sources
+    issues = source_issues + duplicate_sources + planning_docs["issues"]
 
     result = {
         "schema_version": INDEX_SCHEMA_VERSION,
@@ -55,6 +57,7 @@ def build_index(root: Path, *, write_cache: bool) -> dict[str, Any]:
             "items": source_entries if isinstance(source_entries, list) else [],
         },
         "documents": documents,
+        "planning_docs": planning_docs,
         "anchors": anchors,
         "aliases": build_alias_index(documents),
         "issues": issues,
