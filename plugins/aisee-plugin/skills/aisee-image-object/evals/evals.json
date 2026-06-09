@@ -1,0 +1,47 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:image-object",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "image-object-001",
+      "name": "extract-object-from-single-image",
+      "scenario": "asset-extraction",
+      "prompt": "帮我把一张产品海报里的设备主体抠出来，导出透明素材，并保留一个带圆角和 padding 的变体。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户提供的是单张图片对象处理需求。"
+        ]
+      },
+      "expected_output": "应聚焦对象分离、去背景、透明切图、padding/圆角变体和必要 mask/workspace；不能把它扩展成全局设计规范、Figma 写入或前端实现。",
+      "expected_outputs": [
+        "围绕单张图片对象处理。",
+        "说明透明素材和变体导出需求。",
+        "必要时提到 mask 或背景修补。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "对象分离",
+        "透明素材",
+        "导出变体"
+      ],
+      "must_not": [
+        "不得把对象处理需求转成 design-spec 或前端实现任务。",
+        "不得把单图处理扩展成全局视觉规范。"
+      ],
+      "quality_checks": [
+        "围绕单图工作流，不发散到页面级设计。",
+        "输出与素材生产直接相关。"
+      ],
+      "fact_source_constraints": [
+        "对象级图片处理结果是素材，不是 OpenSpec 或长期 UI 规范事实源。"
+      ],
+      "files": []
+    }
+  ]
+}

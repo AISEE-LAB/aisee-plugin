@@ -8,6 +8,19 @@ from typing import Any
 
 
 def resolve_project_root(cwd: Path) -> Path:
+    current = cwd.resolve()
+    git_root = git_top_level(current)
+
+    for candidate in ancestor_chain(current, stop=git_root):
+        if has_project_markers(candidate):
+            return candidate
+
+    if git_root is not None:
+        return git_root
+    return current
+
+
+def git_top_level(cwd: Path) -> Path | None:
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -17,9 +30,29 @@ def resolve_project_root(cwd: Path) -> Path:
             stderr=subprocess.DEVNULL,
             text=True,
         )
-        return Path(result.stdout.strip())
     except Exception:
-        return cwd.resolve()
+        return None
+    output = result.stdout.strip()
+    return Path(output).resolve() if output else None
+
+
+def ancestor_chain(start: Path, *, stop: Path | None) -> list[Path]:
+    current = start
+    chain = [current]
+    while current.parent != current:
+        current = current.parent
+        chain.append(current)
+        if stop is not None and current == stop:
+            break
+    return chain
+
+
+def has_project_markers(path: Path) -> bool:
+    openspec_config = (path / "openspec" / "config.yaml").exists()
+    openspec_changes = (path / "openspec" / "changes").exists()
+    aisee_root = (path / "aisee").exists()
+    agents = (path / "AGENTS.md").exists()
+    return openspec_config or openspec_changes or (aisee_root and agents)
 
 
 def rel(root: Path, path: Path) -> str:

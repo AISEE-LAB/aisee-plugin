@@ -1,0 +1,47 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:archive-guard",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "archive-guard-001",
+      "name": "block-archive-on-open-blockers",
+      "scenario": "archive-gate",
+      "prompt": "当前 change 的 openspec validate 已通过，但 aisee:verify 还有 blocker，tasks 也没全关。帮我判断能不能 archive。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户是在 archive 前请求最终 gate 判断。"
+        ]
+      },
+      "expected_output": "应基于 validate、verify、apply tracks 和 evidence 做 schema-aware 放行判断；这里必须明确暂不建议 archive，并指出先修 verify blocker 和未关闭的 apply tracks；不得替代 openspec archive 或直接声称已归档。",
+      "expected_outputs": [
+        "先核对 verify、archive-check、apply tracks 和 evidence。",
+        "输出暂不建议 archive 的结论和阻断原因。",
+        "把后续动作限定为修 blocker、补 evidence 或关闭 tracks。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "archive gate 判断",
+        "阻断原因",
+        "后续修复动作"
+      ],
+      "must_not": [
+        "不得直接执行或等同于 openspec archive。",
+        "不得把 planning docs 或聊天结论当作 archive 放行事实。"
+      ],
+      "quality_checks": [
+        "判断基于当前 change 和 schema evidence，不做泛化建议。",
+        "不把 risk 说成已解决。"
+      ],
+      "fact_source_constraints": [
+        "archive gate 只消费当前 change artifacts、verify/archive checks 和 evidence。"
+      ],
+      "files": []
+    }
+  ]
+}

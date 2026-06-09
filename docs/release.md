@@ -75,6 +75,13 @@ python scripts/smoke_release.py
 
 `scripts/smoke_release.py` 会重新构建 dist、安装 wheel 到干净 venv，并检查 wheel / sdist 不包含完整 `skills/`、`references/`、schema pack trees、team knowledge templates 或 plugin metadata 副本。
 
+当前 smoke 还必须证明：
+
+- `aisee plugin inspect --json` 在 installed wheel 中返回 `mode=cli-only`；
+- `aisee doctor --json` 仍输出 Codex marketplace setup hint；
+- `aisee plugin export ...` 返回 argparse `invalid choice`，且不会创建目标目录；
+- `aisee schemas list --json` 在 wheel-only 环境不报告 packaged schema source。
+
 该 workflow 默认使用 PyPI Trusted Publishing，不在仓库中保存 PyPI token。PyPI 项目需要配置 trusted publisher：
 
 ```text
@@ -144,10 +151,13 @@ python scripts/smoke_release.py --with-pipx
 - `docs/compatibility-policy.md` 是否覆盖新增或破坏的公开契约。
 - `docs/schema-packs.md` 是否覆盖新增或调整的 schema。
 - `docs/plugin-marketplace.md` 是否覆盖 plugin manifest、marketplace listing 和 Codex 安装路径。
+- `plugins/aisee-plugin/references/skill-taxonomy.md`、README 和 workflow 是否仍与 core 11 / 扩展 skill 分层一致。
 - 新增 skill、reference、schema pack 或 team knowledge template 是否位于 repository plugin content 源内，并能通过 Codex marketplace 安装读取。
 - 新增 CLI JSON 字段是否有 contract tests。
 - 破坏性或用户可见变更是否写入 `CHANGELOG.md`。
 - 需要长期保留的发布决策是否写入 `aisee/memory/`。
+
+与 root resolver 相关的公开行为变更前，还应确认 fixture / monorepo 场景测试仍通过，例如 `tests/test_doctor_flow_schema.py` 中从 Git 仓库子项目目录运行 `doctor` / `flow inspect` 不会错误解析到仓库顶层。
 
 ## Git Tag 规则
 

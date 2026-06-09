@@ -1,0 +1,47 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:design-assets",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "design-assets-001",
+      "name": "generate-visual-reference-assets",
+      "scenario": "design-reference",
+      "prompt": "我有一个金融数据看板需求，先帮我整理需要哪些参考图、背景、插画和透明素材，再给一版参考图方向。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户要的是视觉参考和素材规划，不是前端实现。"
+        ]
+      },
+      "expected_output": "应聚焦参考图、素材清单、视觉线索和生成型素材规划；可以给参考图方向，但不能把它变成 UI 内容规格、Figma 写入或前端代码实现。",
+      "expected_outputs": [
+        "整理视觉参考图与素材需求。",
+        "区分背景、插画、装饰层和透明素材。",
+        "说明后续如需长期规范应进入 design-spec。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "素材清单",
+        "视觉方向",
+        "后续衔接提示"
+      ],
+      "must_not": [
+        "不得直接输出前端实现代码。",
+        "不得把 design-assets 伪装成长期 UI 规范事实源。"
+      ],
+      "quality_checks": [
+        "把视觉参考与长期设计规范分开。",
+        "按需规划素材，不泛化成整站设计系统。"
+      ],
+      "fact_source_constraints": [
+        "design-assets 只提供视觉输入，不替代 UI Content、Design Spec 或 OpenSpec artifacts。"
+      ],
+      "files": []
+    }
+  ]
+}

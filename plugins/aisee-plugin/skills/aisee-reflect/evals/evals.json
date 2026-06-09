@@ -1,0 +1,47 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:reflect",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "reflect-001",
+      "name": "capture-reusable-session-learnings",
+      "scenario": "session-reflection",
+      "prompt": "这次调试和交付过程里有几轮稳定模式，帮我做一次 reflect，把可复用经验整理成项目内候选知识资产。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户是在会话末尾明确要求复盘。"
+        ]
+      },
+      "expected_output": "应总结可复用经验、候选 guardrails、技能缺口或流程修正，并沉淀为项目内可审查资产；不得直接写入团队知识仓库或改写 OpenSpec 事实源。",
+      "expected_outputs": [
+        "提炼可复用模式。",
+        "区分项目内候选与团队级知识。",
+        "指出后续是否适合 knowledge-curate。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "经验提炼",
+        "候选知识资产",
+        "后续衔接"
+      ],
+      "must_not": [
+        "不得直接写入 team knowledge repo。",
+        "不得把 reflect 文档伪装成 OpenSpec baseline 或 change artifact。"
+      ],
+      "quality_checks": [
+        "聚焦可复用结论，不复述整段聊天。",
+        "输出应可供后续审查。"
+      ],
+      "fact_source_constraints": [
+        "reflect 产物是项目内候选资产，不替代当前 change 或 baseline 事实。"
+      ],
+      "files": []
+    }
+  ]
+}

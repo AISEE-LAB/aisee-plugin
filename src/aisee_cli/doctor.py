@@ -9,6 +9,7 @@ from aisee_cli.id_registry import check_registry
 from aisee_cli.index import index_path
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import inspect_layout
+from aisee_cli.planning_docs import inspect_planning_docs
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.schema_pack import list_schema_packs
 from aisee_cli.sources import check_sources
@@ -30,6 +31,7 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
         issues.append(issue("OPENSPEC_CHANGES_MISSING", "blocker", "openspec/changes is missing", "openspec/changes"))
 
     layout = inspect_layout(root)
+    planning_docs = inspect_planning_docs(root)
     for item in layout["legacy_only"]:
         issues.append(issue(
             "AISEE_LEGACY_PATH",
@@ -54,6 +56,7 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
     issues.extend(item for item in sources["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in registry["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in schemas["issues"] if item.get("severity") == "blocker")
+    issues.extend(planning_docs["issues"])
     if not openspec_cli["available"]:
         issues.append(issue("OPENSPEC_CLI_UNAVAILABLE", "info", "OpenSpec CLI is not available or failed to report a version"))
     if compound["status"] != "ok":
@@ -84,6 +87,7 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
             "sources": sources,
             "id_registry": registry,
             "schemas": schemas,
+            "planning_docs": planning_docs,
             "context_index": {
                 "path": rel(root, index_path(root)),
                 "exists": index_path(root).exists(),

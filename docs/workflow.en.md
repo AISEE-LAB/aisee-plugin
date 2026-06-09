@@ -36,6 +36,18 @@ Use `aisee:init` to audit or create:
 
 For existing projects, avoid writing new changes immediately. Prefer `aisee:spec-migrate` to derive baseline specs from verified current behavior first.
 
+## Default Path vs On-Demand Extensions
+
+The default new-feature happy path depends only on the core workflow: `aisee:flow`, `aisee:init`, `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, `aisee:implementation-bridge`, `aisee:verify`, and `aisee:archive-guard`.
+
+The following capabilities are conditional, not mandatory on every iteration:
+
+- `aisee:design-spec` / `aisee:design-assets`: only when visual rules, references, or asset planning are needed.
+- `aisee:svg-assets` / `aisee:image-object`: only for asset production or image-object workflows.
+- `aisee:spec-migrate`: only when onboarding an existing project into a baseline spec flow.
+- `aisee:reflect` / `aisee:knowledge-curate`: only for retrospectives and team knowledge curation.
+- `hw:*`: only for hardware, embedded, or experimental domains; they do not affect the default app workflow.
+
 ## 1. Upfront Clarification
 
 The goal is to turn chat-based ideas into reviewable inputs before implementation.
@@ -45,9 +57,10 @@ Recommended order:
 ```text
 aisee:srs
   -> aisee:ui-content, when UI exists
-  -> aisee:design-spec / aisee:design-assets, when visual design is needed
   -> aisee:architecture
 ```
+
+If visual rules, reference imagery, or asset planning are needed, enter `aisee:design-spec` / `aisee:design-assets` as an on-demand branch. They are not mandatory in the default happy path.
 
 Artifact roles:
 

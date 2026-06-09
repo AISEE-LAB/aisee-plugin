@@ -1,0 +1,48 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "hw:architecture",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "hw-architecture-001",
+      "name": "freeze-global-hardware-constraints",
+      "scenario": "hardware-architecture",
+      "prompt": "我们要做一块采集板，已经有初步硬件需求。请先整理整体架构，统一接口、资源分配、存储、时钟和验证策略。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "这是硬件/嵌入式架构阶段，不是 app 默认流程。"
+        ]
+      },
+      "expected_output": "应聚焦全局硬件/固件约束、接口、资源、验证和禁止偏离规则；明确这是 domain-specific / experimental 路径，不影响 app 默认 workflow；不得生成软件 SRS、前端 UI 或实现代码。",
+      "expected_outputs": [
+        "输出硬件架构边界。",
+        "冻结全局资源与接口约束。",
+        "声明硬件域专用路径。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "全局约束",
+        "接口与资源",
+        "验证策略",
+        "实验域声明"
+      ],
+      "must_not": [
+        "不得把硬件流程伪装成 app 默认路径。",
+        "不得输出前端或通用软件实现任务。"
+      ],
+      "quality_checks": [
+        "围绕系统级硬件边界，不替代后续 change planning。",
+        "说明硬件域专用性。"
+      ],
+      "fact_source_constraints": [
+        "硬件架构文档服务硬件 change 规划，不替代软件 OpenSpec baseline。"
+      ],
+      "files": []
+    }
+  ]
+}

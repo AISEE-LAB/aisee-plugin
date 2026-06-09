@@ -1,0 +1,48 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "hw:init",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "hw-init-001",
+      "name": "initialize-hardware-project-structure",
+      "scenario": "hardware-init",
+      "prompt": "当前 change 是 initialize-hardware-project。请按已确认的 hw:architecture 帮我校验工程目录、Core+Function 结构和厂商库位置。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "这是硬件工程初始化阶段。"
+        ]
+      },
+      "expected_output": "应围绕硬件工程骨架、目录模板、Clock/Memory 契约和 vendor SDK 位置给出初始化或校验动作；不得绕过 OpenSpec 直接变成主流程执行器，也不得输出 app 默认 workflow 建议。",
+      "expected_outputs": [
+        "检查或生成工程骨架。",
+        "对齐时钟、存储和目录契约。",
+        "说明其仅用于硬件初始化场景。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "工程骨架",
+        "目录契约",
+        "时钟/存储约束",
+        "适用场景"
+      ],
+      "must_not": [
+        "不得绕过 OpenSpec 直接承担整个硬件开发流程。",
+        "不得把硬件初始化建议混入 app 默认路径。"
+      ],
+      "quality_checks": [
+        "只处理初始化/校验边界。",
+        "强调依赖既有硬件架构事实。"
+      ],
+      "fact_source_constraints": [
+        "硬件初始化结果应受当前 change 和硬件架构约束，不替代规范事实源。"
+      ],
+      "files": []
+    }
+  ]
+}

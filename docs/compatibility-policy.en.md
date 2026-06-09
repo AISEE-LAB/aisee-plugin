@@ -88,11 +88,12 @@ Rules:
 The following are public contracts:
 
 - `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
+- the core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 11 workflow skills;
 - `aisee plugin inspect --json` returns stable status and setup hints in CLI-only installs;
 - `aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` have been removed from the public CLI surface;
 - the PyPI wheel no longer promises bundled copies of skills, references, schema packs, team knowledge templates, or plugin metadata.
 
-Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or reintroducing legacy content-distribution commands without a clear single owner.
+Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, changing the core set of 11 workflow skills, or reintroducing legacy content-distribution commands without a clear single owner.
 
 ### Plugin Marketplace
 
@@ -107,6 +108,17 @@ The following are public contracts:
 Breaking changes include renaming the plugin, removing the Codex manifest, changing marketplace listing policy semantics, or making marketplace listings sources of truth for OpenSpec, schema, or source-map.
 
 See [Plugin Marketplace](plugin-marketplace.en.md) for details.
+
+### Planning Docs And Root Resolution
+
+The following are public contracts:
+
+- the planning-doc frontmatter contract and the read-only lifecycle diagnostics exposed through `aisee index --json` and `aisee doctor --json`;
+- the basic semantics of planning-doc fields such as `status`, `doc_type`, `source_refs`, `change_refs`, and `anchors`;
+- `resolve_project_root` preferring the nearest Aisee/OpenSpec project marker before falling back to the Git top-level;
+- release smoke checks for CLI-only wheels, marketplace setup hints, removed-command invalid choice behavior, and root-resolver fixtures.
+
+Breaking changes include turning planning-doc diagnostics into write commands, changing root resolution so monorepo subprojects are silently interpreted as repository roots, or restoring old blocker-JSON assumptions for removed commands.
 
 ## Experimental Contracts
 
@@ -159,6 +171,7 @@ After a stable public release:
 Changes touching Public Contracts must consider:
 
 - whether README / workflow / best practices / release docs need updates;
+- whether the skill taxonomy reference needs updates;
 - whether schema pack docs need updates;
 - whether context pack references need updates;
 - whether CLI contract tests need updates;

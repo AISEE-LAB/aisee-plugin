@@ -29,6 +29,8 @@ def run_aisee(root: Path, *args: str) -> dict:
 
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
+    write(root / "openspec" / "changes" / ".gitkeep", "")
     write(
         root / "aisee" / "registry" / "sources.json",
         json.dumps(
@@ -60,7 +62,22 @@ def create_project(root: Path) -> None:
     )
     write(
         root / "docs" / "requirements" / "auth-srs.md",
-        """# Auth SRS
+        """---
+title: "Auth SRS"
+doc_type: "srs"
+status: "active"
+date: "2026-06-09"
+scope: "auth"
+owner: "Aisee"
+source_refs:
+  - "ticket://auth"
+change_refs:
+  - "openspec/changes/add-auth"
+anchors:
+  - "docs/requirements/auth-srs.md#FR-001"
+---
+
+# Auth SRS
 
 ## 登录
 
@@ -70,7 +87,22 @@ def create_project(root: Path) -> None:
     )
     write(
         root / "docs" / "ui-content" / "auth-ui.md",
-        """# Auth UI
+        """---
+title: "Auth UI"
+doc_type: "ui-content"
+status: "active"
+date: "2026-06-09"
+scope: "auth"
+owner: "Aisee"
+source_refs:
+  - "docs/requirements/auth-srs.md#FR-001"
+change_refs:
+  - "openspec/changes/add-auth"
+anchors:
+  - "docs/ui-content/auth-ui.md#PAGE-001"
+---
+
+# Auth UI
 
 ## 登录页
 
@@ -137,10 +169,40 @@ def test_index_writes_rebuildable_cache(tmp_path: Path) -> None:
     assert "docs/requirements/auth-srs.md#FR-001" in data["anchors"]
     assert data["aliases"]["srs:auth-login"] == "docs/requirements/auth-srs.md"
     assert any(item["path"] == "docs/requirements/auth-srs.md" for item in data["documents"])
+    assert data["planning_docs"]["count"] == 2
+    assert any(item["path"] == "docs/requirements/auth-srs.md" and item["doc_type"] == "srs" for item in data["planning_docs"]["items"])
     cache = tmp_path / "aisee" / "cache" / "context-index.json"
     assert cache.exists()
     cached = json.loads(cache.read_text(encoding="utf-8"))
     assert cached["meta"]["cache_is_fact_source"] is False
+
+
+def test_index_ignores_frontmatter_outside_planning_doc_roots(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(
+        tmp_path / "examples" / "sample.md",
+        """---
+title: "Example"
+doc_type: "srs"
+status: "active"
+date: "2026-06-09"
+scope: "example"
+owner: "Aisee"
+source_refs:
+  - "ticket://example"
+change_refs:
+  - "openspec/changes/example"
+anchors:
+  - "examples/sample.md#FR-001"
+---
+
+# Example
+""",
+    )
+
+    data = run_aisee(tmp_path, "index", "--json")
+
+    assert all(item["path"] != "examples/sample.md" for item in data["planning_docs"]["items"])
 
 
 def test_get_returns_anchor_source_and_relations(tmp_path: Path) -> None:

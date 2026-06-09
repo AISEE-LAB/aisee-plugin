@@ -1,0 +1,47 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:change-author",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "change-author-001",
+      "name": "author-single-confirmed-change",
+      "scenario": "artifact-authoring",
+      "prompt": "change-plan 已确认一个 change：add-passwordless-login，schema 是 aisee-app-spec-driven。现在帮我把 proposal、source-map、specs 和 tasks 的初稿编排出来。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户已经有单个明确 change 和 schema。"
+        ]
+      },
+      "expected_output": "应围绕单个已确认 change 输出 artifact 编排与 authoring 规则，提醒先跑 author-check，不重拆 change，不写代码；对 app schema 只按 source-map Required 状态展开按需 contract。",
+      "expected_outputs": [
+        "限定为单个 change 的 artifacts 初稿。",
+        "说明 source-map、specs、tasks 和按需 contract 的职责边界。",
+        "要求先跑 author-check，不在此阶段写实现代码。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "单个 change 边界",
+        "artifact 编排",
+        "author-check 前置"
+      ],
+      "must_not": [
+        "不得重拆 change 边界。",
+        "不得直接写代码或替代 ce-work。"
+      ],
+      "quality_checks": [
+        "只处理当前 schema 包含的 artifacts。",
+        "不把 planning docs 复制成 OpenSpec artifacts。"
+      ],
+      "fact_source_constraints": [
+        "正式事实必须落在当前 OpenSpec change artifacts，而不是平行文档。"
+      ],
+      "files": []
+    }
+  ]
+}

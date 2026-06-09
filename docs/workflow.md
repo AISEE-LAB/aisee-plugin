@@ -36,6 +36,18 @@ aisee doctor --json
 
 如果是已有项目，先不要直接写新 change。优先使用 `aisee:spec-migrate` 反向整理 baseline specs，再进入新需求开发。
 
+## 默认主路径与按需扩展
+
+默认新功能 happy path 只依赖 core workflow：`aisee:flow`、`aisee:init`、`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard`。
+
+以下能力按条件触发，不是每次都要走：
+
+- `aisee:design-spec` / `aisee:design-assets`：只有存在视觉规范、参考图或素材需求时才进入。
+- `aisee:svg-assets` / `aisee:image-object`：只有素材生产或图片处理工作时才进入。
+- `aisee:spec-migrate`：只用于已有项目建立 baseline spec，不是每次迭代必经步骤。
+- `aisee:reflect` / `aisee:knowledge-curate`：只用于复盘和团队知识沉淀。
+- `hw:*`：仅用于硬件、嵌入式或实验域，不影响 app 默认流程。
+
 ## 1. 前置澄清
 
 目标是把聊天里的想法转成可审查输入，而不是直接进入实现。
@@ -45,9 +57,10 @@ aisee doctor --json
 ```text
 aisee:srs
   -> aisee:ui-content（有 UI 时）
-  -> aisee:design-spec / aisee:design-assets（有视觉设计需要时）
   -> aisee:architecture
 ```
+
+如果有视觉规范、参考图或素材需求，再按需进入 `aisee:design-spec` / `aisee:design-assets`；它们不是默认新功能主路径的必经节点。
 
 产出定位：
 

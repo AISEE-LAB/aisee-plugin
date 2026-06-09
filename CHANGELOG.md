@@ -8,6 +8,22 @@
 
 - 暂无。
 
+### Changed
+
+- 暂无。
+
+## [0.5.0] - 2026-06-09
+
+### Added
+
+- 新增 skill taxonomy 合同与全量 skill eval 准入，固定 core 11、可选扩展、知识循环与硬件 / 实验域分层。
+
+### Changed
+
+- `aisee index --json` 与 `aisee doctor --json` 新增 planning doc lifecycle 只读诊断，覆盖缺失 frontmatter、无效状态和 stale active 风险。
+- `resolve_project_root` 改为优先识别最近的 Aisee/OpenSpec project marker，再 fallback 到 Git 顶层，修复 monorepo / fixture 子项目误判。
+- `scripts/smoke_release.py` 改为验证当前 CLI 命令面：CLI-only wheel、marketplace setup hint、`plugin export` invalid choice 和未创建目标目录。
+
 ## [0.4.0] - 2026-06-09
 
 ### Added

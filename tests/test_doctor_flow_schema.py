@@ -12,6 +12,10 @@ def write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def init_git_repo(root: Path) -> None:
+    subprocess.run(["git", "init"], cwd=root, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+
 def install_compound_skills(root: Path, *skills: str) -> Path:
     skills_dir = root / "compound" / "skills"
     for skill in skills:
@@ -146,6 +150,76 @@ def test_doctor_reports_missing_openspec_as_blocked(tmp_path: Path) -> None:
     assert data["meta"]["writes"] is False
 
 
+def test_doctor_reports_planning_doc_lifecycle_risks_without_blocking_open_project(tmp_path: Path) -> None:
+    create_open_project(tmp_path)
+    write(
+        tmp_path / "aisee" / "docs" / "requirements" / "legacy-auth.md",
+        """---
+title: "Legacy Auth SRS"
+doc_type: "srs"
+status: "active"
+date: "2026-06-09"
+scope: "auth"
+owner: "Aisee"
+source_refs:
+  - "ticket://auth"
+change_refs: []
+anchors:
+  - "aisee/docs/requirements/legacy-auth.md#FR-001"
+---
+
+# Legacy Auth
+""",
+    )
+
+    data = run_json(tmp_path, "doctor", "--json")
+
+    assert data["status"] == "risk"
+    assert any(item["code"] == "PLANNING_DOC_CHANGE_REFS_MISSING" for item in data["issues"])
+    assert any(item["code"] == "PLANNING_DOC_STALE_ACTIVE" for item in data["issues"])
+    assert data["aisee"]["planning_docs"]["count"] == 1
+
+
+def test_doctor_reports_missing_frontmatter_as_risk_only(tmp_path: Path) -> None:
+    create_open_project(tmp_path)
+    write(tmp_path / "aisee" / "docs" / "requirements" / "legacy-auth.md", "# Legacy Auth\n")
+
+    data = run_json(tmp_path, "doctor", "--json")
+
+    assert data["status"] == "risk"
+    assert any(item["code"] == "PLANNING_DOC_FRONTMATTER_MISSING" for item in data["issues"])
+
+
+def test_doctor_reports_invalid_change_refs_in_planning_docs(tmp_path: Path) -> None:
+    create_open_project(tmp_path)
+    write(
+        tmp_path / "aisee" / "docs" / "requirements" / "legacy-auth.md",
+        """---
+title: "Legacy Auth SRS"
+doc_type: "srs"
+status: "active"
+date: "2026-06-09"
+scope: "auth"
+owner: "Aisee"
+source_refs:
+  - "ticket://auth"
+change_refs:
+  - "README.md"
+anchors:
+  - "aisee/docs/requirements/legacy-auth.md#FR-001"
+---
+
+# Legacy Auth
+""",
+    )
+
+    data = run_json(tmp_path, "doctor", "--json")
+
+    assert data["status"] == "risk"
+    assert any(item["code"] == "PLANNING_DOC_CHANGE_REF_INVALID" for item in data["issues"])
+    assert any(item["code"] == "PLANNING_DOC_STALE_ACTIVE" for item in data["issues"])
+
+
 def test_bootstrap_plan_is_read_only(tmp_path: Path) -> None:
     data = run_json(tmp_path, "bootstrap", "--plan", "--json")
 
@@ -238,6 +312,42 @@ def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Pa
     assert data["checks"]["implementation_gaps"]["status"] == "risk"
     assert data["checks"]["verify"]["status"] == "risk"
     assert any("context pack --change add-auth --for ce-work" in item for item in data["required_commands"])
+
+
+def test_root_resolution_prefers_nearest_project_markers_inside_git_monorepo(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write(repo / "AGENTS.md", "# Monorepo Root\n")
+
+    project = repo / "apps" / "billing"
+    create_open_project(project)
+    workdir = project / "nested" / "feature"
+    workdir.mkdir(parents=True)
+
+    doctor = run_json(workdir, "doctor", "--json")
+    flow = run_json(workdir, "flow", "inspect", "--change", "add-auth", "--json")
+
+    assert doctor["status"] == "ok"
+    assert doctor["project_rules"]["primary"] == "AGENTS.md"
+    assert doctor["openspec"]["config"] == "openspec/config.yaml"
+    assert flow["stage"] == "change-authored"
+    assert flow["change"] == "add-auth"
+
+
+def test_root_resolution_falls_back_to_git_root_without_aisee_markers(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_git_repo(repo)
+    write(repo / "AGENTS.md", "# Root Rules\n")
+
+    nested = repo / "packages" / "web"
+    nested.mkdir(parents=True)
+    data = run_json(nested, "doctor", "--json")
+
+    assert data["project_rules"]["primary"] == "AGENTS.md"
+    assert data["status"] == "blocked"
+    assert any(item["code"] == "OPENSPEC_CONFIG_MISSING" for item in data["issues"])
 
 
 def test_flow_inspect_recommends_ce_plan_when_execution_paths_are_missing(tmp_path: Path) -> None:

@@ -1,0 +1,48 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:knowledge-curate",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "knowledge-curate-001",
+      "name": "batch-curate-project-candidates",
+      "scenario": "knowledge-review",
+      "prompt": "帮我把这次项目里的 reflect candidates 批量审查成 team knowledge card drafts，去掉项目私有细节，并给出 batch report。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户明确要求整理成团队知识草稿。"
+        ]
+      },
+      "expected_output": "应输出批量审查报告和 card drafts，强调去敏、泛化、去重和可复用边界；不得自动写入 team repo、创建分支、提交或 PR。",
+      "expected_outputs": [
+        "产出 batch review report。",
+        "产出 card draft。",
+        "区分可复用经验与项目私有内容。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "去敏",
+        "泛化",
+        "审查报告",
+        "草稿"
+      ],
+      "must_not": [
+        "不得自动写入团队知识仓库。",
+        "不得把项目私有事实直接提升为跨项目规范。"
+      ],
+      "quality_checks": [
+        "输出是待审草稿，不是假定已发布知识。",
+        "强调 review 边界和后续人工确认。"
+      ],
+      "fact_source_constraints": [
+        "team knowledge card drafts 不是当前项目 OpenSpec 事实源。"
+      ],
+      "files": []
+    }
+  ]
+}

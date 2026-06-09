@@ -51,7 +51,22 @@ def create_anchor_project(root: Path) -> None:
     )
     write(
         root / "docs" / "requirements" / "auth-srs.md",
-        """# Auth SRS
+        """---
+title: "Auth SRS"
+doc_type: "srs"
+status: "active"
+date: "2026-06-09"
+scope: "auth"
+owner: "Aisee"
+source_refs:
+  - "ticket://auth"
+change_refs:
+  - "openspec/changes/add-auth"
+anchors:
+  - "docs/requirements/auth-srs.md#FR-001"
+---
+
+# Auth SRS
 
 ## 登录
 

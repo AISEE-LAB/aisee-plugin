@@ -66,6 +66,30 @@ Aisee CLI = JSON context bus, not a second source of truth
 Compound Engineering = optional implementation / review / test consumer
 ```
 
+## Skill Taxonomy
+
+`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all 22 public skills through `skills: "./skills/"`, but the default happy path contains only **11 core workflow skills**. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
+
+Core workflow:
+
+- `aisee:flow`
+- `aisee:init`
+- `aisee:srs`
+- `aisee:ui-content`
+- `aisee:architecture`
+- `aisee:change-plan`
+- `aisee:change-author`
+- `aisee-schema-pack`
+- `aisee:implementation-bridge`
+- `aisee:verify`
+- `aisee:archive-guard`
+
+On-demand extensions:
+
+- Optional extensions: `aisee:design-spec`, `aisee:design-assets`, `aisee:svg-assets`, `aisee:image-object`, `aisee:spec-migrate`
+- Knowledge loop: `aisee:reflect`, `aisee:knowledge-curate`
+- Hardware / experimental: `hw:srs`, `hw:architecture`, `hw:init`, `hw:change-plan`
+
 ## Features
 
 - **Structured requirement clarification**: `aisee:srs` clarifies business needs through dialogue and produces planning-level SRS documents.
