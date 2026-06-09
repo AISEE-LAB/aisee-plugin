@@ -9,6 +9,8 @@
 - Aisee CLI 输出 JSON context view，不创建第二份规范事实源。
 - 实现、review、test 可以由 Compound Engineering 或其他 coding agent 承接。
 - `openspec archive <change>` 是已验证 change 合入 baseline 的最终动作。
+- planning docs 只服务当前版本 / 迭代输入，不替代 baseline facts。
+- 文档内正式写法只使用 local ID；跨文档正式追踪只使用 anchor ref。
 
 ## 0. 项目初始化
 
@@ -55,11 +57,11 @@ aisee:srs
 | Design Spec / Assets | 描述或生成视觉规范、参考图、素材和风格输入 | 不重复页面内容 |
 | Architecture | 记录技术事实、架构边界、平台约束、共享约定和风险 | 不替代 change artifact |
 
-这些前置文档是 change planning 的输入，不是 OpenSpec baseline。
+这些前置文档是当前版本 / 迭代的 planning docs，是 change planning 的输入，不是 OpenSpec baseline。
 
 ## 2. Change 规划
 
-用 `aisee:change-plan` 把已确认输入拆成可独立交付的 OpenSpec changes。
+用 `aisee:change-plan` 把已确认输入拆成可独立交付的 OpenSpec changes。一个版本 / 迭代可以拆成 one or more changes。
 
 ```text
 aisee:change-plan
@@ -75,6 +77,7 @@ aisee:change-plan
 - 不把输入材料章节、技术层、页面类型、schema artifact 当成 change。
 - 大 change 可以有依赖顺序，但不要让单个 change 承担整套产品。
 - 低风险小修复可以使用 `quick-fix`，不强制走 app schema。
+- 小范围、边界明确、低风险工作可以跳过 SRS / UI / Architecture 等重前置文档，直接进入合适的轻量 schema。
 - 前后端共享接口、事件、数据模型或 SDK 时，优先规划一个前置 contract change。
 
 ## 3. Change 创建与 Authoring
@@ -107,6 +110,7 @@ data-model.md            # 按需
 - Required=yes：必须展开对应 artifact。
 - Required=no：必须写清楚 N/A 原因。
 - 不要为了“完整”强行生成与当前 change 无关的 contract。
+- Upstream Sources / Trace 表中的正式跨文档列使用 `Ref` / `Refs`；当前 change 内新对象使用 local ID。
 
 ## 4. 实现交接
 
@@ -173,7 +177,7 @@ aisee context pack --change <change> --for aisee-verify --json
 
 - schema artifacts 是否存在。
 - Required=yes contracts 是否闭合。
-- source-map、ID、代码路径、测试路径和 evidence 是否一致。
+- source-map、anchor refs / local IDs、代码路径、测试路径和 evidence 是否一致。
 - `tasks.md` 或 apply tracks 是否真实完成。
 - OpenSpec validate 是否通过。
 - review/test/manual evidence 是否足够。

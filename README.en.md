@@ -6,7 +6,7 @@ English | [简体中文](https://github.com/AISEE-LAB/aisee-plugin/blob/main/REA
 
 Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, schema-aware OpenSpec changes, implementation briefs, verification checks, and archive guardrails.
 
-Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, stable ID tracking, and engineering handoff rules around OpenSpec.
+Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, anchor-aware traceability, and engineering handoff rules around OpenSpec.
 
 ## Why Aisee?
 
@@ -19,8 +19,18 @@ Aisee makes that context explicit:
 - create and complete OpenSpec changes with schema-aware guidance;
 - keep OpenSpec as the only persistent specification source of truth;
 - generate machine-readable context packs for implementation, verification, and review;
-- track requirement, page, contract, task, code, and evidence IDs;
+- track requirements, pages, contracts, tasks, code, and evidence through local IDs and anchor refs;
 - check whether artifacts, tasks, source maps, tests, and review evidence are closed before archive.
+
+## Agile Delivery Model
+
+Aisee now follows a version / iteration-oriented agile model:
+
+- SRS, UI Content, Design Spec, and Architecture are **planning docs** for the current version or iteration;
+- `aisee:change-plan` splits one iteration into **one or more** independently deliverable OpenSpec changes;
+- the current change's proposal, source-map, specs, contracts, and tasks are the formal implementation-time commitments;
+- after `openspec archive`, baseline specs take over as the current source of truth;
+- small, bounded, low-risk work can skip heavy upfront docs and enter an appropriate lightweight schema directly.
 
 ## Workflow Positioning
 
@@ -28,7 +38,10 @@ Aisee makes that context explicit:
 User intent
   ↓
 Aisee skills
-  Clarify requirements, UI content, architecture, and change boundaries
+  Produce planning docs and clarify requirements, UI content, architecture, and change boundaries
+  ↓
+aisee:change-plan
+  One iteration -> one or more OpenSpec changes
   ↓
 OpenSpec
   Manage active changes, baseline specs, validate, apply, and archive
@@ -62,7 +75,7 @@ Compound Engineering = optional implementation / review / test consumer
 - **Context packs**: `aisee context pack` generates JSON context for implementation, verification, and review.
 - **Contract context service**: `aisee contract` exposes service contracts through manifest-first and section-level reads for cross-repository frontend/backend collaboration.
 - **Team knowledge guardrails**: `aisee knowledge` retrieves a small number of reviewed engineering lessons through pack/card protocols without turning the knowledge repository into a second specification source.
-- **ID registry and traceability**: `aisee id`, `aisee get`, and `aisee trace` connect upstream documents, OpenSpec artifacts, tasks, code paths, tests, and evidence.
+- **Anchor-aware traceability**: `aisee get`, `aisee trace`, and `aisee index` connect upstream documents, OpenSpec artifacts, tasks, code paths, tests, and evidence through `doc-ref#LOCAL-ID` or alias anchors.
 - **Verification and archive guardrails**: `aisee:verify` and `aisee:archive-guard` diagnose gaps and risks before archive.
 - **Harness design**: CLI contract tests and normalized skill eval cases keep the workflow stable.
 
@@ -202,7 +215,7 @@ aisee flow inspect --json
 - [Plugin Marketplace](docs/plugin-marketplace.en.md): responsibilities of plugin manifests, marketplace listings, PyPI/pipx, and the Codex install path.
 - [Team Knowledge Guardrails](docs/team-knowledge.en.md): experimental status, usage, and gaps before stability for shared team knowledge.
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, and read model.
-- [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, ID/source-map rules, and contract attachment boundaries.
+- [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, anchor/source-map rules, and contract attachment boundaries.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
 - [Release And Version Governance](docs/release.md): single version source, release checks, and tag rules.
@@ -210,18 +223,26 @@ aisee flow inspect --json
 ## Typical Workflow
 
 ```text
-1. aisee:srs
-2. aisee:ui-content
-3. aisee:architecture
-4. aisee:change-plan
-5. /opsx:new "<change>" --schema <schema>
-6. aisee:change-author
-7. openspec validate <change>
-8. aisee:implementation-bridge
-9. implementation / review / test
-10. aisee:verify
-11. aisee:archive-guard
-12. openspec archive <change>
+1. aisee:srs / aisee:ui-content / aisee:architecture, as needed
+2. aisee:change-plan
+3. /opsx:new "<change>" --schema <schema>
+4. aisee:change-author
+5. openspec validate <change>
+6. aisee:implementation-bridge
+7. implementation / review / test
+8. aisee:verify
+9. aisee:archive-guard
+10. openspec archive <change>
+
+For small, bounded, low-risk work, an abbreviated path is also valid:
+
+```text
+quick-fix / quick-research / another lightweight schema
+  -> change-author
+  -> implementation-bridge
+  -> verify
+  -> archive-guard
+```
 ```
 
 Before and after implementation, use read-only Aisee reviewer roles as needed: `aisee-change-architect`, `aisee-spec-reviewer`, and `aisee-implementation-reviewer`. See [Aisee Workflow](docs/workflow.en.md) for timing and boundaries, and [Aisee Best Practices](docs/best-practices.en.md) for reuse-first routing.
@@ -324,10 +345,9 @@ aisee contract get --change <change> --artifact service-contract --section capab
 aisee contract serve --host 127.0.0.1 --port 8765
 aisee change verify-check <change> --json
 aisee change archive-check <change> --json
-aisee id check --json
-aisee id reserve --scope <scope> --type <type> --count 3 --json
-aisee get <id> --json
-aisee trace <id> --json
+aisee index --json
+aisee get docs/requirements/auth-srs.md#FR-001 --json
+aisee trace srs:auth-login#FR-001 --json
 ```
 
 Key CLI rules:
@@ -336,7 +356,8 @@ Key CLI rules:
 - `aisee/cache/context-index.json` is a deletable and rebuildable cache.
 - `aisee/cache/knowledge-index.json` is also a deletable and rebuildable cache; team knowledge persists in pinned pack/card files.
 - `aisee knowledge promote-batch` only writes the local team knowledge worktree; it does not commit, push, or create PRs.
-- `aisee/registry/id-registry.json`, `aisee/registry/sources.json`, OpenSpec artifacts, and `source-map.md` are persistent traceability inputs.
+- `aisee/registry/sources.json`, OpenSpec artifacts, and `source-map.md` are the current formal traceability inputs.
+- If `aisee/registry/id-registry.json` still exists, treat it as legacy compatibility data rather than a formal authoring entry point.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
 - `aisee openspec ensure` only bridges OpenSpec initialization and profile setup. It does not replace `aisee:init`.
 - `aisee contract serve` is a read-only contract context service, not a mock backend, API gateway, or second API source of truth. It binds to `127.0.0.1` by default; LAN access requires explicit `--host 0.0.0.0` and exposes local contract documents to that network.

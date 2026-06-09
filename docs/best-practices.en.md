@@ -19,11 +19,11 @@ Aisee documents, CLI JSON, Implementation Briefs, review reports, and chat summa
 - verification evidence;
 - improvement suggestions.
 
-Any conclusion that must persist should be written back to the current OpenSpec change, baseline specs, schema apply tracks, source-map, or registry.
+Any conclusion that must persist should be written back to the current OpenSpec change, baseline specs, schema apply tracks, source-map, or other formal sources such as `sources.json`.
 
 ## 2. Do Not Let Upfront Documents Replace Change Artifacts
 
-SRS, UI Content, Design Spec, and Architecture help plan changes.
+SRS, UI Content, Design Spec, and Architecture help plan the current version or iteration's changes.
 
 Recommended:
 
@@ -64,6 +64,14 @@ Avoid using these as change boundaries:
 
 For multi-repository work, prefer a contract change or prerequisite shared change to govern the interface.
 
+## 3.1 Use The Lightweight Path For Small Low-Risk Work
+
+When work is small, bounded, and low-risk:
+
+- it can skip heavier upfront docs such as SRS, UI Content, or Architecture;
+- it can enter `quick-fix`, `quick-research`, or another suitable lightweight schema directly;
+- it still must close the current change artifacts, verify flow, and archive gate.
+
 ## 4. Choose Schema By Risk
 
 Recommended schema choices:
@@ -103,8 +111,8 @@ This reduces duplication and keeps AI context smaller.
 
 `source-map.md` should record:
 
-- upstream IDs;
-- produced IDs;
+- upstream anchor refs;
+- local IDs produced inside the current change;
 - artifact applicability;
 - code paths;
 - test paths;
@@ -113,18 +121,19 @@ This reduces duplication and keeps AI context smaller.
 
 Do not rewrite full requirements, page flows, API details, or data models in source-map. Detailed content belongs in specs, contracts, or the corresponding artifact.
 
-## 7. IDs Are Stable; Content Evolves
+## 7. Local IDs And Anchor Refs Are Stable; Content Evolves
 
-IDs connect requirements, pages, APIs, data, tasks, code, and evidence.
+Local IDs and anchor refs connect requirements, pages, APIs, data, tasks, code, and evidence.
 
 Recommended:
 
-- Reserve or confirm IDs before implementation.
-- Keep temporary IDs short-lived; they must not enter archive.
-- When replacing or removing IDs, keep migration notes.
-- Do not treat headings, filenames, or natural-language descriptions as stable IDs.
+- Use local IDs inside documents, such as `FR-001`, `PAGE-001`, or `API-001`.
+- Use anchor refs across documents, such as `docs/requirements/auth-srs.md#FR-001`.
+- Keep temporary `TYPE-NEW-001` IDs short-lived; they must not enter archive.
+- When replacing or removing anchor/local IDs, keep migration notes.
+- Do not treat headings, filenames, or natural-language descriptions as stable identifiers.
 
-The ID registry is a traceability input, not requirement prose.
+Use `sources.json`, `source-map.md`, and rebuildable index output for traceability; do not return to the full ID lifecycle model.
 
 ## 8. Context Pack Is A Read Entry, Not A New Document
 
