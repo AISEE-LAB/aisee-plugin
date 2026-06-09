@@ -13,19 +13,19 @@
 **场景模式**：new-build
 **ID Scope**：{scope}
 
-> 正式 PAGE / FLOW / STATE ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式写法只使用文档内 local ID，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
 
 ---
 
 ## 1. 来源与范围
 
-### 1.0 ID Registry 状态
+### 1.0 Anchor / Local ID 状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已读取 `aisee/registry/id-registry.json` | yes / no | `aisee id check --json` | |
-| 已为新增 PAGE / FLOW / STATE 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
-| 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
+| local ID 已稳定 | yes / no | 文档内编号检查 | |
+| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#PAGE-001` / `ui-content:...#PAGE-001` | |
+| 存在临时 ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
 
 ### 1.1 覆盖范围
 - 覆盖 FR：{{scope}}:FR-001 ~ {{scope}}:FR-00X
@@ -77,7 +77,6 @@
 ## 5. 流程总览
 
 ### FLOW-001 {流程名称}
-<!-- aisee:id {scope}:FLOW-001 -->
 
 **目标用户**：{role}
 **关联 FR**：{{scope}}:FR-xxx
@@ -96,7 +95,6 @@
 ## 6. 页面内容规格
 
 ### PAGE-001 {页面名称}
-<!-- aisee:id {scope}:PAGE-001 -->
 
 **页面类型**：{列表页 / 详情页 / 表单页 / 流程页 / 设置页 / 结果页 / 授权页 / 通知落地页}
 **页面目标**：{一句话说明用户在此页面完成什么}

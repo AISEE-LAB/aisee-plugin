@@ -13,7 +13,7 @@
 **技术域**：{app / web / mini-program / desktop / backend-service / cli-tool / job-async / integration / data / hybrid-software}
 **ID Scope**：{scope}
 
-> 正式 ARCH / DEC / CONSTRAINT / RISK ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式写法只使用文档内 local ID，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
 
 ---
 
@@ -37,13 +37,13 @@
 
 ## 2. 技术域与技术栈 / 工具链状态
 
-### 2.0 ID Registry 状态
+### 2.0 Anchor / Local ID 状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已读取 `aisee/registry/id-registry.json` | yes / no | `aisee id check --json` | |
-| 已为新增 ARCH / DEC / CONSTRAINT / RISK 执行 reserve | yes / no / N/A | `aisee id reserve --scope {scope} --type <TYPE> --count <N> --json` | |
-| 存在临时 ID | yes / no | `[ID-RESERVATION-REQUIRED]` | |
+| local ID 已稳定 | yes / no | 文档内编号检查 | |
+| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#ARCH-001` / `architecture:...#ARCH-001` | |
+| 存在临时 ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
 
 **状态**：已确定 / 部分确定 / 未确定
 
@@ -73,10 +73,10 @@
 
 | ARCH ID | 项 | 当前事实 / 决策 | 来源 | 可信度 | 对 change-plan 的影响 |
 |----|----|-----------------|------|--------|------------------------|
-| {scope}:ARCH-001 | 系统分层 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
-| {scope}:ARCH-002 | 主要运行单元 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
-| {scope}:ARCH-003 | 端 / 服务 / 设备协作关系 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
-| {scope}:ARCH-004 | 模块边界原则 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| ARCH-001 | 系统分层 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| ARCH-002 | 主要运行单元 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| ARCH-003 | 端 / 服务 / 设备协作关系 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
+| ARCH-004 | 模块边界原则 | {fact/decision or 未确认} | {source} | high/medium/low | {impact} |
 
 ---
 
@@ -191,7 +191,7 @@
 
 | RISK ID | 标记 | 内容 | 影响 | 建议处理 |
 |------|------|------|------|----------|
-| {scope}:RISK-001 | [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] / [DOC-CONTEXT-MISSING] / [ARCH-DECISION-REQUIRED] / [SPEC-GAP] / [STACK-CONFLICT] / [TECH-CONVENTION-MISSING] / [SCHEMA-HINT-UNCLEAR] / [ID-RESERVATION-REQUIRED] | {content} | {impact} | {next step} |
+| RISK-001 | [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] / [DOC-CONTEXT-MISSING] / [ARCH-DECISION-REQUIRED] / [SPEC-GAP] / [STACK-CONFLICT] / [TECH-CONVENTION-MISSING] / [SCHEMA-HINT-UNCLEAR] / [ID-FINALIZATION-REQUIRED] | {content} | {impact} | {next step} |
 
 ---
 

@@ -1,6 +1,6 @@
 # aisee:design-spec — 标准模板
 
-用于项目级、模块级、跨页面、多端或需要完整设计规范事实源的场景。
+用于项目级、模块级、跨页面、多端或需要完整 design spec / delta planning doc 的场景。
 
 ```markdown
 # Design Spec：{项目 / 模块 / 功能名}
@@ -20,7 +20,7 @@
 - 需求 / 模块：{name}
 - 覆盖页面 / 流程：{PAGE/FLOW or 无}
 - 覆盖平台：{platforms}
-- 用途：为 UI 设计、Design Assets、change-plan 和后续实现提供设计规范事实源
+- 用途：为 UI 设计、Design Assets、change-plan 和后续实现提供 design spec / delta planning input
 
 ### 1.2 不在范围
 - 不生成 SRS 或 UI 内容规格

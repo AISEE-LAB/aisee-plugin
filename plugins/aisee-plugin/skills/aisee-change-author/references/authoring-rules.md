@@ -39,8 +39,8 @@
 
 | Artifact | 主要输入 | 可新增 ID | 禁止内容 |
 |---|---|---|---|
-| `proposal.md` | confirmed change-plan、上游来源 ID、用户确认边界 | 无；只引用上游 ID | 接口字段、数据库字段、实现步骤、重新拆 change |
-| `source-map.md` | proposal、上游文档、ID registry、schema artifact list | `SPEC / API / DATA / TASK / TEST` 的预留记录 | 业务需求正文、契约细节、实现方案 |
+| `proposal.md` | confirmed change-plan、上游来源 anchor、用户确认边界 | 无；只引用上游 anchor / local ID | 接口字段、数据库字段、实现步骤、重新拆 change |
+| `source-map.md` | proposal、上游文档、sources index、schema artifact list | `SPEC / API / DATA / TASK / TEST` 的 local ID 记录 | 业务需求正文、契约细节、实现方案 |
 | `specs/**/*.md` | source-map 中覆盖的 `FR / NFR / RULE / FLOW / STATE` | `SPEC` | UI 布局、API 字段、表字段、任务清单 |
 | `change-context.md` | Architecture 中相关 `ARCH / DEC / CONSTRAINT / RISK` | 局部 `DEC / CONSTRAINT / RISK` | 重写全局 Architecture、展开服务 / 数据 / UI 契约 |
 | `ui-contract.md` | UI Content、Design Spec / Assets、specs、change-context、source-map | 必要时新增局部 `PAGE / FLOW / STATE` | 重新制定或复制完整视觉规范、组件库选择、像素布局 |
@@ -90,8 +90,8 @@ service-contract.md
 
 生成规则：
 
-- `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用完整 ID，不复制上游全文。
-- `source-map.md`：先建立上游输入 ID、产出 ID、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
+- `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用 anchor ref 或 local ID，不复制上游全文。
+- `source-map.md`：先建立上游输入 anchor、产出 local ID、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
 - `specs/**/*.md`：只写用户可观察行为和验收场景，覆盖 FR / NFR / RULE / FLOW / STATE。
 - `change-context.md`：只在 Required=yes 时承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture。
 - `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
@@ -122,26 +122,21 @@ Required=no 的 artifact 不能留空原因。生成 `source-map.md` 的 schema 
 
 不生成 `source-map.md` 的 schema 应在当前主 artifact 或对应 artifact 中写 N/A 原因，不要补假 source-map。如果同时创建 N/A 文件，文件只需要包含状态和 N/A 原因，不需要填完整模板。
 
-## ID Preflight
+## Anchor / Local ID Preflight
 
-优先使用 `aisee change author-check <change> --json` 中的 `ids.actions`。需要手动补查时使用：
+优先使用 `aisee change author-check <change> --json` 中的 `anchors.actions`。需要手动补查时使用：
 
 ```bash
 aisee change author-check <change> --json
-aisee id check --json
-aisee trace <upstream-id> --json
-aisee id reserve --scope <scope> --type SPEC --count <n> --json
-aisee id reserve --scope <scope> --type API --count <n> --json
-aisee id reserve --scope <scope> --type DATA --count <n> --json
-aisee id reserve --scope <scope> --type TASK --count <n> --json
-aisee id reserve --scope <scope> --type TEST --count <n> --json
-aisee id activate <full-id> --owner <artifact-path> --title "<title>"
+aisee get <anchor-ref> --json
+aisee trace <anchor-ref> --json
+aisee index --json
 ```
 
-只 reserve 实际需要的 ID 类型。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时 reserve。
+只在当前 change 内生成实际需要的 local ID。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时写新的 local ID，并把跨文档追踪回写成 anchor ref。
 
 工具不可用时：
 
-- 继续生成草稿可以，但所有新增 ID 必须用 `{{scope}}:<TYPE>-NEW-001`。
-- 如果 schema 生成 `source-map.md`，必须在 `source-map.md` 写 `[ID-RESERVATION-REQUIRED]`；否则写入当前 schema 的主 artifact。
-- final / handoff 必须说明这些不是正式 ID，后续需要运行 `aisee id reserve / activate / check`。
+- 继续生成草稿可以，但所有新增 ID 必须用 `TYPE-NEW-001`。
+- 如果 schema 生成 `source-map.md`，必须在 `source-map.md` 写 `[ID-FINALIZATION-REQUIRED]`；否则写入当前 schema 的主 artifact。
+- final / handoff 必须说明这些不是最终 local ID，后续需要完成 local ID 定稿并校验 anchor 解析。

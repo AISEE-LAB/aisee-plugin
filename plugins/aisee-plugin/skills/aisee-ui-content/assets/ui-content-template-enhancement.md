@@ -13,7 +13,7 @@
 **场景模式**：enhancement
 **ID Scope**：{scope}
 
-> 正式 PAGE / FLOW / STATE ID 必须来自 `aisee/registry/id-registry.json`。工具不可用时使用 `{{scope}}:<TYPE>-NEW-001` 临时占位符，并标注 `[ID-RESERVATION-REQUIRED]`。
+> 正式写法只使用文档内 local ID，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
 
 ---
 
@@ -84,7 +84,6 @@
 ## 6. 变化流程总览
 
 ### FLOW-001 {流程名称}
-<!-- aisee:id {scope}:FLOW-001 -->
 
 **变化类型**：新增 / 修改 / 替换 / 下线
 **目标用户**：{role}
@@ -104,7 +103,6 @@
 ## 7. 页面变化规格
 
 ### PAGE-001 {页面名称}
-<!-- aisee:id {scope}:PAGE-001 -->
 
 **变化状态**：Changed / New / Deprecated / Unknown
 **当前来源**：{现有页面/路由/source-map/baseline/历史文档；新建则写“无”}

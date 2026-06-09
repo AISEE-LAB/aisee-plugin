@@ -27,7 +27,7 @@ Reviewer 触发建议：
 
 ## 职责
 
-- 读取项目状态、OpenSpec change、`aisee/registry/sources.json`、`aisee/registry/id-registry.json`、schema artifacts、Aisee companion artifacts 和 CE review/test evidence。
+- 读取项目状态、OpenSpec change、`aisee/registry/sources.json`、schema artifacts、Aisee companion artifacts 和 CE review/test evidence；必要时把旧 full ID 文本只当成兼容诊断，不当成正式事实源。
 - 优先调用 Aisee CLI 的 `doctor`、`flow inspect/next`、`change inspect`、`author-check`、`gaps`、`verify-check`、`archive-check` 和 `context pack` 获取当前事实。
 - 展示当前 schema、source-map/tasks 是否必需、implementation references、verify/archive checks 和 required commands。
 - 判断当前 workflow stage。

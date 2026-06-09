@@ -6,11 +6,11 @@
 
 ## 通用规则
 
-- FR / NFR / RULE / FLOW / STATE 必须引用 SRS 中的完整 ID；没有 ID 时标注 `[SOURCE-ID-MISSING]` 或 `[ID-RESERVATION-REQUIRED]`。
+- FR / NFR / RULE / FLOW / STATE 必须引用 SRS 中的 `doc-ref#LOCAL-ID` 或 alias anchor；没有稳定 local ID 时标注 `[SOURCE-ID-MISSING]` 或 `[ID-FINALIZATION-REQUIRED]`。
 - PAGE / FLOW / STATE 必须来自 UI Content；没有 UI 时写 `N/A`，不要硬造页面。
-- Architecture 相关来源只引用 `ARCH / DEC / CONSTRAINT / RISK` 完整 ID，不复制整段架构说明。
-- `aisee:change-plan` 不分配上游 ID，不临时发明正式 ID。
-- SPEC / API / DATA / TASK / TEST 是 change-author 阶段产出，seed 中写 `TBD in <artifact>`。
+- Architecture 相关来源只引用 `ARCH / DEC / CONSTRAINT / RISK` 的 anchor ref 或 local ID，不复制整段架构说明。
+- `aisee:change-plan` 不分配上游 ID，不临时发明正式 full ID。
+- SPEC / API / DATA / TASK / TEST 是 change-author 阶段产出，seed 中写 `TBD in <artifact>` 或 local ID placeholder。
 - artifact 适用性要写 yes/no 和原因，不能只写 yes/no。
 - 不要在 seed 中写最终 API endpoint、数据库字段、引脚表、寄存器表或实现任务。
 
@@ -20,10 +20,10 @@
 
 | 字段 | 填写规则 |
 |------|----------|
-| FR / NFR / RULE | SRS 中的完整 ID |
-| PAGE / FLOW / STATE | UI Content 中的完整 ID，或 `N/A` |
+| FR / NFR / RULE | SRS 中的 anchor ref |
+| PAGE / FLOW / STATE | UI Content 中的 anchor ref，或 `N/A` |
 | DESIGN | Design Spec / Design Assets / dev-visual-brief 引用，或 `N/A` |
-| ARCH / DEC / CONSTRAINT / RISK | Architecture 中的完整 ID，或 `N/A` |
+| ARCH / DEC / CONSTRAINT / RISK | Architecture 中的 anchor ref，或 `N/A` |
 | SPEC | `TBD in change-author` |
 | API | `TBD in service-contract` |
 | DATA | `TBD in data-model` |
