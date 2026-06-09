@@ -125,21 +125,21 @@ def test_plugin_inspect_reports_cli_only_without_source_checkout(tmp_path: Path)
     assert data["issues"][0]["code"] == "PLUGIN_CONTENT_UNAVAILABLE"
 
 
-def test_plugin_export_returns_deprecation_blocker(tmp_path: Path) -> None:
+def test_plugin_export_is_not_a_public_subcommand(tmp_path: Path) -> None:
     destination = tmp_path / "exported-plugin"
-    data = run_json(tmp_path, "plugin", "export", "--target", "codex", "--dest", str(destination), "--json")
+    result = run_aisee(tmp_path, "plugin", "export", "--target", "codex", "--dest", str(destination), "--json", check=False)
 
-    assert data["status"] == "blocked"
-    assert data["meta"]["writes"] is False
-    assert data["issues"][0]["code"] == "PLUGIN_EXPORT_DEPRECATED"
+    assert result.returncode == 2
+    assert "invalid choice" in result.stderr
+    assert "export" in result.stderr
     assert not destination.exists()
 
 
-def test_team_knowledge_scaffold_returns_deprecation_blocker(tmp_path: Path) -> None:
+def test_team_knowledge_scaffold_is_not_a_public_subcommand(tmp_path: Path) -> None:
     destination = tmp_path / "team-knowledge"
-    data = run_json(tmp_path, "knowledge", "scaffold", "--dest", str(destination), "--json")
+    result = run_aisee(tmp_path, "knowledge", "scaffold", "--dest", str(destination), "--json", check=False)
 
-    assert data["status"] == "blocked"
-    assert data["meta"]["writes"] is False
-    assert data["issues"][0]["code"] == "KNOWLEDGE_SCAFFOLD_DEPRECATED"
+    assert result.returncode == 2
+    assert "invalid choice" in result.stderr
+    assert "scaffold" in result.stderr
     assert not destination.exists()

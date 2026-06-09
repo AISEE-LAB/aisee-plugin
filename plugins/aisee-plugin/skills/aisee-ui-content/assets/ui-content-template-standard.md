@@ -3,6 +3,19 @@
 用于 `new-build + standard` 场景：新系统或新模块，没有可引用的既有 UI 基线，生成单文件完整 UI 内容规格。
 
 ```markdown
+---
+title: "UI 内容规格：{功能名}"
+doc_type: "ui-content"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{作者或团队}"
+source_refs:
+  - "{SRS path or anchor ref}"
+change_refs: []
+anchors: []
+---
+
 # UI 内容规格：{功能名}
 
 **文档编号**：UIC-{YYYY-MM-DD}-{slug}

@@ -69,7 +69,7 @@ node <skill-dir>/scripts/setup-schemas.js --schema security-audit --force
 
 安装规则：
 
-- 优先使用 `aisee schemas list/check --json` 获取机器可解析状态。`aisee schemas install` 是迁移期兼容命令，只返回 deprecation/blocker，不写入 schema pack。
+- 优先使用 `aisee schemas list/check --json` 获取机器可解析状态。schema pack 安装路径改为 marketplace-installed plugin 或外部仓库；不再通过公开 CLI 子命令写入 schema pack。
 - 需要写入 schema pack 时，使用本 skill 内 `scripts/setup-schemas.js` 或按确认后的文件清单从本 skill 的 `assets/schema-pack/<schema-name>/` 复制到项目 `openspec/schemas/<schema-name>/`。
 - 写入 `openspec/schemas/<schema-name>/`。
 - 已存在同名 schema 时默认跳过；`--force` 才覆盖。

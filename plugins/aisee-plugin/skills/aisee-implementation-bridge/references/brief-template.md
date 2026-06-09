@@ -9,6 +9,20 @@
 - 保存到文件时，优先使用 `aisee/cache/implementation-bridge/<change>/brief-part-NN.md`；这些文件是 generated handoff / cache，不是规范事实源。
 
 ```md
+---
+title: "Implementation Brief"
+doc_type: "implementation-brief"
+status: "draft"
+date: "{date}"
+scope: "<change>"
+owner: "{作者或团队}"
+source_refs:
+  - "openspec/changes/<change>"
+change_refs:
+  - "openspec/changes/<change>"
+anchors: []
+---
+
 # Implementation Brief
 
 ## Preflight

@@ -5,6 +5,18 @@
 ## Reflect 报告模板
 
 ```markdown
+---
+title: "Reflect 报告"
+doc_type: "reflect"
+status: "draft"
+date: "YYYY-MM-DD"
+scope: "session"
+owner: "{作者或团队}"
+source_refs: []
+change_refs: []
+anchors: []
+---
+
 # Reflect 报告
 
 ## 会话概览
@@ -74,6 +86,18 @@ aisee/docs/reflect/YYYY-MM-DD_<slug>.md
 模板：
 
 ```markdown
+---
+title: "Reflect: <Session Title>"
+doc_type: "reflect"
+status: "draft"
+date: "YYYY-MM-DD"
+scope: "session"
+owner: "{作者或团队}"
+source_refs: []
+change_refs: []
+anchors: []
+---
+
 # Reflect: <Session Title>
 
 _Date: YYYY-MM-DD_

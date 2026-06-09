@@ -3,6 +3,19 @@
 当 FR <= 10、模块 < 3，且没有复杂扩展块需要 Epic 模式时，使用本模板。
 
 ```markdown
+---
+title: "需求规格说明书：{系统/功能名称}"
+doc_type: "srs"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{从 AGENTS.md 或项目上下文提取，或填\"待填写\"}"
+source_refs:
+  - "{repo-relative source path or anchor ref}"
+change_refs: []
+anchors: []
+---
+
 # 需求规格说明书
 
 **文档编号**：SRS-{YYYY-MM-DD}-{slug}

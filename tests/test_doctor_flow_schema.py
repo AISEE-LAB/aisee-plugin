@@ -66,7 +66,6 @@ def create_open_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(root / "openspec" / "changes" / ".gitkeep", "")
-    write(root / "aisee" / "registry" / "id-registry.json", '{"version":1,"scopes":{}}\n')
     write(root / "aisee" / "registry" / "sources.json", '{"version":1,"sources":[]}\n')
     write(
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
@@ -108,7 +107,6 @@ def create_quick_research_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: quick-research\n")
     write(root / "openspec" / "changes" / ".gitkeep", "")
-    write(root / "aisee" / "registry" / "id-registry.json", '{"version":1,"scopes":{}}\n')
     write(
         root / "openspec" / "schemas" / "quick-research" / "schema.yaml",
         """name: quick-research
@@ -157,6 +155,7 @@ def test_bootstrap_plan_is_read_only(tmp_path: Path) -> None:
     schema_action = next(item for item in data["actions"] if item["path"] == "aisee-plugin marketplace")
     assert "codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main" in schema_action["reason"]
     assert "aisee schemas install" not in schema_action["reason"]
+    assert all(not item["path"].endswith("id-registry.json") for item in data["actions"])
     assert not (tmp_path / "AGENTS.md").exists()
 
 
@@ -182,13 +181,11 @@ def test_doctor_and_bootstrap_report_legacy_aisee_layout(tmp_path: Path) -> None
     assert any(item["kind"] == "migrate" and ".memory/index.md" in item["path"] for item in bootstrap["actions"])
 
 
-def test_bootstrap_apply_is_explicitly_blocked(tmp_path: Path) -> None:
+def test_bootstrap_apply_is_not_a_public_flag(tmp_path: Path) -> None:
     result = run_aisee(tmp_path, "bootstrap", "--apply", "--json", check=False)
-    data = json.loads(result.stdout)
 
-    assert result.returncode == 1
-    assert data["status"] == "blocked"
-    assert data["issues"][0]["code"] == "BOOTSTRAP_APPLY_NOT_IMPLEMENTED"
+    assert result.returncode == 2
+    assert "unrecognized arguments: --apply" in result.stderr
 
 
 def test_schema_pack_list_and_check_use_explicit_dev_asset_root(tmp_path: Path, monkeypatch) -> None:
@@ -197,13 +194,9 @@ def test_schema_pack_list_and_check_use_explicit_dev_asset_root(tmp_path: Path, 
 
     listed = run_json(tmp_path, "schemas", "list", "--json")
     checked = run_json(tmp_path, "schemas", "check", "--json")
-    installed = run_json(tmp_path, "schemas", "install", "--schema", "quick-fix", "--json")
 
     assert listed["schemas"][0]["name"] == "quick-fix"
     assert checked["status"] == "ok"
-    assert installed["status"] == "blocked"
-    assert installed["meta"]["writes"] is False
-    assert installed["issues"][0]["code"] == "SCHEMA_INSTALL_DEPRECATED"
     assert not (tmp_path / "openspec" / "schemas" / "quick-fix" / "schema.yaml").exists()
 
 

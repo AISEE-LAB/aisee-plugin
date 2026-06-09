@@ -27,6 +27,7 @@ Aisee makes that context explicit:
 Aisee now follows a version / iteration-oriented agile model:
 
 - SRS, UI Content, Design Spec, and Architecture are **planning docs** for the current version or iteration;
+- regular planning docs use a shared YAML frontmatter contract for identity, status, and source indexing without becoming OpenSpec baseline facts;
 - `aisee:change-plan` splits one iteration into **one or more** independently deliverable OpenSpec changes;
 - the current change's proposal, source-map, specs, contracts, and tasks are the formal implementation-time commitments;
 - after `openspec archive`, baseline specs take over as the current source of truth;
@@ -156,7 +157,7 @@ aisee doctor --json
 
 When reading plugin content, the CLI checks only the Codex install location by default. For other agent runtimes, set `AISEE_AGENT_RUNTIME=claude|cursor|agents`; set it to `none` to disable installed plugin content discovery.
 
-`aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` no longer distribute plugin content from the PyPI wheel. These public legacy commands return stable JSON blockers with the Codex marketplace setup path.
+`aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` have been removed from the public CLI surface. Plugin content, schema packs, and team knowledge templates now come from the Codex marketplace plugin or external repositories.
 
 The source repository also includes plugin metadata for multiple agent runtimes:
 
@@ -245,7 +246,7 @@ quick-fix / quick-research / another lightweight schema
 ```
 ```
 
-Before and after implementation, use read-only Aisee reviewer roles as needed: `aisee-change-architect`, `aisee-spec-reviewer`, and `aisee-implementation-reviewer`. See [Aisee Workflow](docs/workflow.en.md) for timing and boundaries, and [Aisee Best Practices](docs/best-practices.en.md) for reuse-first routing.
+Before and after implementation, use read-only Aisee reviewer lenses as needed: `aisee-change-architect`, `aisee-spec-reviewer`, and `aisee-implementation-reviewer`. See [Aisee Workflow](docs/workflow.en.md) for timing and boundaries, and [Aisee Best Practices](docs/best-practices.en.md) for reuse-first routing.
 
 For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline specs from code, tests, docs, routes, and verified behavior.
 

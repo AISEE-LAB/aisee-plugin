@@ -7,15 +7,15 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 
 `aisee:verify` 是当前 change 的 schema-aware 一致性诊断器。它不创建事实源，不替代 OpenSpec parser，也不做 archive 放行审批；OpenSpec artifact 合法性以 `openspec validate` 和当前 schema 为准。
 
-## Reviewer role 边界
+## Reviewer lens 边界
 
-如需 Aisee 审查角色，`aisee:verify` 只建议或消费只读一致性 reviewer 结论：
+如需 Aisee 审查 lens，`aisee:verify` 只建议或消费只读一致性审查结论：
 
 - `aisee-change-architect`：change 边界、依赖、粒度和可独立交付性。
 - `aisee-spec-reviewer`：schema artifacts、contracts、source-map、tasks 的完整性、一致性和可验证性。
 - `aisee-implementation-reviewer`：实现、tasks、source-map/spec 和 evidence 是否一致，是否可进入 verify/archive。
 
-这些 role 不修改代码、不运行测试、不提交 PR、不解决 CI，也不替代 `ce-doc-review`、`ce-code-review`、`ce-test-*` 或 `ce-work`。接口、UI、硬件、固件、安全和验证差异只能作为 schema-aware check lenses。
+这些 lens 不修改代码、不运行测试、不提交 PR、不解决 CI，也不替代 `ce-doc-review`、`ce-code-review`、`ce-test-*` 或 `ce-work`。接口、UI、硬件、固件、安全和验证差异只能作为 schema-aware check lenses。
 
 触发时机：
 

@@ -24,7 +24,7 @@
         "拒绝创建 API/UI/硬件全能审查 agent。",
         "将接口、界面、硬件作为 schema-aware domain check lenses。",
         "优先读取当前 change 和 aisee context pack。",
-        "只建议三个 Aisee 一致性 reviewer role。"
+        "只建议三个 Aisee 一致性 reviewer lens。"
       ],
       "must_ask": [],
       "must_include": [
@@ -45,7 +45,7 @@
       ],
       "fact_source_constraints": [
         "verify 只读取当前 OpenSpec change、schema artifacts、source-map/contracts、tasks 和 evidence。",
-        "reviewer role 结论不是新的规范事实源。"
+        "reviewer lens 结论不是新的规范事实源。"
       ],
       "files": []
     },
@@ -57,13 +57,13 @@
       "context": {
         "files": [],
         "assumptions": [
-          "用户要求的是 Aisee 规范一致性 reviewer role。",
+          "用户要求的是 Aisee 规范一致性 reviewer lens。",
           "不要求实现 subagent runtime。"
         ]
       },
-      "expected_output": "可以定义 aisee-change-architect、aisee-spec-reviewer、aisee-implementation-reviewer 三个只读一致性 reviewer role。必须说明它们只输出结构化审查结论，不改代码、不跑测试、不提交 PR、不解决 CI，也不替代 ce-doc-review、ce-code-review、ce-test-* 或 ce-work。",
+      "expected_output": "可以定义 aisee-change-architect、aisee-spec-reviewer、aisee-implementation-reviewer 三个只读一致性 reviewer lens。必须说明它们只输出结构化审查结论，不改代码、不跑测试、不提交 PR、不解决 CI，也不替代 ce-doc-review、ce-code-review、ce-test-* 或 ce-work。",
       "expected_outputs": [
-        "定义三个 Aisee reviewer role。",
+        "定义三个 Aisee reviewer lens。",
         "说明三个 role 的 OpenSpec/schema/evidence 一致性范围。",
         "说明不实现 runtime 或自动调用。",
         "说明不替代 CE execution/review/test。"
@@ -77,16 +77,16 @@
         "不替代 CE"
       ],
       "must_not": [
-        "不得把 reviewer role 写成会自动修改代码的 agent。",
-        "不得把 reviewer role 写成会运行完整测试或提交 PR 的 agent。",
-        "不得把 reviewer role 当作 accepted risk 或 archive approval。"
+        "不得把 reviewer lens 写成会自动修改代码的 agent。",
+        "不得把 reviewer lens 写成会运行完整测试或提交 PR 的 agent。",
+        "不得把 reviewer lens 当作 accepted risk 或 archive approval。"
       ],
       "quality_checks": [
         "三个 role 的职责边界互不重叠。",
         "明确 runtime 和自动调用不在 verify 职责内。"
       ],
       "fact_source_constraints": [
-        "reviewer role 只能消费当前 change 和 evidence。",
+        "reviewer lens 只能消费当前 change 和 evidence。",
         "长期结论必须回写 owner artifact 或 evidence 文件。"
       ],
       "files": []

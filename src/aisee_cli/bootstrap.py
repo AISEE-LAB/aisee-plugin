@@ -7,7 +7,7 @@ from typing import Any
 
 from aisee_cli.doctor import build_doctor
 from aisee_cli.marketplace import MARKETPLACE_ADD_COMMAND, PLUGIN_ADD_COMMAND
-from aisee_cli.paths import id_registry_path, inspect_layout, sources_path
+from aisee_cli.paths import inspect_layout, sources_path
 from aisee_cli.project import rel
 
 
@@ -40,9 +40,6 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
     sources = sources_path(root)
     if not sources.exists():
         actions.append(action("create", rel(root, sources), "Create empty sources registry."))
-    registry = id_registry_path(root)
-    if not registry.exists():
-        actions.append(action("create", rel(root, registry), "Create empty ID lifecycle registry."))
     if not (root / "openspec" / "schemas").exists():
         actions.append(action(
             "install",
@@ -60,21 +57,6 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
             "command": "aisee bootstrap --plan --json",
             "apply_supported": False,
         },
-    }
-
-
-def build_bootstrap_apply_response() -> dict[str, Any]:
-    return {
-        "status": "blocked",
-        "writes": False,
-        "issues": [
-            {
-                "code": "BOOTSTRAP_APPLY_NOT_IMPLEMENTED",
-                "severity": "blocker",
-                "message": "bootstrap --apply is intentionally not implemented yet; use --plan and explicit setup commands",
-            }
-        ],
-        "summary": {"blocker": 1, "risk": 0, "info": 0, "total": 1},
     }
 
 

@@ -884,25 +884,28 @@ def build_guardrails(target: str, source_map_required: bool) -> list[str]:
 
 def build_evidence(root: Path, change: str) -> dict[str, Any]:
     review_dir = root / "docs" / "reviews"
-    review_files = []
+    review_files: list[str] = []
     if review_dir.exists():
         review_files = [rel(root, path) for path in sorted(review_dir.glob(f"*{change}*")) if path.is_file()]
+    aisee_review_lens = [path for path in review_files if is_aisee_reviewer_path(path)]
+    ce_review_files = [path for path in review_files if path not in aisee_review_lens]
     verification_dir = root / "docs" / "verification"
     verification_files = []
     if verification_dir.exists():
         verification_files = [rel(root, path) for path in sorted(verification_dir.glob(f"*{change}*")) if path.is_file()]
-    classified = classify_evidence(review_files, verification_files)
+    classified = classify_evidence(ce_review_files, verification_files)
     return {
         "openspec_validate": first_matching(verification_files, ("validate", "openspec")),
-        "ce_doc_review": [path for path in review_files if "doc" in path],
-        "ce_code_review": [path for path in review_files if "code" in path],
+        "ce_doc_review": [path for path in ce_review_files if "doc" in path],
+        "ce_code_review": [path for path in ce_review_files if "code" in path],
+        "aisee_review_lens": aisee_review_lens,
         "tests": [path for path in verification_files if "test" in path],
         "manual_verification": [path for path in verification_files if "manual" in path or "verify" in path],
         "docsite": classified["docsite"],
         "infra": classified["infra"],
         "security": classified["security"],
         "quick_fix": classified["quick_fix"],
-        "details": build_evidence_details(root, review_files, verification_files, classified),
+        "details": build_evidence_details(root, ce_review_files, aisee_review_lens, verification_files, classified),
     }
 
 
@@ -941,14 +944,16 @@ def matching_paths(paths: list[str], terms: tuple[str, ...]) -> list[str]:
 
 def build_evidence_details(
     root: Path,
-    review_files: list[str],
+    ce_review_files: list[str],
+    aisee_review_lens: list[str],
     verification_files: list[str],
     classified: dict[str, dict[str, list[str]]],
 ) -> dict[str, Any]:
     validate_path = first_matching(verification_files, ("validate", "openspec"))
     return {
         "openspec_validate": parse_status_file(root, validate_path) if validate_path else None,
-        "reviews": [parse_review_file(root, path) for path in review_files],
+        "reviews": [parse_review_file(root, path) for path in ce_review_files],
+        "aisee_review_lens": [parse_review_file(root, path) for path in aisee_review_lens],
         "tests": [parse_status_file(root, path) for path in verification_files if "test" in path.lower()],
         "manual_verification": [
             parse_status_file(root, path)
@@ -962,8 +967,20 @@ def build_evidence_details(
             }
             for domain, categories in classified.items()
         },
-        "accepted_risks": collect_accepted_risks(root, review_files + verification_files),
+        "accepted_risks": collect_accepted_risks(root, ce_review_files + aisee_review_lens + verification_files),
     }
+
+
+def is_aisee_reviewer_path(path: str) -> bool:
+    lowered = path.lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "aisee-change-architect",
+            "aisee-spec-reviewer",
+            "aisee-implementation-reviewer",
+        )
+    )
 
 
 def parse_review_file(root: Path, path: str) -> dict[str, Any]:

@@ -27,6 +27,7 @@ Aisee 的目标是让这些上下文显式化：
 Aisee 当前采用面向版本 / 迭代的敏捷模型：
 
 - SRS、UI Content、Design Spec、Architecture 都是 **planning docs**，用于当前版本 / 迭代的输入；
+- 普通 planning docs 使用统一 YAML frontmatter 合同做身份、状态和来源索引，但不会提升为 OpenSpec baseline 事实源；
 - `aisee:change-plan` 把一次迭代拆成 **one or more** 可独立交付的 OpenSpec changes；
 - 当前 change 的 proposal、source-map、specs、contracts、tasks 才是实现前的正式细化承诺；
 - `openspec archive` 后，baseline specs 接管当前事实；
@@ -156,7 +157,7 @@ aisee doctor --json
 
 CLI 读取插件内容时默认只检查 Codex 安装位置。需要对接其它 agent runtime 时，可设置 `AISEE_AGENT_RUNTIME=claude|cursor|agents`；设置为 `none` 可关闭已安装插件内容发现。
 
-`aisee plugin export`、`aisee schemas install` 和 `aisee knowledge scaffold` 已不再从 PyPI wheel 分发插件内容；这些公开旧命令会返回稳定 JSON blocker，并提示 Codex marketplace 安装路径。
+`aisee plugin export`、`aisee schemas install` 和 `aisee knowledge scaffold` 已从公开 CLI 命令面移除。插件内容、schema pack 和 team knowledge 模板通过 Codex marketplace 插件或外部仓库获取。
 
 源码仓库也包含多个 agent runtime 的插件元数据：
 
@@ -245,7 +246,7 @@ quick-fix / quick-research / 其它轻量 schema
 ```
 ```
 
-实现前后可按需触发只读 Aisee reviewer role：`aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer`。触发时机和边界见 [Aisee Workflow](docs/workflow.md)，复用优先规则见 [Aisee Best Practices](docs/best-practices.md)。
+实现前后可按需触发只读 Aisee reviewer lens：`aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer`。触发时机和边界见 [Aisee Workflow](docs/workflow.md)，复用优先规则见 [Aisee Best Practices](docs/best-practices.md)。
 
 对于已有项目，可使用 `aisee:spec-migrate` 从代码、测试、文档、路由和已验证行为中整理 OpenSpec baseline specs。
 

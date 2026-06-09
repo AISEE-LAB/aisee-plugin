@@ -7,6 +7,8 @@ description: 根据 SRS、模块需求文档、已确认功能需求或现有系
 
 从已确认需求中推导页面清单、页面内容、页面元素、状态反馈、权限可见性、跨页面流程和多端差异，生成可交给 `aisee:change-plan`、UI 设计规范阶段或后续实现规划使用的 UI 内容规格。
 
+生成或改写 planning doc 时，frontmatter 字段合同统一遵循 `plugins/aisee-plugin/references/planning-doc-frontmatter.md`；它只服务索引和追踪，不替代 OpenSpec 事实源。
+
 ## 输入
 
 用户提供以下任意一种输入：

@@ -116,7 +116,7 @@ aisee:reflect
 公开稳定前还需要补齐：
 
 - 更多真实 team knowledge card packs；
-- stale card refresh 工作流；
+- stale card refresh 工作流；它是后续独立 change，不由 `aisee:verify`、reviewer lens 或 `aisee:knowledge-curate` 隐式执行；
 - 可选 semantic rerank 或 MCP 包装，但不改变 Git + card/pack 事实源。
 
 底层架构说明见 [Aisee Team Knowledge Architecture](architecture/aisee-team-knowledge.md)。

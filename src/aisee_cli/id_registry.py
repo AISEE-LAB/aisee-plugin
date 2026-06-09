@@ -184,12 +184,11 @@ def check_registry(project_root: Path) -> dict[str, Any]:
     if not path.exists():
         path_label = rel(root, path)
         return {
-            "status": "missing",
+            "status": "ok",
             "registry": path_label,
-            "issues": [
-                issue("REGISTRY_MISSING", "blocker", f"{path_label} is missing", path_label),
-            ],
-            "summary": {"blocker": 1, "risk": 0, "info": 0, "total": 1},
+            "available": False,
+            "issues": [],
+            "summary": {"blocker": 0, "risk": 0, "info": 0, "total": 0},
         }
 
     registry = load_registry(root)

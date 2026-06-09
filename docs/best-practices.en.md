@@ -154,7 +154,7 @@ Rules:
 
 ## 9. Reuse Existing Workflows Before Creating Or Executing Tasks
 
-Before creating tasks, entering implementation, proposing reviewer roles, or recommending a next step, check existing workflows and skills first:
+Before creating tasks, entering implementation, proposing reviewer lenses, or recommending a next step, check existing workflows and skills first:
 
 - When there is no explicit change, use `aisee:flow` or `aisee flow inspect --json` to identify the current stage.
 - When there is an explicit change, read the target context pack first, such as `aisee context pack --change <change> --for ce-work --json`.

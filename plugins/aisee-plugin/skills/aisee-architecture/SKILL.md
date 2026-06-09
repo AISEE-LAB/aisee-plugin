@@ -7,6 +7,8 @@ description: 在 aisee:change-plan 之前生成软件项目技术架构文档，
 
 在 `aisee:change-plan` 前运行，给 change 边界规划提供软件项目的技术事实、架构概览、全局工程约定、架构决策、约束、缺口和 schema artifact hints。它不拆 change，不生成 change 名称，不安排阶段，不写具体契约或实现方案。
 
+生成或改写 planning doc 时，frontmatter 字段合同统一遵循 `plugins/aisee-plugin/references/planning-doc-frontmatter.md`；它只服务索引和追踪，不替代 OpenSpec 事实源。
+
 当前主流程面向 App、小程序、Web、桌面、后端/API、CLI、Job、集成、数据和设备协作软件。纯硬件、嵌入式、固件、RTOS、驱动、板级 bring-up、PCB、BOM 或制造相关架构后续按专用硬件流程整理；本 skill 只记录软件侧需要知道的设备协作约束。
 
 ## 输入

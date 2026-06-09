@@ -7,6 +7,8 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 
 `aisee:implementation-bridge` 是 OpenSpec change 到工程实现阶段的交接器。
 
+如需保存 Implementation Brief，frontmatter 字段合同统一遵循 `plugins/aisee-plugin/references/planning-doc-frontmatter.md`；这些 brief 仍是 generated handoff / cache，不是规范事实源。
+
 ## 复用优先
 
 执行前必须优先复用当前 change 的机器可读上下文：

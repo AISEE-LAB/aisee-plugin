@@ -117,8 +117,6 @@ aisee schemas check --json
 
 - `aisee doctor --json` 输出 `codex_marketplace` 检查结果；
 - `aisee plugin inspect --json` 输出 CLI-only 状态和 Codex marketplace setup hint；
-- `aisee plugin export --target codex --dest /tmp/aisee-plugin-bundle --force --json` 返回稳定 blocker，且 `meta.writes` 为 `false`；
-- `aisee schemas install --json` 返回稳定 blocker，且 `meta.writes` 为 `false`；
 - wheel 中不包含完整 `skills/`、`references/`、schema pack trees、team knowledge templates 或 plugin metadata 副本。
 
 Codex marketplace 真实安装 smoke 会写 Codex 本地配置，不放入默认 PyPI 发布 workflow。发布负责人可在已授权的本机环境中额外执行：

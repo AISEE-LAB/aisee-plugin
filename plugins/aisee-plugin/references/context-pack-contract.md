@@ -14,7 +14,7 @@
 ## Fact Sources
 
 - OpenSpec artifacts / Markdown：内容事实源。
-- `aisee/registry/id-registry.json`：ID 分配和生命周期事实源。
+- `aisee/registry/id-registry.json`：历史兼容数据；当前主链路不把它当作正式事实源。
 - `aisee/registry/sources.json`：change 外部 Aisee 产物来源登记事实源。
 - `aisee/cache/context-index.json`：可删除、可重建缓存，不是事实源。
 
@@ -129,7 +129,7 @@ Rules:
 - `artifacts` 只承诺 metadata scan 和原文入口；不要把 contract 内容解析成业务语义。
 - `source_map` 作为 Aisee companion artifact，可包含 `upstream_sources`、`id_trace`、`artifact_applicability`、`implementation_paths`、`verification_evidence`、`out_of_scope` 和 parse issues。
 - `sources` 只包含 `aisee/registry/sources.json` 和 `source-map.md` 明确引用的上游来源。
-- `id_registry` 只报告当前状态，不分配新 ID。
+- `id_registry` 只报告历史兼容状态；缺失不是当前 authoring / lookup / traceability blocker。
 
 ## Derived Facts
 

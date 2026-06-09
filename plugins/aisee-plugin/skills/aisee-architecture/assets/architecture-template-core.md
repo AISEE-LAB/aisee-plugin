@@ -3,6 +3,19 @@
 所有软件技术域都必须使用。用于生成通用部分：范围、技术域、来源、架构概览、全局工程约定、架构决策、架构边界、可复用能力、共享前置、耦合点、运行环境限制、风险和 Open Questions。
 
 ```markdown
+---
+title: "技术架构文档：{需求 / 功能 / 产品名}"
+doc_type: "architecture"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{作者或团队}"
+source_refs:
+  - "{SRS / UI Content / repo path / anchor ref}"
+change_refs: []
+anchors: []
+---
+
 # 技术架构文档：{需求 / 功能 / 产品名}
 
 **文档编号**：ARCH-{YYYY-MM-DD}-{slug}

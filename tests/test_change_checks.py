@@ -126,7 +126,6 @@ apply:
 def create_device_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-device-spec-driven\n")
-    write(root / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
     write(
         root / "openspec" / "schemas" / "aisee-device-spec-driven" / "schema.yaml",
         """name: aisee-device-spec-driven
@@ -467,6 +466,19 @@ def test_context_pack_adds_doc_review_focus_and_evidence(tmp_path: Path) -> None
     assert data["facts"]["derived"]["review"]["focus"][0] == "schema_artifacts"
     assert data["evidence"]["ce_doc_review"] == ["docs/reviews/add-auth-doc-review.md"]
     assert data["evidence"]["tests"] == ["docs/verification/add-auth-test-results.md"]
+
+
+def test_context_pack_separates_aisee_reviewer_lens_from_ce_review(tmp_path: Path) -> None:
+    create_change_project(tmp_path, task_mark="x")
+    write(tmp_path / "docs" / "reviews" / "add-auth-aisee-implementation-reviewer.md", "- P1 implementation drift remains open\n")
+    write(tmp_path / "docs" / "verification" / "add-auth-test-results.md", "# Test\n")
+
+    data = run_json(tmp_path, "context", "pack", "--change", "add-auth", "--for", "aisee-verify", "--json")
+
+    assert data["evidence"]["aisee_review_lens"] == ["docs/reviews/add-auth-aisee-implementation-reviewer.md"]
+    assert data["evidence"]["ce_code_review"] == []
+    assert data["evidence"]["details"]["aisee_review_lens"][0]["path"] == "docs/reviews/add-auth-aisee-implementation-reviewer.md"
+    assert data["evidence"]["details"]["reviews"] == []
 
 
 def test_verify_check_blocks_failed_validate_or_test_evidence(tmp_path: Path) -> None:

@@ -18,7 +18,6 @@ def write(path: Path, text: str) -> None:
 def create_contract_project(root: Path) -> Path:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
-    write(root / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
     write(
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven

@@ -10,6 +10,7 @@
 - 实现、review、test 可以由 Compound Engineering 或其他 coding agent 承接。
 - `openspec archive <change>` 是已验证 change 合入 baseline 的最终动作。
 - planning docs 只服务当前版本 / 迭代输入，不替代 baseline facts。
+- 普通 planning docs 使用统一 YAML frontmatter 合同做身份、状态和来源索引；OpenSpec change 和 baseline 仍是规范事实源。
 - 文档内正式写法只使用 local ID；跨文档正式追踪只使用 anchor ref。
 
 ## 0. 项目初始化
@@ -153,7 +154,7 @@ Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，
 
 当 change 触及公开 CLI、HTTP endpoint、API/service contract、schema、parser、路径读取、安全或隐私表面时，建议执行 Tier 2 code review。
 
-只读 Aisee reviewer role 的触发时机：
+只读 Aisee reviewer lens 的触发时机：
 
 | Reviewer | 触发时机 | 用途 |
 | --- | --- | --- |

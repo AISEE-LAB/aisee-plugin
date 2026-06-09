@@ -46,7 +46,7 @@ srs:auth-login#FR-001
 
 | 层 | 作用 | 是否事实源 |
 |---|---|---|
-| planning docs / OpenSpec artifacts | 承载正文、local ID、anchor 引用 | 是 |
+| planning docs / OpenSpec artifacts | 承载正文、local ID、anchor 引用；planning docs frontmatter 只承载索引字段 | 是 |
 | `aisee/registry/sources.json` | 来源注册与 alias | 是 |
 | `aisee index` 输出 | 文档扫描后的 anchor occurrence 视图 | 否，可重建 |
 | `aisee/cache/context-index.json` | 缓存 | 否 |

@@ -3,6 +3,19 @@
 用于项目级、模块级、跨页面、多端或需要完整 design spec / delta planning doc 的场景。
 
 ```markdown
+---
+title: "Design Spec：{项目 / 模块 / 功能名}"
+doc_type: "design-spec"
+status: "draft"
+date: "{date}"
+scope: "{project / module / feature}"
+owner: "{作者或团队}"
+source_refs:
+  - "{SRS / UI Content / Architecture / Design Assets}"
+change_refs: []
+anchors: []
+---
+
 # Design Spec：{项目 / 模块 / 功能名}
 
 **文档编号**：DS-{YYYY-MM-DD}-{slug}

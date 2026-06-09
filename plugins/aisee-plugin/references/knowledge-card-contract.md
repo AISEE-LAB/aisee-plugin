@@ -22,7 +22,7 @@ CLI 的默认读取入口固定为：
 <team-knowledge>/knowledge/cards/**/*.yaml
 ```
 
-独立 team knowledge 仓库可以从 marketplace-installed plugin 的 `skills/aisee-knowledge-curate/assets/team-knowledge/` 复制初始结构，或从团队维护的外部模板仓库创建。`aisee knowledge scaffold` 是迁移期兼容命令，只返回 deprecation/blocker，不写入目录或项目配置。配置完成后，用 `aisee knowledge doctor --json` 检查配置 path 与实际目录是否一致。
+独立 team knowledge 仓库可以从 marketplace-installed plugin 的 `skills/aisee-knowledge-curate/assets/team-knowledge/` 复制初始结构，或从团队维护的外部模板仓库创建。`aisee knowledge scaffold` 已从公开 CLI 命令面移除；默认模板初始化改为 marketplace plugin 内容或外部模板仓库。配置完成后，用 `aisee knowledge doctor --json` 检查配置 path 与实际目录是否一致。
 
 读取顺序：
 

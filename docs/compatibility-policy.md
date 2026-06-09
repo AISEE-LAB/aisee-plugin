@@ -89,7 +89,7 @@
 
 - GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
 - `aisee plugin inspect --json` 在 CLI-only 安装中返回稳定状态和 setup hint；
-- `aisee plugin export --target codex|claude|cursor` 在迁移期返回稳定 deprecation/blocker JSON，不从 wheel 写 plugin bundle；
+- `aisee plugin export`、`aisee schemas install`、`aisee knowledge scaffold` 已从公开 CLI 命令面移除；
 - PyPI wheel 不再承诺包含 skills、references、schema packs、team knowledge templates 或 plugin metadata 副本。
 
 破坏性变更包括重命名插件、移除 Codex manifest、破坏 marketplace plugin root 布局，或改变旧公开命令的 JSON blocker 语义。

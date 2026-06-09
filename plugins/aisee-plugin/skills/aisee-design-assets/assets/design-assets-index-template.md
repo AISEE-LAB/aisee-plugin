@@ -1,3 +1,15 @@
+---
+title: "Design Assets Index"
+doc_type: "design-assets"
+status: "draft"
+date: "{date}"
+scope: "{project / module / feature}"
+owner: "{作者或团队}"
+source_refs: []
+change_refs: []
+anchors: []
+---
+
 # Design Assets Index
 
 - 项目：

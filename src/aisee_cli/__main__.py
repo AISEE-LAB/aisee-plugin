@@ -7,7 +7,7 @@ from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.author_check import build_author_check
-from aisee_cli.bootstrap import build_bootstrap_apply_response, build_bootstrap_plan
+from aisee_cli.bootstrap import build_bootstrap_plan
 from aisee_cli.change import build_change_inspect
 from aisee_cli.change_checks import build_archive_check, build_verify_check
 from aisee_cli.contract import build_contract_get, build_contract_manifest, build_contract_summary
@@ -24,15 +24,14 @@ from aisee_cli.knowledge import (
     build_knowledge_install,
     build_knowledge_promote_batch,
     build_knowledge_query,
-    build_knowledge_scaffold,
     build_knowledge_update,
 )
 from aisee_cli.lookup import get_anchor, trace_anchor
 from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
-from aisee_cli.plugin_assets import export_plugin_assets, inspect_plugin_assets, plugin_path
+from aisee_cli.plugin_assets import inspect_plugin_assets, plugin_path
 from aisee_cli.project import resolve_project_root
-from aisee_cli.schema_pack import check_schema_packs, install_schema_packs, list_schema_packs
+from aisee_cli.schema_pack import check_schema_packs, list_schema_packs
 from aisee_cli.sources import add_source, check_sources, list_sources, remove_source
 
 
@@ -44,9 +43,7 @@ def main() -> int:
     doctor_parser.add_argument("--json", action="store_true", help="output JSON")
     doctor_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
     bootstrap_parser = subparsers.add_parser("bootstrap")
-    bootstrap_group = bootstrap_parser.add_mutually_exclusive_group()
-    bootstrap_group.add_argument("--plan", action="store_true", help="output bootstrap plan")
-    bootstrap_group.add_argument("--apply", action="store_true", help="apply bootstrap plan")
+    bootstrap_parser.add_argument("--plan", action="store_true", help="output bootstrap plan")
     bootstrap_parser.add_argument("--json", action="store_true", help="output JSON")
     openspec_parser = subparsers.add_parser("openspec")
     openspec_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -65,11 +62,6 @@ def main() -> int:
     plugin_path_parser = plugin_subparsers.add_parser("path")
     plugin_path_parser.add_argument("--target", choices=["codex", "claude", "cursor"], required=True, help="agent runtime target")
     plugin_path_parser.add_argument("--json", action="store_true", help="output JSON")
-    plugin_export_parser = plugin_subparsers.add_parser("export", description="deprecated: return a JSON blocker; plugin content is installed through Codex marketplace")
-    plugin_export_parser.add_argument("--target", choices=["codex", "claude", "cursor"], required=True, help="agent runtime target")
-    plugin_export_parser.add_argument("--dest", required=True, help="legacy destination argument; no files are written")
-    plugin_export_parser.add_argument("--force", action="store_true", help="legacy compatibility flag; no files are overwritten")
-    plugin_export_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_parser = subparsers.add_parser("sources")
     sources_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_subparsers = sources_parser.add_subparsers(dest="sources_command")
@@ -99,11 +91,6 @@ def main() -> int:
     schemas_check_parser = schemas_subparsers.add_parser("check")
     schemas_check_parser.add_argument("--json", action="store_true", help="output JSON")
     schemas_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
-    schemas_install_parser = schemas_subparsers.add_parser("install", description="deprecated: return a JSON blocker; schema packs come from the marketplace plugin")
-    schemas_install_parser.add_argument("--schema", action="append", default=[], help="legacy schema selection argument; no schema is installed")
-    schemas_install_parser.add_argument("--all", action="store_true", help="legacy compatibility flag; no schemas are installed")
-    schemas_install_parser.add_argument("--force", action="store_true", help="legacy compatibility flag; no schemas are overwritten")
-    schemas_install_parser.add_argument("--json", action="store_true", help="output JSON")
     index_parser = subparsers.add_parser("index")
     index_parser.add_argument("--json", action="store_true", help="output JSON")
     index_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
@@ -143,12 +130,6 @@ def main() -> int:
     knowledge_doctor_parser = knowledge_subparsers.add_parser("doctor")
     knowledge_doctor_parser.add_argument("--team-path", help="team knowledge repository path to compare with config")
     knowledge_doctor_parser.add_argument("--json", action="store_true", help="output JSON")
-    knowledge_scaffold_parser = knowledge_subparsers.add_parser("scaffold", description="deprecated: return a JSON blocker; default templates are not copied from the PyPI CLI")
-    knowledge_scaffold_parser.add_argument("--dest", required=True, help="legacy destination argument; no scaffold is written")
-    knowledge_scaffold_parser.add_argument("--force", action="store_true", help="legacy compatibility flag; no directory is overwritten")
-    knowledge_scaffold_parser.add_argument("--update-config", action="store_true", help="legacy compatibility flag; no config is written")
-    knowledge_scaffold_parser.add_argument("--pack", action="append", default=[], help="legacy pack argument; can be repeated")
-    knowledge_scaffold_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_install_parser = knowledge_subparsers.add_parser("install")
     knowledge_install_parser.add_argument("--allow-dirty", action="store_true", help="allow dirty existing checkout")
     knowledge_install_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -229,9 +210,9 @@ def main() -> int:
 
     if args.command == "bootstrap":
         root = resolve_project_root(Path.cwd())
-        result = build_bootstrap_apply_response() if args.apply else build_bootstrap_plan(root)
+        result = build_bootstrap_plan(root)
         print_json(result)
-        return exit_code_for(result, fail_on_blocker=args.apply)
+        return exit_code_for(result, fail_on_blocker=False)
 
     if args.command == "openspec" and args.openspec_command is None:
         print_json(error_response("Use one of: ensure.", "MISSING_SUBCOMMAND"), stderr=True)
@@ -260,14 +241,10 @@ def main() -> int:
                 result = plugin_path(root, args.target)
                 print_json(result)
                 return 0
-            if args.plugin_command == "export":
-                result = export_plugin_assets(root, args.target, Path(args.dest), force=args.force)
-                print_json(result)
-                return 0
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
-        print_json(error_response("Use one of: inspect, path, export.", "MISSING_SUBCOMMAND"), stderr=True)
+        print_json(error_response("Use one of: inspect, path.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "context" and args.context_command is None:
@@ -288,7 +265,7 @@ def main() -> int:
         return 0
 
     if args.command == "knowledge" and args.knowledge_command is None:
-        print_json(error_response("Use one of: inspect, check, doctor, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+        print_json(error_response("Use one of: inspect, check, doctor, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "knowledge":
@@ -300,8 +277,6 @@ def main() -> int:
                 result = build_knowledge_check(root, team_path=args.team_path)
             elif args.knowledge_command == "doctor":
                 result = build_knowledge_doctor(root, team_path=args.team_path)
-            elif args.knowledge_command == "scaffold":
-                result = build_knowledge_scaffold(root, args.dest, force=args.force, update_config=args.update_config, packs=args.pack)
             elif args.knowledge_command == "install":
                 result = build_knowledge_install(root, allow_dirty=args.allow_dirty)
             elif args.knowledge_command == "update":
@@ -331,7 +306,7 @@ def main() -> int:
             elif args.knowledge_command == "index":
                 result = build_knowledge_index(root, write_cache=True, team_path=args.team_path)
             else:
-                print_json(error_response("Use one of: inspect, check, doctor, scaffold, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+                print_json(error_response("Use one of: inspect, check, doctor, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
                 return 2
         except ValueError as error:
             print_json(error_response(str(error), "KNOWLEDGE_ERROR"), stderr=True)
@@ -463,15 +438,10 @@ def main() -> int:
                 result = check_schema_packs(root)
                 print_json(result)
                 return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
-            if args.schemas_command == "install":
-                selected = ["*"] if args.all else args.schema
-                result = install_schema_packs(root, selected, force=args.force)
-                print_json(result)
-                return 0
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
-        print_json(error_response("Use one of: list, check, install.", "MISSING_SUBCOMMAND"), stderr=True)
+        print_json(error_response("Use one of: list, check.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "index":

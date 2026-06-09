@@ -7,7 +7,7 @@ description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当
 
 `aisee:archive-guard` 是 `openspec archive <change>` 前的最终放行建议器。它不创建新事实源，不替代 `aisee:verify`，也不替代 OpenSpec archive；OpenSpec artifact 合法性和 baseline merge 仍以 `openspec validate` / `openspec archive` 为准。
 
-## Reviewer evidence 边界
+## Reviewer lens evidence 边界
 
 Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 CE review/test 的替代品：
 

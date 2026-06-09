@@ -46,6 +46,7 @@ Compound Engineering
 
 - 版本 / 迭代级输入
 - delta / brief / inventory / evidence
+- frontmatter 身份、状态和来源索引
 
 不负责长期替代 OpenSpec baseline。
 

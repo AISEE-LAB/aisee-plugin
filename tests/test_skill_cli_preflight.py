@@ -21,6 +21,28 @@ def test_shared_cli_preflight_document_is_not_part_of_skill_context() -> None:
     assert not (ROOT / "plugins" / "aisee-plugin" / "references" / "cli-preflight.md").exists()
 
 
+def test_planning_doc_frontmatter_contract_exists_and_representative_templates_reference_it() -> None:
+    contract = ROOT / "plugins" / "aisee-plugin" / "references" / "planning-doc-frontmatter.md"
+    assert contract.exists()
+    assert "doc_type" in contract.read_text(encoding="utf-8")
+
+    expected = {
+        "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-standard.md": 'doc_type: "srs"',
+        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-standard.md": 'doc_type: "ui-content"',
+        "plugins/aisee-plugin/skills/aisee-architecture/assets/architecture-template-core.md": 'doc_type: "architecture"',
+        "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-standard.md": 'doc_type: "design-spec"',
+        "plugins/aisee-plugin/skills/aisee-design-assets/assets/design-assets-index-template.md": 'doc_type: "design-assets"',
+        "plugins/aisee-plugin/skills/aisee-implementation-bridge/references/brief-template.md": 'doc_type: "implementation-brief"',
+        "plugins/aisee-plugin/skills/aisee-reflect/references/output-templates.md": 'doc_type: "reflect"',
+    }
+    for relative_path, marker in expected.items():
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert marker in text
+        assert "source_refs:" in text
+        assert "change_refs:" in text
+        assert "anchors:" in text
+
+
 def test_cli_outputs_keep_marketplace_recovery_hints() -> None:
     import sys
 

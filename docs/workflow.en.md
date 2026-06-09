@@ -10,6 +10,7 @@ This document describes the recommended software development workflow for Aisee 
 - Implementation, review, and test work can be handled by Compound Engineering or another coding agent.
 - `openspec archive <change>` is the final operation that merges a verified change into the baseline.
 - planning docs serve the current version or iteration only; they do not replace baseline facts.
+- regular planning docs use a shared YAML frontmatter contract for identity, status, and source indexing; OpenSpec changes and baseline specs remain the authoritative facts.
 - formal authoring uses local IDs inside documents and anchor refs across documents.
 
 ## 0. Project Setup
@@ -153,7 +154,7 @@ Implementation can be handled by a coding agent or human developer. Regardless o
 
 When a change touches public CLI behavior, HTTP endpoints, API/service contracts, schemas, parsers, path reads, security, or privacy, Tier 2 code review is recommended.
 
-Read-only Aisee reviewer role timing:
+Read-only Aisee reviewer lens timing:
 
 | Reviewer | When to trigger | Purpose |
 | --- | --- | --- |

@@ -89,10 +89,10 @@ The following are public contracts:
 
 - `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
 - `aisee plugin inspect --json` returns stable status and setup hints in CLI-only installs;
-- `aisee plugin export --target codex|claude|cursor` returns stable deprecation/blocker JSON during migration and does not write plugin bundles from the wheel;
+- `aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` have been removed from the public CLI surface;
 - the PyPI wheel no longer promises bundled copies of skills, references, schema packs, team knowledge templates, or plugin metadata.
 
-Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or changing the JSON blocker semantics of public legacy commands.
+Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or reintroducing legacy content-distribution commands without a clear single owner.
 
 ### Plugin Marketplace
 

@@ -38,8 +38,16 @@ def test_doctor_reports_marketplace_setup_hint_when_codex_config_lacks_aisee(tmp
     assert data["codex_marketplace"]["status"] == "missing"
 
 
-def test_legacy_content_command_reports_marketplace_setup_hint(tmp_path: Path) -> None:
-    data = run_json(tmp_path, "plugin", "export", "--target", "codex", "--dest", str(tmp_path / "bundle"), "--json")
+def test_plugin_path_reports_marketplace_setup_hint_when_content_is_missing(tmp_path: Path) -> None:
+    data = run_json(
+        tmp_path,
+        "plugin",
+        "path",
+        "--target",
+        "codex",
+        "--json",
+        env={"AISEE_AGENT_RUNTIME": "none", "CODEX_HOME": str(tmp_path / "codex-home")},
+    )
 
     assert data["status"] == "blocked"
     assert data["setup_hint"]["writes_codex_state"] is False

@@ -158,7 +158,7 @@ aisee schemas list --json
 aisee schemas check --json --fail-on-blocker
 ```
 
-`aisee schemas install` 不再从 PyPI wheel 安装 schema packs。需要 schema pack 内容时，通过 marketplace-installed plugin 的 `aisee-schema-pack` 工作流读取并复制插件内 schema。
+`aisee schemas install` 已从公开 CLI 命令面移除。需要 schema pack 内容时，通过 marketplace-installed plugin 的 `aisee-schema-pack` 工作流读取并复制插件内 schema，或从外部仓库同步。
 
 创建 app change：
 

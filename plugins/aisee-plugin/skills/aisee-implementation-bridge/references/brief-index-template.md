@@ -10,6 +10,20 @@
 - 每个 part 仍使用 `brief-template.md`。
 
 ```md
+---
+title: "Brief Batch Index"
+doc_type: "implementation-brief"
+status: "draft"
+date: "{date}"
+scope: "<change>"
+owner: "{作者或团队}"
+source_refs:
+  - "openspec/changes/<change>"
+change_refs:
+  - "openspec/changes/<change>"
+anchors: []
+---
+
 # Brief Batch Index
 
 ## Preflight

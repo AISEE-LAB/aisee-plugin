@@ -47,7 +47,6 @@ def test_project_local_commands_remain_on_top_level_help(tmp_path: Path) -> None
         "context",
         "knowledge",
         "contract",
-        "id",
         "flow",
         "gaps",
         "trace",
@@ -56,18 +55,41 @@ def test_project_local_commands_remain_on_top_level_help(tmp_path: Path) -> None
         assert command in result.stdout
 
 
-def test_public_content_distribution_commands_return_json_blockers(tmp_path: Path) -> None:
+def test_removed_content_distribution_commands_are_not_public_subcommands(tmp_path: Path) -> None:
     env = {"AISEE_AGENT_RUNTIME": "none"}
-    plugin_export = run_json(tmp_path, "plugin", "export", "--target", "codex", "--dest", str(tmp_path / "bundle"), "--json", env=env)
+    plugin_export = run_aisee(
+        tmp_path,
+        "plugin",
+        "export",
+        "--target",
+        "codex",
+        "--dest",
+        str(tmp_path / "bundle"),
+        "--json",
+        check=False,
+        env_overrides=env,
+    )
     plugin_path = run_json(tmp_path, "plugin", "path", "--target", "codex", "--json", env=env)
-    schema_install = run_json(tmp_path, "schemas", "install", "--all", "--json", env=env)
-    knowledge_scaffold = run_json(tmp_path, "knowledge", "scaffold", "--dest", str(tmp_path / "team"), "--json", env=env)
+    schema_install = run_aisee(tmp_path, "schemas", "install", "--all", "--json", check=False, env_overrides=env)
+    knowledge_scaffold = run_aisee(
+        tmp_path,
+        "knowledge",
+        "scaffold",
+        "--dest",
+        str(tmp_path / "team"),
+        "--json",
+        check=False,
+        env_overrides=env,
+    )
 
-    assert plugin_export["status"] == "blocked"
+    assert plugin_export.returncode == 2
+    assert "invalid choice" in plugin_export.stderr
+    assert "export" in plugin_export.stderr
     assert plugin_path["status"] == "blocked"
-    assert schema_install["status"] == "blocked"
-    assert knowledge_scaffold["status"] == "blocked"
-    assert plugin_export["meta"]["writes"] is False
     assert plugin_path["meta"]["writes"] is False
-    assert schema_install["meta"]["writes"] is False
-    assert knowledge_scaffold["meta"]["writes"] is False
+    assert schema_install.returncode == 2
+    assert "invalid choice" in schema_install.stderr
+    assert "install" in schema_install.stderr
+    assert knowledge_scaffold.returncode == 2
+    assert "invalid choice" in knowledge_scaffold.stderr
+    assert "scaffold" in knowledge_scaffold.stderr
