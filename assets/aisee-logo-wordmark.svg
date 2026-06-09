@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 15.9 177.8 46">
+  <defs>
+    <linearGradient id="text-grad-1" x1="80.04" x2="80.04" y1="46.92" y2="51.49" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#01DAFB" offset="0"/>
+      <stop stop-color="#443AFF" offset="1"/>
+    </linearGradient>
+    <linearGradient id="text-grad-2" x1="80.56" x2="80.56" y1="32.29" y2="51.39" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#01EAFE" offset="0"/>
+      <stop stop-color="#4C2EFB" offset="1"/>
+    </linearGradient>
+    <linearGradient id="text-grad-3" x1="98.62" x2="100.9" y1="31.68" y2="51.22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#01ECFE" offset="0"/>
+      <stop stop-color="#019DFD" offset=".4831"/>
+      <stop stop-color="#5B30FC" offset=".7614"/>
+    </linearGradient>
+    <linearGradient id="text-grad-4" x1="118.2" x2="118.2" y1="31.71" y2="51.39" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#01DCFC" offset="0"/>
+      <stop stop-color="#3745FE" offset="1"/>
+    </linearGradient>
+    <linearGradient id="text-grad-5" x1="144.7" x2="144.7" y1="31.71" y2="51.39" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#01E8FC" offset="0"/>
+      <stop stop-color="#3143FD" offset="1"/>
+    </linearGradient>
+    <linearGradient id="text-grad-6" x1="170.8" x2="170.8" y1="31.71" y2="51.39" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#01E7FC" offset="0"/>
+      <stop stop-color="#2F3BFD" offset="1"/>
+    </linearGradient>
+  </defs>
+
+  <svg x="8.5" y="22" width="35.2" height="29.4" viewBox="0 0 448.14 373.36" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="icon-grad-1" x1="198.27" y1="111.79" x2="485.27" y2="277.49" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#015cfa"/>
+        <stop offset=".14" stop-color="#016bfa"/>
+        <stop offset=".39" stop-color="#0182fb"/>
+        <stop offset=".48" stop-color="#018afc"/>
+        <stop offset=".5" stop-color="#0e84fc"/>
+        <stop offset=".72" stop-color="#415bfd"/>
+        <stop offset=".89" stop-color="#6847fe"/>
+        <stop offset=".99" stop-color="#8d47ff"/>
+      </linearGradient>
+      <linearGradient id="icon-grad-2" x1="-9.95" y1="322.52" x2="282.09" y2="30.48" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#7d3cfb"/>
+        <stop offset=".16" stop-color="#5b49fc"/>
+        <stop offset=".42" stop-color="#2a70fd"/>
+        <stop offset=".66" stop-color="#01b4fe"/>
+        <stop offset=".86" stop-color="#01eafe"/>
+        <stop offset="1" stop-color="#01ffff"/>
+      </linearGradient>
+      <linearGradient id="icon-grad-3" x1="313.51" y1="349.21" x2="400.58" y2="298.94" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#352af7"/>
+        <stop offset=".37" stop-color="#3325ee"/>
+        <stop offset="1" stop-color="#2f1de2"/>
+      </linearGradient>
+      <linearGradient id="icon-grad-4" x1="59.85" y1="434.28" x2="378.05" y2="250.57" gradientUnits="userSpaceOnUse">
+        <stop offset=".1" stop-color="#ebf947"/>
+        <stop offset=".29" stop-color="#7df592"/>
+        <stop offset=".49" stop-color="#1e61fd"/>
+        <stop offset="1" stop-color="#00aafe"/>
+      </linearGradient>
+    </defs>
+    <path fill="url(#icon-grad-1)" d="M270.88,19.18l170.5,287.5s26,45-24,62l-47-23L218.38,84.68,251.74,19.18l7.64-5.5,11.5,5.5Z"/>
+    <path fill="url(#icon-grad-2)" d="M270.63,19.03c-2.42-2.1-5.16-4.15-7.85-5.93-6.56-4.34-13.69-7.91-21.2-10.28-22.57-7.13-44.75-.42-60.93,16.66-8.1,8.54-13.61,20-19.58,30.11-7.04,11.92-14.07,23.84-21.11,35.76-8.98,15.2-17.95,30.41-26.93,45.61-9.86,16.7-19.72,33.4-29.58,50.1-9.69,16.4-19.37,32.81-29.06,49.21-8.45,14.32-16.91,28.63-25.36,42.95-6.16,10.44-12.33,20.88-18.49,31.31-2.82,4.77-5.63,9.54-8.45,14.31l-.21,.35s-6,11,4,19,53,28,53,28c0,0,200.93-337.88,201-338,.95-1.59,2.18-3.09,3.37-4.5,1.48-1.75,3.76-4.65,6.26-4.84,.38-.03,.77,.03,1.12,.19Z"/>
+    <path fill="url(#icon-grad-3)" d="M278.07,287.83c2.79-.35,6.14,2.37,8.14,3.92,7.85,6.07,14.78,13.26,22.03,20.01,14.88,13.85,27.98,29.44,42.71,43.4,6.84,6.49,15.47,11.34,24.33,14.48,13.45,4.77,28.03,4.96,41.61,.54,0,0,11.95-4.01,18.48-11.01l-78.64-32.1s-27.83-19.9-28.83-20.9-33-20-33-20c0,0-16.81,1.65-16.81,1.65Z"/>
+    <path fill="url(#icon-grad-4)" d="M.1,326.65s17.28,13.03,57.28-10.97c18.59-11.16,36.5-23.5,54.35-35.79,18.61-12.82,37.08-25.85,55.48-38.99,9.1-6.5,17.92-14.24,28.16-18.9,6.13-2.79,12.63-4.82,19.28-5.97,21.04-3.63,41.66,2.87,57.62,16.91,5.66,4.98,10.67,10.67,15.12,16.75,44,60,76.99,78.45,151.49,106.23l-5.86,5.05c-.74,.63-6.32-1.34-7.14-1.54-5.61-1.39-10.78-4.05-16.03-6.42s-10.57-4.16-15.82-6.3c-11.28-4.61-22.3-9.85-33.09-15.51-14.45-7.57-27.86-16.92-41.84-25.28-3.48-2.08-6.99-4.11-10.53-6.08-9.27-5.17-19.47-9.68-29.84-11.87-11.39-2.4-23.22-2.74-34.65-.44-15.39,3.1-27.25,11.88-40.48,19.82-7.93,4.76-15.86,9.51-23.79,14.26-17.64,10.57-35.29,21.14-52.93,31.72-6.14,3.67-12.27,7.35-18.39,11.04-5.41,3.26-10.83,6.91-17.11,8.2-12.87,2.65-25.56-3.26-37.02-8.41-12.48-5.6-24.79-11.63-36.61-18.54-6.64-3.88-18.96-9.72-17.64-18.98Z"/>
+  </svg>
+
+  <g transform="translate(-17 -4.5)">
+    <polygon points="76.9 51.5 84.6 51.5 81.9 46.9 79.3 46.9" fill="url(#text-grad-1)"/>
+    <polygon points="81.5 32.3 79.2 32.3 68.2 51.4 72.2 51.4 80.4 36.9 88.7 51.4 92.9 51.4" fill="url(#text-grad-2)"/>
+    <rect x="97.6" y="31.7" width="3.4" height="19.7" fill="url(#text-grad-3)"/>
+    <path d="m113.6 31.7h14.5l-1.6 3.3h-12.7c-1.2 0-2.5 1.2-1.8 3.3 0.4 1.1 1.5 1.5 2.1 1.5h8.3c2.9 0 5.6 2.3 5.5 5.9 0 2.6-2.2 5.6-5.3 5.6h-14.5v-3.5h13.9c2.9 0.1 2.6-4.6-0.3-4.6h-8.2c-2.5 0-5.4-1.8-5.5-5.3-0.2-4.3 3.3-6.2 5.6-6.2z" fill="url(#text-grad-4)"/>
+    <path d="m140.9 31.7h14.1l-1.5 3.3h-12.4c-1.2 0-2.3 1-2.3 2.4v8.1c0 1.2 0.9 2.4 2.4 2.4h13.2v3.4h-13.6c-3.2 0-5.5-2.7-5.5-5.7v-7.8c0-3.4 2.4-6.1 5.6-6.1zm1 8.3h9.5l-1.4 3.3h-10.1l1.6-3.3z" fill="url(#text-grad-5)"/>
+    <path d="m166.5 31.7h14l-1.6 3.3h-12.2c-1.4 0-2.6 1.1-2.6 2.4v8.1c0 1.2 1 2.4 2.4 2.4h13.1v3.5h-13.2c-3.4 0-5.6-2.7-5.7-5.8v-8.2c0.1-3.3 2.8-5.7 5.8-5.7zm0.9 8.3h9.6l-1.6 3.3h-9.4l1.5-3.3z" fill="url(#text-grad-6)"/>
+  </g>
+</svg>

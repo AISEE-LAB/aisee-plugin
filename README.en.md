@@ -1,6 +1,33 @@
-# Aisee Plugin
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AISEE-LAB/aisee-plugin/main/assets/aisee-logo-wordmark.svg" alt="Aisee" width="560">
+</p>
 
-English | [简体中文](https://github.com/AISEE-LAB/aisee-plugin/blob/main/README.md)
+<p align="center">
+  <strong>An AI software engineering plugin for iterative OpenSpec delivery</strong><br>
+  Connect planning docs, schema-aware change authoring, implementation handoff, verification, and archive guardrails into one workflow that can evolve over time.
+</p>
+
+<p align="center">
+  English · <a href="https://github.com/AISEE-LAB/aisee-plugin/blob/main/README.md">简体中文</a>
+</p>
+
+<p align="center">
+  <a href="https://aisee.wiki">Website</a> ·
+  <a href="https://github.com/AISEE-LAB/aisee-plugin">GitHub</a> ·
+  <a href="https://github.com/AISEE-LAB/aisee-plugin/blob/main/docs/workflow.en.md">Workflow</a> ·
+  <a href="https://github.com/AISEE-LAB/aisee-plugin/blob/main/docs/best-practices.en.md">Best Practices</a> ·
+  <a href="https://github.com/AISEE-LAB/aisee-plugin/blob/main/docs/plugin-marketplace.en.md">Plugin Marketplace</a> ·
+  <a href="https://pypi.org/project/aisee-plugin/">PyPI</a>
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/aisee-plugin/"><img src="https://img.shields.io/pypi/v/aisee-plugin" alt="PyPI"></a>
+  <a href="https://pypi.org/project/aisee-plugin/"><img src="https://img.shields.io/pypi/pyversions/aisee-plugin" alt="Python"></a>
+  <a href="https://github.com/AISEE-LAB/aisee-plugin/actions/workflows/ci.yml"><img src="https://github.com/AISEE-LAB/aisee-plugin/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
+</p>
+
+# Aisee Plugin
 
 **Aisee** stands for **AI-Enhanced Software Engineering**.
 
