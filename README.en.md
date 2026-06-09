@@ -3,8 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>An AI software engineering plugin for iterative OpenSpec delivery</strong><br>
-  Connect planning docs, schema-aware change authoring, implementation handoff, verification, and archive guardrails into one workflow that can evolve over time.
+  <strong>Spec First. Better Handoffs. Compound Knowledge.</strong>
 </p>
 
 <p align="center">
@@ -24,6 +23,7 @@
   <a href="https://pypi.org/project/aisee-plugin/"><img src="https://img.shields.io/pypi/v/aisee-plugin" alt="PyPI"></a>
   <a href="https://pypi.org/project/aisee-plugin/"><img src="https://img.shields.io/pypi/pyversions/aisee-plugin" alt="Python"></a>
   <a href="https://github.com/AISEE-LAB/aisee-plugin/actions/workflows/ci.yml"><img src="https://github.com/AISEE-LAB/aisee-plugin/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/AISEE-LAB/aisee-plugin/stargazers"><img src="https://img.shields.io/github/stars/AISEE-LAB/aisee-plugin?style=social" alt="GitHub stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
 </p>
 

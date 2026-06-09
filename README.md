@@ -3,8 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>面向 OpenSpec 迭代交付的 AI 软件工程插件</strong><br>
-  把 planning docs、schema-aware change authoring、implementation handoff、verify 与 archive guard 串成一条可长期演进的工作流。
+  <strong>规范先行，交接更稳，知识复利。</strong>
 </p>
 
 <p align="center">
@@ -24,6 +23,7 @@
   <a href="https://pypi.org/project/aisee-plugin/"><img src="https://img.shields.io/pypi/v/aisee-plugin" alt="PyPI"></a>
   <a href="https://pypi.org/project/aisee-plugin/"><img src="https://img.shields.io/pypi/pyversions/aisee-plugin" alt="Python"></a>
   <a href="https://github.com/AISEE-LAB/aisee-plugin/actions/workflows/ci.yml"><img src="https://github.com/AISEE-LAB/aisee-plugin/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/AISEE-LAB/aisee-plugin/stargazers"><img src="https://img.shields.io/github/stars/AISEE-LAB/aisee-plugin?style=social" alt="GitHub stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
 </p>
 
