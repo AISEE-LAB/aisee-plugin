@@ -8,6 +8,17 @@
 
 - 暂无。
 
+## [0.4.0] - 2026-06-09
+
+### Added
+
+- 新增 `aisee knowledge init-repo` 和 `aisee knowledge configure`，用于初始化独立 team knowledge 仓库并写入业务项目侧 `aisee/knowledge.yaml`。
+
+### Changed
+
+- 为 `aisee knowledge promote-batch` 增加 `.aisee-team-knowledge` marker 和基础目录结构校验，避免误写业务项目根目录。
+- 修正 marketplace bundled team knowledge template，使其与当前 card/pack contract 保持一致。
+
 ## [0.3.0] - 2026-06-09
 
 ### Changed

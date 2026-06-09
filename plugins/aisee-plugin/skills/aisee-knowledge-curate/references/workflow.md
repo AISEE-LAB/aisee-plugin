@@ -96,7 +96,9 @@ aisee/docs/reflect/knowledge-curation/YYYY-MM-DD_<slug>.md
 用户明确授权写入 team knowledge worktree 后，优先建议：
 
 ```bash
+aisee knowledge init-repo --dest <team-knowledge> --initial-pack <pack-id> --json
+aisee knowledge configure --path <team-knowledge> --enable-pack <pack-id> --json
 aisee knowledge promote-batch --curation <report> --team-path <team-knowledge> --pack <pack-id> --json
 ```
 
-该命令只写本地 worktree，不创建分支、commit、push、merge 或 PR。
+如果仓库已经存在，只需要运行 `promote-batch`。它只写本地 worktree，不创建分支、commit、push、merge 或 PR。

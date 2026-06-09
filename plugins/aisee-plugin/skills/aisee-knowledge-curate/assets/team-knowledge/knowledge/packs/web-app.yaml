@@ -1,5 +1,11 @@
 id: web-app
+version: 0.1.0
+status: active
 title: Web App Guardrails
+description: Web app engineering guardrails
 cards:
   - cli-json-output-stability
-  - openspec-source-map-is-routing
+card_globs: []
+disabled_cards: []
+defaults:
+  max_cards: 3

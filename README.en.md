@@ -157,7 +157,7 @@ aisee doctor --json
 
 When reading plugin content, the CLI checks only the Codex install location by default. For other agent runtimes, set `AISEE_AGENT_RUNTIME=claude|cursor|agents`; set it to `none` to disable installed plugin content discovery.
 
-`aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` have been removed from the public CLI surface. Plugin content, schema packs, and team knowledge templates now come from the Codex marketplace plugin or external repositories.
+`aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` have been removed from the public CLI surface. Plugin content, schema packs, and team knowledge templates now come from the Codex marketplace plugin or external repositories; team knowledge onboarding now uses `aisee knowledge init-repo` and `aisee knowledge configure`.
 
 The source repository also includes plugin metadata for multiple agent runtimes:
 
@@ -215,7 +215,7 @@ aisee flow inspect --json
 - [Compatibility Policy](docs/compatibility-policy.en.md): compatibility boundaries for CLI JSON, schema packs, context packs, plugin content, and experimental capabilities.
 - [Plugin Marketplace](docs/plugin-marketplace.en.md): responsibilities of plugin manifests, marketplace listings, PyPI/pipx, and the Codex install path.
 - [Team Knowledge Guardrails](docs/team-knowledge.en.md): experimental status, usage, and gaps before stability for shared team knowledge.
-- [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, and read model.
+- [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, CLI onboarding, and read model.
 - [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, anchor/source-map rules, and contract attachment boundaries.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.

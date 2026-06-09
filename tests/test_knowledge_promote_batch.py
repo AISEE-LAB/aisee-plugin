@@ -242,3 +242,55 @@ boundaries: [test only]
     assert data["status"] == "blocked"
     assert "KNOWLEDGE_CARD_DUPLICATE" in {item["code"] for item in data["issues"]}
     assert not (team / "knowledge" / "cards" / "general" / "duplicate-draft.md").exists()
+
+
+def test_knowledge_promote_batch_requires_team_repo_marker(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+    (team / ".aisee-team-knowledge").unlink()
+    curation = tmp_path / "curation.md"
+    write(
+        curation,
+        """```yaml
+id: marker-missing
+title: Marker missing
+status: candidate
+applies_to:
+  phases: [implementation]
+trigger: [marker]
+recommended_action: [marker]
+boundaries: [test only]
+```
+""",
+    )
+
+    data = run_json(tmp_path, "knowledge", "promote-batch", "--curation", str(curation), "--team-path", str(team), "--json")
+
+    assert data["status"] == "blocked"
+    assert "KNOWLEDGE_SCAFFOLD_MARKER_MISSING" in {item["code"] for item in data["issues"]}
+    assert not (team / "knowledge" / "cards" / "general" / "marker-missing.md").exists()
+
+
+def test_knowledge_promote_batch_rejects_missing_team_repo_structure(tmp_path: Path) -> None:
+    team = tmp_path / "team"
+    write(team / ".aisee-team-knowledge", "marker\n")
+    curation = tmp_path / "curation.md"
+    write(
+        curation,
+        """```yaml
+id: structure-missing
+title: Structure missing
+status: candidate
+applies_to:
+  phases: [implementation]
+trigger: [missing]
+recommended_action: [missing]
+boundaries: [test only]
+```
+""",
+    )
+
+    data = run_json(tmp_path, "knowledge", "promote-batch", "--curation", str(curation), "--team-path", str(team), "--json")
+
+    assert data["status"] == "blocked"
+    assert "KNOWLEDGE_PACKS_MISSING" in {item["code"] for item in data["issues"]}
+    assert "KNOWLEDGE_CARDS_MISSING" in {item["code"] for item in data["issues"]}

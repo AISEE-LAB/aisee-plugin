@@ -1,7 +1,7 @@
 ---
 title: "feat: Team knowledge CLI initialization"
 type: "feat"
-status: "active"
+status: "completed"
 date: "2026-06-09"
 ---
 

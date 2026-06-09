@@ -18,7 +18,9 @@ from aisee_cli.flow import build_flow
 from aisee_cli.index import build_index
 from aisee_cli.knowledge import (
     build_knowledge_check,
+    build_knowledge_configure,
     build_knowledge_doctor,
+    build_knowledge_init_repo,
     build_knowledge_index,
     build_knowledge_inspect,
     build_knowledge_install,
@@ -127,6 +129,23 @@ def main() -> int:
     knowledge_check_parser = knowledge_subparsers.add_parser("check")
     knowledge_check_parser.add_argument("--team-path", help="team knowledge repository path")
     knowledge_check_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_init_parser = knowledge_subparsers.add_parser("init-repo")
+    knowledge_init_parser.add_argument("--dest", required=True, help="destination path for the team knowledge repository")
+    knowledge_init_parser.add_argument("--initial-pack", default="web-app", help="initial pack id to create; default: web-app")
+    knowledge_init_parser.add_argument("--force", action="store_true", help="allow merging managed files into a non-empty directory")
+    knowledge_init_parser.add_argument("--json", action="store_true", help="output JSON")
+    knowledge_configure_parser = knowledge_subparsers.add_parser("configure")
+    knowledge_configure_parser.add_argument("--path", required=True, help="team knowledge repository path or checkout path")
+    knowledge_configure_parser.add_argument("--enable-pack", action="append", default=[], help="pack id to enable; can be repeated")
+    knowledge_configure_parser.add_argument("--repo", help="optional remote repository URL")
+    knowledge_configure_parser.add_argument("--ref", help="optional ref to pin")
+    knowledge_configure_parser.add_argument("--max-cards", type=int, help="maximum knowledge matches to retrieve")
+    knowledge_configure_parser.add_argument(
+        "--include-project-candidates",
+        choices=["true", "false"],
+        help="whether retrieval should include project-local candidate knowledge",
+    )
+    knowledge_configure_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_doctor_parser = knowledge_subparsers.add_parser("doctor")
     knowledge_doctor_parser.add_argument("--team-path", help="team knowledge repository path to compare with config")
     knowledge_doctor_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -265,7 +284,7 @@ def main() -> int:
         return 0
 
     if args.command == "knowledge" and args.knowledge_command is None:
-        print_json(error_response("Use one of: inspect, check, doctor, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+        print_json(error_response("Use one of: inspect, check, init-repo, configure, doctor, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "knowledge":
@@ -275,6 +294,21 @@ def main() -> int:
                 result = build_knowledge_inspect(root)
             elif args.knowledge_command == "check":
                 result = build_knowledge_check(root, team_path=args.team_path)
+            elif args.knowledge_command == "init-repo":
+                result = build_knowledge_init_repo(root, dest=args.dest, initial_pack=args.initial_pack, force=args.force)
+            elif args.knowledge_command == "configure":
+                include_project_candidates = None
+                if args.include_project_candidates is not None:
+                    include_project_candidates = args.include_project_candidates == "true"
+                result = build_knowledge_configure(
+                    root,
+                    team_path=args.path,
+                    enable_packs=args.enable_pack,
+                    repo=args.repo,
+                    ref=args.ref,
+                    max_cards=args.max_cards,
+                    include_project_candidates=include_project_candidates,
+                )
             elif args.knowledge_command == "doctor":
                 result = build_knowledge_doctor(root, team_path=args.team_path)
             elif args.knowledge_command == "install":
@@ -306,7 +340,7 @@ def main() -> int:
             elif args.knowledge_command == "index":
                 result = build_knowledge_index(root, write_cache=True, team_path=args.team_path)
             else:
-                print_json(error_response("Use one of: inspect, check, doctor, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
+                print_json(error_response("Use one of: inspect, check, init-repo, configure, doctor, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
                 return 2
         except ValueError as error:
             print_json(error_response(str(error), "KNOWLEDGE_ERROR"), stderr=True)

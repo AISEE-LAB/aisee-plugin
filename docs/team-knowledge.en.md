@@ -1,6 +1,6 @@
 # Team Knowledge Guardrails
 
-> Experimental feature: suitable for local trials and workflow dogfooding, but not yet a stable public contract. Remote repository sync and promote-batch are available; default templates live under `skills/aisee-knowledge-curate/assets/team-knowledge/` in the marketplace-installed plugin, or in an external knowledge repository. They no longer come from PyPI CLI scaffolding. PR automation and MCP service support are still unsettled.
+> Experimental feature: suitable for local trials and workflow dogfooding, but not yet a stable public contract. The default onboarding path now uses `aisee knowledge init-repo` and `aisee knowledge configure`; remote sync and promote-batch are already available. PR automation and MCP support are still unsettled.
 
 Team knowledge reuses a small number of reviewed engineering lessons across projects so AI agents can avoid repeating known mistakes during implementation, review, and verification.
 
@@ -16,8 +16,9 @@ It is not:
 
 The current version supports:
 
-- pinning a local team knowledge path, ref, and packs through `aisee/knowledge.yaml`;
-- obtaining team knowledge templates from `skills/aisee-knowledge-curate/assets/team-knowledge/` in the marketplace-installed plugin or an external Git repository;
+- initializing a standalone team knowledge repository with `aisee knowledge init-repo --dest <path> --initial-pack <id> --json`;
+- writing `aisee/knowledge.yaml` through `aisee knowledge configure --path <path> --enable-pack <id> --json`;
+- using `skills/aisee-knowledge-curate/assets/team-knowledge/` in the marketplace-installed plugin as a contract-valid example template, or an external Git repository;
 - inspecting configuration with `aisee knowledge inspect --json`;
 - checking that the configured path and actual team knowledge directory match with `aisee knowledge doctor --json`;
 - validating cards and packs with `aisee knowledge check --json` or `--team-path <path>`;
@@ -38,7 +39,7 @@ It does not currently:
 
 ## Recommended Configuration
 
-Business projects should pin only the packs they need:
+Business projects should pin only the packs they need. Prefer generating this file with `aisee knowledge configure` instead of editing it by hand:
 
 ```yaml
 repo: git@example.com:org/aisee-team-knowledge.git
@@ -51,11 +52,20 @@ retrieval:
   include_project_candidates: true
 ```
 
-V1 primarily uses the local `path`; `repo` and `ref` record provenance and support manual synchronization.
+V1 primarily uses the local `path`; `repo` and `ref` record provenance and support manual synchronization. `configure` preserves untouched fields unless you explicitly override them, and it never copies the full knowledge repository into the business project.
 
 ## Retrieval
 
-For default templates, install the Aisee plugin through the Codex marketplace first, then copy `skills/aisee-knowledge-curate/assets/team-knowledge/` into a dedicated team knowledge repository. The CLI no longer copies scaffold templates from the wheel.
+Recommended initialization flow:
+
+```bash
+aisee knowledge init-repo --dest ../aisee-team-knowledge --initial-pack web-app --json
+aisee knowledge check --team-path ../aisee-team-knowledge --json
+aisee knowledge configure --path ../aisee-team-knowledge --enable-pack web-app --json
+aisee knowledge doctor --json
+```
+
+If your team already maintains a static template repository, or wants to inspect the marketplace example, `skills/aisee-knowledge-curate/assets/team-knowledge/` remains a contract-valid reference. The default onboarding path no longer requires manually copying directories.
 
 Inspect configuration first:
 
@@ -64,6 +74,8 @@ aisee knowledge inspect --json
 aisee knowledge doctor --json
 aisee knowledge check --json
 ```
+
+`aisee knowledge check --json` and `--team-path <path>` now expose `team_knowledge.write_ready` so callers can tell whether the repo already satisfies the `promote-batch` write preconditions. A `false` value usually means the marker or base directory structure is still missing.
 
 Query by phase and surface:
 
@@ -109,7 +121,7 @@ aisee:reflect
   -> human review of the diff before commit / PR
 ```
 
-Writing to the team knowledge repo, creating branches, committing, merging, or opening PRs requires explicit user authorization again.
+Writing to the team knowledge repo, creating branches, committing, merging, or opening PRs requires explicit user authorization again. Before writing, `aisee knowledge promote-batch` validates the `.aisee-team-knowledge` marker plus the `knowledge/packs` and `knowledge/cards` directories so a business-project root is not mistaken for a team repo.
 
 ## Gaps Before Stability
 

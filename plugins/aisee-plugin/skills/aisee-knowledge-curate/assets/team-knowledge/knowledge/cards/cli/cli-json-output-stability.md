@@ -1,13 +1,23 @@
 ---
 id: cli-json-output-stability
-title: Keep public CLI JSON stable
+title: CLI JSON 输出必须保持字段稳定
 status: active
 applies_to:
-  phase: [implementation, review]
-  surface: [cli]
-trigger: "Changing a public JSON command, issue code, or machine-readable field."
-recommended_action: "Preserve existing fields where possible, add tests for new fields, and document deprecation when a field changes meaning."
-boundaries: "Does not apply to internal caches or explicitly experimental debug output."
+  stacks: [python]
+  frameworks: []
+  phases: [implementation, review, verify]
+  schemas: []
+  surfaces: [cli, json-output]
+trigger:
+  - 修改 public CLI JSON command、issue code 或 machine-readable field
+recommended_action:
+  - 优先保持新增字段向后兼容
+  - 为字段变化补充 CLI contract test
+  - 破坏性语义调整时补充迁移说明
+boundaries:
+  - 不适用于 internal cache
+  - 不适用于明确标记为 experimental 的 debug 输出
+tags: [cli, json-output]
 ---
 
 Public CLI JSON is consumed by agents and automation. Additive changes are preferred; breaking changes require a migration note and contract tests.

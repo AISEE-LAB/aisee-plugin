@@ -5,6 +5,9 @@ from pathlib import Path
 from test_knowledge_config import configure_project, create_team_knowledge, run_json, write
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
 def test_knowledge_check_reports_duplicate_card_ids(tmp_path: Path) -> None:
     team = create_team_knowledge(tmp_path)
     configure_project(tmp_path, team)
@@ -27,6 +30,25 @@ boundaries: [test only]
 
     assert data["status"] == "blocked"
     assert "KNOWLEDGE_CARD_DUPLICATE" in {item["code"] for item in data["issues"]}
+
+
+def test_knowledge_check_reports_write_ready_for_valid_team_repo(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+
+    data = run_json(tmp_path, "knowledge", "check", "--team-path", str(team), "--json")
+
+    assert data["team_knowledge"]["marker_exists"] is True
+    assert data["team_knowledge"]["write_ready"] is True
+
+
+def test_knowledge_check_reports_write_not_ready_when_marker_missing(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+    (team / ".aisee-team-knowledge").unlink()
+
+    data = run_json(tmp_path, "knowledge", "check", "--team-path", str(team), "--json")
+
+    assert data["team_knowledge"]["marker_exists"] is False
+    assert data["team_knowledge"]["write_ready"] is False
 
 
 def test_knowledge_check_reports_deprecated_replacement_issues(tmp_path: Path) -> None:
@@ -153,3 +175,11 @@ cards: []
     data = run_json(tmp_path, "knowledge", "check", "--team-path", str(team), "--json")
 
     assert "KNOWLEDGE_PACK_VERSION_MISSING" in {item["code"] for item in data["issues"]}
+
+
+def test_marketplace_team_knowledge_template_is_contract_valid() -> None:
+    template = ROOT / "plugins" / "aisee-plugin" / "skills" / "aisee-knowledge-curate" / "assets" / "team-knowledge"
+
+    data = run_json(ROOT, "knowledge", "check", "--team-path", str(template), "--json")
+
+    assert data["status"] == "ok"

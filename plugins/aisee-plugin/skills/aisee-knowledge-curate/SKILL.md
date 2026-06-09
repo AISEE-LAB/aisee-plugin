@@ -23,6 +23,7 @@ description: 批量审查项目内 reusable knowledge candidates，把 reflect/s
 - 不复制 solution 正文。
 - 不把 candidate 自动提升为 active card。
 - 不自动写入 `aisee-team-knowledge`；用户授权后可以建议运行 `aisee knowledge promote-batch`。
+- 不手工创建 team knowledge 仓库骨架或直接改业务项目 `aisee/knowledge.yaml`；初始化和接入优先走 `aisee knowledge init-repo` 与 `aisee knowledge configure`。
 - 不创建分支、commit、push、merge 或 PR，除非用户明确授权并提供 team repo 路径。
 - 不让 team knowledge 覆盖 OpenSpec specs、tasks、contracts、source-map 或 baseline。
 
@@ -57,6 +58,7 @@ rg --files aisee/docs/reflect docs/solutions 2>/dev/null | rg 'knowledge-candida
 
 - 默认只输出审查报告，不改 team repo。
 - 写入 team repo 前必须再次确认用户授权和目标路径；优先使用 `aisee knowledge promote-batch --curation <path> --team-path <path> --pack <id> --json` 写入本地 worktree。
+- 如果用户还没有 team knowledge 仓库，先建议 `aisee knowledge init-repo --dest <path> --initial-pack <id> --json`；如果业务项目还没 pin，建议 `aisee knowledge configure --path <path> --enable-pack <id> --json`。
 - `promote-batch` 不会创建分支、commit、push、merge 或 PR；这些 Git 动作仍需用户明确授权。
 - 推荐 batch review：积累 3-10 条真实可复用候选后再提交。
 - 安全、高风险或公开接口类候选可以建议单独 PR，但仍需用户授权。

@@ -112,7 +112,7 @@
 
 当前仍为 experimental：
 
-- Team knowledge 远程安装、自动同步、promote-batch、PR 自动化和 MCP 包装；
+- Team knowledge `init-repo` / `configure` onboarding、远程安装、自动同步、promote-batch、PR 自动化和 MCP 包装；
 - 硬件和嵌入式主工作流整合；
 - 可运行的完整 lifecycle dogfood fixtures；
 - schema sample changes 的最终目录和格式；

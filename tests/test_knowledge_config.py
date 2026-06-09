@@ -33,6 +33,7 @@ def run_json(root: Path, *args: str) -> dict:
 
 def create_team_knowledge(root: Path) -> Path:
     team = root / ".aisee" / "team-knowledge"
+    write(team / ".aisee-team-knowledge", "team_knowledge: true\n")
     write(
         team / "knowledge" / "packs" / "web-app.yaml",
         """id: web-app
@@ -156,6 +157,17 @@ def test_knowledge_doctor_reports_team_path_mismatch(tmp_path: Path) -> None:
 
     assert data["status"] == "blocked"
     assert "KNOWLEDGE_PATH_MISMATCH" in {item["code"] for item in data["issues"]}
+
+
+def test_knowledge_doctor_blocks_missing_team_repo_marker(tmp_path: Path) -> None:
+    team = create_team_knowledge(tmp_path)
+    configure_project(tmp_path, team)
+    (team / ".aisee-team-knowledge").unlink()
+
+    data = run_json(tmp_path, "knowledge", "doctor", "--json")
+
+    assert data["status"] == "blocked"
+    assert "KNOWLEDGE_SCAFFOLD_MARKER_MISSING" in {item["code"] for item in data["issues"]}
 
 
 def test_knowledge_inspect_reports_missing_pack(tmp_path: Path) -> None:

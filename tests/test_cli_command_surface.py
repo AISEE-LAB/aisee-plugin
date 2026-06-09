@@ -93,3 +93,10 @@ def test_removed_content_distribution_commands_are_not_public_subcommands(tmp_pa
     assert knowledge_scaffold.returncode == 2
     assert "invalid choice" in knowledge_scaffold.stderr
     assert "scaffold" in knowledge_scaffold.stderr
+
+
+def test_knowledge_help_shows_init_repo_and_configure(tmp_path: Path) -> None:
+    result = run_aisee(tmp_path, "knowledge", "--help")
+
+    assert "init-repo" in result.stdout
+    assert "configure" in result.stdout

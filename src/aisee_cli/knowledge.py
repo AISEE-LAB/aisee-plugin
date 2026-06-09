@@ -25,6 +25,116 @@ CARD_REQUIRED_FIELDS = ("id", "title", "status", "applies_to", "trigger", "recom
 CARD_STATUSES = {"candidate", "active", "deprecated"}
 TEXT_TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_:+.-]+|[\u4e00-\u9fff]+")
 SCAFFOLD_MARKER = ".aisee-team-knowledge"
+DEFAULT_INITIAL_PACK = "web-app"
+INIT_REPO_PACKS = {
+    "web-app": {
+        "id": "web-app",
+        "version": "0.1.0",
+        "status": "active",
+        "description": "Web app engineering guardrails",
+        "cards": ["cli-json-output-stability"],
+        "card_globs": [],
+        "disabled_cards": [],
+        "defaults": {"max_cards": DEFAULT_MAX_CARDS},
+    },
+    "openspec": {
+        "id": "openspec",
+        "version": "0.1.0",
+        "status": "active",
+        "description": "OpenSpec authoring and execution guardrails",
+        "cards": ["openspec-source-map-is-routing"],
+        "card_globs": [],
+        "disabled_cards": [],
+        "defaults": {"max_cards": DEFAULT_MAX_CARDS},
+    },
+}
+INIT_REPO_CARDS = {
+    "cli-json-output-stability": {
+        "category": "cli",
+        "metadata": {
+            "id": "cli-json-output-stability",
+            "title": "CLI JSON 输出必须保持字段稳定",
+            "status": "active",
+            "applies_to": {
+                "stacks": ["python"],
+                "frameworks": [],
+                "phases": ["implementation", "verify"],
+                "schemas": [],
+                "surfaces": ["cli", "json-output"],
+            },
+            "trigger": [
+                "修改 public CLI JSON 输出字段、issue code 或退出语义",
+            ],
+            "recommended_action": [
+                "优先保持字段向后兼容，并补充 CLI contract test",
+            ],
+            "boundaries": [
+                "不适用于仅面向人类的非 JSON 日志输出",
+            ],
+            "tags": ["cli", "json-output"],
+        },
+        "body": "Public CLI JSON 会被 agent 和自动化消费。优先做 additive change；破坏性调整必须配套迁移说明和 contract test。\n",
+    },
+    "openspec-source-map-is-routing": {
+        "category": "openspec",
+        "metadata": {
+            "id": "openspec-source-map-is-routing",
+            "title": "source-map 只承载路由与归属信息",
+            "status": "active",
+            "applies_to": {
+                "stacks": [],
+                "frameworks": [],
+                "phases": ["planning", "implementation", "review"],
+                "schemas": ["aisee-app-spec-driven", "aisee-device-spec-driven"],
+                "surfaces": ["openspec", "source-map"],
+            },
+            "trigger": [
+                "修改 source-map.md、实现引用、ownership 或执行路由信息",
+            ],
+            "recommended_action": [
+                "把规范性需求留在 specs/contracts/tasks 中，source-map 只记录路由与来源锚点",
+            ],
+            "boundaries": [
+                "不要把 source-map.md 变成 requirements、tasks 或 contract 的平行事实源",
+            ],
+            "tags": ["openspec", "source-map"],
+        },
+        "body": "source-map.md 帮助 agent 路由实现与评审，但不替代规范事实源。\n",
+    },
+}
+INIT_REPO_TEXT_FILES = {
+    SCAFFOLD_MARKER: "team_knowledge: true\n",
+    "AGENTS.md": """# Team Knowledge Repo Rules
+
+- 默认使用中文编写 card、review 说明和仓库文档，除非团队明确要求其他语言。
+- Team knowledge card 是可复用工程 guardrail，不是 OpenSpec spec、task、contract 或 source-map 的替代品。
+- 写入此仓库前先运行 `aisee knowledge check --team-path <path> --json`；写入时优先使用 `aisee knowledge promote-batch`。
+- 不要提交 secrets、客户专有信息、生产凭据或大段项目私有实现正文。
+""",
+    "README.md": """# Aisee Team Knowledge
+
+这个仓库承载经过 review 的团队级 guardrail cards。
+
+推荐工作流：
+
+1. `aisee knowledge check --team-path <path> --json`
+2. `aisee knowledge configure --path <path> --enable-pack web-app --json`
+3. 在业务项目中运行 `aisee knowledge doctor --json`
+4. 使用 `aisee knowledge promote-batch` 写入已审查 draft
+""",
+    "docs/authoring-guide.md": """# Authoring Guide
+
+- card frontmatter 必须满足当前 CLI contract。
+- `candidate` 只表示候选知识；默认检索只消费 `active`。
+- 进入 team knowledge 之前先做去敏和去重检查。
+""",
+    "docs/review-policy.md": """# Review Policy
+
+- promote 前确认 card 没有复制项目私有实现正文。
+- 保持 pack/card 元数据可被 CLI 直接解析。
+- 需要废弃 card 时，使用 `deprecated` 并填写 `deprecated_by`。
+""",
+}
 
 
 def build_knowledge_inspect(root: Path) -> dict[str, Any]:
@@ -211,6 +321,7 @@ def build_knowledge_check(root: Path, *, team_path: str | None = None) -> dict[s
         command = "aisee knowledge check --json"
         if not config.get("available"):
             issues.append(issue("KNOWLEDGE_CONFIG_MISSING", "risk", "aisee/knowledge.yaml was not found", rel(root, knowledge_config_path(root))))
+    write_ready = bool(team_root and not validate_team_repo_for_write(root, team_root))
     return {
         "schema_version": KNOWLEDGE_SCHEMA_VERSION,
         "status": status_from_issues(issues),
@@ -218,6 +329,8 @@ def build_knowledge_check(root: Path, *, team_path: str | None = None) -> dict[s
         "team_knowledge": {
             "path": rel(root, team_root) if team_root else None,
             "exists": bool(team_root and team_root.exists()),
+            "marker_exists": bool(team_root and (team_root / SCAFFOLD_MARKER).exists()),
+            "write_ready": write_ready,
         },
         "packs": packs,
         "cards": summarize_cards(cards),
@@ -251,7 +364,7 @@ def build_knowledge_doctor(root: Path, *, team_path: str | None = None) -> dict[
         if not team_root.exists():
             issues.append(issue("KNOWLEDGE_REPO_MISSING", "blocker", f"team knowledge path does not exist: {team_root}", rel(root, team_root)))
         elif not (team_root / SCAFFOLD_MARKER).exists():
-            issues.append(issue("KNOWLEDGE_SCAFFOLD_MARKER_MISSING", "risk", f"team knowledge path is missing {SCAFFOLD_MARKER}", rel(root, team_root)))
+            issues.append(issue("KNOWLEDGE_SCAFFOLD_MARKER_MISSING", "blocker", f"team knowledge path is missing {SCAFFOLD_MARKER}", rel(root, team_root)))
     packs, cards, check_issues = load_configured_knowledge(root, config, configured_root) if config.get("available") else ([], [], [])
     issues.extend(check_issues)
     command = f"aisee knowledge doctor --team-path {team_path} --json" if team_path else "aisee knowledge doctor --json"
@@ -307,6 +420,154 @@ def build_knowledge_scaffold(
             "updates_config": update_config,
         },
     }
+
+
+def build_knowledge_init_repo(
+    root: Path,
+    *,
+    dest: str,
+    initial_pack: str = DEFAULT_INITIAL_PACK,
+    force: bool = False,
+) -> dict[str, Any]:
+    destination = resolve_user_path(root, Path(dest))
+    issues: list[dict[str, str]] = []
+    try:
+        pack_id = safe_pack_id(initial_pack)
+    except ValueError as error:
+        issues.append(issue("KNOWLEDGE_PACK_INVALID", "blocker", str(error), dest))
+        return init_repo_result(root, destination, initial_pack, [], issues, force=force)
+    if pack_id not in INIT_REPO_PACKS:
+        issues.append(issue(
+            "KNOWLEDGE_PACK_INVALID",
+            "blocker",
+            f"unsupported initial pack: {pack_id}; expected one of {', '.join(sorted(INIT_REPO_PACKS))}",
+            dest,
+        ))
+        return init_repo_result(root, destination, pack_id, [], issues, force=force)
+    if destination.exists() and destination.is_file():
+        issues.append(issue("KNOWLEDGE_DEST_INVALID", "blocker", f"destination is a file: {destination}", rel(root, destination)))
+        return init_repo_result(root, destination, pack_id, [], issues, force=force)
+
+    planned_writes = init_repo_contents_for_pack(pack_id)
+    if destination.exists():
+        existing_entries = sorted(destination.iterdir())
+        if existing_entries and not force:
+            issues.append(issue(
+                "KNOWLEDGE_DEST_NOT_EMPTY",
+                "blocker",
+                "destination already exists and is not empty; re-run with --force to merge managed files",
+                rel(root, destination),
+            ))
+            return init_repo_result(root, destination, pack_id, [], issues, force=force)
+        if existing_entries and force:
+            for relative_path, content in planned_writes.items():
+                target = destination / relative_path
+                if target.exists() and target.read_text(encoding="utf-8") != content:
+                    issues.append(issue(
+                        "KNOWLEDGE_DEST_CONFLICT",
+                        "blocker",
+                        f"managed file already exists with different content: {relative_path}",
+                        rel(root, target),
+                    ))
+            if issues:
+                return init_repo_result(root, destination, pack_id, [], issues, force=force)
+
+    destination.mkdir(parents=True, exist_ok=True)
+    written: list[str] = []
+    for relative_path, content in planned_writes.items():
+        target = destination / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if not target.exists() or target.read_text(encoding="utf-8") != content:
+            target.write_text(content, encoding="utf-8")
+            written.append(rel(root, target))
+
+    validation = build_knowledge_check(root, team_path=destination.as_posix())
+    issues.extend(validation.get("issues", []))
+    return init_repo_result(root, destination, pack_id, written, issues, force=force)
+
+
+def build_knowledge_configure(
+    root: Path,
+    *,
+    team_path: str,
+    enable_packs: list[str],
+    repo: str | None = None,
+    ref: str | None = None,
+    max_cards: int | None = None,
+    include_project_candidates: bool | None = None,
+) -> dict[str, Any]:
+    config_path = knowledge_config_path(root)
+    current_data: dict[str, Any] = {}
+    issues: list[dict[str, str]] = []
+    resolved_team_root = resolve_user_path(root, Path(team_path))
+    if config_path.exists():
+        current_data, parse_error = load_yaml_file(config_path)
+        if parse_error:
+            issues.append(issue("KNOWLEDGE_CONFIG_INVALID", "blocker", parse_error, rel(root, config_path)))
+            return configure_result(root, config_path, {}, [], issues, team_path=team_path, enable_packs=enable_packs)
+
+    sanitized_packs: list[str] = []
+    for pack in enable_packs:
+        sanitized_packs.append(safe_pack_id(pack))
+    existing_packs = normalize_string_list(current_data.get("packs"))
+    merged_packs: list[str] = []
+    for pack in existing_packs + sanitized_packs:
+        if pack not in merged_packs:
+            merged_packs.append(pack)
+
+    retrieval_data = current_data.get("retrieval") if isinstance(current_data.get("retrieval"), dict) else {}
+    effective_repo = repo if repo is not None else current_data.get("repo")
+    if not resolved_team_root.exists() and not effective_repo:
+        issues.append(issue(
+            "KNOWLEDGE_REPO_MISSING",
+            "blocker",
+            "team knowledge path does not exist; provide an existing local repo path or set --repo for a future install",
+            rel(root, resolved_team_root),
+        ))
+        return configure_result(root, config_path, {}, [], issues, team_path=team_path, enable_packs=sanitized_packs, repo=repo, ref=ref, max_cards=max_cards, include_project_candidates=include_project_candidates)
+    if resolved_team_root.exists() and not (resolved_team_root / SCAFFOLD_MARKER).exists():
+        issues.append(issue(
+            "KNOWLEDGE_SCAFFOLD_MARKER_MISSING",
+            "blocker",
+            f"team knowledge path is missing {SCAFFOLD_MARKER}",
+            rel(root, resolved_team_root),
+        ))
+        return configure_result(root, config_path, {}, [], issues, team_path=team_path, enable_packs=sanitized_packs, repo=repo, ref=ref, max_cards=max_cards, include_project_candidates=include_project_candidates)
+    configured_path = rel(root, resolved_team_root)
+    updated = dict(current_data)
+    updated["path"] = configured_path
+    if repo is not None:
+        updated["repo"] = repo
+    if ref is not None:
+        updated["ref"] = ref
+    updated["packs"] = merged_packs
+    updated["retrieval"] = {
+        "max_cards": normalize_max_cards(max_cards if max_cards is not None else retrieval_data.get("max_cards")),
+        "include_project_candidates": (
+            include_project_candidates
+            if include_project_candidates is not None
+            else bool(retrieval_data.get("include_project_candidates", True))
+        ),
+        "vector": retrieval_data.get("vector", "optional"),
+    }
+
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(yaml.safe_dump(updated, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    reloaded, reload_issues = load_knowledge_config(root)
+    issues.extend(reload_issues)
+    return configure_result(
+        root,
+        config_path,
+        config_public(root, reloaded, resolve_team_root(root, reloaded)),
+        [rel(root, config_path)],
+        issues,
+        team_path=team_path,
+        enable_packs=sanitized_packs,
+        repo=repo,
+        ref=ref,
+        max_cards=max_cards,
+        include_project_candidates=include_project_candidates,
+    )
 
 
 def build_knowledge_install(root: Path, *, allow_dirty: bool = False) -> dict[str, Any]:
@@ -387,8 +648,7 @@ def build_knowledge_promote_batch(
     issues: list[dict[str, str]] = []
     if not curation_path.exists():
         issues.append(issue("KNOWLEDGE_CURATION_MISSING", "blocker", f"curation file does not exist: {curation}", rel(root, curation_path)))
-    if not team_root.exists():
-        issues.append(issue("KNOWLEDGE_REPO_MISSING", "blocker", f"team knowledge path does not exist: {team_path}", rel(root, team_root)))
+    issues.extend(validate_team_repo_for_write(root, team_root))
     if pack_id:
         try:
             pack_path = pack_path_for_id(team_root, pack_id)
@@ -728,6 +988,23 @@ def validate_pack_data(pack_id: str, pack_data: dict[str, Any], path_label: str)
         value = pack_data.get(field)
         if value is not None and not isinstance(value, list):
             issues.append(issue("KNOWLEDGE_PACK_FIELD_INVALID", "risk", f"{field} must be a list", path_label))
+    return issues
+
+
+def validate_team_repo_for_write(root: Path, team_root: Path) -> list[dict[str, str]]:
+    issues: list[dict[str, str]] = []
+    if not team_root.exists():
+        issues.append(issue("KNOWLEDGE_REPO_MISSING", "blocker", f"team knowledge path does not exist: {team_root}", rel(root, team_root)))
+        return issues
+    marker = team_root / SCAFFOLD_MARKER
+    packs_dir = team_root / "knowledge" / "packs"
+    cards_dir = team_root / "knowledge" / "cards"
+    if not marker.exists():
+        issues.append(issue("KNOWLEDGE_SCAFFOLD_MARKER_MISSING", "blocker", f"team knowledge path is missing {SCAFFOLD_MARKER}", rel(root, team_root)))
+    if not packs_dir.exists():
+        issues.append(issue("KNOWLEDGE_PACKS_MISSING", "blocker", "knowledge/packs directory was not found", rel(root, packs_dir)))
+    if not cards_dir.exists():
+        issues.append(issue("KNOWLEDGE_CARDS_MISSING", "blocker", "knowledge/cards directory was not found", rel(root, cards_dir)))
     return issues
 
 
@@ -1358,9 +1635,9 @@ def pack_path_for_id(team_root: Path, pack_id: str) -> Path:
     return path
 
 
-def render_card_markdown(metadata: dict[str, Any]) -> str:
+def render_card_markdown(metadata: dict[str, Any], *, body: str | None = None) -> str:
     frontmatter = yaml.safe_dump(metadata, allow_unicode=True, sort_keys=False).strip()
-    return f"---\n{frontmatter}\n---\n\n## Guardrail\n\n待团队 review 后补充说明。\n"
+    return f"---\n{frontmatter}\n---\n\n{body or '## Guardrail\\n\\n待团队 review 后补充说明。\\n'}"
 
 
 def add_card_to_pack_data(data: dict[str, Any], card_id: str) -> bool:
@@ -1394,6 +1671,93 @@ def promote_result(
             "command": "aisee knowledge promote-batch --json",
             "writes": changed,
             "git_actions": False,
+        },
+    }
+
+
+def init_repo_contents_for_pack(pack_id: str) -> dict[str, str]:
+    contents = dict(INIT_REPO_TEXT_FILES)
+    pack_data = INIT_REPO_PACKS[pack_id]
+    contents[f"knowledge/packs/{pack_id}.yaml"] = yaml.safe_dump(pack_data, allow_unicode=True, sort_keys=False)
+    for card_id in normalize_string_list(pack_data.get("cards")):
+        card = INIT_REPO_CARDS[card_id]
+        contents[f"knowledge/cards/{card['category']}/{card_id}.md"] = render_card_markdown(card["metadata"], body=card["body"])
+    return contents
+
+
+def init_repo_result(
+    root: Path,
+    destination: Path,
+    initial_pack: str,
+    written: list[str],
+    issues: list[dict[str, str]],
+    *,
+    force: bool,
+) -> dict[str, Any]:
+    return {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": status_from_issues(issues),
+        "team_knowledge": {
+            "path": rel(root, destination),
+            "exists": destination.exists(),
+            "initial_pack": initial_pack,
+        },
+        "written": sorted(set(written)),
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "next_commands": [
+            f"aisee knowledge check --team-path {destination.as_posix()} --json",
+            f"aisee knowledge configure --path {destination.as_posix()} --enable-pack {initial_pack} --json",
+        ],
+        "meta": {
+            "command": f"aisee knowledge init-repo --dest {destination.as_posix()} --initial-pack {initial_pack} --json",
+            "writes": bool(written),
+            "force": force,
+        },
+    }
+
+
+def configure_result(
+    root: Path,
+    config_path: Path,
+    config_payload: dict[str, Any],
+    written: list[str],
+    issues: list[dict[str, str]],
+    *,
+    team_path: str,
+    enable_packs: list[str],
+    repo: str | None = None,
+    ref: str | None = None,
+    max_cards: int | None = None,
+    include_project_candidates: bool | None = None,
+) -> dict[str, Any]:
+    command_parts = ["aisee", "knowledge", "configure", "--path", team_path]
+    for pack in enable_packs:
+        command_parts.extend(["--enable-pack", pack])
+    if repo is not None:
+        command_parts.extend(["--repo", repo])
+    if ref is not None:
+        command_parts.extend(["--ref", ref])
+    if max_cards is not None:
+        command_parts.extend(["--max-cards", str(max_cards)])
+    if include_project_candidates is not None:
+        command_parts.extend(["--include-project-candidates", "true" if include_project_candidates else "false"])
+    command_parts.append("--json")
+    return {
+        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
+        "status": status_from_issues(issues),
+        "config": config_payload,
+        "written": sorted(set(written)),
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "next_commands": [
+            "aisee knowledge inspect --json",
+            "aisee knowledge doctor --json",
+        ],
+        "meta": {
+            "command": " ".join(command_parts),
+            "writes": bool(written),
+            "config_path": rel(root, config_path),
         },
     }
 
