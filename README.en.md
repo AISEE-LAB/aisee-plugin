@@ -505,15 +505,13 @@ python scripts/smoke_release.py --with-pipx
 
 ### Ongoing Compatibility Governance
 
-- Maintain compatibility boundaries for CLI JSON, schema packs, context packs, marketplace plugin content, and skill contracts.
-- Maintain deprecation and migration rules for breaking changes.
-- Decide which hardware and embedded workflows remain experimental and which enter the main Aisee workflow.
-- Add more real-world lifecycle fixtures beyond the app scenario.
+- Keep CLI JSON, schema packs, context packs, marketplace plugin content, and skill contracts aligned with the Compatibility Policy; when a public contract changes, update tests, migration notes, and release notes together.
+- Add more real-world lifecycle fixtures beyond the app scenario, starting with quick-fix, quick-research, docsite, and infra-change.
 
 ### Later
 
 - Expand cross-repository contract collaboration examples.
-- Stabilize team knowledge remote sync, promote workflows, lifecycle management, and optional MCP wrapping.
+- Tighten team knowledge remote sync, promote workflows, lifecycle management, and optional MCP wrapping.
 
 ## License
 

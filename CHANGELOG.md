@@ -8,6 +8,15 @@
 
 - 暂无。
 
+## [0.3.0] - 2026-06-09
+
+### Changed
+
+- 移除公开 CLI 中无单一 owner 的遗留内容分发入口：`aisee plugin export`、`aisee schemas install`、`aisee knowledge scaffold` 和 `aisee bootstrap --apply`。
+- 将 Aisee reviewer 统一为只读 review lens，并把 Aisee reviewer evidence 与 CE review evidence 在 context pack 中分离。
+- 为 planning docs 增加统一 YAML frontmatter 合同，并同步主要模板、技能文档、README、workflow 和兼容性文档。
+- 将缺少 `id-registry.json` 调整为历史兼容状态，不再视为当前 authoring / lookup / traceability 的 blocker。
+
 ## [0.1.3] - 2026-06-08
 
 ### Changed

@@ -505,15 +505,13 @@ python scripts/smoke_release.py --with-pipx
 
 ### 持续兼容治理
 
-- 持续维护 CLI JSON、schema packs、context packs、marketplace plugin content 和 skill contracts 的兼容边界。
-- 持续维护破坏性变更的弃用、迁移和版本升级规则。
-- 明确哪些硬件和嵌入式工作流继续保持实验性，哪些进入 Aisee 主工作流。
-- 增加 app 场景之外的真实生命周期 fixtures。
+- 继续按 Compatibility Policy 维护 CLI JSON、schema packs、context packs、marketplace plugin content 和 skill contracts；新增或破坏公开契约时同步补测试、迁移说明和 release notes。
+- 增加 app 场景之外的真实生命周期 fixtures，优先覆盖 quick-fix、quick-research、docsite 和 infra-change。
 
 ### 后续
 
 - 扩展跨仓库契约协作示例。
-- 稳定 team knowledge 远程同步、promote workflow、生命周期管理和可选 MCP 包装。
+- 收敛 team knowledge 的远程同步、promote workflow、生命周期管理和可选 MCP 包装。
 
 ## License
 
