@@ -30,31 +30,28 @@ def run_aisee(root: Path, *args: str) -> dict:
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(
-        root / ".aisee" / "id-registry.json",
+        root / "aisee" / "registry" / "sources.json",
         json.dumps(
             {
                 "version": 1,
-                "scopes": {
-                    "auth": {
-                        "counters": {"FR": 1, "PAGE": 1},
-                        "ids": {
-                            "auth:FR-001": {
-                                "type": "FR",
-                                "number": 1,
-                                "status": "active",
-                                "title": "用户登录",
-                                "owner": "docs/requirements/auth-srs.md",
-                            },
-                            "auth:PAGE-001": {
-                                "type": "PAGE",
-                                "number": 1,
-                                "status": "active",
-                                "title": "登录页",
-                                "owner": "docs/ui-content/auth-ui.md",
-                            },
-                        },
-                    }
-                },
+                "sources": [
+                    {
+                        "scope": "auth",
+                        "type": "srs",
+                        "path": "docs/requirements/auth-srs.md",
+                        "alias": "srs:auth-login",
+                        "template": "aisee-srs",
+                        "parser": "srs",
+                    },
+                    {
+                        "scope": "auth",
+                        "type": "ui-content",
+                        "path": "docs/ui-content/auth-ui.md",
+                        "alias": "ui-content:auth-login",
+                        "template": "aisee-ui-content",
+                        "parser": "ui-content",
+                    },
+                ],
             },
             ensure_ascii=False,
             indent=2,
@@ -67,8 +64,8 @@ def create_project(root: Path) -> None:
 
 ## 登录
 
-覆盖需求：auth:FR-001
-关联页面：auth:PAGE-001
+覆盖需求：FR-001
+关联页面：PAGE-001
 """,
     )
     write(
@@ -77,13 +74,25 @@ def create_project(root: Path) -> None:
 
 ## 登录页
 
-页面 ID：auth:PAGE-001
-覆盖需求：auth:FR-001
+页面 ID：PAGE-001
+覆盖需求：docs/requirements/auth-srs.md#FR-001
 """,
     )
     write(
         root / "openspec" / "changes" / "add-auth" / "source-map.md",
-        "| FR | auth:FR-001 | 登录 | docs/requirements/auth-srs.md | 覆盖 | src/auth/session.py / tests/auth/test_session.py |\n",
+        """## Upstream Sources
+
+| Source | Path / Description | Ref | Status | Notes |
+|---|---|---|---|---|
+| SRS | docs/requirements/auth-srs.md | docs/requirements/auth-srs.md#FR-001 | confirmed | |
+
+## Affected Paths Index
+
+| Kind | Path | Refs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/auth/session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
+| test | tests/auth/test_session.py | docs/requirements/auth-srs.md#FR-001 | add | |
+""",
     )
 
 
@@ -97,21 +106,23 @@ def test_sources_add_and_check(tmp_path: Path) -> None:
         "--scope",
         "auth",
         "--type",
-        "srs",
+        "architecture",
         "--path",
-        "docs/requirements/auth-srs.md",
+        "docs/architecture/auth-brief.md",
+        "--alias",
+        "architecture:auth-login",
         "--template",
-        "aisee-srs",
+        "aisee-architecture",
         "--parser",
-        "srs",
+        "architecture",
         "--json",
     )
     checked = run_aisee(tmp_path, "sources", "check", "--json")
 
-    assert added["status"] == "ok"
+    assert added["status"] == "risk"
     assert added["changed"] is True
-    assert checked["status"] == "ok"
-    assert checked["sources"][0]["path"] == "docs/requirements/auth-srs.md"
+    assert checked["status"] == "risk"
+    assert checked["sources"][0]["alias"] == "srs:auth-login"
     assert (tmp_path / "aisee" / "registry" / "sources.json").exists()
 
 
@@ -123,7 +134,8 @@ def test_index_writes_rebuildable_cache(tmp_path: Path) -> None:
     assert data["status"] == "ok"
     assert data["index"]["writes"] is True
     assert data["project_rules"]["primary"] == "AGENTS.md"
-    assert "auth:FR-001" in data["ids"]
+    assert "docs/requirements/auth-srs.md#FR-001" in data["anchors"]
+    assert data["aliases"]["srs:auth-login"] == "docs/requirements/auth-srs.md"
     assert any(item["path"] == "docs/requirements/auth-srs.md" for item in data["documents"])
     cache = tmp_path / "aisee" / "cache" / "context-index.json"
     assert cache.exists()
@@ -131,28 +143,36 @@ def test_index_writes_rebuildable_cache(tmp_path: Path) -> None:
     assert cached["meta"]["cache_is_fact_source"] is False
 
 
-def test_get_returns_registry_source_and_relations(tmp_path: Path) -> None:
+def test_get_returns_anchor_source_and_relations(tmp_path: Path) -> None:
     create_project(tmp_path)
 
-    data = run_aisee(tmp_path, "get", "auth:FR-001", "--json")
+    data = run_aisee(tmp_path, "get", "docs/requirements/auth-srs.md#FR-001", "--json")
 
     assert data["status"] == "linked"
-    assert data["registry"]["entry"]["title"] == "用户登录"
+    assert data["document"] == "docs/requirements/auth-srs.md"
     assert data["source"]["path"] == "docs/requirements/auth-srs.md"
     assert data["source"]["heading"]["title"] == "登录"
     assert data["relations"]["changes"] == ["add-auth"]
-    assert data["relations"]["ids"] == ["auth:PAGE-001"]
+    assert data["relations"]["references"] == ["docs/requirements/auth-srs.md#PAGE-001"]
     assert data["relations"]["code_paths"] == ["src/auth/session.py"]
     assert data["relations"]["test_paths"] == ["tests/auth/test_session.py"]
     assert data["meta"]["source_index_written"] is False
 
 
-def test_get_reports_unregistered_reference(tmp_path: Path) -> None:
+def test_get_resolves_alias_anchor(tmp_path: Path) -> None:
     create_project(tmp_path)
-    write(tmp_path / "docs" / "requirements" / "auth-srs.md", "遗漏注册：auth:FR-999\n")
 
-    data = run_aisee(tmp_path, "get", "auth:FR-999", "--json")
+    data = run_aisee(tmp_path, "get", "srs:auth-login#FR-001", "--json")
 
-    assert data["status"] == "unregistered"
-    assert data["issues"][0]["code"] == "ID_NOT_REGISTERED"
-    assert data["references"][0]["path"] == "docs/requirements/auth-srs.md"
+    assert data["status"] == "linked"
+    assert data["reference_type"] == "alias-anchor"
+    assert data["canonical_reference"] == "docs/requirements/auth-srs.md#FR-001"
+
+
+def test_get_reports_missing_local_id(tmp_path: Path) -> None:
+    create_project(tmp_path)
+
+    data = run_aisee(tmp_path, "get", "docs/requirements/auth-srs.md#FR-999", "--json")
+
+    assert data["status"] == "missing-local-id"
+    assert data["issues"][0]["code"] == "ANCHOR_LOCAL_ID_MISSING"

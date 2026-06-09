@@ -18,34 +18,34 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
 
 ## Upstream Sources
 
-| Source | Path / Description | Source ID | Status | Notes |
+| Source | Path / Description | Ref | Status | Notes |
 |---|---|---|---|---|
-| SRS | docs/requirements/auth-srs.md | SRC-001 | confirmed | |
+| SRS | docs/requirements/auth-srs.md | docs/requirements/auth-srs.md#FR-001 | confirmed | |
 
-## ID Trace
+## Anchor Trace
 
-| Type | ID | Title | Source | Handling | Artifact |
+| Type | Ref | Title | Source | Handling | Artifact |
 |---|---|---|---|---|---|
-| FR | auth:FR-001 | 登录 | SRS | covered | specs / tasks |
+| FR | docs/requirements/auth-srs.md#FR-001 | 登录 | SRS | covered | specs / tasks |
 
 ## Affected Paths Index
 
-| Kind | Path | IDs | Mode | Notes |
+| Kind | Path | Refs | Mode | Notes |
 |---|---|---|---|---|
-| code | src/auth/session.py | auth:API-001 | modify | |
-| test | tests/auth/test_session.py | auth:TEST-001 | add | |
+| code | src/auth/session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
+| test | tests/auth/test_session.py | docs/requirements/auth-srs.md#FR-001 | add | |
 
 ## Expected Evidence Index
 
-| Type | Path / Command | Status | IDs | Notes |
+| Type | Path / Command | Status | Refs | Notes |
 |---|---|---|---|---|
-| test | docs/verification/add-auth-test-results.md | passed | auth:TEST-001 | |
+| test | docs/verification/add-auth-test-results.md | passed | docs/requirements/auth-srs.md#FR-001 | |
 
 ## Artifact Applicability
 
-| Artifact | Required | IDs | Reason | Handoff |
+| Artifact | Required | Refs | Reason | Handoff |
 |---|---|---|---|---|
-| service-contract.md | yes | auth:API-001 | 需要接口 | tasks.md |
+| service-contract.md | yes | docs/requirements/auth-srs.md#FR-001 | 需要接口 | tasks.md |
 | data-model.md | no | N/A | 不涉及持久化 | N/A |
 
 ## Contract Ownership / Sync
@@ -63,27 +63,29 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
 
 ## Out of Scope
 
-- auth:FR-002 注册
+- docs/requirements/auth-srs.md#FR-002 注册
 """,
     )
 
     parsed = parse_source_map(change)
 
     assert parsed["parse_level"] == "structured"
-    assert parsed["upstream_sources"][0]["path"] == "docs/requirements/auth-srs.md"
-    assert parsed["id_trace"][0]["ids"] == ["auth:FR-001"]
+    assert parsed["upstream_sources"][0]["ref"] == "docs/requirements/auth-srs.md#FR-001"
+    assert parsed["anchor_trace"][0]["refs"] == ["docs/requirements/auth-srs.md#FR-001"]
     assert parsed["implementation_paths"] == [
         {
             "kind": "code",
             "path": "src/auth/session.py",
-            "ids": ["auth:API-001"],
+            "refs": ["docs/requirements/auth-srs.md#FR-001"],
+            "local_ids": ["FR-001"],
             "mode": "modify",
             "notes": "",
         },
         {
             "kind": "test",
             "path": "tests/auth/test_session.py",
-            "ids": ["auth:TEST-001"],
+            "refs": ["docs/requirements/auth-srs.md#FR-001"],
+            "local_ids": ["FR-001"],
             "mode": "add",
             "notes": "",
         },
@@ -96,13 +98,13 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
         "contracts/openapi.yaml",
         "contracts/events.yaml",
     ]
-    assert parsed["out_of_scope"] == ["auth:FR-002 注册"]
+    assert parsed["out_of_scope"] == ["docs/requirements/auth-srs.md#FR-002 注册"]
     assert parsed["issues"] == []
 
 
 def test_parse_source_map_falls_back_to_metadata_scan(tmp_path: Path) -> None:
     change = tmp_path / "openspec" / "changes" / "add-auth"
-    write(change / "source-map.md", "auth:FR-001 uses src/auth/session.py and tests/auth/test_session.py.\n")
+    write(change / "source-map.md", "docs/requirements/auth-srs.md#FR-001 uses src/auth/session.py and tests/auth/test_session.py.\n")
 
     parsed = parse_source_map(change)
 
@@ -119,15 +121,15 @@ def test_parse_source_map_keeps_legacy_section_heading_compatibility(tmp_path: P
 
 ## Implementation Paths
 
-| Kind | Path | IDs | Mode | Notes |
+| Kind | Path | Refs | Mode | Notes |
 |---|---|---|---|---|
-| code | src/auth/session.py | auth:API-001 | modify | |
+| code | src/auth/session.py | docs/requirements/auth-srs.md#FR-001 | modify | |
 
 ## Verification Evidence
 
-| Type | Path / Command | Status | IDs | Notes |
+| Type | Path / Command | Status | Refs | Notes |
 |---|---|---|---|---|
-| test | docs/verification/add-auth-test-results.md | passed | auth:TEST-001 | |
+| test | docs/verification/add-auth-test-results.md | passed | docs/requirements/auth-srs.md#FR-001 | |
 """,
     )
 

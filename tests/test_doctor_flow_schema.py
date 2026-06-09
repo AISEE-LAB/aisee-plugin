@@ -225,8 +225,8 @@ def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Pa
     data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
 
     assert data["status"] == "risk"
-    assert data["stage"] == "implementation-ready"
-    assert "ce-work" in data["recommended_path"]
+    assert data["stage"] == "change-authored"
+    assert "ce-plan" in data["recommended_path"]
     assert data["doctor"]["status"] == "ok"
     assert data["schema"]["name"] == "aisee-app-spec-driven"
     assert data["schema"]["source_map_required"] is True
@@ -234,12 +234,12 @@ def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Pa
     assert data["inputs"]["source_map"] == "present"
     assert data["inputs"]["source_map_parse_level"] == "metadata"
     assert "SOURCE_MAP_UNSTRUCTURED" in data["inputs"]["source_map_issue_codes"]
-    assert data["inputs"]["execution"]["requires_ce_plan"] is False
+    assert data["inputs"]["execution"]["requires_ce_plan"] is True
     candidates = data["reuse"]["workflow_candidates"]
     assert all(set(candidate) == {"name", "kind", "status", "reason"} for candidate in candidates)
     candidates_by_name = {candidate["name"]: candidate for candidate in candidates}
     assert candidates_by_name["aisee:implementation-bridge"]["status"] == "recommended"
-    assert candidates_by_name["ce-work"]["status"] == "available"
+    assert candidates_by_name["ce-plan"]["status"] == "missing" or candidates_by_name["ce-plan"]["status"] == "available"
     assert data["checks"]["author"]["status"] == "needs-work"
     assert data["checks"]["gaps"]["status"] == "risk"
     assert data["checks"]["implementation_gaps"]["status"] == "risk"

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from collections import Counter
 from pathlib import Path
 from typing import Any
 
 from aisee_cli.context_pack import artifact_not_required, build_context_pack
-from aisee_cli.id_registry import load_registry, lookup_entry, registry_path
 
 
 def build_author_check(project_root: Path, change: str) -> dict[str, Any]:
@@ -17,9 +15,7 @@ def build_author_check(project_root: Path, change: str) -> dict[str, Any]:
     derived = pack["facts"]["derived"]
     schema = parsed["schema"]
     artifacts = schema["artifacts"]
-    id_registry = parsed["id_registry"]
-    all_ids = sorted(set(derived["traceability"]["upstream_ids"]) | set(derived["traceability"]["produced_ids"]))
-    registry_entries = inspect_registry_entries(root, all_ids)
+    anchor_index = parsed["anchor_index"]
 
     schema_issues = inspect_schema(schema, artifacts, root)
     artifact_order = build_artifact_order(artifacts)
@@ -29,7 +25,7 @@ def build_author_check(project_root: Path, change: str) -> dict[str, Any]:
         for item in artifacts
         if item.get("status") == "missing" and not artifact_not_required(item, source_map)
     ]
-    id_actions = build_id_actions(id_registry, registry_entries)
+    id_actions = build_id_actions(anchor_index)
     blockers = build_blockers(pack["gaps"], schema_issues)
     warnings = build_warnings(pack["gaps"], schema_issues)
     next_actions = build_next_actions(missing_artifacts, id_actions, blockers)
@@ -48,16 +44,16 @@ def build_author_check(project_root: Path, change: str) -> dict[str, Any]:
         "artifact_order": artifact_order,
         "missing_artifacts": missing_artifacts,
         "artifact_applicability": derived["artifact_applicability"],
-        "ids": {
-            "upstream": derived["traceability"]["upstream_ids"],
-            "produced": derived["traceability"]["produced_ids"],
-            "registry": {
-                "available": id_registry["available"],
-                "path": id_registry["path"],
-                "missing": id_registry["missing_ids"],
-                "temporary": id_registry["temporary_ids"],
-                "inactive": id_registry["inactive_ids"],
-                "status_counts": id_registry["status_counts"],
+        "anchors": {
+            "upstream_refs": derived["traceability"]["upstream_refs"],
+            "produced_local_ids": derived["traceability"]["produced_local_ids"],
+            "resolution": {
+                "available": anchor_index["available"],
+                "path": anchor_index["path"],
+                "resolved": anchor_index["resolved"],
+                "missing_references": anchor_index["missing_references"],
+                "temporary_local_ids": anchor_index["temporary_local_ids"],
+                "legacy_full_ids": anchor_index["legacy_full_ids"],
             },
             "actions": id_actions,
         },
@@ -139,46 +135,11 @@ def artifact_summary(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def inspect_registry_entries(root: Path, ids: list[str]) -> dict[str, dict[str, Any]]:
-    path = registry_path(root)
-    if not path.exists():
-        return {}
-    try:
-        registry = load_registry(root)
-    except ValueError:
-        return {}
-    entries: dict[str, dict[str, Any]] = {}
-    for full_id in ids:
-        entry = lookup_entry(registry, full_id)
-        if entry is not None:
-            entries[full_id] = entry
-    return entries
-
-
-def build_id_actions(id_registry: dict[str, Any], entries: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    temporary = id_registry.get("temporary_ids", [])
-    reserve_counts = Counter()
-    for full_id in temporary:
-        try:
-            reserve_counts[full_id.split(":", 1)[1].split("-", 1)[0]] += 1
-        except IndexError:
-            reserve_counts["UNKNOWN"] += 1
-
-    activate = [
-        {
-            "id": full_id,
-            "owner": entry.get("owner") or "TODO",
-            "title": entry.get("title") or "TODO",
-        }
-        for full_id, entry in sorted(entries.items())
-        if entry.get("status") == "reserved"
-    ]
-
+def build_id_actions(anchor_index: dict[str, Any]) -> dict[str, Any]:
     return {
-        "reserve": [{"type": id_type, "count": count} for id_type, count in sorted(reserve_counts.items())],
-        "activate": activate,
-        "fix_missing": id_registry.get("missing_ids", []),
-        "replace_inactive": id_registry.get("inactive_ids", []),
+        "finalize_local_ids": anchor_index.get("temporary_local_ids", []),
+        "fix_missing_references": anchor_index.get("missing_references", []),
+        "remove_legacy_full_ids": anchor_index.get("legacy_full_ids", []),
     }
 
 
@@ -198,10 +159,12 @@ def build_warnings(gaps: list[dict[str, Any]], schema_issues: list[dict[str, str
 
 def build_next_actions(missing_artifacts: list[dict[str, Any]], id_actions: dict[str, Any], blockers: list[dict[str, Any]]) -> list[str]:
     actions: list[str] = []
-    for item in id_actions["reserve"]:
-        actions.append(f"aisee id reserve --scope <scope> --type {item['type']} --count {item['count']} --json")
-    for item in id_actions["activate"]:
-        actions.append(f"aisee id activate {item['id']} --owner <path> --title \"<title>\" --json")
+    if id_actions["finalize_local_ids"]:
+        actions.append("replace temporary local IDs with final local IDs in current change artifacts")
+    if id_actions["fix_missing_references"]:
+        actions.append("fix unresolved anchor refs in source-map.md or referenced planning docs")
+    if id_actions["remove_legacy_full_ids"]:
+        actions.append("replace legacy full IDs with doc-ref#LOCAL-ID anchor refs")
     for item in missing_artifacts:
         actions.append(f"create {item['generates']}")
     if blockers:

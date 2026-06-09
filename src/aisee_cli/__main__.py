@@ -15,7 +15,6 @@ from aisee_cli.contract_server import lan_warning, serve_contract_context
 from aisee_cli.context_pack import build_context_pack
 from aisee_cli.doctor import build_doctor
 from aisee_cli.flow import build_flow
-from aisee_cli.id_registry import activate_id, check_registry, deprecate_id, next_id, reserve_ids
 from aisee_cli.index import build_index
 from aisee_cli.knowledge import (
     build_knowledge_check,
@@ -28,7 +27,7 @@ from aisee_cli.knowledge import (
     build_knowledge_scaffold,
     build_knowledge_update,
 )
-from aisee_cli.lookup import get_id, trace_id
+from aisee_cli.lookup import get_anchor, trace_anchor
 from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
 from aisee_cli.plugin_assets import export_plugin_assets, inspect_plugin_assets, plugin_path
@@ -85,6 +84,7 @@ def main() -> int:
     sources_add_parser.add_argument("--path", required=True, help="source path")
     sources_add_parser.add_argument("--template", help="source template")
     sources_add_parser.add_argument("--parser", help="source parser")
+    sources_add_parser.add_argument("--alias", help="optional source alias in kind:slug form")
     sources_add_parser.add_argument("--json", action="store_true", help="output JSON")
     sources_remove_parser = sources_subparsers.add_parser("remove")
     sources_remove_parser.add_argument("--scope", required=True, help="source scope")
@@ -197,31 +197,6 @@ def main() -> int:
     contract_serve_parser.add_argument("--host", default="127.0.0.1", help="host to bind; default: 127.0.0.1")
     contract_serve_parser.add_argument("--port", type=int, default=8765, help="port to bind; default: 8765")
     contract_serve_parser.add_argument("--json", action="store_true", help="output JSON startup metadata")
-    id_parser = subparsers.add_parser("id")
-    id_parser.add_argument("--json", action="store_true", help="output JSON")
-    id_subparsers = id_parser.add_subparsers(dest="id_command")
-    id_check_parser = id_subparsers.add_parser("check")
-    id_check_parser.add_argument("--json", action="store_true", help="output JSON")
-    id_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
-    id_next_parser = id_subparsers.add_parser("next")
-    id_next_parser.add_argument("--scope", required=True, help="ID scope")
-    id_next_parser.add_argument("--type", required=True, help="ID type")
-    id_next_parser.add_argument("--json", action="store_true", help="output JSON")
-    id_reserve_parser = id_subparsers.add_parser("reserve")
-    id_reserve_parser.add_argument("--scope", required=True, help="ID scope")
-    id_reserve_parser.add_argument("--type", required=True, help="ID type")
-    id_reserve_parser.add_argument("--count", type=int, default=1, help="number of IDs to reserve")
-    id_reserve_parser.add_argument("--json", action="store_true", help="output JSON")
-    id_activate_parser = id_subparsers.add_parser("activate")
-    id_activate_parser.add_argument("id", help="full ID, for example auth:FR-001")
-    id_activate_parser.add_argument("--owner", required=True, help="owner document path")
-    id_activate_parser.add_argument("--title", required=True, help="ID title")
-    id_activate_parser.add_argument("--json", action="store_true", help="output JSON")
-    id_deprecate_parser = id_subparsers.add_parser("deprecate")
-    id_deprecate_parser.add_argument("id", help="full ID, for example auth:FR-001")
-    id_deprecate_parser.add_argument("--replaced-by", action="append", default=[], help="replacement full ID")
-    id_deprecate_parser.add_argument("--reason", required=True, help="deprecation reason")
-    id_deprecate_parser.add_argument("--json", action="store_true", help="output JSON")
     flow_parser = subparsers.add_parser("flow")
     flow_parser.add_argument("--json", action="store_true", help="output JSON")
     flow_subparsers = flow_parser.add_subparsers(dest="flow_command")
@@ -235,10 +210,10 @@ def main() -> int:
     gaps_parser.add_argument("--change", required=True, help="OpenSpec change name")
     gaps_parser.add_argument("--json", action="store_true", help="output JSON")
     trace_parser = subparsers.add_parser("trace")
-    trace_parser.add_argument("id", help="full ID to trace")
+    trace_parser.add_argument("reference", help="anchor ref to trace, for example docs/requirements/auth-srs.md#FR-001")
     trace_parser.add_argument("--json", action="store_true", help="output JSON")
     get_parser = subparsers.add_parser("get")
-    get_parser.add_argument("id", help="full ID to get")
+    get_parser.add_argument("reference", help="anchor ref to get, for example srs:auth-login#FR-001")
     get_parser.add_argument("--json", action="store_true", help="output JSON")
     args = parser.parse_args()
 
@@ -464,7 +439,7 @@ def main() -> int:
                 print_json(result)
                 return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
             if args.sources_command == "add":
-                result = add_source(root, args.scope, args.type, args.path, args.template, args.parser)
+                result = add_source(root, args.scope, args.type, args.path, args.template, args.parser, args.alias)
                 print_json(result)
                 return 0
             if args.sources_command == "remove":
@@ -505,33 +480,10 @@ def main() -> int:
         print_json(result)
         return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
 
-    if args.command == "id":
-        root = resolve_project_root(Path.cwd())
-        try:
-            if args.id_command == "check":
-                result = check_registry(root)
-            elif args.id_command == "next":
-                result = next_id(root, args.scope, args.type)
-            elif args.id_command == "reserve":
-                result = reserve_ids(root, args.scope, args.type, args.count)
-            elif args.id_command == "activate":
-                result = activate_id(root, args.id, args.owner, args.title)
-            elif args.id_command == "deprecate":
-                result = deprecate_id(root, args.id, args.replaced_by, args.reason)
-            else:
-                print_json(error_response("Use one of: check, next, reserve, activate, deprecate.", "MISSING_SUBCOMMAND"), stderr=True)
-                return 2
-        except ValueError as error:
-            print_json(error_response(str(error)), stderr=True)
-            return 2
-        print_json(result)
-        fail_on_blocker = bool(getattr(args, "fail_on_blocker", False))
-        return exit_code_for(result, fail_on_blocker=fail_on_blocker)
-
     if args.command == "trace":
         root = resolve_project_root(Path.cwd())
         try:
-            result = trace_id(root, args.id)
+            result = trace_anchor(root, args.reference)
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
@@ -541,7 +493,7 @@ def main() -> int:
     if args.command == "get":
         root = resolve_project_root(Path.cwd())
         try:
-            result = get_id(root, args.id)
+            result = get_anchor(root, args.reference)
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2

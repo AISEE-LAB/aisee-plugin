@@ -2,36 +2,36 @@
 
 ## Upstream Sources
 
-| Source | Path / Description | Source ID | Status | Notes |
+| Source | Path / Description | Ref | Status | Notes |
 |---|---|---|---|---|
-| SRS | aisee/docs/requirements/auth-srs.md | auth:FR-001 | confirmed | Passwordless login |
-| UI Content | aisee/docs/ui-content/auth-ui.md | auth:PAGE-001, auth:FLOW-001, auth:STATE-001 | confirmed | Login page and states |
-| Architecture | aisee/docs/architecture/auth-architecture.md | auth:ARCH-001, auth:DEC-001 | confirmed | Session boundary |
+| SRS | aisee/docs/requirements/auth-srs.md | aisee/docs/requirements/auth-srs.md#FR-001 | confirmed | Passwordless login |
+| UI Content | aisee/docs/ui-content/auth-ui.md | aisee/docs/ui-content/auth-ui.md#PAGE-001, aisee/docs/ui-content/auth-ui.md#FLOW-001, aisee/docs/ui-content/auth-ui.md#STATE-001 | confirmed | Login page and states |
+| Architecture | aisee/docs/architecture/auth-architecture.md | aisee/docs/architecture/auth-architecture.md#ARCH-001, aisee/docs/architecture/auth-architecture.md#DEC-001 | confirmed | Session boundary |
 
-## ID Trace
+## Anchor Trace
 
-| Type | ID | Title | Source | Handling | Artifact |
+| Type | Ref | Title | Source | Handling | Artifact |
 |---|---|---|---|---|---|
-| FR | auth:FR-001 | Passwordless login | SRS | cover | specs/auth.md |
-| PAGE | auth:PAGE-001 | Login page | UI Content | change | ui-contract.md |
-| FLOW | auth:FLOW-001 | Request and verify code | UI Content | change | ui-contract.md |
-| STATE | auth:STATE-001 | Code sent state | UI Content | change | ui-contract.md |
-| ARCH | auth:ARCH-001 | Session boundary | Architecture | inherit | change-context.md |
-| DEC | auth:DEC-001 | Token storage decision | Architecture | inherit | change-context.md |
-| SPEC | auth:SPEC-001 | Passwordless login behavior | This change | produce | specs/auth.md |
-| API | auth:API-001 | Passwordless login API | This change | produce | service-contract.md |
-| DATA | auth:DATA-001 | Login verification token | This change | produce | data-model.md |
-| TASK | auth:TASK-001 | Implement passwordless login | This change | produce | tasks.md |
-| TEST | auth:TEST-001 | Passwordless login tests | This change | produce | tasks.md |
+| FR | aisee/docs/requirements/auth-srs.md#FR-001 | Passwordless login | SRS | cover | specs/auth.md |
+| PAGE | aisee/docs/ui-content/auth-ui.md#PAGE-001 | Login page | UI Content | change | ui-contract.md |
+| FLOW | aisee/docs/ui-content/auth-ui.md#FLOW-001 | Request and verify code | UI Content | change | ui-contract.md |
+| STATE | aisee/docs/ui-content/auth-ui.md#STATE-001 | Code sent state | UI Content | change | ui-contract.md |
+| ARCH | aisee/docs/architecture/auth-architecture.md#ARCH-001 | Session boundary | Architecture | inherit | change-context.md |
+| DEC | aisee/docs/architecture/auth-architecture.md#DEC-001 | Token storage decision | Architecture | inherit | change-context.md |
+| SPEC | SPEC-001 | Passwordless login behavior | This change | produce | specs/auth.md |
+| API | API-001 | Passwordless login API | This change | produce | service-contract.md |
+| DATA | DATA-001 | Login verification token | This change | produce | data-model.md |
+| TASK | TASK-001 | Implement passwordless login | This change | produce | tasks.md |
+| TEST | TEST-001 | Passwordless login tests | This change | produce | tasks.md |
 
 ## Artifact Applicability
 
-| Artifact | Required | IDs | Reason | Handoff |
+| Artifact | Required | Refs | Reason | Handoff |
 |---|---|---|---|---|
-| change-context.md | yes | auth:ARCH-001, auth:DEC-001 | Architecture decisions affect implementation | service-contract.md, data-model.md |
-| ui-contract.md | yes | auth:PAGE-001, auth:FLOW-001, auth:STATE-001 | Login page content changes | service-contract.md |
-| service-contract.md | yes | auth:API-001 | Frontend and backend are separate projects | tasks.md |
-| data-model.md | yes | auth:DATA-001 | One-time code verification needs persistence | service-contract.md, tasks.md |
+| change-context.md | yes | aisee/docs/architecture/auth-architecture.md#ARCH-001, aisee/docs/architecture/auth-architecture.md#DEC-001 | Architecture decisions affect implementation | service-contract.md, data-model.md |
+| ui-contract.md | yes | aisee/docs/ui-content/auth-ui.md#PAGE-001, aisee/docs/ui-content/auth-ui.md#FLOW-001, aisee/docs/ui-content/auth-ui.md#STATE-001 | Login page content changes | service-contract.md |
+| service-contract.md | yes | API-001 | Frontend and backend are separate projects | tasks.md |
+| data-model.md | yes | DATA-001 | One-time code verification needs persistence | service-contract.md, tasks.md |
 
 ## Contract Ownership / Sync
 
@@ -47,21 +47,21 @@
 
 ## Implementation Paths
 
-| Kind | Path | IDs | Mode | Notes |
+| Kind | Path | Refs | Mode | Notes |
 |---|---|---|---|---|
-| code | src/auth/passwordless.py | auth:API-001, auth:DATA-001 | add | Provider implementation |
-| code | app/login/page.tsx | auth:PAGE-001, auth:FLOW-001, auth:STATE-001 | modify | Consumer integration |
-| test | tests/auth/test_passwordless.py | auth:TEST-001 | add | Provider and contract tests |
-| test | tests/ui/test_login_flow.ts | auth:TEST-001 | add | Consumer flow test |
-| contract | contracts/openapi.yaml | auth:API-001 | add | Optional machine-readable contract |
+| code | src/auth/passwordless.py | API-001, DATA-001 | add | Provider implementation |
+| code | app/login/page.tsx | PAGE-001, FLOW-001, STATE-001 | modify | Consumer integration |
+| test | tests/auth/test_passwordless.py | TEST-001 | add | Provider and contract tests |
+| test | tests/ui/test_login_flow.ts | TEST-001 | add | Consumer flow test |
+| contract | contracts/openapi.yaml | API-001 | add | Optional machine-readable contract |
 
 ## Verification Evidence
 
-| Path / Command | IDs | Status | Notes |
+| Path / Command | Refs | Status | Notes |
 |---|---|---|---|
-| docs/verification/add-passwordless-login-openspec-validate.md | auth:TEST-001 | passed | `openspec validate` evidence |
-| docs/verification/add-passwordless-login-tests.md | auth:TEST-001 | passed | Automated test evidence |
-| docs/reviews/add-passwordless-login-code-review.md | auth:TEST-001 | passed | Code review evidence |
+| docs/verification/add-passwordless-login-openspec-validate.md | TEST-001 | passed | `openspec validate` evidence |
+| docs/verification/add-passwordless-login-tests.md | TEST-001 | passed | Automated test evidence |
+| docs/reviews/add-passwordless-login-code-review.md | TEST-001 | passed | Code review evidence |
 
 ## Out of Scope
 

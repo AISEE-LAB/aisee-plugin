@@ -6,7 +6,7 @@
 
 | ID | Entity | Change |
 |---|---|---|
-| auth:DATA-001 | login_verification_tokens | New table or collection for one-time login verification |
+| DATA-001 | login_verification_tokens | New table or collection for one-time login verification |
 
 ## Fields
 

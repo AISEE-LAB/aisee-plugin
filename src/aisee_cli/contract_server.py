@@ -10,7 +10,7 @@ from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
 
 from aisee_cli.contract import build_contract_get, build_contract_manifest, build_contract_summary, validate_change_name
-from aisee_cli.lookup import get_id, trace_id
+from aisee_cli.lookup import get_anchor, trace_anchor
 from aisee_cli.output import error_response
 
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
@@ -84,10 +84,10 @@ def route_contract_request(root: Path, path: str, host: str, port: int) -> tuple
     if parts == ["changes"]:
         manifest = build_contract_manifest(root, max_chars=max_chars)
         return HTTPStatus.OK, {"schema_version": "1.0", "status": "ok", "changes": manifest["changes"]}
-    if len(parts) == 2 and parts[0] == "ids":
-        return HTTPStatus.OK, get_id(root, parts[1])
+    if len(parts) == 2 and parts[0] == "anchors":
+        return HTTPStatus.OK, get_anchor(root, parts[1])
     if len(parts) == 2 and parts[0] == "trace":
-        return HTTPStatus.OK, trace_id(root, parts[1])
+        return HTTPStatus.OK, trace_anchor(root, parts[1])
 
     if len(parts) >= 3 and parts[0] == "changes":
         change = parts[1]

@@ -1,41 +1,39 @@
-"""ID lookup and trace helpers."""
+"""Anchor lookup and trace helpers."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.id_registry import load_registry, lookup_entry, parse_id, registry_path
+from aisee_cli.anchor_refs import canonical_anchor, parse_anchor_ref, resolve_alias_path
 from aisee_cli.index import build_index
 from aisee_cli.output import issue
-from aisee_cli.project import rel
 
 
-def get_id(project_root: Path, full_id: str) -> dict[str, Any]:
-    parsed = parse_id(full_id)
+def get_anchor(project_root: Path, reference: str) -> dict[str, Any]:
     root = project_root.resolve()
-    registry_file = registry_path(root)
-    registry_available = registry_file.exists()
-    registry = load_registry(root) if registry_available else {"version": 1, "scopes": {}}
-    entry = lookup_entry(registry, full_id)
+    parsed = parse_anchor_ref(reference)
     index = build_index(root, write_cache=False)
-    references = index["ids"].get(full_id, [])
-    primary = choose_primary_source(entry, references)
-    registry_label = rel(root, registry_file)
-    issues = build_lookup_issues(full_id, entry, references, registry_available, registry_label)
+
+    document = parsed["document"]
+    alias = parsed["alias"]
+    if alias:
+        document = resolve_alias_path(index["sources"]["items"], alias)
+
+    canonical_reference = canonical_anchor(document, parsed["local_id"]) if document else None
+    references = index["anchors"].get(canonical_reference, []) if canonical_reference else []
+    primary = choose_primary_source(references, document, parsed["local_id"])
+    issues = build_lookup_issues(parsed, document, references, index)
     relations = build_relations(references)
 
     return {
-        "status": lookup_status(entry, references),
-        "id": full_id,
-        "scope": parsed["scope"],
-        "type": parsed["type"],
-        "number": parsed["number"],
-        "registry": {
-            "available": registry_available,
-            "path": registry_label,
-            "entry": entry,
-        },
+        "status": lookup_status(document, references),
+        "reference_type": parsed["reference_type"],
+        "reference": reference,
+        "canonical_reference": canonical_reference,
+        "document": document,
+        "local_id": parsed["local_id"],
+        "alias": alias,
         "source": primary,
         "references": references,
         "relations": relations,
@@ -43,41 +41,25 @@ def get_id(project_root: Path, full_id: str) -> dict[str, Any]:
         "summary": {
             "reference_count": len(references),
             "change_count": len(relations["changes"]),
-            "related_id_count": len(relations["ids"]),
+            "related_reference_count": len(relations["references"]),
             "code_path_count": len(relations["code_paths"]),
             "test_path_count": len(relations["test_paths"]),
             "issue_count": len(issues),
         },
         "meta": {
-            "command": f"aisee get {full_id} --json",
+            "command": f"aisee get {reference} --json",
             "source_index_written": False,
         },
     }
 
 
-def trace_id(project_root: Path, full_id: str) -> dict[str, Any]:
-    result = get_id(project_root, full_id)
-    result["meta"]["command"] = f"aisee trace {full_id} --json"
+def trace_anchor(project_root: Path, reference: str) -> dict[str, Any]:
+    result = get_anchor(project_root, reference)
+    result["meta"]["command"] = f"aisee trace {reference} --json"
     return result
 
 
-def choose_primary_source(entry: dict[str, Any] | None, references: list[dict[str, Any]]) -> dict[str, Any] | None:
-    owner = str(entry.get("owner") or "") if isinstance(entry, dict) else ""
-    if owner:
-        for reference in references:
-            if reference.get("path") == owner:
-                return {
-                    "path": reference.get("path"),
-                    "line": reference.get("line"),
-                    "heading": reference.get("heading"),
-                    "text": reference.get("text"),
-                }
-        return {
-            "path": owner,
-            "line": None,
-            "heading": None,
-            "text": None,
-        }
+def choose_primary_source(references: list[dict[str, Any]], document: str | None, local_id: str) -> dict[str, Any] | None:
     if references:
         reference = references[0]
         return {
@@ -86,22 +68,36 @@ def choose_primary_source(entry: dict[str, Any] | None, references: list[dict[st
             "heading": reference.get("heading"),
             "text": reference.get("text"),
         }
+    if document:
+        return {
+            "path": document,
+            "line": None,
+            "heading": None,
+            "text": f"{document}#{local_id}",
+        }
     return None
 
 
 def build_relations(references: list[dict[str, Any]]) -> dict[str, Any]:
     changes: set[str] = set()
-    related_ids: set[str] = set()
+    related_refs: set[str] = set()
     code_paths: set[str] = set()
     test_paths: set[str] = set()
     for reference in references:
         path = str(reference.get("path") or "")
+        current_reference = str(reference.get("reference") or "")
         parts = path.split("/")
         if parts[:2] == ["openspec", "changes"] and len(parts) >= 3:
             changes.add(parts[2])
-        for related_id in reference.get("related_ids", []):
-            if isinstance(related_id, str):
-                related_ids.add(related_id)
+        document = str(reference.get("document") or path)
+        for local_id in reference.get("related_local_ids", []):
+            if isinstance(local_id, str):
+                related_ref = canonical_anchor(document, local_id)
+                if related_ref != current_reference:
+                    related_refs.add(related_ref)
+        for anchor_ref in reference.get("anchor_refs", []):
+            if isinstance(anchor_ref, str) and anchor_ref != current_reference:
+                related_refs.add(anchor_ref)
         for related_path in reference.get("paths", []):
             if not isinstance(related_path, str):
                 continue
@@ -111,38 +107,41 @@ def build_relations(references: list[dict[str, Any]]) -> dict[str, Any]:
                 code_paths.add(related_path)
     return {
         "changes": sorted(changes),
-        "ids": sorted(related_ids),
+        "references": sorted(related_refs),
         "code_paths": sorted(code_paths),
         "test_paths": sorted(test_paths),
     }
 
 
 def build_lookup_issues(
-    full_id: str,
-    entry: dict[str, Any] | None,
+    parsed: dict[str, Any],
+    document: str | None,
     references: list[dict[str, Any]],
-    registry_available: bool,
-    registry_label: str,
+    index: dict[str, Any],
 ) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
-    if not registry_available:
-        issues.append(issue("ID_REGISTRY_MISSING", "risk", f"{registry_label} is missing", registry_label))
-    if entry is None:
-        severity = "risk" if references else "info"
-        issues.append(issue("ID_NOT_REGISTERED", severity, f"{full_id} is not registered", registry_label))
-    elif entry.get("status") != "active":
-        issues.append(issue("ID_NOT_ACTIVE", "info", f"{full_id} status is {entry.get('status')}", registry_label))
-    if entry is not None and entry.get("status") == "active" and not references:
-        issues.append(issue("ID_NO_REFERENCES", "risk", f"{full_id} is active but has no scanned references", str(entry.get("owner") or "")))
+    documents = {item.get("path"): item for item in index.get("documents", []) if isinstance(item, dict)}
+    if parsed["reference_type"] == "alias-anchor" and document is None:
+        issues.append(issue("ANCHOR_ALIAS_NOT_FOUND", "risk", f"alias is not registered: {parsed['alias']}", "aisee/registry/sources.json"))
+    if document and not any(item.get("path") == document for item in index.get("documents", [])):
+        issues.append(issue("ANCHOR_DOCUMENT_MISSING", "risk", f"document does not exist: {document}", document))
+    if document and not references:
+        issues.append(issue("ANCHOR_LOCAL_ID_MISSING", "risk", f"{parsed['local_id']} was not found in {document}", document))
+    legacy = set()
+    if document and isinstance(documents.get(document), dict):
+        legacy.update(item for item in documents[document].get("legacy_full_ids", []) if isinstance(item, str))
+    legacy.update(full_id for reference in references for full_id in reference.get("legacy_full_ids", []) if isinstance(full_id, str))
+    for full_id in sorted(legacy):
+        issues.append(issue("LEGACY_FULL_ID_REFERENCE", "info", f"legacy full ID remains in anchor source context: {full_id}", str(document or "")))
     return issues
 
 
-def lookup_status(entry: dict[str, Any] | None, references: list[dict[str, Any]]) -> str:
-    if entry is None:
-        return "unregistered" if references else "missing"
-    if entry.get("status") == "active" and references:
+def lookup_status(document: str | None, references: list[dict[str, Any]]) -> str:
+    if document and references:
         return "linked"
-    return str(entry.get("status") or "registered")
+    if document:
+        return "missing-local-id"
+    return "missing-document"
 
 
 def is_test_path(path: str) -> bool:
