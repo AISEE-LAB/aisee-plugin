@@ -13,7 +13,7 @@ PyPI / pipx
   -> provides project-local JSON context tooling, OpenSpec companion checks, project memory, team knowledge, and version/distribution governance commands
 ```
 
-Marketplace installation does not install the `aisee` CLI. PyPI / pipx installation does not install bundled skills, schema packs, references, or team knowledge templates.
+Marketplace installation does not install the `aisee` CLI. PyPI / pipx installation provides only the CLI; skills, schema packs, references, and team knowledge templates come from the marketplace plugin.
 
 ## Codex Install
 
@@ -79,7 +79,7 @@ Recommended relationship:
 Not recommended:
 
 - letting the CLI write Codex marketplace or plugin cache state;
-- bundling a second copy of skills, references, schema packs, or team knowledge templates in the PyPI wheel;
+- copying skills, references, schema packs, or team knowledge templates into the PyPI / pipx distribution channel;
 - treating marketplace listings as project sources of truth for OpenSpec, schemas, source-map, or team knowledge;
 - forcing Codex marketplace fields onto Claude / Cursor metadata.
 
@@ -91,7 +91,7 @@ The following are Aisee public contracts:
 - Codex manifest `skills` points to a loadable skills directory;
 - Codex marketplace setup commands;
 - base JSON semantics for CLI `status`, `issues`, `summary`, `meta`, and setup hints;
-- public legacy commands return stable deprecation/blocker JSON during migration instead of silently writing old wheel assets.
+- public legacy commands return stable deprecation/blocker JSON during migration instead of silently writing old content assets.
 
 The following are not stable:
 
@@ -113,4 +113,4 @@ Also confirm manually:
 
 - `plugins/aisee-plugin/.codex-plugin/plugin.json` has no unsupported fields;
 - `.agents/plugins/marketplace.json` points at the `./plugins/aisee-plugin` plugin root;
-- `pipx install aisee-plugin` validates the CLI only and does not assume plugin content exists inside the wheel.
+- `pipx install aisee-plugin` validates the CLI only and does not assume PyPI / pipx installation also provides plugin content.

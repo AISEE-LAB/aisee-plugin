@@ -31,9 +31,15 @@
 
 **Aisee** stands for **AI-Enhanced Software Engineering**.
 
-Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, schema-aware OpenSpec changes, implementation briefs, verification checks, and archive guardrails.
+Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, OpenSpec changes, project memory, team knowledge guardrails, implementation briefs, verification checks, and archive guardrails.
 
-Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, and engineering handoff rules around OpenSpec.
+Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, project memory, team knowledge, JSON context tooling, and engineering handoff rules around OpenSpec.
+
+## OpenSpec Boundary
+
+Aisee does not replace OpenSpec and does not maintain a second schema state machine. Aisee reads the current schema declaration only when handling OpenSpec changes, context packs, or schema pack checks; project memory and team knowledge remain guidance / guardrails.
+
+When Aisee handles OpenSpec artifacts, it acts only as a parser / checker / projector. `openspec validate` and `openspec archive` remain OpenSpec responsibilities.
 
 ## Why Aisee?
 
@@ -43,10 +49,10 @@ Aisee makes that context explicit:
 
 - clarify business requirements before implementation;
 - separate requirements, UI content, architecture context, and change planning;
-- create and complete OpenSpec changes with schema-aware guidance;
+- create and complete OpenSpec changes while reading required artifacts from the current schema;
 - keep OpenSpec as the only persistent specification source of truth;
 - generate machine-readable context packs for implementation, verification, and review;
-- constrain document-local numbering through schemas and skills to reduce invented or duplicated labels;
+- constrain document-local numbering through skills/templates to reduce invented or duplicated labels;
 - check whether artifacts, tasks, source maps, tests, and review evidence are closed before archive.
 
 ## Agile Delivery Model
@@ -198,7 +204,7 @@ codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
 codex plugin add aisee-plugin@aisee-plugin
 ```
 
-Check CLI-only state and marketplace setup hints:
+Check CLI and plugin content status:
 
 ```bash
 aisee plugin inspect --json
@@ -248,7 +254,7 @@ openspec init . --tools none --profile core
 openspec config profile core
 ```
 
-Schema packs come from the marketplace-installed plugin. `aisee schemas list/check` only reports project-installed schema state or source-checkout development schema state; it does not install schemas from the PyPI wheel.
+Schema packs come from the marketplace-installed plugin. `aisee schemas list/check` only reports project-installed schema state or source-checkout development schema state; it does not install schemas automatically.
 
 Check the project state again:
 
@@ -458,7 +464,7 @@ aisee knowledge promote-batch --curation <path> --team-path ../aisee-team-knowle
 Rules:
 
 - `aisee:knowledge` guides day-to-day CLI usage for onboarding, sync, retrieval, and promote.
-- `install`, `update`, and `promote-batch` are experimental. The PyPI CLI no longer provides local default scaffolding. PR automation and MCP service support are still unsettled.
+- `install`, `update`, and `promote-batch` are experimental. Team knowledge examples come from the marketplace plugin or external repositories; PR automation and MCP service support are still unsettled.
 - Query through the CLI instead of letting AI scan `knowledge/cards/**/*.md` directly.
 - Return a small number of bounded matches as implementation, review, or verification reminders.
 - Project-local `aisee/docs/reflect/knowledge-candidates/` remains a candidate area and is not promoted automatically.
@@ -477,10 +483,8 @@ plugins/aisee-plugin/
   references/        Cross-skill contracts and references
 bin/                 Local CLI entrypoint
 src/aisee_cli/       Aisee Python CLI
-src/aisee_plugin_assets/
-                     Minimal compatibility package; no bundled skills, schemas, references, or plugin metadata
-docs/                User workflow, best practices, architecture, plans, and review docs
-docs/architecture/   Architecture and historical decision docs
+docs/                User workflow, best practices, architecture, and release docs
+docs/architecture/   Architecture docs
 docs/plans/          Development plans
 docs/reviews/        Audit and review records
 scripts/             Development and release helper scripts
@@ -537,7 +541,7 @@ python scripts/smoke_release.py --with-pipx
 - OpenSpec is the canonical specification source.
 - Do not create parallel sources of truth in Aisee docs, CLI cache, or chat summaries.
 - Keep skills single-purpose: requirements, UI content, architecture, change planning, implementation bridge, verify, and archive guard.
-- Prefer schema-aware checks over hardcoded artifact assumptions.
+- When processing OpenSpec changes, read the current schema declaration instead of hardcoding app artifact assumptions.
 - Keep `SKILL.md` concise and put long rules in references or architecture docs.
 - Treat hardware and embedded workflows as dedicated extensions instead of forcing them into the app schema.
 
@@ -551,12 +555,12 @@ python scripts/smoke_release.py --with-pipx
 
 ### Ongoing Compatibility Governance
 
-- Keep CLI JSON, schema packs, context packs, marketplace plugin content, and skill contracts aligned with the Compatibility Policy; when a public contract changes, update tests, migration notes, and release notes together.
-- Add more real-world lifecycle fixtures beyond the app scenario, starting with quick-fix, quick-research, docsite, and infra-change.
+- Keep CLI JSON, project memory, team knowledge, context packs, marketplace plugin content, and skill contracts aligned with the Compatibility Policy; when a public contract changes, update tests, migration notes, and release notes together.
+- Use real-project dogfood to verify memory retrieval, context pack handoffs, and knowledge guardrails instead of expanding abstract flows just to cover schema types.
 
 ### Later
 
-- Expand cross-repository contract collaboration examples.
+- Improve project memory conflict hints, stale-entry policy, and low-context injection rules.
 - Tighten team knowledge remote sync, promote workflows, lifecycle management, and optional MCP wrapping.
 
 ## License

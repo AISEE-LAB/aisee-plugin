@@ -99,7 +99,7 @@ python scripts/check_versions.py
 python scripts/sync_versions.py
 ```
 
-`scripts/sync_package_assets.py` 仅保留为兼容入口。PyPI package 是 CLI-only，不再 mirror skills、references、schema packs、team knowledge templates 或 plugin metadata。
+`scripts/sync_package_assets.py` 仅保留为兼容入口。PyPI / pipx 通道只发布 CLI，不再同步分发 skills、references、schema packs、team knowledge templates 或 plugin metadata。
 
 ## 发布前检查清单
 
@@ -124,15 +124,15 @@ python scripts/smoke_release.py
 - 如果该版本已经存在于 PyPI，则跳过发布；
 - 如果该版本不存在，则运行版本检查、测试、`scripts/smoke_release.py`、`twine check`，再发布到 PyPI。
 
-`scripts/smoke_release.py` 会重新构建 dist、安装 wheel 到干净 venv，并检查 wheel / sdist 不包含完整 `skills/`、`references/`、schema pack trees、team knowledge templates 或 plugin metadata 副本。
+`scripts/smoke_release.py` 会重新构建 dist、安装发布包到干净 venv，并检查 PyPI 发布产物没有混入 marketplace plugin 内容。
 
 当前 smoke 还必须证明：
 
-- `aisee plugin inspect --json` 在 installed wheel 中返回 `mode=cli-only`；
+- `aisee plugin inspect --json` 在 PyPI 安装环境中返回 CLI runtime 状态；
 - `aisee doctor --json` 仍输出 Codex marketplace setup hint；
-- `aisee memory inspect --json` 在 installed wheel 中可用且只读；
+- `aisee memory inspect --json` 在 PyPI 安装环境中可用且只读；
 - `aisee plugin export ...` 返回 argparse `invalid choice`，且不会创建目标目录；
-- `aisee schemas list --json` 在 wheel-only 环境不报告 packaged schema source。
+- `aisee schemas list --json` 在 PyPI 安装环境不报告内置 schema 来源。
 
 该 workflow 默认使用 PyPI Trusted Publishing，不在仓库中保存 PyPI token。PyPI 项目需要配置 trusted publisher：
 
@@ -172,11 +172,11 @@ aisee schemas list --json
 aisee schemas check --json
 ```
 
-发布后的 CLI-only smoke 需要确认：
+发布后的 PyPI CLI smoke 需要确认：
 
 - `aisee doctor --json` 输出 `codex_marketplace` 检查结果；
-- `aisee plugin inspect --json` 输出 CLI-only 状态和 Codex marketplace setup hint；
-- wheel 中不包含完整 `skills/`、`references/`、schema pack trees、team knowledge templates 或 plugin metadata 副本。
+- `aisee plugin inspect --json` 输出 CLI runtime 状态和 Codex marketplace setup hint；
+- PyPI 发布产物没有混入 marketplace plugin 内容。
 
 Codex marketplace 真实安装 smoke 会写 Codex 本地配置，不放入默认 PyPI 发布 workflow。发布负责人可在已授权的本机环境中额外执行：
 

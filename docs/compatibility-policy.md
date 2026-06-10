@@ -90,8 +90,8 @@
 
 - GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
 - `plugins/aisee-plugin/references/skill-taxonomy.md` 中 core / optional / knowledge / hardware 分层，以及 core 10 skill 集合；
-- `aisee plugin inspect --json` 在 CLI-only 安装中返回稳定状态和 setup hint；
-- PyPI wheel 只承诺 CLI 能力；skills、references、schema packs、team knowledge templates 和 plugin metadata 通过 marketplace plugin 或外部仓库分发。
+- `aisee plugin inspect --json` 在 PyPI / pipx 安装中返回稳定状态和 setup hint；
+- PyPI / pipx 通道只承诺 CLI 能力；skills、references、schema packs、team knowledge templates 和 plugin metadata 通过 marketplace plugin 或外部仓库分发。
 
 破坏性变更包括重命名插件、移除 Codex manifest、破坏 marketplace plugin root 布局，或改变 core workflow skill 集合。
 
@@ -116,7 +116,7 @@
 - 普通 planning docs 的 frontmatter 合同和 `aisee doctor --json` / `aisee context pack --json` 的只读 diagnostics；
 - `status`、`doc_type`、`source_refs`、`change_refs` 等 planning doc 索引字段的基本语义；
 - `resolve_project_root` 以最近的 Aisee/OpenSpec project marker 优先，再 fallback 到 Git 顶层的语义；
-- release smoke 对 CLI-only wheel、marketplace setup hint、公开命令面和 root resolver fixture 的检查重点。
+- release smoke 对 PyPI / pipx CLI、marketplace setup hint、公开命令面和 root resolver fixture 的检查重点。
 
 破坏性变更包括把 planning doc diagnostics 变成写入命令，或改变 root resolution 使 monorepo 子项目误读为仓库顶层。
 

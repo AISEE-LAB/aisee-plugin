@@ -90,8 +90,8 @@ The following are public contracts:
 
 - `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
 - the core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 10 workflow skills;
-- `aisee plugin inspect --json` returns stable status and setup hints in CLI-only installs;
-- the PyPI wheel only promises CLI capabilities; skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
+- `aisee plugin inspect --json` returns stable status and setup hints in PyPI / pipx installs;
+- the PyPI / pipx channel only promises CLI capabilities; skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
 
 Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or changing the core workflow skill set.
 
@@ -116,7 +116,7 @@ The following are public contracts:
 - the planning-doc frontmatter contract and the read-only diagnostics exposed through `aisee doctor --json` and `aisee context pack --json`;
 - the basic semantics of planning-doc fields such as `status`, `doc_type`, `source_refs`, and `change_refs`;
 - `resolve_project_root` preferring the nearest Aisee/OpenSpec project marker before falling back to the Git top-level;
-- release smoke checks for CLI-only wheels, marketplace setup hints, the public command surface, and root-resolver fixtures.
+- release smoke checks for the PyPI / pipx CLI, marketplace setup hints, the public command surface, and root-resolver fixtures.
 
 Breaking changes include turning planning-doc diagnostics into write commands or changing root resolution so monorepo subprojects are silently interpreted as repository roots.
 
