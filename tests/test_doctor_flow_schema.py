@@ -27,6 +27,11 @@ def run_aisee(root: Path, *args: str, check: bool = True) -> subprocess.Complete
     env = os.environ.copy()
     repo_src = Path(__file__).resolve().parents[1] / "src"
     env["PYTHONPATH"] = str(repo_src)
+    if "CODEX_HOME" in os.environ:
+        env["CODEX_HOME"] = os.environ["CODEX_HOME"]
+    else:
+        env["HOME"] = str(root / "home")
+        env["CODEX_HOME"] = str(root / "home" / ".codex")
     return subprocess.run(
         [sys.executable, "-m", "aisee_cli.__main__", *args],
         cwd=root,
@@ -50,6 +55,7 @@ def create_schema_pack(root: Path) -> None:
         root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "schema.yaml",
         """name: quick-fix
 version: 1
+description: quick fixes
 capabilities:
   - apply_execution
   - archive_authority
@@ -84,6 +90,7 @@ def create_open_project(root: Path) -> None:
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
 version: 2
+description: app schema
 capabilities:
   - source_map_traceability
   - apply_execution
@@ -140,6 +147,7 @@ def create_quick_research_project(root: Path) -> None:
         root / "openspec" / "schemas" / "quick-research" / "schema.yaml",
         """name: quick-research
 version: 1
+description: research schema
 capabilities:
   - research_only
   - archive_authority
@@ -185,6 +193,7 @@ def create_opsx_collab_project(root: Path) -> None:
         root / "openspec" / "schemas" / "opsx-collab-pr-loop" / "schema.yaml",
         """name: opsx-collab-pr-loop
 version: 1
+description: review loop
 capabilities:
   - apply_execution
   - archive_authority
@@ -376,6 +385,89 @@ def test_schema_check_validates_project_installed_schema_without_source_assets(t
     assert result.returncode == 1
     assert data["status"] == "blocked"
     assert any(item["code"] == "SCHEMA_PARSE_FAILED" for item in data["issues"])
+
+
+def test_schema_check_reports_structural_schema_contract_issues(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("AISEE_AGENT_RUNTIME", "none")
+    write(
+        tmp_path / "openspec" / "schemas" / "broken" / "schema.yaml",
+        """name: broken
+capabilities:
+  - apply_execution
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    template: templates/proposal.md
+    requires: [tasks]
+    requiredness: always
+    capabilities: [primary_brief]
+  - id: proposal
+    generates: tasks.md
+    template: tasks.md
+    requires: [proposal]
+    requiredness: always
+    capabilities: [apply_track]
+apply:
+  requires: [proposal]
+  tracks: tasks.md
+""",
+    )
+    write(tmp_path / "openspec" / "schemas" / "broken" / "templates" / "proposal.md", "# proposal\n")
+    write(tmp_path / "openspec" / "schemas" / "broken" / "templates" / "tasks.md", "# tasks\n")
+
+    data = run_json(tmp_path, "schemas", "check", "--json")
+
+    assert data["status"] == "blocked"
+    codes = {item["code"] for item in data["issues"]}
+    assert "SCHEMA_ARTIFACT_DUPLICATE" in codes
+    assert "SCHEMA_VERSION_MISSING" in codes
+    assert "SCHEMA_DESCRIPTION_MISSING" in codes
+    assert "SCHEMA_TEMPLATE_PATH_INVALID" in codes
+    assert "SCHEMA_DAG_CYCLE" in codes
+
+
+def test_doctor_reports_schema_pack_version_mismatch(tmp_path: Path, monkeypatch) -> None:
+    create_open_project(tmp_path)
+    codex_home = tmp_path / "home" / ".codex"
+    write(codex_home / "config.toml", """[marketplaces.aisee-plugin]\nsource = "AISEE-LAB/aisee-plugin"\n\n[plugins."aisee-plugin@aisee-plugin"]\nenabled = true\n""")
+    write(codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "skills" / "aisee-srs" / "SKILL.md", "# aisee:srs\n")
+    write(codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "references" / "README.md", "# refs\n")
+    write(
+        codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "schema.yaml",
+        """name: quick-fix
+version: 1
+description: small fixes
+capabilities:
+  - apply_execution
+  - archive_authority
+artifacts:
+  - id: problem
+    generates: problem.md
+    template: problem.md
+    requires: []
+    requiredness: always
+    capabilities: [problem_statement]
+apply:
+  requires: [problem]
+  tracks: problem.md
+archive:
+  tracks:
+    - problem.md
+""",
+    )
+    write(
+        codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "templates" / "problem.md",
+        "# problem\n",
+    )
+    write(
+        codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / ".codex-plugin" / "plugin.json",
+        '{"name":"aisee-plugin","version":"0.5.0"}\n',
+    )
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+
+    data = run_json(tmp_path, "doctor", "--json")
+
+    assert any(item["code"] == "SCHEMA_PACK_VERSION_MISMATCH" for item in data["issues"])
 
 
 def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Path, monkeypatch) -> None:

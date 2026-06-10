@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.assets import resolve_asset_root, resolve_plugin_metadata
+from aisee_cli.assets import read_asset_version, resolve_asset_root, resolve_plugin_metadata
 from aisee_cli.marketplace import marketplace_issue, marketplace_setup_hint
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.project import rel
@@ -38,6 +38,7 @@ def inspect_plugin_assets(root: Path) -> dict[str, Any]:
             },
         }
     skills_dir = asset_root / "skills"
+    asset_version = read_asset_version(asset_root)
     issues = []
     if not skills_dir.exists():
         issues.append(issue("PLUGIN_SKILLS_MISSING", "blocker", "plugin skills directory was not found", rel(root, skills_dir)))
@@ -63,6 +64,7 @@ def inspect_plugin_assets(root: Path) -> dict[str, Any]:
         "status": status_from_issues(issues),
         "mode": "source-checkout",
         "asset_root": rel(root, asset_root),
+        "asset_version": asset_version,
         "skills_dir": rel(root, skills_dir),
         "skills": skills,
         "targets": targets,
@@ -127,6 +129,7 @@ def plugin_path(root: Path, target: str) -> dict[str, Any]:
         "mode": "source-checkout",
         "target": target,
         "asset_root": rel(root, asset_root),
+        "asset_version": read_asset_version(asset_root),
         "metadata": rel(root, metadata),
         "skills": rel(root, asset_root / "skills"),
     }

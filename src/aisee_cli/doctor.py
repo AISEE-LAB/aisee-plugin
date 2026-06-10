@@ -56,6 +56,7 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
     issues.extend(item for item in sources["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in registry["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in schemas["issues"] if item.get("severity") == "blocker")
+    issues.extend(item for item in schemas["issues"] if item.get("code") == "SCHEMA_PACK_VERSION_MISMATCH")
     issues.extend(planning_docs["issues"])
     if not openspec_cli["available"]:
         issues.append(issue("OPENSPEC_CLI_UNAVAILABLE", "info", "OpenSpec CLI is not available or failed to report a version"))

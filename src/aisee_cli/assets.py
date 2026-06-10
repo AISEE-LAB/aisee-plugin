@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 from aisee_cli.marketplace import marketplace_summary
 
@@ -134,6 +134,30 @@ def read_toml(path: Path) -> dict:
         return tomllib.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+
+def read_asset_manifest(root: Path | None) -> dict[str, Any] | None:
+    if root is None:
+        return None
+    manifest = root / ".codex-plugin" / "plugin.json"
+    if not manifest.exists():
+        return None
+    try:
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def read_asset_version(root: Path | None) -> str | None:
+    manifest = read_asset_manifest(root)
+    if manifest is None:
+        return None
+    value = manifest.get("version")
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
 
 
 def missing_asset_error() -> FileNotFoundError:

@@ -100,3 +100,9 @@ def test_knowledge_help_shows_init_repo_and_configure(tmp_path: Path) -> None:
 
     assert "init-repo" in result.stdout
     assert "configure" in result.stdout
+
+
+def test_schemas_help_shows_format_subcommand(tmp_path: Path) -> None:
+    result = run_aisee(tmp_path, "schemas", "--help")
+
+    assert "format" in result.stdout

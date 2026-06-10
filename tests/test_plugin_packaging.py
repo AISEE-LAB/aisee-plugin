@@ -38,17 +38,44 @@ def run_json(root: Path, *args: str, env: dict[str, str] | None = None) -> dict:
     return json.loads(result.stdout)
 
 
-def create_plugin_root(path: Path) -> Path:
+def create_plugin_root(path: Path, *, version: str = "0.6.0") -> Path:
     (path / "skills" / "aisee-srs").mkdir(parents=True)
     (path / "skills" / "aisee-srs" / "SKILL.md").write_text("# aisee:srs\n", encoding="utf-8")
     (path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix").mkdir(parents=True)
     (path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "schema.yaml").write_text(
-        "name: quick-fix\nartifacts:\n  - id: problem\n",
+        """name: quick-fix
+version: 1
+description: small fixes
+capabilities:
+  - apply_execution
+  - archive_authority
+artifacts:
+  - id: problem
+    generates: problem.md
+    template: problem.md
+    requires: []
+    requiredness: always
+    capabilities: [problem_statement]
+apply:
+  requires: [problem]
+  tracks: problem.md
+archive:
+  tracks:
+    - problem.md
+""",
+        encoding="utf-8",
+    )
+    (path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "templates").mkdir(parents=True)
+    (path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "templates" / "problem.md").write_text(
+        "# problem\n",
         encoding="utf-8",
     )
     (path / "references").mkdir()
     (path / ".codex-plugin").mkdir()
-    (path / ".codex-plugin" / "plugin.json").write_text('{"name":"aisee-plugin"}\n', encoding="utf-8")
+    (path / ".codex-plugin" / "plugin.json").write_text(
+        json.dumps({"name": "aisee-plugin", "version": version}, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     return path
 
 
@@ -101,6 +128,29 @@ def test_agent_runtime_none_disables_installed_asset_discovery(tmp_path: Path) -
     assert data["source"] is None
     assert data["schemas"] == []
     assert data["issues"][0]["code"] == "SCHEMA_PACK_SOURCE_UNAVAILABLE"
+
+
+def test_schema_pack_reports_version_mismatch_for_installed_plugin_content(tmp_path: Path) -> None:
+    codex_home = tmp_path / "home" / ".codex"
+    create_plugin_root(codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin", version="0.5.0")
+    (codex_home / "config.toml").parent.mkdir(parents=True, exist_ok=True)
+    (codex_home / "config.toml").write_text(
+        """[marketplaces.aisee-plugin]
+source = "https://github.com/AISEE-LAB/aisee-plugin.git"
+
+[plugins."aisee-plugin@aisee-plugin"]
+enabled = true
+""",
+        encoding="utf-8",
+    )
+
+    data = run_json(tmp_path, "schemas", "list", "--json")
+
+    assert data["status"] == "risk"
+    mismatch = next(item for item in data["issues"] if item["code"] == "SCHEMA_PACK_VERSION_MISMATCH")
+    assert mismatch["severity"] == "risk"
+    assert data["cli_version"] == "0.6.0"
+    assert data["source_version"] == "0.5.0"
 
 
 def test_unrelated_project_skills_do_not_shadow_aisee_assets(tmp_path: Path) -> None:

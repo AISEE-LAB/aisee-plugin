@@ -72,6 +72,7 @@ node <skill-dir>/scripts/setup-schemas.js --schema security-audit --force
 安装规则：
 
 - 优先使用 `aisee schemas list/check --json` 获取机器可解析状态。schema pack 安装路径改为 marketplace-installed plugin 或外部仓库；不再通过公开 CLI 子命令写入 schema pack。
+- `aisee schemas check --json` 只负责 schema 结构自检：`schema.yaml` 形状、artifact 元数据、依赖 DAG、自循环/坏依赖、模板存在性与 canonical format 漂移；它不替代 change 级 verify，也不自动判断 `config.yaml rules` 是否足够表达团队约束。
 - 需要写入 schema pack 时，使用本 skill 内 `scripts/setup-schemas.js` 或按确认后的文件清单从本 skill 的 `assets/schema-pack/<schema-name>/` 复制到项目 `openspec/schemas/<schema-name>/`。
 - 写入 `openspec/schemas/<schema-name>/`。
 - 已存在同名 schema 时默认跳过；`--force` 才覆盖。
@@ -118,7 +119,7 @@ openspec/project-docs.md
 - `apply.requires` 是否足以支持实现阶段。
 - `apply.tracks` 是否指向实际需要打勾或维护的文件。
 - `aisee schemas format --check --json` 是否无 drift；需要机械收敛时用 `aisee schemas format --write --json`。
-- artifact id 与 `openspec/config.yaml` 的 `rules` 是否匹配；不匹配时用 `instruction` 补齐团队约束。
+- artifact id 与 `openspec/config.yaml` 的 `rules` 是否匹配；这一步需要人工对照或借助 `openspec templates --schema <name>` 调试，不由 `aisee schemas check` 自动替代。不匹配时用 `instruction` 补齐团队约束。
 - schema 名称是否避开官方内置 schema 名称，除非明确要覆盖。
 
 更完整的多 schema 决策和冲突处理见 `references/multi-schema-best-practices.md`。

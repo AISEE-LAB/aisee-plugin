@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from aisee_cli.assets import resolve_schema_pack_dir
+from aisee_cli import __version__
+from aisee_cli.assets import read_asset_version, resolve_schema_pack_dir, resolve_source_asset_root
 from aisee_cli.context_pack import parse_schema
 from aisee_cli.marketplace import marketplace_issue, marketplace_setup_hint
 from aisee_cli.output import issue, status_from_issues, summarize_issues
@@ -33,7 +35,9 @@ def list_available_schemas(root: Path) -> list[str]:
 
 
 def list_schema_packs(root: Path) -> dict[str, Any]:
+    source_root = resolve_source_asset_root(root)
     source_base = maybe_schema_pack_dir(root)
+    source_version = read_asset_version(source_root)
     available = list_available_schemas(root) if source_base is not None else []
     installed_base = root / "openspec" / "schemas"
     installed = sorted(path.name for path in installed_base.iterdir() if (path / "schema.yaml").exists()) if installed_base.exists() else []
@@ -53,9 +57,20 @@ def list_schema_packs(root: Path) -> dict[str, Any]:
             "info",
             "Aisee schema packs are provided by the GitHub marketplace plugin, not by the PyPI CLI package.",
         ))
+    elif source_version and source_version != __version__:
+        issues.append(
+            issue(
+                "SCHEMA_PACK_VERSION_MISMATCH",
+                "risk",
+                f"CLI version {__version__} does not match resolved plugin content version {source_version}",
+                rel(root, source_root / ".codex-plugin" / "plugin.json") if source_root else None,
+            )
+        )
     return {
         "status": status_from_issues(issues),
         "source": rel(root, source_base) if source_base is not None else None,
+        "source_version": source_version,
+        "cli_version": __version__,
         "target": rel(root, installed_base),
         "schemas": schemas,
         "issues": issues,
@@ -88,6 +103,7 @@ def check_schema_packs(root: Path) -> dict[str, Any]:
                     f"{schema_dir_label}/schema.yaml",
                 )
             )
+        issues.extend(inspect_schema_structure(schema_file, schema_dir_label, schema_info))
         for artifact in schema_info["artifacts"]:
             template = artifact.template
             if template and not (schema_file.parent / "templates" / template).exists():
@@ -118,6 +134,109 @@ def validate_schema_yaml(schema_file: Path) -> None:
     artifacts = data.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
         raise ValueError("schema.yaml must define artifacts")
+
+
+def inspect_schema_structure(schema_file: Path, schema_dir_label: str, schema_info: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    schema_ids = [artifact.artifact_id for artifact in schema_info["artifacts"]]
+    duplicate_ids = sorted(artifact_id for artifact_id, count in Counter(schema_ids).items() if count > 1)
+    for artifact_id in duplicate_ids:
+        issues.append(
+            issue(
+                "SCHEMA_ARTIFACT_DUPLICATE",
+                "blocker",
+                f"schema defines duplicate artifact id: {artifact_id}",
+                f"{schema_dir_label}/schema.yaml",
+            )
+        )
+
+    raw_data = yaml.safe_load(schema_file.read_text(encoding="utf-8")) or {}
+    if not isinstance(raw_data.get("version"), int):
+        issues.append(issue("SCHEMA_VERSION_MISSING", "blocker", "schema.yaml must define integer version", f"{schema_dir_label}/schema.yaml"))
+    if not str(raw_data.get("description") or "").strip():
+        issues.append(issue("SCHEMA_DESCRIPTION_MISSING", "blocker", "schema.yaml must define description", f"{schema_dir_label}/schema.yaml"))
+
+    known_ids = set(schema_ids)
+    ordered_ids: list[str] = []
+    for artifact in schema_info["artifacts"]:
+        artifact_id = artifact.artifact_id
+        if "/" in (artifact.template or "") or "\\" in (artifact.template or ""):
+            issues.append(
+                issue(
+                    "SCHEMA_TEMPLATE_PATH_INVALID",
+                    "blocker",
+                    f"{artifact_id} template must be a file name under templates/, not a nested path",
+                    f"{schema_dir_label}/schema.yaml",
+                )
+            )
+        late_requires = []
+        for requirement in artifact.requires:
+            if requirement not in known_ids:
+                issues.append(
+                    issue(
+                        "SCHEMA_REQUIRES_UNKNOWN",
+                        "blocker",
+                        f"{artifact_id} requires unknown artifact {requirement}",
+                        f"{schema_dir_label}/schema.yaml",
+                    )
+                )
+            elif requirement not in ordered_ids:
+                late_requires.append(requirement)
+        if late_requires:
+            issues.append(
+                issue(
+                    "SCHEMA_DAG_ORDER",
+                    "risk",
+                    f"{artifact_id} requires artifacts that appear later or itself: {', '.join(late_requires)}",
+                    f"{schema_dir_label}/schema.yaml",
+                )
+            )
+        ordered_ids.append(artifact_id)
+
+    cycle = first_cycle(schema_info)
+    if cycle:
+        issues.append(
+            issue(
+                "SCHEMA_DAG_CYCLE",
+                "blocker",
+                f"schema artifact dependencies contain a cycle: {' -> '.join(cycle)}",
+                f"{schema_dir_label}/schema.yaml",
+            )
+        )
+    return issues
+
+
+def first_cycle(schema_info: dict[str, Any]) -> list[str]:
+    graph = {
+        artifact.artifact_id: list(artifact.requires)
+        for artifact in schema_info["artifacts"]
+    }
+    visiting: set[str] = set()
+    visited: set[str] = set()
+    stack: list[str] = []
+
+    def walk(node: str) -> list[str]:
+        if node in visiting:
+            index = stack.index(node)
+            return [*stack[index:], node]
+        if node in visited:
+            return []
+        visiting.add(node)
+        stack.append(node)
+        for requirement in graph.get(node, []):
+            if requirement not in graph:
+                continue
+            if cycle := walk(requirement):
+                return cycle
+        stack.pop()
+        visiting.remove(node)
+        visited.add(node)
+        return []
+
+    for node in graph:
+        if cycle := walk(node):
+            return cycle
+    return []
 
 
 def format_schema_packs(root: Path, *, check: bool = False, write: bool = False) -> dict[str, Any]:
