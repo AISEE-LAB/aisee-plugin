@@ -24,6 +24,12 @@ CLI 的默认读取入口固定为：
 
 独立 team knowledge 仓库的默认初始化入口是 `aisee knowledge init-repo --dest <path> --initial-pack <id> --json`。marketplace-installed plugin 的 `skills/aisee-knowledge-curate/assets/team-knowledge/` 是 contract-valid 示例模板，也可以使用团队维护的外部模板仓库。配置完成后，用 `aisee knowledge configure --path <path> --enable-pack <id> --json` 写入项目 pin，再运行 `aisee knowledge doctor --json` 检查配置 path 与实际目录是否一致。需要预检该仓库能否被 `promote-batch` 写入时，可读取 `aisee knowledge check --team-path <path> --json` 返回中的 `team_knowledge.write_ready`。
 
+Skill 路由：
+
+- `aisee:knowledge`：引导团队知识 CLI 的初始化、配置、同步、检索和 promote 操作。
+- `aisee:knowledge-curate`：审查项目内候选知识，产出去敏、泛化、去重后的 curation report 和 card drafts。
+- `aisee:reflect`：在项目内生成可审查候选，不直接写入 team knowledge repo。
+
 读取顺序：
 
 1. 读取项目 `aisee/knowledge.yaml`，获得 repo/path/ref/packs/retrieval。

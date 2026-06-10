@@ -32,6 +32,7 @@
 以下 skill 服务项目内复盘、审查和团队知识沉淀，不是每次迭代必经节点：
 
 - `aisee:reflect`
+- `aisee:knowledge`
 - `aisee:knowledge-curate`
 
 ## Hardware / Experimental

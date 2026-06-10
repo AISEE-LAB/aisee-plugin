@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "Aisee",
     "shortDescription": "AI-Enhanced Software Engineering for OpenSpec-driven development.",
-    "longDescription": "Aisee helps teams run OpenSpec-driven development with structured requirements, schema-aware change authoring, context packs, ID registry, and Compound Engineering handoffs.",
+    "longDescription": "Aisee helps teams run OpenSpec-driven development with structured requirements, schema-aware change authoring, context packs, team knowledge guardrails, and Compound Engineering handoffs.",
     "developerName": "Fengliang",
     "category": "Coding",
     "capabilities": [

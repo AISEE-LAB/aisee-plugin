@@ -1,0 +1,88 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:knowledge",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "knowledge-001",
+      "name": "guide-team-knowledge-onboarding",
+      "scenario": "team-knowledge-onboarding",
+      "prompt": "帮我把当前项目接入团队知识库，并检查以后实现时能不能检索 guardrails。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户要求接入和验证团队知识 CLI。"
+        ]
+      },
+      "expected_output": "应先检查或创建 team knowledge repo，再用 configure 写入项目 pin，并通过 doctor/check/query 验证；不得手工发明 knowledge.yaml 或把知识库当 OpenSpec 事实源。",
+      "expected_outputs": [
+        "使用 aisee knowledge init-repo 或 configure。",
+        "运行 doctor/check 验证配置。",
+        "说明 query 或 context pack --knowledge 的使用方式。"
+      ],
+      "must_ask": [
+        "如果需要写入新路径，应确认目标 team knowledge 路径。"
+      ],
+      "must_include": [
+        "aisee knowledge configure",
+        "aisee knowledge doctor",
+        "aisee knowledge query"
+      ],
+      "must_not": [
+        "不得直接递归扫描 knowledge/cards 当作默认流程。",
+        "不得把 team knowledge 当作 OpenSpec baseline 或 current change 事实源。"
+      ],
+      "quality_checks": [
+        "区分配置、同步、检索和写入流程。",
+        "写入前说明路径和命令。"
+      ],
+      "fact_source_constraints": [
+        "team knowledge 是 guardrail retrieval，不替代 OpenSpec、source-map、tasks 或 contracts。"
+      ],
+      "files": []
+    },
+    {
+      "id": "knowledge-002",
+      "name": "route-curation-to-knowledge-curate",
+      "scenario": "team-knowledge-promotion",
+      "prompt": "把这次项目经验沉淀到团队知识里，如果可以就写入 team repo。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户提出沉淀到团队知识，但未说明已有 curation report。"
+        ]
+      },
+      "expected_output": "应先转交或建议使用 aisee:knowledge-curate 生成去敏、泛化、去重后的 batch report；只有已有 report 且用户明确授权目标路径时才运行 promote-batch。",
+      "expected_outputs": [
+        "说明 aisee:knowledge-curate 负责生成 drafts。",
+        "说明 promote-batch 只写本地 worktree。",
+        "提醒默认 candidate，明确授权后才可 --activate。"
+      ],
+      "must_ask": [
+        "确认是否已有 curation report。",
+        "确认 team knowledge worktree 路径和是否允许写入。"
+      ],
+      "must_include": [
+        "aisee:knowledge-curate",
+        "aisee knowledge check --team-path",
+        "aisee knowledge promote-batch"
+      ],
+      "must_not": [
+        "不得直接从聊天记录生成 active card 并写入 team repo。",
+        "不得自动 commit、push、merge 或创建 PR。"
+      ],
+      "quality_checks": [
+        "保持 knowledge 和 knowledge-curate 职责分离。",
+        "强调用户授权和 write_ready 检查。"
+      ],
+      "fact_source_constraints": [
+        "curation report 是待审材料；active team card 才是默认检索对象。"
+      ],
+      "files": []
+    }
+  ]
+}

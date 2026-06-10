@@ -122,7 +122,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 按需扩展：
 
 - 可选扩展：`aisee:design-spec`、`aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object`、`aisee:spec-migrate`
-- 知识循环：`aisee:reflect`、`aisee:knowledge-curate`
+- 知识循环：`aisee:reflect`、`aisee:knowledge`、`aisee:knowledge-curate`
 - 硬件 / 实验域：`hw:srs`、`hw:architecture`、`hw:init`、`hw:change-plan`
 
 ## 功能特性
@@ -322,6 +322,7 @@ quick-fix / quick-research / 其它轻量 schema
 | `aisee:svg-assets` | 生成、矢量化、优化和校验 SVG assets。 |
 | `aisee:image-object` | 对象级图片分割、mask、去背景和导出工作流。 |
 | `aisee:reflect` | 沉淀可复用项目经验和工作流改进。 |
+| `aisee:knowledge` | 引导团队知识 CLI 的初始化、配置、同步、检索和 promote 流程。 |
 | `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
 
 硬件相关 skills 已保留，但仍在整合到 Aisee 主工作流中：
@@ -417,14 +418,22 @@ retrieval:
 常用命令：
 
 ```bash
+aisee knowledge init-repo --dest ../aisee-team-knowledge --initial-pack web-app --json
+aisee knowledge configure --path ../aisee-team-knowledge --enable-pack web-app --json
 aisee knowledge inspect --json
+aisee knowledge doctor --json
+aisee knowledge check --json
+aisee knowledge install --json
+aisee knowledge update --json
 aisee knowledge query --phase implementation --surface cli --query "public CLI JSON" --json
 aisee knowledge query --from-change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
+aisee knowledge promote-batch --curation <path> --team-path ../aisee-team-knowledge --pack web-app --json
 ```
 
 使用原则：
 
+- `aisee:knowledge` 负责引导这些 CLI 的日常使用，降低初始化、同步、检索和 promote 的门槛。
 - `install`、`update` 和 `promote-batch` 是实验性能力；本地默认 scaffold 不再由 PyPI CLI 提供。PR 自动化和 MCP 服务仍未稳定。
 - 通过 CLI 查询，不让 AI 直接扫描 `knowledge/cards/**/*.md`。
 - 只返回少量带边界的 matches，作为实现、review 或 verify 的提醒。
