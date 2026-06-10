@@ -39,9 +39,8 @@ def parse_source_map(change_path: Path) -> dict[str, Any]:
     evidence = extract_evidence(tables)
     artifact_applicability = extract_artifact_applicability(tables)
     contract_sync = extract_contract_sync(tables)
-    anchor_trace = extract_anchor_trace(tables)
+    source_context = extract_source_context(tables)
     upstream_sources = extract_upstream_sources(tables)
-    intake_sources = extract_intake_sources(tables)
     out_of_scope = extract_bullets(sections, {"不在本 Change 范围", "不在范围", "Out of Scope", "Follow-up", "后续处理"})
     issues = build_issues(path.exists(), tables, implementation_paths, artifact_applicability, text)
     return {
@@ -49,8 +48,7 @@ def parse_source_map(change_path: Path) -> dict[str, Any]:
         "status": "present" if path.exists() else "missing",
         "parse_level": "structured" if tables else ("metadata" if text else "missing"),
         "upstream_sources": upstream_sources,
-        "intake_sources": intake_sources,
-        "anchor_trace": anchor_trace,
+        "source_context": source_context,
         "artifact_applicability": artifact_applicability,
         "contract_sync": contract_sync,
         "implementation_paths": implementation_paths,
@@ -118,7 +116,6 @@ def normalize_key(key: str) -> str:
         "描述 / 摘要": "summary",
         "summary": "summary",
         "摘要": "summary",
-        "sources.json id": "source_id",
         "source id": "source_id",
         "文档引用": "ref",
         "anchor ref": "ref",
@@ -178,29 +175,22 @@ def extract_upstream_sources(tables: dict[str, list[dict[str, str]]]) -> list[di
     return rows
 
 
-def extract_intake_sources(tables: dict[str, list[dict[str, str]]]) -> list[dict[str, Any]]:
+def extract_source_context(tables: dict[str, list[dict[str, str]]]) -> list[dict[str, Any]]:
     rows = []
     for title, table in tables.items():
-        if any(token in title for token in ("Intake 来源", "Intake Sources")):
-            for row in table:
-                summary = row.get("summary") or row.get("notes") or ""
-                rows.append({
-                    "type": row.get("type") or row.get("source") or "",
-                    "title": row.get("title") or "",
-                    "path": row.get("path") or "",
-                    "ref": row.get("ref") or "",
-                    "status": normalize_status(row.get("status") or ""),
-                    "artifact": row.get("artifact") or "",
-                    "summary": summary,
-                    "notes": row.get("notes") or "",
-                })
-    return rows
-
-
-def extract_anchor_trace(tables: dict[str, list[dict[str, str]]]) -> list[dict[str, Any]]:
-    rows = []
-    for title, table in tables.items():
-        if any(token in title for token in ("上游输入", "本 Change 覆盖", "本 Change 产出", "Anchor Trace", "ID Trace")):
+        if any(
+            token in title
+            for token in (
+                "上游输入",
+                "本 Change 覆盖",
+                "本 Change 产出",
+                "来源上下文",
+                "Source Context",
+                "Context Routing",
+                "Anchor Trace",
+                "ID Trace",
+            )
+        ):
             for row in table:
                 text = " ".join(row.values())
                 rows.append({

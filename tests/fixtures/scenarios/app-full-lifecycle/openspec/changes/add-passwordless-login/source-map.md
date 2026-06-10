@@ -8,7 +8,7 @@
 | UI Content | aisee/docs/ui-content/auth-ui.md | aisee/docs/ui-content/auth-ui.md#PAGE-001, aisee/docs/ui-content/auth-ui.md#FLOW-001, aisee/docs/ui-content/auth-ui.md#STATE-001 | confirmed | Login page and states |
 | Architecture | aisee/docs/architecture/auth-architecture.md | aisee/docs/architecture/auth-architecture.md#ARCH-001, aisee/docs/architecture/auth-architecture.md#DEC-001 | confirmed | Session boundary |
 
-## Anchor Trace
+## Source Context
 
 | Type | Ref | Title | Source | Handling | Artifact |
 |---|---|---|---|---|---|

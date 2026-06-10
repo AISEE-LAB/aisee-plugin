@@ -7,7 +7,6 @@ Markdown as a second source of truth.
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -19,7 +18,6 @@ import yaml
 from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref
 from aisee_cli.assets import resolve_source_asset_root
 from aisee_cli.index import build_index
-from aisee_cli.paths import sources_path as aisee_sources_path
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.source_map import parse_source_map
 from aisee_cli.tool_checks import check_compound_plugin
@@ -100,14 +98,13 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     code_paths = [p for p in source_paths if not is_test_path(p)]
     test_paths = [p for p in source_paths if is_test_path(p)]
 
-    sources = inspect_sources(root, source_map_text)
+    sources = inspect_sources(source_map_text)
     task_state = parse_task_state(tasks_text)
     upstream_refs = sorted(extract_anchor_refs(source_map_text))
-    intake_sources = source_map.get("intake_sources", [])
     produced_local_ids = sorted(extract_produced_local_ids(tasks_text) | extract_produced_local_ids(combined_text))
     all_change_local_ids = sorted(extract_ids(combined_text))
-    anchor_index = inspect_anchor_index(root, upstream_refs, all_change_local_ids)
-    traceability_mode = derive_traceability_mode(upstream_refs, intake_sources)
+    source_reference_index = inspect_source_reference_index(root, upstream_refs, all_change_local_ids)
+    traceability_mode = derive_traceability_mode(upstream_refs, produced_local_ids)
     parsed_artifacts = slim_artifacts(full_parsed_artifacts) if target == "ce-work" else full_parsed_artifacts
 
     gaps = build_gaps(
@@ -117,7 +114,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         code_paths=code_paths,
         test_paths=test_paths,
         target=target,
-        anchor_index=anchor_index,
+        source_reference_index=source_reference_index,
         source_map=source_map,
         source_map_required=source_map_required,
         unmapped_reference_paths=unmapped_reference_paths,
@@ -169,20 +166,19 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 "artifacts": parsed_artifacts,
                 "source_map": source_map,
                 "sources": sources,
-                "anchor_index": anchor_index,
+                "source_reference_index": source_reference_index,
             },
             "derived": {
                 "read_order": read_order,
                 "scope": derive_scope(read_text(change_path / "proposal.md"), source_map_text),
                 "traceability": {
                     "upstream_refs": upstream_refs,
-                    "intake_sources": intake_sources,
                     "mode": traceability_mode,
                     "produced_local_ids": produced_local_ids,
-                    "resolved_anchors": anchor_index["resolved"],
-                    "unresolved_anchors": anchor_index["missing_references"],
-                    "legacy_full_ids": anchor_index["legacy_full_ids"],
-                    "anchor_links": derive_id_links(source_map_text, tasks_text),
+                    "resolved_source_refs": source_reference_index["resolved"],
+                    "unresolved_source_refs": source_reference_index["missing_references"],
+                    "legacy_full_ids": source_reference_index["legacy_full_ids"],
+                    "numbering_links": derive_id_links(source_map_text, tasks_text),
                 },
                 "artifact_applicability": source_map["artifact_applicability"] or derive_artifact_applicability(source_map_text),
                 "code_paths": code_paths,
@@ -243,7 +239,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "traceability": summarize_trace_checks(
                 upstream_refs,
                 produced_local_ids,
-                intake_sources=intake_sources,
                 mode=traceability_mode,
             ),
             "tasks": summarize_task_checks(task_state),
@@ -259,7 +254,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "traceability": summarize_trace_checks(
                 upstream_refs,
                 produced_local_ids,
-                intake_sources=intake_sources,
                 mode=traceability_mode,
             ),
             "tasks": summarize_task_checks(task_state),
@@ -487,7 +481,7 @@ def artifact_has_capability(artifact: ArtifactSpec | dict[str, Any], capability:
 
 
 def schema_generates_source_map(schema_info: dict[str, Any]) -> bool:
-    return schema_has_capability(schema_info, "source_map_traceability")
+    return schema_has_capability(schema_info, "source_map_routing")
 
 
 def schema_requires_tasks(schema_info: dict[str, Any]) -> bool:
@@ -507,8 +501,7 @@ def not_applicable_source_map() -> dict[str, Any]:
         "status": "not_applicable",
         "parse_level": "not_applicable",
         "upstream_sources": [],
-        "intake_sources": [],
-        "anchor_trace": [],
+        "source_context": [],
         "artifact_applicability": [],
         "contract_sync": {"available": False, "values": {}, "machine_readable_contracts": []},
         "implementation_paths": [],
@@ -615,18 +608,11 @@ def slim_artifacts(parsed_artifacts: dict[str, Any]) -> dict[str, Any]:
     return slimmed
 
 
-def derive_traceability_mode(upstream_refs: list[str], intake_sources: list[dict[str, Any]]) -> str:
-    has_anchors = bool(upstream_refs)
-    has_intake = any(
-        any(str(item.get(field) or "").strip() for field in ("type", "title", "path", "ref", "summary", "artifact"))
-        for item in intake_sources
-    )
-    if has_anchors and has_intake:
-        return "mixed"
-    if has_anchors:
-        return "anchor"
-    if has_intake:
-        return "intake"
+def derive_traceability_mode(upstream_refs: list[str], produced_local_ids: list[str]) -> str:
+    if upstream_refs:
+        return "source-ref"
+    if produced_local_ids:
+        return "numbered"
     return "empty"
 
 
@@ -649,11 +635,10 @@ def inspect_project_rules(root: Path) -> dict[str, Any]:
     }
 
 
-def inspect_anchor_index(root: Path, references: list[str], local_ids: list[str]) -> dict[str, Any]:
+def inspect_source_reference_index(root: Path, references: list[str], local_ids: list[str]) -> dict[str, Any]:
     index = build_index(root, write_cache=False)
-    aliases = index.get("aliases", {})
     documents = {item.get("path"): item for item in index.get("documents", []) if isinstance(item, dict)}
-    anchors = index.get("anchors", {})
+    reference_index = index.get("references", {})
     resolved: list[dict[str, Any]] = []
     missing_references: list[str] = []
     errors: list[str] = []
@@ -664,9 +649,9 @@ def inspect_anchor_index(root: Path, references: list[str], local_ids: list[str]
             errors.append(str(error))
             missing_references.append(reference)
             continue
-        document = parsed["document"] or aliases.get(parsed["alias"])
+        document = parsed["document"]
         canonical_ref = f"{document}#{parsed['local_id']}" if document else None
-        occurrences = anchors.get(canonical_ref, []) if canonical_ref else []
+        occurrences = reference_index.get(canonical_ref, []) if canonical_ref else []
         if document and any(item.get("document") == document for item in occurrences):
             resolved.append({
                 "reference": reference,
@@ -680,7 +665,7 @@ def inspect_anchor_index(root: Path, references: list[str], local_ids: list[str]
     return {
         "available": True,
         "checked": True,
-        "path": index["index"]["path"],
+        "scan_source": "internal",
         "queried_references": sorted(references),
         "queried_local_ids": sorted(local_ids),
         "resolved": sorted(resolved, key=lambda item: item["reference"]),
@@ -692,22 +677,10 @@ def inspect_anchor_index(root: Path, references: list[str], local_ids: list[str]
     }
 
 
-def inspect_sources(root: Path, source_map_text: str) -> list[dict[str, Any]]:
-    registry_path = aisee_sources_path(root)
+def inspect_sources(source_map_text: str) -> list[dict[str, Any]]:
     sources: list[dict[str, Any]] = []
-    if registry_path.exists():
-        try:
-            data = json.loads(read_text(registry_path))
-            if isinstance(data, list):
-                sources.extend(item for item in data if isinstance(item, dict))
-            elif isinstance(data, dict):
-                for key, value in data.items():
-                    sources.append({"id": key, "value": value})
-        except json.JSONDecodeError:
-            sources.append({"path": rel(root, registry_path), "status": "invalid-json"})
-
     for path in sorted(extract_paths(source_map_text)):
-        if path.startswith("docs/"):
+        if path.startswith(("aisee/docs/", "docs/")):
             sources.append({"path": path, "status": "referenced"})
     return sources
 
@@ -752,7 +725,7 @@ def build_gaps(
     code_paths: list[str],
     test_paths: list[str],
     target: str,
-    anchor_index: dict[str, Any],
+    source_reference_index: dict[str, Any],
     source_map: dict[str, Any],
     source_map_required: bool,
     unmapped_reference_paths: list[str],
@@ -844,36 +817,35 @@ def build_gaps(
                 )
             )
 
-    anchor_owner_artifact = "source-map.md" if source_map_required else "schema artifacts"
-    temporary_ids = anchor_index.get("temporary_local_ids", [])
+    reference_owner_artifact = "source-map.md" if source_map_required else "schema artifacts"
+    temporary_ids = source_reference_index.get("temporary_local_ids", [])
     if temporary_ids:
         gaps.append(
             gap(
-                "LOCAL_ID_FINALIZATION_REQUIRED",
+                "NUMBERING_FINALIZATION_REQUIRED",
                 "risk",
-                "Change contains temporary local IDs that must be finalized before authoring completes",
-                anchor_owner_artifact,
+                "Change contains temporary numbers that must be finalized before authoring completes",
+                reference_owner_artifact,
                 temporary_ids,
             )
         )
-    missing_references = anchor_index.get("missing_references", [])
+    missing_references = source_reference_index.get("missing_references", [])
     if missing_references:
         gaps.append(
             gap(
-                "ANCHOR_RESOLUTION_MISSING",
+                "SOURCE_REF_RESOLUTION_MISSING",
                 "risk",
-                "Change references anchor refs that could not be resolved",
-                anchor_owner_artifact,
+                "Change references source refs that could not be resolved",
+                reference_owner_artifact,
                 missing_references,
             )
         )
-    intake_sources = source_map.get("intake_sources", [])
-    if source_map_required and not missing_references and not anchor_index.get("resolved") and not intake_sources and not produced_local_ids:
+    if source_map_required and not missing_references and not source_reference_index.get("resolved") and not produced_local_ids:
         gaps.append(
             gap(
-                "SOURCE_TRACE_MISSING",
+                "SOURCE_CONTEXT_MISSING",
                 "risk",
-                "source-map.md has no anchor refs, no intake sources, and no produced local IDs",
+                "source-map.md has no source refs and no produced numbers",
                 "source-map.md",
             )
         )
@@ -883,7 +855,7 @@ def build_gaps(
             gap(
                 "LEGACY_FULL_ID_REFERENCE",
                 "risk",
-                "Change still contains legacy full ID references",
+                "Change still contains legacy full ID text",
                 anchor_owner_artifact,
                 legacy_full_ids,
             )
@@ -1167,7 +1139,6 @@ def build_execution_brief(
         "read_first": read_order[:8],
         "source_refs": {
             "upstream_refs": traceability.get("upstream_refs", []),
-            "intake_sources": traceability.get("intake_sources", []),
             "mode": traceability.get("mode"),
         },
         "produced_local_ids": traceability.get("produced_local_ids", []),
@@ -1451,7 +1422,7 @@ def build_reusable_workflow_candidates(
             "name": "aisee:implementation-bridge",
             "kind": "aisee-skill",
             "status": "recommended",
-            "reason": "preflight author-check, gaps, context pack, scope guardrails, and review recommendation before CE execution",
+                "reason": "review context pack gaps, scope guardrails, and review recommendation before CE execution",
         }
     ]
 
@@ -1479,13 +1450,11 @@ def summarize_artifact_checks(artifact_entries: list[dict[str, Any]]) -> list[di
 def summarize_trace_checks(
     upstream_refs: list[str],
     produced_local_ids: list[str],
-    intake_sources: list[dict[str, Any]] | None = None,
     mode: str | None = None,
 ) -> list[dict[str, Any]]:
     return [{
         "mode": mode,
         "upstream_ref_count": len(upstream_refs),
-        "intake_source_count": len(intake_sources or []),
         "produced_local_id_count": len(produced_local_ids),
     }]
 

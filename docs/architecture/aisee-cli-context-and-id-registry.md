@@ -1,104 +1,54 @@
-# Aisee CLI、上下文索引与 Anchor 设计
+# Aisee CLI、上下文索引与编号规则
 
 ## 维护边界
 
-本文描述 **当前生效** 的 Aisee CLI 设计，不保留旧 full ID / `aisee id` lifecycle 方案作为现行规则。
+本文描述当前生效的 Aisee CLI 上下文设计。Aisee 不再提供独立的 ID lifecycle、anchor lookup 或跨项目制品读取能力。
 
-若与以下事实源冲突，以事实源为准：
+事实源以以下内容为准：
 
-- [plugins/aisee-plugin/references/id-policy.md](/Users/fengliang/PycharmProjects/aisee-plugin/plugins/aisee-plugin/references/id-policy.md)
-- [plugins/aisee-plugin/references/source-map-contract.md](/Users/fengliang/PycharmProjects/aisee-plugin/plugins/aisee-plugin/references/source-map-contract.md)
 - `src/aisee_cli/`
+- `plugins/aisee-plugin/skills/*/SKILL.md`
+- `plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/`
 - `tests/`
 
 ## 1. 目标
 
-Aisee CLI 不是第二套规范系统。它的目标只有三个：
+Aisee CLI 不是第二套规范系统。它只做四件事：
 
-1. 解析 planning docs、OpenSpec artifacts 和 evidence 中的最小可用上下文。
-2. 用 anchor ref 精准定位片段，而不是让 agent 全量扫描仓库。
-3. 为 `ce-work`、`verify`、`review`、跨项目只读上下文提供稳定 JSON 入口。
+1. 检查环境、版本、插件资产和项目布局。
+2. 解析 OpenSpec artifacts、`source-map.md`、tasks、evidence 和少量 planning doc metadata。
+3. 生成面向实现、验证和 review 的 JSON context pack。
+4. 管理团队知识仓库的只读检索、安装和批量提升辅助。
 
-## 2. 当前正式模型
+## 2. 编号模型
 
-### 2.1 标识模型
+编号是 skill/template 的写作约束，不是独立 CLI 能力。
 
-当前正式规则：
+正式规则：
 
-- 文档内只写 `local ID`，例如 `FR-001`、`PAGE-001`、`DEC-001`
-- 跨文档只写 `anchor ref`
+- 文档内编号使用 `FR-001`、`PAGE-001`、`ARCH-001`、`SPEC-001`、`TASK-001` 等格式。
+- 无法确定最终编号时，使用 `TYPE-NEW-001` 并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
+- 编号只用于减少重复命名、方便人工阅读和让 `source-map.md` / context pack 能做轻量解析。
 
-```text
-docs/requirements/auth-srs.md#FR-001
-aisee/docs/ui-content/auth-ui.md#PAGE-001
-srs:auth-login#FR-001
-```
+以下不再是当前模型：
 
-以下不再是正式模型：
+- 旧 ID lifecycle 命令
+- 独立 lookup / trace 命令
+- full ID lifecycle
+- 把编号系统包装成跨项目 traceability 服务
 
-- `scope:TYPE-001`
-- `aisee id reserve / activate / deprecate`
-- `<!-- aisee:id ... -->`
-
-旧 full ID 若仍出现在历史文档中，只作为兼容诊断文本处理。
-
-### 2.2 事实源分工
+## 3. 事实源分工
 
 | 层 | 作用 | 是否事实源 |
 |---|---|---|
-| planning docs / OpenSpec artifacts | 承载正文、local ID、anchor 引用；planning docs frontmatter 只承载索引字段 | 是 |
-| `aisee/registry/sources.json` | 来源注册与 alias | 是 |
-| `aisee index` 输出 | 文档扫描后的 anchor occurrence 视图 | 否，可重建 |
-| `aisee/cache/context-index.json` | 缓存 | 否 |
-| `docs/reviews/*` / `docs/verification/*` | review / test / manual evidence | 是 |
+| OpenSpec change artifacts / baseline specs | 规范事实、任务和归档依据 | 是 |
+| planning docs | 版本 / 迭代输入，frontmatter 只做索引辅助 | 是，但不是 baseline |
+| `source-map.md` | 当前 change 的来源、适用性、候选路径和 evidence 路由 | 是 |
+| context pack 内部扫描视图 | 可重建的文档扫描视图 | 否 |
 
-`aisee/registry/id-registry.json` 现在不是正式 authoring 事实源；如仓库保留该文件，只用于历史兼容。
+## 4. 命令职责
 
-## 3. 命令职责
-
-### 3.1 `aisee index`
-
-扫描文档并建立：
-
-- document
-- local ID occurrence
-- anchor ref occurrence
-- alias 映射
-- 相关代码/测试路径线索
-
-输出面向 machine-readable context，不负责写回规范。
-
-### 3.2 `aisee get <anchor-ref>`
-
-按 anchor ref 返回：
-
-- `reference_type`
-- `document`
-- `local_id`
-- `source`
-- `references`
-- `relations`
-- `issues`
-
-示例：
-
-```bash
-aisee get docs/requirements/auth-srs.md#FR-001 --json
-aisee get srs:auth-login#FR-001 --json
-```
-
-### 3.3 `aisee trace <anchor-ref>`
-
-返回该锚点与：
-
-- change
-- 相关页面 / 流程 / 状态
-- 代码路径 / 测试路径
-- legacy full ID 诊断
-
-的关系视图。
-
-### 3.4 `aisee context pack`
+### `aisee context pack`
 
 围绕当前 change 生成 schema-aware JSON：
 
@@ -108,73 +58,38 @@ aisee get srs:auth-login#FR-001 --json
 - `guardrails`
 - `evidence`
 
-它依赖：
+它依赖 `source-map.md`、当前 change artifacts、review / verification evidence 和 schema metadata。内部扫描只服务本次输出，不作为公开 `index` 命令或持久事实源。
 
-- `source-map.md`
-- 当前 change artifacts
-- `sources.json`
-- review / verification evidence
+## 5. Source Map 规则
 
-它不把缓存或摘要当事实源。
+`source-map.md` 是当前 change 的上下文路由中心。
 
-## 4. Source Map 规则
+它记录：
 
-`source-map.md` 是当前 change 的路由中心。
+- 上游来源或用户输入摘要
+- 当前 change 产出的文档内编号
+- artifact Required yes/no 和原因
+- 候选代码 / 测试 / contract 路径
+- 预期 evidence 入口
+- 必要时记录 contract owner / provider / consumer / sync mode
 
-当前正式列语义：
+它不记录：
 
-- `Ref` / `Refs`：跨文档 anchor ref
-- 本 change 内新产物：local ID
-- `Artifact Applicability`：Required yes/no + 原因
-- `Implementation Paths`：候选代码 / 测试 / contract 路径
-- `Verification Evidence`：预期或已存在证据入口
+- 具体实现步骤
+- contract 字段细节
+- 最终测试结论
+- 长期 ID 生命周期
 
-不再使用：
+## 6. 结论
 
-- `ID` 作为正式跨文档列
-- full ID lifecycle 状态
-
-## 5. 诊断与兼容
-
-CLI 仍会报告以下问题，但它们是 **诊断**，不是 authoring 入口：
-
-- `ANCHOR_ALIAS_NOT_FOUND`
-- `ANCHOR_DOCUMENT_MISSING`
-- `ANCHOR_LOCAL_ID_MISSING`
-- `LEGACY_FULL_ID_REFERENCE`
-- `SOURCE_MAP_LEGACY_FULL_ID`
-
-设计原则：
-
-- 缺锚点：报 risk / blocker，不静默全文 fallback
-- 旧 full ID：报兼容诊断，不继续生成新 full ID
-
-## 6. 与 OpenSpec / CE 的边界
+当前模型是：
 
 ```text
-OpenSpec
-= schema / change artifacts / validate / archive / baseline specs
-
-Aisee CLI
-= anchor-aware context companion
-
-Compound Engineering
-= implementation / review / test / commit / PR / reflect
+skills enforce numbering
+OpenSpec owns specs/tasks/archive
+source-map routes context
+aisee CLI emits JSON views
+Compound executes engineering work
 ```
 
-Aisee CLI 不负责：
-
-- 修改 OpenSpec baseline
-- 替代 `openspec validate`
-- 替代 `openspec archive`
-- 生成平行任务系统
-
-## 7. 迁移原则
-
-历史仓库从旧模型迁向当前模型时：
-
-1. 文档正文先改为 local ID
-2. `source-map.md` 改为 `Ref/Refs`
-3. `sources.json` 增加 alias
-4. `aisee get/trace` 改用 anchor ref
-5. 旧 full ID 仅保留为短期兼容诊断，逐步清除
+编号保留为写作规则，CLI 不再把编号升级成独立产品面。

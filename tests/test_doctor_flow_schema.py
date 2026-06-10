@@ -85,14 +85,13 @@ def create_open_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(root / "openspec" / "changes" / ".gitkeep", "")
-    write(root / "aisee" / "registry" / "sources.json", '{"version":1,"sources":[]}\n')
     write(
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
 version: 2
 description: app schema
 capabilities:
-  - source_map_traceability
+  - source_map_routing
   - apply_execution
   - archive_authority
 artifacts:
@@ -334,7 +333,6 @@ def test_bootstrap_plan_is_read_only(tmp_path: Path) -> None:
     assert schema_action["kind"] == "create"
     assert "aisee:schema-pack" in schema_action["reason"]
     assert "aisee schemas install" not in schema_action["reason"]
-    assert all(not item["path"].endswith("id-registry.json") for item in data["actions"])
     assert not (tmp_path / "AGENTS.md").exists()
 
 
@@ -342,13 +340,12 @@ def test_bootstrap_plan_does_not_reinstall_marketplace_when_only_project_schemas
     write(tmp_path / "AGENTS.md", "# Rules\n")
     write(tmp_path / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(tmp_path / "openspec" / "changes" / ".gitkeep", "")
-    write(tmp_path / "aisee" / "registry" / "sources.json", '{"version":1,"sources":[]}\n')
     codex_home = tmp_path / "home" / ".codex"
     write(codex_home / "config.toml", """[marketplaces.aisee-plugin]\nsource = "AISEE-LAB/aisee-plugin"\n\n[plugins."aisee-plugin@aisee-plugin"]\nenabled = true\n""")
     create_schema_pack(codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin")
     write(
         codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / ".codex-plugin" / "plugin.json",
-        '{"name":"aisee-plugin","version":"0.7.2"}\n',
+        '{"name":"aisee-plugin","version":"0.8.0"}\n',
     )
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
 
@@ -363,8 +360,6 @@ def test_doctor_and_bootstrap_report_legacy_aisee_layout(tmp_path: Path) -> None
     write(tmp_path / "AGENTS.md", "# Rules\n")
     write(tmp_path / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(tmp_path / "openspec" / "changes" / ".gitkeep", "")
-    write(tmp_path / ".aisee" / "id-registry.json", '{"version":1,"scopes":{}}\n')
-    write(tmp_path / ".aisee" / "sources.json", '{"version":1,"sources":[]}\n')
     write(tmp_path / ".memory" / "index.md", "# Memory Index\n")
 
     doctor = run_json(tmp_path, "doctor", "--json")
@@ -373,11 +368,8 @@ def test_doctor_and_bootstrap_report_legacy_aisee_layout(tmp_path: Path) -> None
     assert doctor["status"] == "risk"
     assert any(item["code"] == "AISEE_LEGACY_PATH" for item in doctor["issues"])
     assert {item["name"] for item in doctor["aisee"]["layout"]["legacy_only"]} >= {
-        "sources",
-        "id_registry",
         "memory_index",
     }
-    assert any(item["kind"] == "migrate" and ".aisee/sources.json" in item["path"] for item in bootstrap["actions"])
     assert any(item["kind"] == "migrate" and ".memory/index.md" in item["path"] for item in bootstrap["actions"])
 
 

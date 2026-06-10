@@ -16,7 +16,7 @@ description: '适用场景：硬件相关项目的 OpenSpec 执行层，包括 M
 
   '
 capabilities:
-- source_map_traceability
+- source_map_routing
 - apply_execution
 - archive_authority
 artifacts:

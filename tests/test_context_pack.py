@@ -33,27 +33,6 @@ def create_plugin_asset_root(root: Path, schema_name: str, schema_yaml: str, tem
 
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
-    write(
-        root / "aisee" / "registry" / "sources.json",
-        json.dumps(
-            {
-                "version": 1,
-                "sources": [
-                    {
-                        "scope": "auth",
-                        "type": "srs",
-                        "path": "docs/requirements/auth-srs.md",
-                        "alias": "srs:auth-login",
-                        "template": "aisee-srs",
-                        "parser": "srs",
-                    }
-                ],
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-    )
     write(root / "docs" / "requirements" / "auth-srs.md", "# Auth SRS\n\n## 登录\n\n覆盖需求：FR-001\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
     write(
@@ -61,7 +40,7 @@ def create_project(root: Path) -> None:
         """name: aisee-app-spec-driven
 version: 2
 capabilities:
-  - source_map_traceability
+  - source_map_routing
   - apply_execution
   - archive_authority
   - contract_helper
@@ -144,7 +123,7 @@ archive:
 |---|---|---|---|---|
 | SRS | docs/requirements/auth-srs.md | docs/requirements/auth-srs.md#FR-001 | confirmed | |
 
-## Anchor Trace
+## Source Context
 
 | Type | Ref | Title | Source | Handling | Artifact |
 |---|---|---|---|---|---|
@@ -284,7 +263,7 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) ->
     assert pack["facts"]["parsed"]["source_map"]["implementation_paths"]
     assert "text" not in pack["facts"]["parsed"]["artifacts"]["proposal"]
     brief = pack["facts"]["derived"]["execution"]["brief"]
-    assert brief["source_refs"]["mode"] == "anchor"
+    assert brief["source_refs"]["mode"] == "source-ref"
     assert brief["allowed_paths"] == ["src/auth/session.py", "tests/auth/test_session.py"]
     assert brief["produced_local_ids"] == ["SPEC-001", "TASK-001", "TEST-001"]
     assert any(path.endswith("proposal.md") for path in brief["authoritative_sources"])
@@ -317,11 +296,11 @@ def test_context_pack_accepts_intake_only_traceability_path(tmp_path: Path) -> N
         tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
         """# Source Map
 
-## Intake Sources
+## Upstream Sources
 
-| Type | Title / 名称 | Path / Description | External Ref | Status | Summary | 承接 Artifact | Notes |
-|---|---|---|---|---|---|---|---|
-| user-input | 登录改造 | 用户直接输入 | issue://AUTH-9 | confirmed | 摘要化输入，避免保存长提示词 | specs/auth.md | |
+| Source | Path / Description | Ref | Status | Notes |
+|---|---|---|---|---|
+| user-input | 登录改造：摘要化输入，避免保存长提示词 | issue://AUTH-9 | confirmed | |
 
 ## Artifact 适用性
 
@@ -370,14 +349,13 @@ def test_context_pack_accepts_intake_only_traceability_path(tmp_path: Path) -> N
 
     traceability = pack["facts"]["derived"]["traceability"]
     assert traceability["upstream_refs"] == []
-    assert traceability["mode"] == "intake"
-    assert traceability["intake_sources"][0]["ref"] == "issue://AUTH-9"
+    assert traceability["mode"] == "numbered"
     assert "SPEC-001" in traceability["produced_local_ids"]
-    assert pack["facts"]["parsed"]["anchor_index"]["missing_references"] == []
-    assert "SOURCE_TRACE_MISSING" not in {gap["code"] for gap in pack["gaps"]}
+    assert pack["facts"]["parsed"]["source_reference_index"]["missing_references"] == []
+    assert "SOURCE_CONTEXT_MISSING" not in {gap["code"] for gap in pack["gaps"]}
 
 
-def test_context_pack_reports_source_trace_missing_when_no_anchor_or_intake(tmp_path: Path) -> None:
+def test_context_pack_reports_source_context_missing_when_no_ref_or_number(tmp_path: Path) -> None:
     create_project(tmp_path)
     write(
         tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
@@ -395,7 +373,7 @@ def test_context_pack_reports_source_trace_missing_when_no_anchor_or_intake(tmp_
 
     pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
 
-    assert "SOURCE_TRACE_MISSING" in {gap["code"] for gap in pack["gaps"]}
+    assert "SOURCE_CONTEXT_MISSING" in {gap["code"] for gap in pack["gaps"]}
     assert pack["facts"]["derived"]["traceability"]["mode"] == "empty"
 
 
@@ -532,16 +510,16 @@ def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:
     assert pack["facts"]["derived"]["drift_candidates"] == []
 
 
-def test_context_pack_reports_unregistered_change_ids(tmp_path: Path) -> None:
+def test_context_pack_reports_missing_source_refs(tmp_path: Path) -> None:
     create_project(tmp_path)
     write(tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md", "docs/requirements/missing.md#FR-999 is covered.\n")
 
     pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
 
     gap_codes = {gap["code"] for gap in pack["gaps"]}
-    assert "ANCHOR_RESOLUTION_MISSING" in gap_codes
-    anchor_index = pack["facts"]["parsed"]["anchor_index"]
-    assert "docs/requirements/missing.md#FR-999" in anchor_index["missing_references"]
+    assert "SOURCE_REF_RESOLUTION_MISSING" in gap_codes
+    source_reference_index = pack["facts"]["parsed"]["source_reference_index"]
+    assert "docs/requirements/missing.md#FR-999" in source_reference_index["missing_references"]
 
 
 def test_cli_context_pack_outputs_json(tmp_path: Path) -> None:
@@ -573,36 +551,3 @@ def test_cli_context_pack_outputs_json(tmp_path: Path) -> None:
     data = json.loads(result.stdout)
     assert data["target"] == "ce-work"
     assert data["change"]["id"] == "add-auth"
-
-
-def test_cli_change_inspect_outputs_summary(tmp_path: Path) -> None:
-    create_project(tmp_path)
-    env = os.environ.copy()
-    repo_src = Path(__file__).resolve().parents[1] / "src"
-    env["PYTHONPATH"] = str(repo_src)
-
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "aisee_cli.__main__",
-            "change",
-            "inspect",
-            "add-auth",
-            "--json",
-        ],
-        cwd=tmp_path,
-        env=env,
-        check=True,
-        stdout=subprocess.PIPE,
-        text=True,
-    )
-
-    data = json.loads(result.stdout)
-    assert data["change"]["id"] == "add-auth"
-    assert data["schema"]["name"] == "aisee-app-spec-driven"
-    assert data["anchors"]["upstream_refs"] == ["docs/requirements/auth-srs.md#FR-001"]
-    assert "SPEC-001" in data["anchors"]["produced_local_ids"]
-    assert data["anchors"]["resolution"]["missing_references"] == []
-    assert data["task_state"]["total"] == 4
-    assert "src/auth/session.py" in data["paths"]["code"]

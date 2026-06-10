@@ -19,7 +19,7 @@ Aisee documents, CLI JSON, Implementation Briefs, review reports, and chat summa
 - verification evidence;
 - improvement suggestions.
 
-Any conclusion that must persist should be written back to the current OpenSpec change, baseline specs, schema apply tracks, source-map, or other formal sources such as `sources.json`.
+Any conclusion that must persist should be written back to the current OpenSpec change, baseline specs, schema apply tracks, or source-map.
 
 ## 1.1 Use The Core Workflow By Default
 
@@ -111,12 +111,12 @@ Recommended:
 
 This reduces duplication and keeps AI context smaller.
 
-## 6. Source-map Tracks; It Does Not Explain Everything
+## 6. Source-map Routes; It Does Not Explain Everything
 
 `source-map.md` should record:
 
-- upstream anchor refs;
-- local IDs produced inside the current change;
+- upstream sources or user-input summaries;
+- document-local numbers produced inside the current change;
 - artifact applicability;
 - code paths;
 - test paths;
@@ -125,19 +125,19 @@ This reduces duplication and keeps AI context smaller.
 
 Do not rewrite full requirements, page flows, API details, or data models in source-map. Detailed content belongs in specs, contracts, or the corresponding artifact.
 
-## 7. Local IDs And Anchor Refs Are Stable; Content Evolves
+## 7. Numbers Are Stable; Content Evolves
 
-Local IDs and anchor refs connect requirements, pages, APIs, data, tasks, code, and evidence.
+Document-local numbers reduce duplicate naming and let source-map and context packs perform lightweight parsing.
 
 Recommended:
 
-- Use local IDs inside documents, such as `FR-001`, `PAGE-001`, or `API-001`.
-- Use anchor refs across documents, such as `docs/requirements/auth-srs.md#FR-001`.
+- Use document-local numbers such as `FR-001`, `PAGE-001`, or `API-001`.
+- Put cross-document sources in `source-map.md`; do not create an extra ID lifecycle.
 - Keep temporary `TYPE-NEW-001` IDs short-lived; they must not enter archive.
-- When replacing or removing anchor/local IDs, keep migration notes.
+- When replacing or removing numbers, keep migration notes.
 - Do not treat headings, filenames, or natural-language descriptions as stable identifiers.
 
-Use `sources.json`, `source-map.md`, and rebuildable index output for traceability; do not return to the full ID lifecycle model.
+Use `source-map.md` and context pack's rebuildable scan view as context entries; do not return to the full ID lifecycle model.
 
 ## 8. Context Pack Is A Read Entry, Not A New Document
 

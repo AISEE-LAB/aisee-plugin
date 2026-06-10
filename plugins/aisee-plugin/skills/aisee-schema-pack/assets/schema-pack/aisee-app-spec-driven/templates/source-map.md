@@ -1,59 +1,40 @@
-# Source Map: {{change-name}} / Anchor Routing
+# Source Map: {{change-name}} / Context Routing
 
-> 正式 authoring 只使用 local ID，例如 `FR-001`、`SPEC-001`、`API-001`。跨文档引用必须使用 `doc-ref#LOCAL-ID` 或 alias anchor，例如 `docs/requirements/auth-srs.md#FR-001`、`srs:auth-login#FR-001`。如需临时占位，使用 `TYPE-NEW-001` 并标注 `[ID-FINALIZATION-REQUIRED]`。
-> Source Map 只记录来源、anchor refs、artifact 适用性、追踪关系、候选影响路径和预期证据类型；不写 contract 细节、不写实现步骤、不写最终验证结论。
+> 编号只是 skill/template 的写作约束，例如 `FR-001`、`SPEC-001`、`API-001`、`TASK-001`。编号用于减少重复命名和临时发明，不要求 CLI 单独追踪。
+> Source Map 只记录来源、artifact 适用性、候选影响路径和预期证据类型；不写 contract 细节、不写实现步骤、不写最终验证结论。
 
-## Anchor 状态
+## 编号状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已运行 author preflight | yes / no | 当前 change 与 schema 的本地预检 | |
-| anchor refs 可解析 | yes / no | `aisee get <anchor-ref> --json` / `aisee trace <anchor-ref> --json` | |
-| 存在未解析 anchor | yes / no | `author-check.anchors.resolution.missing_references` | |
-| 存在临时 local ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
-| 存在 legacy full ID 文本 | yes / no | `LEGACY_FULL_ID_REFERENCE` 诊断 | |
+| 当前 change 产出编号已稳定 | yes / no / N/A | 文档内编号检查 | |
+| 存在临时编号 | yes / no | `[NUMBERING-FINALIZATION-REQUIRED]` | |
+| 编号无重复 | yes / no | 当前 change artifacts 本地检查 | |
 
-## Author Check 摘要
+## Context 摘要
 
 | 项目 | 结果 | 处理 |
 |---|---|---|
 | status | ready / needs-work / blocked | |
-| schema.valid | true / false | |
 | missing_artifacts |  | 按 artifact_order 补齐；Required=no 且有原因的按需 artifact 不应列入 |
 | blockers |  | 停止 author，先处理 |
 | warnings |  | 写入阻塞项 / 假设 |
 | next_actions |  | 执行后回填本文 |
 
-## Anchor 处理动作
-
-| 动作 | ID / 类型 | 命令 / 处理方式 | 状态 |
-|---|---|---|---|
-| finalize local id | SPEC-NEW-001 | 替换为最终 local ID，并同步当前文档锚点 | pending / done / N/A |
-| fix missing anchor | docs/...#FR-001 | 修正文档路径、alias 或 local ID | pending / done / N/A |
-| replace legacy full ID | `docs/...#FR-001` 的旧 full ID 文本 | 改写为 `doc-ref#LOCAL-ID` 或 alias anchor | pending / done / N/A |
-
 ## 上游来源
 
-| 来源 | 路径 / 描述 | sources.json ID | 状态 | 备注 |
+| 来源 | 路径 / 描述 | 外部 Ref | 状态 | 备注 |
 |---|---|---|---|---|
-| SRS | aisee/docs/requirements/... | SRC-001 | 已确认 / 缺失 / N/A | |
-| UI Content | aisee/docs/ui-content/... | SRC-002 | 已确认 / 缺失 / N/A | |
-| Design Spec / Assets | docs/design/... / assets/... | SRC-003 / N/A | 已确认 / 缺失 / N/A | |
-| Architecture | aisee/docs/architecture/... | SRC-004 | 已确认 / 缺失 / N/A | |
-| Change Plan | aisee/docs/change-plan/... | SRC-005 | 已确认 / 缺失 / N/A | |
-| Issue / 用户输入 | 摘要化描述或外部链接 | SRC-006 / N/A | 已确认 / 缺失 / N/A | 不保存原始长提示词全文 |
+| SRS | aisee/docs/requirements/... | ticket://... / N/A | 已确认 / 缺失 / N/A | |
+| UI Content | aisee/docs/ui-content/... | ticket://... / N/A | 已确认 / 缺失 / N/A | |
+| Design Spec / Assets | docs/design/... / assets/... | figma://... / N/A | 已确认 / 缺失 / N/A | |
+| Architecture | aisee/docs/architecture/... | issue://... / N/A | 已确认 / 缺失 / N/A | |
+| Change Plan | aisee/docs/change-plan/... | N/A | 已确认 / 缺失 / N/A | |
+| Issue / 用户输入 | 1-5 句摘要化描述或外部链接 | issue://... / PR URL / N/A | 已确认 / 缺失 / N/A | 不保存原始长提示词全文 |
 
-## Intake 来源
+## 上游输入
 
-> 当没有 SRS / UI Content / Architecture 等前置 planning docs 时使用。本表记录 authoring 线索，不分配 `FR-001`、不参与 anchor 解析，也不是新的规范事实源。
-
-| Type | Title / 名称 | Path / Description | External Ref | Status | Summary | 承接 Artifact | Notes |
-|---|---|---|---|---|---|---|---|
-| user-input / issue / ticket / PR / change-plan | | | issue://... / PR URL / N/A | confirmed / pending / N/A | 1-5 句精简摘要 | specs/... / tasks.md / proposal.md | 不复制原始长提示词 |
-
-## 上游输入 Anchor
-
-| 类型 | Ref | 标题 / 名称 | 来源 | 本 change 处理方式 | 后续 artifact |
+| 类型 | Ref / 摘要 | 标题 / 名称 | 来源 | 本 change 处理方式 | 后续 artifact |
 |---|---|---|---|---|---|
 | FR | docs/requirements/...#FR-001 / N/A | | SRS | 覆盖 / 部分覆盖 / 不覆盖 | specs / tasks |
 | NFR | docs/requirements/...#NFR-001 / N/A | | SRS / Architecture | 覆盖 / 部分覆盖 / 不覆盖 | specs / change-context / tasks |
@@ -66,9 +47,9 @@
 | CONSTRAINT | docs/architecture/...#CONSTRAINT-001 | | Architecture | 承接 / 不适用 / 待确认 | change-context / contracts / tasks |
 | RISK | docs/architecture/...#RISK-001 | | Architecture / Change Plan | 规避 / 接受 / 待确认 | change-context / tasks |
 
-## 本 Change 产出 Local ID
+## 本 Change 产出编号
 
-| 类型 | Local ID | 标题 / 名称 | 产生 artifact | 追踪到上游 Ref |
+| 类型 | 编号 | 标题 / 名称 | 产生 artifact | 关联来源 / 上游 Ref |
 |---|---|---|---|---|
 | SPEC | SPEC-001 | | specs/... | docs/requirements/...#FR-001 |
 | API | API-001 | | service-contract.md | docs/requirements/...#FR-001 / docs/ui-content/...#PAGE-001 |
@@ -82,7 +63,7 @@
 
 ## Affected Paths Index
 
-> 仅记录候选影响路径和 ID 关联，供 tasks.md 和实现阶段引用；不要在这里写具体修改步骤。
+> 仅记录候选影响路径和编号关联，供 tasks.md 和实现阶段引用；不要在这里写具体修改步骤。
 
 | Kind | Path | Refs | Mode | Notes |
 |---|---|---|---|---|
@@ -106,7 +87,7 @@
 > 下列 artifacts 只在本 change 需要对应契约时 Required=yes。
 > Required=no 时必须写具体 N/A 原因；可不展开对应完整模板。
 
-| Artifact | Required | 依据上游 Ref / Local ID | 原因 / N/A 说明 | 相关约束转交 |
+| Artifact | Required | 依据上游 Ref / 编号 | 原因 / N/A 说明 | 相关约束转交 |
 |---|---:|---|---|---|
 | change-context.md | yes / no | docs/architecture/...#ARCH-001 / docs/architecture/...#DEC-001 / N/A | | tasks.md / N/A |
 | ui-contract.md | yes / no | docs/ui-content/...#PAGE-001 / docs/ui-content/...#FLOW-001 / N/A | | service-contract.md / tasks.md / N/A |
@@ -137,18 +118,18 @@
 - [STACK-DECISION-REQUIRED] 
 - [ARCHITECTURE-DECISION-REQUIRED] 
 - [STACK-CONFLICT] 
-- [ID-FINALIZATION-REQUIRED]
-- [ID-CHECK-FAILED]
+- [NUMBERING-FINALIZATION-REQUIRED]
+- [NUMBERING-CHECK-FAILED]
 
-## 追踪规则
+## 编号与路由规则
 
-- 无前置 planning docs 时，合法路径是：`upstream_refs=[]` + `intake_sources!=[]` + 当前 change 产出 local IDs。不要为了消除空值伪造 `docs/...#FR-001`。
+- 无前置 planning docs 时，在“上游来源”记录用户输入、issue、ticket 或 PR 摘要即可。不要为了消除空值伪造 `docs/...#FR-001`。
 - specs 必须覆盖本 change 的全部 FR。
 - change-context.md 仅在 Required=yes 时覆盖 ARCH / DEC / CONSTRAINT / RISK。
 - ui-contract.md 仅在 Required=yes 时覆盖 PAGE / FLOW。
 - data-model.md 仅在 Required=yes 时覆盖 DATA。
 - service-contract.md 仅在 Required=yes 时覆盖 API / backend service / async job / CLI / integration，并满足适用的前端数据需求。
-- 每个新增 ID 激活后必须回填到“本 Change 产出 ID”并记录 owner artifact。
-- tasks.md 内新增 TASK / TEST ID 前必须先 reserve；无法 reserve 时只使用临时 ID。
-- tasks.md 生成前必须重新检查当前 change 与 schema 的预检结果，确认 blocker 已清除或明确保留。
+- 每个新增编号稳定后必须回填到“本 Change 产出编号”并记录 owner artifact。
+- tasks.md 内新增 TASK / TEST 编号时，按当前文档顺序分配；无法确定最终编号时只使用临时编号。
+- tasks.md 生成前必须重新检查当前 change 与 schema，确认 blocker 已清除或明确保留。
 - tasks.md 生成前必须确认 Required=yes 的追踪关系闭合；Required=no 的 artifact 必须有明确原因。

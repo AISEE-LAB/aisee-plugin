@@ -113,7 +113,7 @@ See [Plugin Marketplace](plugin-marketplace.en.md) for details.
 
 The following are public contracts:
 
-- the planning-doc frontmatter contract and the read-only lifecycle diagnostics exposed through `aisee index --json` and `aisee doctor --json`;
+- the planning-doc frontmatter contract and the read-only diagnostics exposed through `aisee doctor --json` and `aisee context pack --json`;
 - the basic semantics of planning-doc fields such as `status`, `doc_type`, `source_refs`, `change_refs`, and `anchors`;
 - `resolve_project_root` preferring the nearest Aisee/OpenSpec project marker before falling back to the Git top-level;
 - release smoke checks for CLI-only wheels, marketplace setup hints, removed-command invalid choice behavior, and root-resolver fixtures.
@@ -141,7 +141,6 @@ Experimental capabilities can change, but documentation must clearly state:
 
 The following are not stable contracts or sources of truth:
 
-- `aisee/cache/context-index.json`;
 - `aisee/cache/knowledge-index.json`;
 - parser internals;
 - scoring weights;

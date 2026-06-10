@@ -11,7 +11,7 @@ This document describes the recommended software development workflow for Aisee 
 - `openspec archive <change>` is the final operation that merges a verified change into the baseline.
 - planning docs serve the current version or iteration only; they do not replace baseline facts.
 - regular planning docs use a shared YAML frontmatter contract for identity, status, and source indexing; OpenSpec changes and baseline specs remain the authoritative facts.
-- formal authoring uses local IDs inside documents and anchor refs across documents.
+- formal authoring uses stable numbers inside documents; cross-document sources are recorded in `source-map.md`.
 
 ## 0. Project Setup
 
@@ -123,7 +123,7 @@ data-model.md            # as needed
 - Required=yes: expand the artifact.
 - Required=no: provide a concrete N/A reason.
 - Do not generate unrelated contracts for completeness.
-- Use `Ref` / `Refs` for formal cross-document traceability in upstream tables; use local IDs for new objects created inside the current change.
+- Use `Ref` / `Refs` for source references in upstream tables; use document-local numbers for new objects created inside the current change.
 
 ## 4. Implementation Handoff
 
@@ -187,7 +187,7 @@ Then use `aisee:verify` or a manual review pass to check:
 
 - whether schema artifacts exist;
 - whether Required=yes contracts are closed;
-- whether source-map, anchor refs / local IDs, code paths, test paths, and evidence are consistent;
+- whether source-map, document-local numbers, code paths, test paths, and evidence are consistent;
 - whether `tasks.md` or apply tracks are truly complete;
 - whether OpenSpec validate passed;
 - whether review/test/manual evidence is sufficient;

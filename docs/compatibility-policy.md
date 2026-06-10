@@ -113,7 +113,7 @@
 
 以下属于公开契约：
 
-- 普通 planning docs 的 frontmatter 合同和 `aisee index --json` / `aisee doctor --json` 的只读 lifecycle diagnostics；
+- 普通 planning docs 的 frontmatter 合同和 `aisee doctor --json` / `aisee context pack --json` 的只读 diagnostics；
 - `status`、`doc_type`、`source_refs`、`change_refs`、`anchors` 等 planning doc 索引字段的基本语义；
 - `resolve_project_root` 以最近的 Aisee/OpenSpec project marker 优先，再 fallback 到 Git 顶层的语义；
 - release smoke 对 CLI-only wheel、marketplace setup hint、removed command invalid choice 和 root resolver fixture 的检查重点。
@@ -141,7 +141,6 @@ Experimental 能力可以变化，但文档必须清楚说明：
 
 以下不能作为事实源或稳定 contract：
 
-- `aisee/cache/context-index.json`；
 - `aisee/cache/knowledge-index.json`；
 - parser 内部 helper；
 - scoring 权重；

@@ -90,7 +90,7 @@ aisee context pack --change <change> --for ce-work --json
 
 读取 pack 时只消费：
 
-- `facts.parsed`：当前 change artifacts、schema、sources、ID registry 状态。
+- `facts.parsed`：当前 change artifacts、schema、source-map 和 schema 状态。
 - `facts.derived.read_order`：实现前读取顺序。
 - `facts.derived.scope`：in/out scope 与 follow-up candidates。
 - `facts.derived.traceability`：上游 ID、产出 ID、ID links。
@@ -188,7 +188,7 @@ Brief 必须根据当前 change 和 context pack 判断是否建议 Tier 2 code 
 
 - 公开 CLI 命令、参数、JSON 输出或退出码。
 - HTTP endpoint、局域网/远程服务、API/service contract、OpenAPI/events/webhooks/proto 等机器可读契约。
-- schema、artifact template、source-map parser、contract parser、ID registry、context pack 或 OpenSpec 衔接逻辑。
+- schema、artifact template、source-map parser、contract parser、context pack 或 OpenSpec 衔接逻辑。
 - 文件/路径读取、目录遍历、缓存、包安装、package assets、dependency manifest。
 - 认证、权限、安全、隐私、敏感信息、生产配置或回滚策略。
 

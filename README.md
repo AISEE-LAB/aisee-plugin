@@ -33,7 +33,7 @@
 
 Aisee Plugin 是一个面向 OpenSpec 工作流的 AI 软件工程插件。它帮助团队把模糊想法整理成可审查的需求、UI 内容规格、技术架构上下文、schema-aware OpenSpec changes、实现交接 brief、验证检查和归档门禁。
 
-Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、schema packs、JSON context tooling、anchor-aware 追踪和工程交接规则。
+Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、schema packs、JSON context tooling 和工程交接规则。
 
 ## Schema Capability Boundary
 
@@ -55,7 +55,7 @@ Aisee 的目标是让这些上下文显式化：
 - 以 schema-aware 的方式创建和补齐 OpenSpec changes；
 - 保持 OpenSpec 作为唯一持久规范事实源；
 - 为实现、验证和审查生成机器可读的 context pack；
-- 用 local ID 与 anchor ref 追踪需求、页面、契约、任务、代码和证据；
+- 用 schema 和 skill 约束文档内编号，减少临时发明和重复命名；
 - 检查 artifacts、tasks、source-map、测试和 review evidence 是否闭环。
 
 ## 敏捷开发模型
@@ -134,7 +134,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 - **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
 - **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
-- **Anchor-aware traceability**：`aisee get`、`aisee trace` 和 `aisee index` 通过 `doc-ref#LOCAL-ID` / alias anchor 连接上游文档、OpenSpec artifacts、tasks、代码路径、测试和 evidence。
+- **轻量上下文路由**：`aisee context pack` 在 `source-map.md` 存在时解析来源、编号、候选路径和 evidence 入口。
 - **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
 - **Harness 设计**：通过 CLI contract tests 和规范化 skill eval cases 保持工作流稳定。
 
@@ -273,7 +273,7 @@ aisee doctor --json
 - [Plugin Marketplace](docs/plugin-marketplace.md)：说明插件 manifest、marketplace listing、PyPI/pipx 和 Codex 安装路径的分工。
 - [Team Knowledge Guardrails](docs/team-knowledge.md)：说明团队共享知识的实验性状态、使用方式和稳定前缺口。
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md)：说明 team knowledge 的 guardrail retrieval 定位、card/pack 边界、CLI 初始化和读取模型。
-- [Schema Packs](docs/schema-packs.md)：说明 schema 选择、app schema artifact DAG、anchor/source-map 规则和契约附件边界。
+- [Schema Packs](docs/schema-packs.md)：说明 schema 选择、app schema artifact DAG、source-map/编号规则和契约附件边界。
 - [Aisee / OpenSpec / Compound Engineering 融合方案](docs/architecture/aisee-openspec-compound-integration.md)：高层职责边界和历史决策快照。
 - [OpenSpec 多 Schema 最佳实践](docs/architecture/openspec-multi-schema-best-practices.md)：多 schema 共存、冲突和管理规则。
 - [Release And Version Governance](docs/release.md)：版本号单一事实源、发布检查和 tag 规则。
@@ -371,10 +371,6 @@ aisee openspec ensure --json
 aisee plugin inspect --json
 aisee schemas list --json
 aisee schemas check --json
-aisee sources list --json
-aisee sources check --json
-aisee index --json
-aisee change inspect <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
@@ -389,19 +385,14 @@ aisee knowledge query --from-change <change> --for ce-work --json
 aisee knowledge index --json
 aisee knowledge index --team-path .aisee/team-knowledge --json
 aisee knowledge promote-batch --curation <path> --team-path .aisee/team-knowledge --pack web-app --json
-aisee index --json
-aisee get docs/requirements/auth-srs.md#FR-001 --json
-aisee trace srs:auth-login#FR-001 --json
 ```
 
 CLI 关键规则：
 
 - JSON 输出只是上下文视图，不是事实源。
-- `aisee/cache/context-index.json` 只是可删除、可重建的 cache。
 - `aisee/cache/knowledge-index.json` 也是可删除、可重建的 cache；team knowledge 的持久来源是已 pin 的 pack/card 文件。
 - `aisee knowledge promote-batch` 只写本地 team knowledge worktree，不自动 commit、push 或创建 PR。
-- `aisee/registry/sources.json`、OpenSpec artifacts 和 `source-map.md` 是当前正式追踪输入。
-- `aisee/registry/id-registry.json` 如仍存在，只视为历史兼容数据，不再作为正式 authoring 入口。
+- OpenSpec artifacts 和 `source-map.md` 是 context pack 的正式输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
 - `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
 - `aisee knowledge query` 只返回少量 guardrails；默认只读 pack manifest 和 card frontmatter，`--debug` 才包含命中 card 的正文摘要。

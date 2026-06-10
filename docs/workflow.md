@@ -11,7 +11,7 @@
 - `openspec archive <change>` 是已验证 change 合入 baseline 的最终动作。
 - planning docs 只服务当前版本 / 迭代输入，不替代 baseline facts。
 - 普通 planning docs 使用统一 YAML frontmatter 合同做身份、状态和来源索引；OpenSpec change 和 baseline 仍是规范事实源。
-- 文档内正式写法只使用 local ID；跨文档正式追踪只使用 anchor ref。
+- 文档内正式写法使用稳定编号；跨文档来源由 `source-map.md` 记录。
 
 ## 0. 项目初始化
 
@@ -123,7 +123,7 @@ data-model.md            # 按需
 - Required=yes：必须展开对应 artifact。
 - Required=no：必须写清楚 N/A 原因。
 - 不要为了“完整”强行生成与当前 change 无关的 contract。
-- Upstream Sources / Trace 表中的正式跨文档列使用 `Ref` / `Refs`；当前 change 内新对象使用 local ID。
+- Upstream Sources / Trace 表记录来源 `Ref` / `Refs`；当前 change 内新对象使用文档内编号。
 
 ## 4. 实现交接
 
@@ -187,7 +187,7 @@ aisee context pack --change <change> --for aisee-verify --json
 
 - schema artifacts 是否存在。
 - Required=yes contracts 是否闭合。
-- source-map、anchor refs / local IDs、代码路径、测试路径和 evidence 是否一致。
+- source-map、文档内编号、代码路径、测试路径和 evidence 是否一致。
 - `tasks.md` 或 apply tracks 是否真实完成。
 - OpenSpec validate 是否通过。
 - review/test/manual evidence 是否足够。

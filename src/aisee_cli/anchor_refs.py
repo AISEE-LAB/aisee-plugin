@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from typing import Any
 
 
@@ -71,36 +70,3 @@ def parse_anchor_ref(reference: str) -> dict[str, Any]:
 def canonical_anchor(document: str, local_id: str) -> str:
     return f"{document}#{local_id}"
 
-
-def source_aliases(source_entries: Any, path: str) -> list[str]:
-    aliases: list[str] = []
-    if not isinstance(source_entries, list):
-        return aliases
-    for entry in source_entries:
-        if not isinstance(entry, dict) or str(entry.get("path") or "") != path:
-            continue
-        alias = str(entry.get("alias") or "").strip()
-        source_type = str(entry.get("type") or "").strip()
-        if alias:
-            aliases.append(alias)
-        elif source_type:
-            aliases.append(f"{source_type}:{slugify(Path(path).stem)}")
-    return sorted(set(aliases))
-
-
-def resolve_alias_path(source_entries: Any, alias: str) -> str | None:
-    if not isinstance(source_entries, list):
-        return None
-    for entry in source_entries:
-        if not isinstance(entry, dict):
-            continue
-        current_aliases = source_aliases([entry], str(entry.get("path") or ""))
-        if alias in current_aliases:
-            return str(entry.get("path") or "") or None
-    return None
-
-
-def slugify(value: str) -> str:
-    lowered = value.strip().lower().replace("_", "-")
-    slug = re.sub(r"[^a-z0-9-]+", "-", lowered).strip("-")
-    return slug or "document"

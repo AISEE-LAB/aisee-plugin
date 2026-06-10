@@ -24,9 +24,9 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 ## 职责
 
 - 识别当前 change schema，并按 schema 判断归档必需 artifacts、tasks、apply tracks、source-map、contracts 和验证证据。
-- 自动读取只读 CLI JSON：`change inspect`、`context pack --for aisee-verify`；这些检查不要求用户手工执行常规命令。
+- 自动读取只读 CLI JSON：`context pack --for aisee-verify`；这些检查不要求用户手工执行常规命令。
 - 读取已有 validate、verify、review、test、manual verification、preview、monitoring 或设备验证结果。
-- 运行或读取 `aisee change inspect <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 运行或读取 `aisee context pack --change <change> --for aisee-verify --json`。
 - 检查 `aisee:verify` 的 Review Recommendation 是否已有审查证据、本地重点自审证据或正式 accepted risk。
 - 判断是否建议执行 `openspec archive <change>`。
 - 输出 `可以 archive` / `有风险但可接受` / `暂不建议 archive`，并列出阻断项、接受风险和归档后基线影响。
@@ -45,7 +45,6 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 按顺序读取或运行：
 
 ```bash
-aisee change inspect <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 openspec validate <change>
 ```

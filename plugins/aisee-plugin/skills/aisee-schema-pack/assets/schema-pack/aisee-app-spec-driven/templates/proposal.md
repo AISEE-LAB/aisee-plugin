@@ -7,12 +7,12 @@
 - 当前问题：
 - 触发原因：
 - 上游来源：SRS / UI Content / Architecture / Change Plan / Issue / 用户输入
-- 主要来源 anchor / local ID：docs/...#FR-001 / docs/...#PAGE-001 / DEC-001 / N/A
-- 如果没有前置 planning docs：这里只写 intake 摘要，不复制原始长提示词；正式追踪放到 `source-map.md` 的 `Intake 来源`
+- 主要来源 / 编号：docs/...#FR-001 / docs/...#PAGE-001 / DEC-001 / N/A
+- 如果没有前置 planning docs：这里只写摘要，不复制原始长提示词；来源摘要放到 `source-map.md` 的“上游来源”
 
 ## 上下文读取顺序
 
-1. source-map.md：确认来源、anchor refs / local IDs、artifact 适用性和不在范围内容。
+1. source-map.md：确认来源、文档内编号、artifact 适用性和不在范围内容。
 2. specs/**/*.md：确认用户可观察行为、业务规则和验收场景。
 3. Required=yes 的 change-context / ui-contract / service-contract / data-model：确认架构、UI、服务和数据约束。
 4. tasks.md：确认实现顺序、验证任务和证据要求。
@@ -27,9 +27,9 @@
 
 ## 变更范围
 
-> 这里只写范围摘要。完整来源、anchor 路由和跨文档追踪由 source-map.md 维护。
+> 这里只写范围摘要。完整来源、上下文路由和候选影响路径由 source-map.md 维护。
 
-| 类型 | Ref / Local ID | 说明 |
+| 类型 | Ref / 编号 | 说明 |
 |---|---|---|
 | 功能需求 | docs/...#FR-xxx / N/A — no SRS planning doc | |
 | 非功能需求 | docs/...#NFR-xxx / N/A — no SRS planning doc | |

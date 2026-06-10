@@ -33,7 +33,7 @@
 
 Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, schema-aware OpenSpec changes, implementation briefs, verification checks, and archive guardrails.
 
-Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, anchor-aware traceability, and engineering handoff rules around OpenSpec.
+Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, schema packs, JSON context tooling, and engineering handoff rules around OpenSpec.
 
 ## Why Aisee?
 
@@ -46,7 +46,7 @@ Aisee makes that context explicit:
 - create and complete OpenSpec changes with schema-aware guidance;
 - keep OpenSpec as the only persistent specification source of truth;
 - generate machine-readable context packs for implementation, verification, and review;
-- track requirements, pages, contracts, tasks, code, and evidence through local IDs and anchor refs;
+- constrain document-local numbering through schemas and skills to reduce invented or duplicated labels;
 - check whether artifacts, tasks, source maps, tests, and review evidence are closed before archive.
 
 ## Agile Delivery Model
@@ -125,7 +125,7 @@ On-demand extensions:
 - **OpenSpec schema pack**: includes app, device, docsite, infra, security, quick-fix, quick-research, and collaboration schemas.
 - **Context packs**: `aisee context pack` generates JSON context for implementation, verification, and review.
 - **Team knowledge guardrails**: `aisee knowledge` retrieves a small number of reviewed engineering lessons through pack/card protocols without turning the knowledge repository into a second specification source.
-- **Anchor-aware traceability**: `aisee get`, `aisee trace`, and `aisee index` connect upstream documents, OpenSpec artifacts, tasks, code paths, tests, and evidence through `doc-ref#LOCAL-ID` or alias anchors.
+- **Lightweight context routing**: `aisee context pack` parses sources, local numbers, candidate paths, and evidence entries when `source-map.md` exists.
 - **Verification and archive guardrails**: `aisee:verify` and `aisee:archive-guard` diagnose gaps and risks before archive.
 - **Harness design**: CLI contract tests and normalized skill eval cases keep the workflow stable.
 
@@ -264,7 +264,7 @@ aisee doctor --json
 - [Plugin Marketplace](docs/plugin-marketplace.en.md): responsibilities of plugin manifests, marketplace listings, PyPI/pipx, and the Codex install path.
 - [Team Knowledge Guardrails](docs/team-knowledge.en.md): experimental status, usage, and gaps before stability for shared team knowledge.
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, CLI onboarding, and read model.
-- [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, anchor/source-map rules, and contract attachment boundaries.
+- [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, source-map/numbering rules, and contract attachment boundaries.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
 - [Release And Version Governance](docs/release.md): single version source, release checks, and tag rules.
@@ -363,10 +363,6 @@ aisee openspec ensure --json
 aisee plugin inspect --json
 aisee schemas list --json
 aisee schemas check --json
-aisee sources list --json
-aisee sources check --json
-aisee index --json
-aisee change inspect <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
@@ -381,19 +377,14 @@ aisee knowledge query --from-change <change> --for ce-work --json
 aisee knowledge index --json
 aisee knowledge index --team-path .aisee/team-knowledge --json
 aisee knowledge promote-batch --curation <path> --team-path .aisee/team-knowledge --pack web-app --json
-aisee index --json
-aisee get docs/requirements/auth-srs.md#FR-001 --json
-aisee trace srs:auth-login#FR-001 --json
 ```
 
 Key CLI rules:
 
 - JSON output is a context view, not a source of truth.
-- `aisee/cache/context-index.json` is a deletable and rebuildable cache.
 - `aisee/cache/knowledge-index.json` is also a deletable and rebuildable cache; team knowledge persists in pinned pack/card files.
 - `aisee knowledge promote-batch` only writes the local team knowledge worktree; it does not commit, push, or create PRs.
-- `aisee/registry/sources.json`, OpenSpec artifacts, and `source-map.md` are the current formal traceability inputs.
-- If `aisee/registry/id-registry.json` still exists, treat it as legacy compatibility data rather than a formal authoring entry point.
+- OpenSpec artifacts and `source-map.md` are formal inputs for context packs.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
 - `aisee openspec ensure` only bridges OpenSpec initialization and profile setup. It does not replace `aisee:init`.
 - `aisee knowledge query` returns only a small number of guardrails. By default it reads pack manifests and card frontmatter; `--debug` is required for matched card body excerpts.

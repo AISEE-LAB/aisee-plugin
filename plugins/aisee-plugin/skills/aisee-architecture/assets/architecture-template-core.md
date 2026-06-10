@@ -26,7 +26,7 @@ anchors: []
 **技术域**：{app / web / mini-program / desktop / backend-service / cli-tool / job-async / integration / data / hybrid-software}
 **ID Scope**：{scope}
 
-> 正式写法只使用文档内 local ID，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
+> 正式写法只使用文档内编号，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档来源后续由 `change-context.md` 或 `source-map.md` 记录；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 
 ---
 
@@ -50,13 +50,12 @@ anchors: []
 
 ## 2. 技术域与技术栈 / 工具链状态
 
-### 2.0 Anchor / Local ID 状态
+### 2.0 编号状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| local ID 已稳定 | yes / no | 文档内编号检查 | |
-| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#ARCH-001` / `architecture:...#ARCH-001` | |
-| 存在临时 ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
+| 编号已稳定 | yes / no | 文档内编号检查 | |
+| 存在临时编号 | yes / no | `[NUMBERING-FINALIZATION-REQUIRED]` | |
 
 **状态**：已确定 / 部分确定 / 未确定
 
@@ -204,7 +203,7 @@ anchors: []
 
 | RISK ID | 标记 | 内容 | 影响 | 建议处理 |
 |------|------|------|------|----------|
-| RISK-001 | [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] / [DOC-CONTEXT-MISSING] / [ARCH-DECISION-REQUIRED] / [SPEC-GAP] / [STACK-CONFLICT] / [TECH-CONVENTION-MISSING] / [SCHEMA-HINT-UNCLEAR] / [ID-FINALIZATION-REQUIRED] | {content} | {impact} | {next step} |
+| RISK-001 | [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] / [DOC-CONTEXT-MISSING] / [ARCH-DECISION-REQUIRED] / [SPEC-GAP] / [STACK-CONFLICT] / [TECH-CONVENTION-MISSING] / [SCHEMA-HINT-UNCLEAR] / [NUMBERING-FINALIZATION-REQUIRED] | {content} | {impact} | {next step} |
 
 ---
 

@@ -97,12 +97,12 @@ def test_core_skills_document_auto_cli_consumption_and_lean_projection() -> None
         assert marker in (ROOT / relative_path).read_text(encoding="utf-8")
 
 
-def test_change_plan_rules_and_templates_support_intake_traceability() -> None:
+def test_change_plan_rules_and_templates_support_source_context_without_fake_refs() -> None:
     expected_markers = {
-        "plugins/aisee-plugin/skills/aisee-change-plan/references/source-map-rules.md": "Intake 来源",
+        "plugins/aisee-plugin/skills/aisee-change-plan/references/source-map-rules.md": "上游来源",
         "plugins/aisee-plugin/skills/aisee-change-plan/references/output-template.md": "Schema availability:",
-        "plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/templates/source-map.md": "合法路径是：`upstream_refs=[]` + `intake_sources!=[]`",
-        "plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/templates/proposal.md": "Intake 来源",
+        "plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/templates/source-map.md": "不要为了消除空值伪造",
+        "plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/templates/proposal.md": "来源摘要放到 `source-map.md` 的“上游来源”",
     }
     for relative_path, marker in expected_markers.items():
         assert marker in (ROOT / relative_path).read_text(encoding="utf-8")

@@ -48,7 +48,7 @@ def package_version() -> str:
     return str(data["project"]["version"])
 
 
-def create_plugin_root(path: Path, *, version: str = "0.7.2") -> Path:
+def create_plugin_root(path: Path, *, version: str = "0.8.0") -> Path:
     (path / "skills" / "aisee-srs").mkdir(parents=True)
     (path / "skills" / "aisee-srs" / "SKILL.md").write_text("# aisee:srs\n", encoding="utf-8")
     (path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix").mkdir(parents=True)

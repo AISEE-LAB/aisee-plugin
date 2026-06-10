@@ -12,7 +12,7 @@
 **作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}
 **ID Scope**：{scope}
 
-> 正式写法只使用文档内 local ID，例如 `FR-001`、`RULE-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
+> 正式写法只使用文档内编号，例如 `FR-001`、`RULE-001`。跨文档引用交给 `doc-ref#编号`；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 
 ---
 
@@ -66,7 +66,7 @@
 |---|---|---|---|
 | local ID 已稳定 | yes / no | 文档内编号检查 | |
 | 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#FR-001` / `srs:...#FR-001` | |
-| 存在临时 ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
+| 存在临时编号 | yes / no | `[NUMBERING-FINALIZATION-REQUIRED]` | |
 
 ### 2.1 产品概述
 {系统定位、解决的核心问题、与现有系统的关系}

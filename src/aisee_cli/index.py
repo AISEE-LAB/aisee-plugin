@@ -3,18 +3,15 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref, source_aliases
-from aisee_cli.output import issue, status_from_issues, summarize_issues
-from aisee_cli.paths import context_index_path
+from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref
+from aisee_cli.output import status_from_issues, summarize_issues
 from aisee_cli.planning_docs import inspect_planning_docs
 from aisee_cli.project import inspect_project_rules, rel
-from aisee_cli.sources import load_sources, sources_path, validate_sources
 
 
 INDEX_SCHEMA_VERSION = "1.0"
@@ -28,53 +25,36 @@ SCAN_DIRS = ("aisee/docs", "docs", "openspec", "skills", "references")
 TEXT_SUFFIXES = {".md", ".yaml", ".yml", ".json", ".txt"}
 
 
-def index_path(root: Path) -> Path:
-    return context_index_path(root)
-
-
 def build_index(root: Path, *, write_cache: bool) -> dict[str, Any]:
-    sources_data, source_load_issues = load_sources(root)
-    source_entries = sources_data.get("sources", []) if isinstance(sources_data, dict) else []
-    source_issues = source_load_issues + validate_sources(root, source_entries)
-    documents = scan_documents(root, source_entries)
+    documents = scan_documents(root)
     planning_docs = inspect_planning_docs(root)
-    anchors = collect_anchor_occurrences(documents)
-    duplicate_sources = find_duplicate_sources(source_entries)
-    issues = source_issues + duplicate_sources + planning_docs["issues"]
+    references = collect_reference_occurrences(documents)
+    issues = planning_docs["issues"]
 
     result = {
         "schema_version": INDEX_SCHEMA_VERSION,
         "status": status_from_issues(issues),
         "index": {
-            "path": rel(root, index_path(root)),
             "writes": write_cache,
             "generated_at": datetime.now(timezone.utc).isoformat(),
         },
         "project_rules": inspect_project_rules(root),
-        "sources": {
-            "path": rel(root, sources_path(root)),
-            "count": len(source_entries) if isinstance(source_entries, list) else 0,
-            "items": source_entries if isinstance(source_entries, list) else [],
-        },
         "documents": documents,
         "planning_docs": planning_docs,
-        "anchors": anchors,
-        "aliases": build_alias_index(documents),
+        "references": references,
         "issues": issues,
         "summary": summarize_issues(issues),
         "meta": {
-            "command": "aisee index --json",
+            "command": "internal context index",
             "cache_is_fact_source": False,
         },
     }
     if write_cache:
-        path = index_path(root)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        raise ValueError("context index cache writes are not supported")
     return result
 
 
-def scan_documents(root: Path, source_entries: Any) -> list[dict[str, Any]]:
+def scan_documents(root: Path) -> list[dict[str, Any]]:
     paths: set[str] = set()
     for dirname in SCAN_DIRS:
         base = root / dirname
@@ -83,11 +63,6 @@ def scan_documents(root: Path, source_entries: Any) -> list[dict[str, Any]]:
         for path in base.rglob("*"):
             if path.is_file() and path.suffix.lower() in TEXT_SUFFIXES:
                 paths.add(rel(root, path))
-
-    if isinstance(source_entries, list):
-        for item in source_entries:
-            if isinstance(item, dict) and item.get("path"):
-                paths.add(str(item["path"]))
 
     documents: list[dict[str, Any]] = []
     for rel_path in sorted(paths):
@@ -98,7 +73,6 @@ def scan_documents(root: Path, source_entries: Any) -> list[dict[str, Any]]:
                 "status": "missing",
                 "local_ids": [],
                 "anchor_refs": [],
-                "aliases": [],
                 "legacy_full_ids": [],
                 "paths": [],
                 "headings": [],
@@ -106,11 +80,11 @@ def scan_documents(root: Path, source_entries: Any) -> list[dict[str, Any]]:
             })
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
-        documents.append(parse_document(rel_path, text, source_entries))
+        documents.append(parse_document(rel_path, text))
     return documents
 
 
-def parse_document(path: str, text: str, source_entries: Any) -> dict[str, Any]:
+def parse_document(path: str, text: str) -> dict[str, Any]:
     local_ids = sorted(extract_local_ids(text))
     anchor_refs = sorted(extract_anchor_refs(text))
     legacy_full_ids = sorted(extract_legacy_full_ids(text))
@@ -151,7 +125,6 @@ def parse_document(path: str, text: str, source_entries: Any) -> dict[str, Any]:
         "hash": "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest(),
         "local_ids": local_ids,
         "anchor_refs": anchor_refs,
-        "aliases": source_aliases(source_entries, path),
         "legacy_full_ids": legacy_full_ids,
         "paths": paths,
         "headings": headings,
@@ -159,8 +132,8 @@ def parse_document(path: str, text: str, source_entries: Any) -> dict[str, Any]:
     }
 
 
-def collect_anchor_occurrences(documents: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
-    anchors: dict[str, list[dict[str, Any]]] = {}
+def collect_reference_occurrences(documents: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    references: dict[str, list[dict[str, Any]]] = {}
     for document in documents:
         if document.get("status") != "present":
             continue
@@ -171,7 +144,7 @@ def collect_anchor_occurrences(documents: list[dict[str, Any]]) -> dict[str, lis
             document_local_ids = [item for item in document.get("local_ids", []) if isinstance(item, str)]
             for local_id in line_local_ids:
                 append_anchor_occurrence(
-                    anchors,
+                    references,
                     canonical_ref=f"{document['path']}#{local_id}",
                     document=document,
                     occurrence=occurrence,
@@ -185,17 +158,17 @@ def collect_anchor_occurrences(documents: list[dict[str, Any]]) -> dict[str, lis
                 except ValueError:
                     continue
                 append_anchor_occurrence(
-                    anchors,
+                    references,
                     canonical_ref=str(parsed["canonical_reference"] or anchor_ref),
                     document=document,
                     occurrence=occurrence,
                     related_local_ids=[],
                 )
-    return {key: value for key, value in sorted(anchors.items())}
+    return {key: value for key, value in sorted(references.items())}
 
 
 def append_anchor_occurrence(
-    anchors: dict[str, list[dict[str, Any]]],
+    references: dict[str, list[dict[str, Any]]],
     *,
     canonical_ref: str,
     document: dict[str, Any],
@@ -203,7 +176,7 @@ def append_anchor_occurrence(
     related_local_ids: list[str],
 ) -> None:
     local_id = canonical_ref.rsplit("#", 1)[-1]
-    anchors.setdefault(canonical_ref, []).append({
+    references.setdefault(canonical_ref, []).append({
         "reference": canonical_ref,
         "path": document["path"],
         "document": document["path"],
@@ -213,37 +186,6 @@ def append_anchor_occurrence(
         "text": occurrence.get("text", ""),
         "related_local_ids": related_local_ids,
         "anchor_refs": occurrence.get("anchor_refs", []),
-        "aliases": document.get("aliases", []),
         "legacy_full_ids": occurrence.get("legacy_full_ids", []),
         "paths": occurrence.get("paths", []),
     })
-
-
-def build_alias_index(documents: list[dict[str, Any]]) -> dict[str, str]:
-    aliases: dict[str, str] = {}
-    for document in documents:
-        if document.get("status") != "present":
-            continue
-        for alias in document.get("aliases", []):
-            if isinstance(alias, str) and alias:
-                aliases[alias] = document["path"]
-    return dict(sorted(aliases.items()))
-
-
-def find_duplicate_sources(source_entries: Any) -> list[dict[str, str]]:
-    if not isinstance(source_entries, list):
-        return []
-    seen: set[tuple[str, str, str]] = set()
-    issues: list[dict[str, str]] = []
-    for item in source_entries:
-        if not isinstance(item, dict):
-            continue
-        key = (
-            str(item.get("scope") or ""),
-            str(item.get("type") or ""),
-            str(item.get("path") or ""),
-        )
-        if key in seen:
-            issues.append(issue("SOURCE_DUPLICATE", "risk", f"duplicate source: {'/'.join(key)}", "sources registry"))
-        seen.add(key)
-    return issues

@@ -7,10 +7,8 @@ from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.bootstrap import build_bootstrap_plan
-from aisee_cli.change import build_change_inspect
 from aisee_cli.context_pack import build_context_pack
 from aisee_cli.doctor import build_doctor
-from aisee_cli.index import build_index
 from aisee_cli.knowledge import (
     build_knowledge_check,
     build_knowledge_configure,
@@ -23,13 +21,11 @@ from aisee_cli.knowledge import (
     build_knowledge_query,
     build_knowledge_update,
 )
-from aisee_cli.lookup import get_anchor, trace_anchor
 from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
 from aisee_cli.plugin_assets import inspect_plugin_assets, plugin_path
 from aisee_cli.project import resolve_project_root
 from aisee_cli.schema_pack import check_schema_packs, format_schema_packs, list_schema_packs
-from aisee_cli.sources import add_source, check_sources, list_sources, remove_source
 
 
 def main() -> int:
@@ -59,27 +55,6 @@ def main() -> int:
     plugin_path_parser = plugin_subparsers.add_parser("path")
     plugin_path_parser.add_argument("--target", choices=["codex", "claude", "cursor"], required=True, help="agent runtime target")
     plugin_path_parser.add_argument("--json", action="store_true", help="output JSON")
-    sources_parser = subparsers.add_parser("sources")
-    sources_parser.add_argument("--json", action="store_true", help="output JSON")
-    sources_subparsers = sources_parser.add_subparsers(dest="sources_command")
-    sources_list_parser = sources_subparsers.add_parser("list")
-    sources_list_parser.add_argument("--json", action="store_true", help="output JSON")
-    sources_check_parser = sources_subparsers.add_parser("check")
-    sources_check_parser.add_argument("--json", action="store_true", help="output JSON")
-    sources_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
-    sources_add_parser = sources_subparsers.add_parser("add")
-    sources_add_parser.add_argument("--scope", required=True, help="source scope")
-    sources_add_parser.add_argument("--type", required=True, help="source type")
-    sources_add_parser.add_argument("--path", required=True, help="source path")
-    sources_add_parser.add_argument("--template", help="source template")
-    sources_add_parser.add_argument("--parser", help="source parser")
-    sources_add_parser.add_argument("--alias", help="optional source alias in kind:slug form")
-    sources_add_parser.add_argument("--json", action="store_true", help="output JSON")
-    sources_remove_parser = sources_subparsers.add_parser("remove")
-    sources_remove_parser.add_argument("--scope", required=True, help="source scope")
-    sources_remove_parser.add_argument("--type", required=True, help="source type")
-    sources_remove_parser.add_argument("--path", required=True, help="source path")
-    sources_remove_parser.add_argument("--json", action="store_true", help="output JSON")
     schemas_parser = subparsers.add_parser("schemas")
     schemas_parser.add_argument("--json", action="store_true", help="output JSON")
     schemas_subparsers = schemas_parser.add_subparsers(dest="schemas_command")
@@ -92,15 +67,6 @@ def main() -> int:
     schemas_format_parser.add_argument("--check", action="store_true", help="report formatting drift without writing")
     schemas_format_parser.add_argument("--write", action="store_true", help="rewrite schema.yaml files into canonical format")
     schemas_format_parser.add_argument("--json", action="store_true", help="output JSON")
-    index_parser = subparsers.add_parser("index")
-    index_parser.add_argument("--json", action="store_true", help="output JSON")
-    index_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
-    change_parser = subparsers.add_parser("change")
-    change_parser.add_argument("--json", action="store_true", help="output JSON")
-    change_subparsers = change_parser.add_subparsers(dest="change_command")
-    inspect_parser = change_subparsers.add_parser("inspect")
-    inspect_parser.add_argument("change", help="OpenSpec change name")
-    inspect_parser.add_argument("--json", action="store_true", help="output JSON")
     context_parser = subparsers.add_parser("context")
     context_parser.add_argument("--json", action="store_true", help="output JSON")
     context_subparsers = context_parser.add_subparsers(dest="context_command")
@@ -164,12 +130,6 @@ def main() -> int:
     knowledge_index_parser = knowledge_subparsers.add_parser("index")
     knowledge_index_parser.add_argument("--team-path", help="team knowledge repository path")
     knowledge_index_parser.add_argument("--json", action="store_true", help="output JSON")
-    trace_parser = subparsers.add_parser("trace")
-    trace_parser.add_argument("reference", help="anchor ref to trace, for example docs/requirements/auth-srs.md#FR-001")
-    trace_parser.add_argument("--json", action="store_true", help="output JSON")
-    get_parser = subparsers.add_parser("get")
-    get_parser.add_argument("reference", help="anchor ref to get, for example srs:auth-login#FR-001")
-    get_parser.add_argument("--json", action="store_true", help="output JSON")
     args = parser.parse_args()
 
     if args.version:
@@ -325,67 +285,6 @@ def main() -> int:
             return 2
         print_json(result)
         return exit_code_for(result, fail_on_blocker=False)
-
-    if args.command == "change" and args.change_command is None:
-        print_json(error_response("Use one of: inspect.", "MISSING_SUBCOMMAND"), stderr=True)
-        return 2
-
-    if args.command == "change" and args.change_command == "inspect":
-        root = resolve_project_root(Path.cwd())
-        result = build_change_inspect(root, args.change)
-        print_json(result)
-        return 0
-
-    if args.command == "sources":
-        root = resolve_project_root(Path.cwd())
-        try:
-            if args.sources_command in {None, "list"}:
-                result = list_sources(root)
-                print_json(result)
-                return 0
-            if args.sources_command == "check":
-                result = check_sources(root)
-                print_json(result)
-                return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
-            if args.sources_command == "add":
-                result = add_source(root, args.scope, args.type, args.path, args.template, args.parser, args.alias)
-                print_json(result)
-                return 0
-            if args.sources_command == "remove":
-                result = remove_source(root, args.scope, args.type, args.path)
-                print_json(result)
-                return 0
-        except ValueError as error:
-            print_json(error_response(str(error)), stderr=True)
-            return 2
-        print_json(error_response("Use one of: list, check, add, remove.", "MISSING_SUBCOMMAND"), stderr=True)
-        return 2
-
-    if args.command == "index":
-        root = resolve_project_root(Path.cwd())
-        result = build_index(root, write_cache=True)
-        print_json(result)
-        return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
-
-    if args.command == "trace":
-        root = resolve_project_root(Path.cwd())
-        try:
-            result = trace_anchor(root, args.reference)
-        except ValueError as error:
-            print_json(error_response(str(error)), stderr=True)
-            return 2
-        print_json(result)
-        return 0
-
-    if args.command == "get":
-        root = resolve_project_root(Path.cwd())
-        try:
-            result = get_anchor(root, args.reference)
-        except ValueError as error:
-            print_json(error_response(str(error)), stderr=True)
-            return 2
-        print_json(result)
-        return 0
 
     print_json(error_response("Use a supported Aisee command.", "MISSING_COMMAND"), stderr=True)
     return 2

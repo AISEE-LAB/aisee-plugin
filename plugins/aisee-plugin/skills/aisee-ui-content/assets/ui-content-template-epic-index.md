@@ -13,7 +13,7 @@
 **场景模式**：{new-build / enhancement / inventory}
 **ID Scope**：{scope}
 
-> 正式写法只使用文档内 local ID，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
+> 正式写法只使用文档内编号，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档来源后续由 `source-map.md` 记录；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 
 ---
 

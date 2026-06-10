@@ -65,9 +65,9 @@ description: 在 aisee:change-plan 之前生成软件项目技术架构文档，
 - `CONSTRAINT`：技术约束、平台约束、集成约束、运行环境限制
 - `RISK`：技术风险、阻塞项、冲突或需要验证的风险
 
-正式写法只使用文档内 local ID，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档引用由后续 `change-context.md`、`source-map.md`、`aisee get`、`aisee trace` 或 alias anchor 处理。不要再要求 `aisee id reserve/activate/check` 或 full ID lifecycle。
+正式写法只使用文档内编号，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档来源由后续 `change-context.md` 或 `source-map.md` 记录；不要使用旧 full ID、ID lifecycle 或 lookup/trace 流程。
 
-如果当前轮次还不能确定最终编号，可以使用 `DEC-NEW-001` 这类 local placeholder，并显式标注 `[ID-FINALIZATION-REQUIRED]`。Architecture 不负责 `API / DATA / TASK / TEST`，也不负责 UI 的 `PAGE` 分配。它只输出后续 `change-context.md` 或 change artifacts 可以引用的架构 ID。
+如果当前轮次还不能确定最终编号，可以使用 `DEC-NEW-001` 这类临时占位符，并显式标注 `[NUMBERING-FINALIZATION-REQUIRED]`。Architecture 不负责 `API / DATA / TASK / TEST`，也不负责 UI 的 `PAGE` 分配。它只输出后续 `change-context.md` 或 change artifacts 可以引用的架构编号。
 
 ## Phase 0 — 读取输入与项目上下文
 
@@ -79,7 +79,6 @@ description: 在 aisee:change-plan 之前生成软件项目技术架构文档，
 cat openspec/config.yaml 2>/dev/null || echo "No openspec config found"
 cat openspec/project.md 2>/dev/null || echo "No project.md found"
 cat AGENTS.md 2>/dev/null | head -160
-cat aisee/registry/sources.json 2>/dev/null || true
 rg --files | rg '(^|/)(package\.json|pnpm-lock\.yaml|yarn\.lock|package-lock\.json|pyproject\.toml|requirements\.txt|Gemfile|go\.mod|Cargo\.toml|pom\.xml|build\.gradle|composer\.json|schema\.sql|openapi\.ya?ml|openapi\.json)$|(^|/)(prisma|drizzle|migrations)(/|$)' | head -80
 rg --files docs aisee/docs openspec 2>/dev/null | rg '(architecture|tech|stack|design|api|schema)' | head -80
 rg --files openspec/specs openspec/changes 2>/dev/null | head -80
@@ -119,7 +118,7 @@ Reference loading：
 - 不要把建议 artifact 类型写死为当前 schema 的固定文件名；schema pack 未来可调整。
 - 如果发现需求与现有技术约束冲突，标注 `[SPEC-GAP]` 或 `[STACK-CONFLICT]`，不要静默绕过。
 - 给 `aisee:change-plan` 的技术提示只能是事实、约束和原因，不是边界规划结果。
-- 正式 `ARCH / DEC / CONSTRAINT / RISK` 只使用文档内 local ID；工具不可用时使用 `TYPE-NEW-001` 并标注 `[ID-FINALIZATION-REQUIRED]`。
+- 正式 `ARCH / DEC / CONSTRAINT / RISK` 只使用文档内编号；无法确定最终编号时使用 `TYPE-NEW-001` 并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 
 ## 与 OpenSpec 工作流集成
 

@@ -65,7 +65,6 @@ cat openspec/config.yaml 2>/dev/null || echo "No config found"
 openspec list --json 2>/dev/null || ls openspec/changes/ 2>/dev/null || echo "No existing changes found"
 ls openspec/changes/archive/ 2>/dev/null | head -20
 cat AGENTS.md 2>/dev/null | head -120
-cat aisee/registry/sources.json 2>/dev/null || true
 ```
 
 `AGENTS.md` 是主入口；`CLAUDE.md` 只作为旧项目兼容 fallback，不主动作为新项目上下文读取。
@@ -81,7 +80,7 @@ cat aisee/registry/sources.json 2>/dev/null || true
 - Design Spec / Design Assets 只提供设计策略、组件策略、tokens、screen patterns、参考图或 dev-visual-brief。
 - Architecture 使用 `ARCH / DEC / CONSTRAINT / RISK`、技术事实、共享前置和阻塞标签。
 
-SRS 模块名、页面类型、设计材料、架构层、技术层和 schema artifact 名都只是边界提示，不是 change 名称或最终边界。ID 规则按 `references/source-map-rules.md` 执行：只引用已有 local ID 对应的 anchor ref，不临时发明 full ID；`SPEC / API / DATA / TASK / TEST` 属于 change-author 阶段。
+SRS 模块名、页面类型、设计材料、架构层、技术层和 schema artifact 名都只是边界提示，不是 change 名称或最终边界。编号规则按 `references/source-map-rules.md` 执行：只引用已有 `doc-ref#编号`，不临时发明 full ID；`SPEC / API / DATA / TASK / TEST` 属于 change-author 阶段。
 
 ## 阶段 3 — 必要时澄清
 

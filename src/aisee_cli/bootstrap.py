@@ -7,8 +7,7 @@ from typing import Any
 
 from aisee_cli.doctor import build_doctor
 from aisee_cli.marketplace import MARKETPLACE_ADD_COMMAND, PLUGIN_ADD_COMMAND
-from aisee_cli.paths import inspect_layout, sources_path
-from aisee_cli.project import rel
+from aisee_cli.paths import inspect_layout
 
 
 def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
@@ -37,9 +36,6 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
             item["legacy"],
             f"Prompt the user first. {item['canonical']} is authoritative; compare before changing, and only remove or archive this legacy path after the user confirms it is stale.",
         ))
-    sources = sources_path(root)
-    if not sources.exists():
-        actions.append(action("create", rel(root, sources), "Create empty sources registry."))
     if doctor["codex_marketplace"]["status"] != "ok":
         actions.append(action(
             "install",

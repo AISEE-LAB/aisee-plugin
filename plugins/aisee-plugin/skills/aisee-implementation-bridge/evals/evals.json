@@ -11,14 +11,14 @@
       "id": "implementation-bridge-001",
       "name": "handoff-authored-change-to-ce-work",
       "scenario": "implementation-handoff",
-      "prompt": "change 已 authored，author-check 无 blocker。帮我给 ce-work 生成一个最小 Implementation Brief，告诉它该读什么、能改哪些路径、是否需要 ce-plan。",
+      "prompt": "change 已 authored，context pack 无 blocker。帮我给 ce-work 生成一个最小 Implementation Brief，告诉它该读什么、能改哪些路径、是否需要 ce-plan。",
       "context": {
         "files": [],
         "assumptions": [
           "当前 change 已存在 context pack。"
         ]
       },
-      "expected_output": "应优先消费 context pack、author-check 和 gaps，生成一次性实现交接摘要；明确 allowed paths、verification、review recommendation 和 ce-plan 是否需要；不得创建平行长期任务清单或直接写代码。",
+      "expected_output": "应优先消费 context pack 和 gaps，生成一次性实现交接摘要；明确 allowed paths、verification、review recommendation 和 ce-plan 是否需要；不得创建平行长期任务清单或直接写代码。",
       "expected_outputs": [
         "先读当前 change 的机器可读上下文。",
         "输出 Implementation Brief 关键栏位。",

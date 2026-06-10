@@ -5,14 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.id_registry import check_registry
-from aisee_cli.index import index_path
 from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import inspect_layout
 from aisee_cli.planning_docs import inspect_planning_docs
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.schema_pack import list_schema_packs
-from aisee_cli.sources import check_sources
 from aisee_cli.tool_checks import check_codex_aisee_marketplace, check_compound_plugin, check_openspec_cli
 
 
@@ -47,14 +44,10 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
             item["legacy"],
         ))
 
-    sources = check_sources(root)
-    registry = check_registry(root)
     schemas = list_schema_packs(root)
     openspec_cli = check_openspec_cli()
     compound = check_compound_plugin()
     codex_marketplace = check_codex_aisee_marketplace()
-    issues.extend(item for item in sources["issues"] if item.get("severity") == "blocker")
-    issues.extend(item for item in registry["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in schemas["issues"] if item.get("severity") == "blocker")
     issues.extend(item for item in schemas["issues"] if item.get("code") == "SCHEMA_PACK_VERSION_MISMATCH")
     issues.extend(planning_docs["issues"])
@@ -85,15 +78,8 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
         "codex_marketplace": codex_marketplace,
         "aisee": {
             "layout": layout,
-            "sources": sources,
-            "id_registry": registry,
             "schemas": schemas,
             "planning_docs": planning_docs,
-            "context_index": {
-                "path": rel(root, index_path(root)),
-                "exists": index_path(root).exists(),
-                "fact_source": False,
-            },
         },
         "issues": issues,
         "summary": summarize_issues(issues),

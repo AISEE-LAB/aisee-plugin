@@ -22,7 +22,7 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
 |---|---|---|---|---|
 | SRS | docs/requirements/auth-srs.md | docs/requirements/auth-srs.md#FR-001 | confirmed | |
 
-## Anchor Trace
+## Source Context
 
 | Type | Ref | Title | Source | Handling | Artifact |
 |---|---|---|---|---|---|
@@ -71,7 +71,7 @@ def test_parse_source_map_structured_tables(tmp_path: Path) -> None:
 
     assert parsed["parse_level"] == "structured"
     assert parsed["upstream_sources"][0]["ref"] == "docs/requirements/auth-srs.md#FR-001"
-    assert parsed["anchor_trace"][0]["refs"] == ["docs/requirements/auth-srs.md#FR-001"]
+    assert parsed["source_context"][0]["refs"] == ["docs/requirements/auth-srs.md#FR-001"]
     assert parsed["implementation_paths"] == [
         {
             "kind": "code",
@@ -167,43 +167,3 @@ def test_parse_source_map_contract_sync_legacy_labels(tmp_path: Path) -> None:
     assert values["machine_readable_contract"]["value"] == "contracts/proto/auth.proto"
     assert values["version_ref"]["value"] == "v1.2.3"
 
-
-def test_parse_source_map_extracts_intake_sources(tmp_path: Path) -> None:
-    change = tmp_path / "openspec" / "changes" / "add-auth"
-    write(
-        change / "source-map.md",
-        """# Source Map
-
-## Intake Sources
-
-| Type | Title / 名称 | Path / Description | External Ref | Status | Summary | 承接 Artifact | Notes |
-|---|---|---|---|---|---|---|---|
-| user-input | 密码登录改造 | 用户直接描述登录改造需求 | issue://AUTH-7 | confirmed | 只保留摘要，不记录原始长提示词 | specs/auth.md | |
-| change-plan | Auth intake summary | aisee/docs/change-plan/auth-intake.md | N/A | confirmed | change-plan 摘要承接实现边界 | tasks.md | |
-""",
-    )
-
-    parsed = parse_source_map(change)
-
-    assert parsed["intake_sources"] == [
-        {
-            "type": "user-input",
-            "title": "密码登录改造",
-            "path": "用户直接描述登录改造需求",
-            "ref": "issue://AUTH-7",
-            "status": "confirmed",
-            "artifact": "specs/auth.md",
-            "summary": "只保留摘要，不记录原始长提示词",
-            "notes": "",
-        },
-        {
-            "type": "change-plan",
-            "title": "Auth intake summary",
-            "path": "aisee/docs/change-plan/auth-intake.md",
-            "ref": "N/A",
-            "status": "confirmed",
-            "artifact": "tasks.md",
-            "summary": "change-plan 摘要承接实现边界",
-            "notes": "",
-        },
-    ]

@@ -4,22 +4,22 @@
 
 ## 目录
 
-- [无前置 planning docs 的 intake 路径](#无前置-planning-docs-的-intake-路径)
+- [无前置 planning docs 的来源路径](#无前置-planning-docs-的来源路径)
 - [无 source-map schema 的缺口落点](#无-source-map-schema-的缺口落点)
 - [Schema DAG 规则](#schema-dag-规则)
 - [Artifact 编写边界](#artifact-编写边界)
 - [App Schema v2 顺序](#app-schema-v2-顺序)
 - [Artifact 适用性判断](#artifact-适用性判断)
-- [ID Preflight](#id-preflight)
+- [编号检查](#编号检查)
 
-## 无前置 planning docs 的 intake 路径
+## 无前置 planning docs 的来源路径
 
 当当前 change 没有 SRS / UI Content / Architecture 等前置 planning docs 时：
 
 - `proposal.md` 只写范围摘要和来源类型，不复制原始长提示词。
-- `source-map.md` 使用 `Intake 来源` 表记录 `type / external ref / summary / artifact`。
+- `source-map.md` 在“上游来源”记录来源类型、外部引用、摘要和承接 artifact。
 - `upstream_refs=[]` 是合法状态；不要为了满足模板创建假 `docs/...#FR-001`。
-- 正式 local ID 仍由当前 change artifacts 产生，例如 `SPEC-001`、`API-001`、`TASK-001`。
+- 正式编号仍由当前 change artifacts 产生，例如 `SPEC-001`、`API-001`、`TASK-001`。
 - 如果输入无法压缩为摘要，写 `[SPEC-GAP]` 或 blocker，等待确认；不要把整段聊天记录写进 source-map。
 
 ## 无 source-map schema 的缺口落点
@@ -36,14 +36,14 @@
 
 ## Schema DAG 规则
 
-- 以 `author-check.artifact_order` 和当前 schema 的 `artifacts[].requires` 为唯一生成顺序来源。
+- 以当前 schema 的 `artifacts[].requires` 为唯一生成顺序来源。
 - 不要因为某个模板常见就创建 schema 未声明的 artifact。
 - 不要给 `quick-fix`、`quick-research`、`infra-change`、`aisee-docsite-driven` 等无 source-map schema 补 `source-map.md`。
 - 对 app schema 的按需 artifacts，先读取 `source-map.md` 的 Artifact 适用性；Required=no 且有原因时不展开完整模板。
 - schema metadata 缺失、不一致、未安装或找不到时，不继续 author；先回到 change creation / schema installation 修复。
 - 如果项目要求保留 N/A 文件，只写状态和 N/A 原因；不要为了填模板而复制无关表格。
 - 生成每个 artifact 前，读取它的 `instruction` 和 `template`。
-- 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`；优先引用 `author-check.schema.issues`。
+- 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`。
 
 ## Artifact 编写边界
 
@@ -51,8 +51,8 @@
 
 | Artifact | 主要输入 | 可新增 ID | 禁止内容 |
 |---|---|---|---|
-| `proposal.md` | confirmed change-plan、上游来源 anchor、用户确认边界 | 无；只引用上游 anchor / local ID | 接口字段、数据库字段、实现步骤、重新拆 change |
-| `source-map.md` | proposal、上游文档、sources index、schema artifact list | `SPEC / API / DATA / TASK / TEST` 的 local ID 记录 | 业务需求正文、契约细节、实现方案 |
+| `proposal.md` | confirmed change-plan、上游来源、用户确认边界 | 无；只引用上游来源 / 编号 | 接口字段、数据库字段、实现步骤、重新拆 change |
+| `source-map.md` | proposal、上游文档、schema artifact list | `SPEC / API / DATA / TASK / TEST` 的编号记录 | 业务需求正文、契约细节、实现方案 |
 | `specs/**/*.md` | source-map 中覆盖的 `FR / NFR / RULE / FLOW / STATE` | `SPEC` | UI 布局、API 字段、表字段、任务清单 |
 | `change-context.md` | Architecture 中相关 `ARCH / DEC / CONSTRAINT / RISK` | 局部 `DEC / CONSTRAINT / RISK` | 重写全局 Architecture、展开服务 / 数据 / UI 契约 |
 | `ui-contract.md` | UI Content、Design Spec / Assets、specs、change-context、source-map | 必要时新增局部 `PAGE / FLOW / STATE` | 重新制定或复制完整视觉规范、组件库选择、像素布局 |
@@ -71,12 +71,12 @@
 | `infra-change` | `impact-assessment.md` 和 `rollback-plan.md` 写影响、窗口、回滚和验证 | 不省略回滚风险 |
 | `security-audit` | `threat-model.md` 写 STRIDE 威胁、风险和缓解；`design.md` 写安全控制设计；`tasks.md` 写安全验收门控 | 不绕过 threat-model，不把安全 review 当普通实现任务 |
 
-当 schema 生成 `source-map.md` 时，`source-map.md` 不是一次性文件。先用它建立初始路由，再在每个 artifact 写入或激活 ID 后回填：
+当 schema 生成 `source-map.md` 时，`source-map.md` 不是一次性文件。先用它建立初始路由，再在每个 artifact 写入或确认编号后回填：
 
 - artifact 是否适用及 N/A 原因。
-- 新增 ID 的 owner path、标题和上游追踪关系。
-- 发现的 `[SPEC-GAP]`、`[ID-RESERVATION-REQUIRED]`、`[STACK-CONFLICT]` 或其他阻塞标签。
-- 不覆盖的上游 ID 及原因。
+- 新增编号的 owner path、标题和上游来源关系。
+- 发现的 `[SPEC-GAP]`、`[NUMBERING-FINALIZATION-REQUIRED]`、`[STACK-CONFLICT]` 或其他阻塞标签。
+- 不覆盖的上游编号及原因。
 
 ## App Schema v2 顺序
 
@@ -102,8 +102,8 @@ service-contract.md
 
 生成规则：
 
-- `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用 anchor ref 或 local ID，不复制上游全文。
-- `source-map.md`：先建立上游输入 anchor、产出 local ID、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
+- `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用来源 ref 或编号，不复制上游全文。
+- `source-map.md`：先建立上游来源、产出编号、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
 - `specs/**/*.md`：只写用户可观察行为和验收场景，覆盖 FR / NFR / RULE / FLOW / STATE。
 - `change-context.md`：只在 Required=yes 时承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture。
 - `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
@@ -134,20 +134,18 @@ Required=no 的 artifact 不能留空原因。生成 `source-map.md` 的 schema 
 
 不生成 `source-map.md` 的 schema 应在当前主 artifact 或对应 artifact 中写 N/A 原因，不要补假 source-map。如果同时创建 N/A 文件，文件只需要包含状态和 N/A 原因，不需要填完整模板。
 
-## Anchor / Local ID Preflight
+## 编号检查
 
-优先使用当前 change、schema 模板和已存在 artifact 中的 anchor/local ID 信息。需要手动补查时使用：
+优先使用当前 change、schema 模板和已存在 artifact 中的编号信息。需要机器视图时使用：
 
 ```bash
-aisee get <anchor-ref> --json
-aisee trace <anchor-ref> --json
-aisee index --json
+aisee context pack --change <change> --for aisee-verify --json
 ```
 
-只在当前 change 内生成实际需要的 local ID。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时写新的 local ID，并把跨文档追踪回写成 anchor ref。
+只在当前 change 内生成实际需要的文档内编号。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时写新的编号，并把跨文档来源回写到 `source-map.md`。
 
 工具不可用时：
 
-- 继续生成草稿可以，但所有新增 ID 必须用 `TYPE-NEW-001`。
-- 如果 schema 生成 `source-map.md`，必须在 `source-map.md` 写 `[ID-FINALIZATION-REQUIRED]`；否则写入当前 schema 的主 artifact。
-- final / handoff 必须说明这些不是最终 local ID，后续需要完成 local ID 定稿并校验 anchor 解析。
+- 继续生成草稿可以，但所有新增编号必须用 `TYPE-NEW-001`。
+- 如果 schema 生成 `source-map.md`，必须在 `source-map.md` 写 `[NUMBERING-FINALIZATION-REQUIRED]`；否则写入当前 schema 的主 artifact。
+- final / handoff 必须说明这些不是最终编号，后续需要完成编号定稿并重新检查当前 change。

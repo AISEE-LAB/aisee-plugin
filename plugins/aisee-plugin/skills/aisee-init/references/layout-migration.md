@@ -20,9 +20,6 @@ aisee/
 
 旧项目兼容路径只允许读取 fallback：
 
-- `.aisee/sources.json`
-- `.aisee/id-registry.json`
-- `.aisee/cache/context-index.json`
 - `.memory/rules.md`
 - `.memory/index.md`
 - `docs/requirements/`
@@ -54,7 +51,5 @@ aisee/
 - legacy-only 可移动到对应 canonical 路径。
 - 目录迁移只搬文件，保持相对结构，不搬空目录。
 - dual-path 必须先比较内容；不自动合并、不覆盖 canonical，不删除旧路径，除非用户确认处理方式。
-- registry 文件不自动合并 JSON；如需合并，先说明策略并取得确认。
-- cache 不迁移，忽略或删除后由 `aisee index` 重建。
 - hooks 不搬旧文件，改为重新运行 hook 安装。
 - memory 可从 `.memory/*` 迁移到 `aisee/memory/*`；若新 memory 已存在，先比较再确认。

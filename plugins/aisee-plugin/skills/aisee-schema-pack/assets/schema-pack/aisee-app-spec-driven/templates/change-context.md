@@ -23,7 +23,7 @@ N/A 原因：
 
 ## 本 Change 局部决策
 
-- DEC-NEW-001 [ID-FINALIZATION-REQUIRED]：
+- DEC-NEW-001 [NUMBERING-FINALIZATION-REQUIRED]：
   - 决策：
   - 依据：
   - 影响：

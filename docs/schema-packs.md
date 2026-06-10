@@ -99,20 +99,18 @@ source-map.md + specs/**/*.md
 | `data-model.md` | 实体、字段、关系、索引、迁移和兼容策略 | 业务需求全文或 API 响应结构 |
 | `tasks.md` | 实现任务、验证任务、证据命令或证据路径 | 需求、契约、ID 注册、归档判断 |
 
-## ID 与 Source Map
+## 编号与 Source Map
 
-当前正式模型只使用：
+当前正式模型把编号作为 skill/template 写作约束：
 
 ```text
 LOCAL-ID
-doc-ref#LOCAL-ID
-alias#LOCAL-ID
 ```
 
 AI 不应临时发明 full ID。工具不可用时只能使用临时 local placeholder：
 
 ```text
-TYPE-NEW-001 [ID-FINALIZATION-REQUIRED]
+TYPE-NEW-001 [NUMBERING-FINALIZATION-REQUIRED]
 ```
 
 `source-map.md` 负责连接：

@@ -26,19 +26,18 @@ anchors: []
 **场景模式**：new-build
 **ID Scope**：{scope}
 
-> 正式写法只使用文档内 local ID，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档引用交给 `doc-ref#LOCAL-ID` 或 alias anchor；工具不可用时使用 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
+> 正式写法只使用文档内编号，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档来源后续由 `source-map.md` 记录；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 
 ---
 
 ## 1. 来源与范围
 
-### 1.0 Anchor / Local ID 状态
+### 1.0 编号状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| local ID 已稳定 | yes / no | 文档内编号检查 | |
-| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#PAGE-001` / `ui-content:...#PAGE-001` | |
-| 存在临时 ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
+| 编号已稳定 | yes / no | 文档内编号检查 | |
+| 存在临时编号 | yes / no | `[NUMBERING-FINALIZATION-REQUIRED]` | |
 
 ### 1.1 覆盖范围
 - 覆盖 FR：{{scope}}:FR-001 ~ {{scope}}:FR-00X

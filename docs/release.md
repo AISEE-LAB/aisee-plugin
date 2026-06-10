@@ -34,6 +34,15 @@ Aisee 使用 SemVer：
 
 公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
 
+## 0.8.0 合同提示
+
+`0.8.0` 继续收缩 CLI 职责，把编号降级为 skill/template 写作约束：
+
+- `aisee get`、`aisee trace`、`aisee sources`、`aisee index` 和 `aisee change inspect` 已从公开 CLI 命令面删除。
+- 文档内编号仍可使用 `FR-001`、`PAGE-001`、`SPEC-001`、`TASK-001` 等格式，但不再作为独立 CLI 追踪产品面。
+- `aisee context pack` 是当前 change 唯一保留的机器上下文出口，负责轻量解析来源、编号、候选路径、evidence 和 schema gaps。
+- README、workflow、architecture docs、app schema template 和相关 skill 文案已移除 `get/trace`、`sources/index/change inspect`、author-check、reserve ID 等旧流程提示。
+
 ## 0.7.2 Patch 提示
 
 `0.7.2` 修复 bootstrap plan 的提示语义：

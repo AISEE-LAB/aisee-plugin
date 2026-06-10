@@ -32,13 +32,13 @@ def test_missing_openspec_subcommand_returns_json_error(tmp_path: Path) -> None:
     assert data["issues"][0]["code"] == "MISSING_SUBCOMMAND"
 
 
-def test_missing_change_subcommand_returns_json_error(tmp_path: Path) -> None:
+def test_removed_change_command_returns_argparse_error(tmp_path: Path) -> None:
     result = run_aisee(tmp_path, "change", "--json")
-    data = json.loads(result.stderr)
 
     assert result.returncode == 2
     assert result.stdout == ""
-    assert data["issues"][0]["code"] == "MISSING_SUBCOMMAND"
+    assert "invalid choice" in result.stderr
+    assert "change" in result.stderr
 
 
 def test_removed_id_command_returns_argparse_error(tmp_path: Path) -> None:
