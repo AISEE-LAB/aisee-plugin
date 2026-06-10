@@ -1,0 +1,85 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:memory",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "memory-001",
+      "name": "retrieve-project-preferences",
+      "scenario": "project-memory-retrieval",
+      "prompt": "实现前先查一下本项目有没有提交信息和测试命令相关的长期偏好。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户要求查询项目本地长期记忆。"
+        ]
+      },
+      "expected_output": "应先运行 aisee memory inspect --json，再用 aisee memory search --query 按任务检索；默认不读取完整正文，也不得把 memory 当 OpenSpec 事实源。",
+      "expected_outputs": [
+        "使用 aisee memory inspect --json。",
+        "使用 aisee memory search --query。",
+        "说明默认只返回 metadata，正文需 --include-body。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "aisee memory inspect --json",
+        "aisee memory search --query",
+        "不是 OpenSpec 事实源"
+      ],
+      "must_not": [
+        "不得直接递归读取整个 aisee/memory/ 树作为默认流程。",
+        "不得把项目记忆替代 source-map、tasks 或 baseline specs。"
+      ],
+      "quality_checks": [
+        "检索范围受控。",
+        "区分 memory guidance 与 OpenSpec facts。"
+      ],
+      "fact_source_constraints": [
+        "项目记忆是 guidance，不替代 OpenSpec、source-map 或 tasks。"
+      ],
+      "files": []
+    },
+    {
+      "id": "memory-002",
+      "name": "write-confirmed-project-preference",
+      "scenario": "project-memory-write",
+      "prompt": "以后本项目提交信息都用中文，记住这个偏好。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户明确表达长期项目偏好和写入意图。"
+        ]
+      },
+      "expected_output": "应确认这是长期项目记忆并选择 pref 类型，然后通过 aisee memory add 写入 canonical aisee/memory/；不得由 hook 自动写入，也不得写全局记忆。",
+      "expected_outputs": [
+        "使用 aisee memory add --type pref。",
+        "写入 canonical aisee/memory/。",
+        "说明会更新 index 和 cache。"
+      ],
+      "must_ask": [
+        "如标题、摘要或正文不明确，应先补齐最小必要信息。"
+      ],
+      "must_include": [
+        "aisee memory add",
+        "--type pref",
+        "aisee/memory/"
+      ],
+      "must_not": [
+        "不得写入 home 目录或全局 memory。",
+        "不得把未确认的会话观察直接提升为 active memory。"
+      ],
+      "quality_checks": [
+        "写入前说明路径和命令。",
+        "写入后检查 meta.writes 为 true。"
+      ],
+      "fact_source_constraints": [
+        "写入的是项目指导信息；若与 AGENTS.md 或 OpenSpec 冲突，应提示用户更新权威产物。"
+      ],
+      "files": []
+    }
+  ]
+}

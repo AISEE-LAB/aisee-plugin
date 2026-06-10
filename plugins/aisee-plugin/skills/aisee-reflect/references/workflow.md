@@ -124,7 +124,7 @@ mkdir -p aisee/docs/reflect aisee/docs/reflect/skills aisee/docs/reflect/skill-p
 写入原则：
 
 - `aisee/docs/reflect/` 是候选区，不是规范事实源。
-- `aisee/memory/` 只有用户明确要求时才写，并必须先读取 `aisee/memory/rules.md` 和 `aisee/memory/index.md`。
+- `aisee/memory/` 只有用户明确要求时才写，并必须先运行 `aisee memory inspect --json`；确认提升后优先通过 `aisee memory add` 写入。
 - 可复用知识候选只是候选卡片，不自动进入全局知识库、用户主目录、其他项目或 active skill。
 - 具体已解决工程问题应建议 `ce-compound`，不要复制 solution 正文。
 

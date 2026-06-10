@@ -13,12 +13,13 @@
 
 ## 1. 目标
 
-Aisee CLI 不是第二套规范系统。它只做四件事：
+Aisee CLI 不是第二套规范系统。它只做五件事：
 
 1. 检查环境、版本、插件资产和项目布局。
 2. 解析 OpenSpec artifacts、`source-map.md`、tasks、evidence 和少量 planning doc metadata。
 3. 生成面向实现、验证和 review 的 JSON context pack。
-4. 管理团队知识仓库的只读检索、安装和批量提升辅助。
+4. 管理当前仓库 project memory 的受控检索、写入和可重建索引。
+5. 管理团队知识仓库的检索、安装和批量提升辅助。
 
 ## 2. 编号模型
 
@@ -37,6 +38,7 @@ Aisee CLI 不是第二套规范系统。它只做四件事：
 | OpenSpec change artifacts / baseline specs | 规范事实、任务和归档依据 | 是 |
 | planning docs | 版本 / 迭代输入，frontmatter 只做索引辅助 | 是，但不是 baseline |
 | `source-map.md` | 当前 change 的来源、适用性、候选路径和 evidence 路由 | 是 |
+| `aisee/memory/` | 当前仓库长期 guidance，如偏好、架构决策摘要、上下文快照和技术栈约束 | 否 |
 | context pack 内部扫描视图 | 可重建的文档扫描视图 | 否 |
 
 ## 4. 命令职责
@@ -52,6 +54,20 @@ Aisee CLI 不是第二套规范系统。它只做四件事：
 - `evidence`
 
 它依赖 `source-map.md`、当前 change artifacts、review / verification evidence 和 schema metadata。内部扫描只服务本次输出，不是持久事实源。
+
+`--project-memory` 是显式 opt-in。启用后，CLI 只把受控 matches 放入独立 `project_memory` 字段，不写入 `facts.parsed` 或 `facts.derived`。
+
+### `aisee memory`
+
+围绕当前仓库项目记忆提供 JSON-first 命令：
+
+- `inspect` 发现布局、策略、类型和限制；
+- `list` 按 type/status/priority 返回 metadata；
+- `search` 按任务检索少量 active metadata，正文必须显式 `--include-body`；
+- `add` 在用户明确意图下写入 canonical `aisee/memory/`；
+- `update-index` 重建 `aisee/memory/index.md` 和 `aisee/cache/memory-index.json`。
+
+Project memory 是 guidance。与 OpenSpec artifacts、`source-map.md` 或 `tasks.md` 冲突时，以 OpenSpec 相关产物为准。
 
 ## 5. Source Map 规则
 
@@ -82,6 +98,7 @@ skills enforce numbering
 OpenSpec owns specs/tasks/archive
 source-map routes context
 aisee CLI emits JSON views
+Aisee memory provides project guidance
 Compound executes engineering work
 ```
 

@@ -10,10 +10,10 @@ GitHub / Codex marketplace
 
 PyPI / pipx
   -> 安装 Aisee CLI
-  -> 提供项目内 JSON context tooling、OpenSpec companion checks、registry、ID、knowledge query 等命令
+  -> 提供项目内 JSON context tooling、OpenSpec companion checks、project memory、team knowledge 和版本/分发治理命令
 ```
 
-Marketplace installation 不会安装 `aisee` CLI。PyPI / pipx installation 不会安装 bundled skills、schema packs、references 或 team knowledge templates。
+Marketplace installation 不会安装 `aisee` CLI。PyPI / pipx installation 只提供 CLI；skills、schema packs、references 和 team knowledge templates 通过 marketplace plugin 获取。
 
 ## Codex 安装
 
@@ -79,7 +79,7 @@ manifest 继续暴露整个 `./skills/` 目录。这意味着 marketplace 会看
 不推荐：
 
 - 让 CLI 写 Codex marketplace 或 plugin cache；
-- 让 PyPI wheel 携带第二份 skills、references、schema packs 或 team knowledge templates；
+- 通过 PyPI / pipx 通道复制分发 skills、references、schema packs 或 team knowledge templates；
 - 让 marketplace listing 成为 OpenSpec、schema、source-map 或 team knowledge 的项目事实源；
 - 为 Claude / Cursor 强行套 Codex marketplace 字段。
 
@@ -91,7 +91,7 @@ manifest 继续暴露整个 `./skills/` 目录。这意味着 marketplace 会看
 - Codex manifest 的 `skills` 指向可加载 skills 目录；
 - Codex marketplace 添加命令；
 - CLI JSON 中 `status`、`issues`、`summary`、`meta` 和 setup hint 的基础语义；
-- 公开旧命令在迁移期返回 stable deprecation/blocker，而不是静默写入旧 wheel assets。
+- 公开旧命令在迁移期返回 stable deprecation/blocker，而不是静默写入旧内容资产。
 
 以下仍不承诺稳定：
 
@@ -113,4 +113,4 @@ python scripts/smoke_release.py
 
 - `plugins/aisee-plugin/.codex-plugin/plugin.json` 没有 unsupported fields；
 - `.agents/plugins/marketplace.json` 指向 `./plugins/aisee-plugin` plugin root；
-- `pipx install aisee-plugin` 只验证 CLI，不假设 wheel 内存在 plugin content。
+- `pipx install aisee-plugin` 只验证 CLI，不假设 PyPI / pipx 安装同时提供 plugin content。

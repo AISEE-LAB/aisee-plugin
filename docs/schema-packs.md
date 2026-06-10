@@ -16,7 +16,7 @@ plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/
 openspec/schemas/<schema-name>/
 ```
 
-PyPI / pipx CLI 不再携带 schema pack 副本。Schema pack 内容通过 GitHub-backed Codex marketplace plugin 分发：
+Schema pack 内容通过 GitHub-backed Codex marketplace plugin 分发；PyPI / pipx 安装只提供 CLI，不自动安装 schema：
 
 ```text
 codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
@@ -41,7 +41,7 @@ plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-
 
 | Schema | 适用场景 | 说明 |
 | --- | --- | --- |
-| `aisee-app-spec-driven` | App、小程序、Web、桌面软件、后端/API、CLI、异步任务、常规全栈开发 | 默认软件开发 schema。通过 `source-map.md` 管理 ID 和 artifact 适用性。 |
+| `aisee-app-spec-driven` | App、小程序、Web、桌面软件、后端/API、CLI、异步任务、常规全栈开发 | 通用软件变更 schema。通过 `source-map.md` 管理文档内编号和 artifact 适用性。 |
 | `aisee-device-spec-driven` | MCU、RTOS、嵌入式 Linux、IoT、网关、驱动、量产和现场维护 | 硬件和嵌入式专用扩展。当前保留，不作为 app 默认流程。 |
 | `aisee-docsite-driven` | 文档站、产品文档、开发者文档 | 用于以文档变更为主要交付物的 change。 |
 | `infra-change` | 部署、CI/CD、云资源、网络、运行环境 | 用于需要影响评估和回滚计划的基础设施变更。 |
@@ -52,7 +52,7 @@ plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-
 
 推荐规则：
 
-- 新软件功能默认选择 `aisee-app-spec-driven`。
+- 需要 specs、source-map、contracts 和 tasks 闭环的软件变更，优先考虑 `aisee-app-spec-driven`。
 - 小型 bugfix 且不改变公开契约时选择 `quick-fix`。
 - 只做技术调研时选择 `quick-research`。
 - 文档站作为交付主体时选择 `aisee-docsite-driven`。
@@ -175,4 +175,4 @@ aisee schemas check --json --fail-on-blocker
 - schema 文件和模板必须同源维护，避免 skill 中复制另一份 schema。
 - README 只保留概览，详细规则放在本文档或 `schema.yaml`。
 - 修改 schema 后验证 marketplace plugin 中的 schema 内容和示例。
-- 公开发布前运行 release smoke test，确认 CLI-only wheel 不包含 schema pack，且 marketplace plugin metadata 可被验证。
+- 公开发布前运行 release smoke test，确认 PyPI 发布产物不混入 schema pack，且 marketplace plugin metadata 可被验证。

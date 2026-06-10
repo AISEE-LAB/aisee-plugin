@@ -80,6 +80,7 @@ Rules:
 - `facts.parsed` represents facts parsed from files;
 - `facts.derived` represents CLI-derived views;
 - `knowledge.matches` is optional guardrail output and must not pollute `facts.parsed` or `facts.derived`;
+- `project_memory.matches` appears only with explicit `--project-memory` and must not pollute `facts.parsed` or `facts.derived`;
 - context packs may grow, but default output must stay bounded;
 - new targets must document consumer, read order, and missing-field behavior.
 
@@ -88,9 +89,9 @@ Rules:
 The following are public contracts:
 
 - `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
-- the core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 11 workflow skills;
-- `aisee plugin inspect --json` returns stable status and setup hints in CLI-only installs;
-- the PyPI wheel only promises CLI capabilities; skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
+- the core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 10 workflow skills;
+- `aisee plugin inspect --json` returns stable status and setup hints in PyPI / pipx installs;
+- the PyPI / pipx channel only promises CLI capabilities; skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
 
 Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or changing the core workflow skill set.
 
@@ -115,9 +116,22 @@ The following are public contracts:
 - the planning-doc frontmatter contract and the read-only diagnostics exposed through `aisee doctor --json` and `aisee context pack --json`;
 - the basic semantics of planning-doc fields such as `status`, `doc_type`, `source_refs`, and `change_refs`;
 - `resolve_project_root` preferring the nearest Aisee/OpenSpec project marker before falling back to the Git top-level;
-- release smoke checks for CLI-only wheels, marketplace setup hints, the public command surface, and root-resolver fixtures.
+- release smoke checks for the PyPI / pipx CLI, marketplace setup hints, the public command surface, and root-resolver fixtures.
 
 Breaking changes include turning planning-doc diagnostics into write commands or changing root resolution so monorepo subprojects are silently interpreted as repository roots.
+
+### Project Memory
+
+The following are public contracts:
+
+- `aisee memory inspect/list/search/add/update-index --json` commands exist and emit valid JSON;
+- the canonical project memory path is `aisee/memory/`, while legacy `.memory/` is read-only fallback;
+- `inspect/search/list` are read-only by default, while `add/update-index` must mark writes through `meta.writes`;
+- default retrieval returns bounded metadata only, not full bodies;
+- `aisee/cache/memory-index.json` is a deletable rebuildable cache, not a source of truth;
+- `aisee context pack --project-memory` emits matches only in a separate `project_memory` field.
+
+Breaking changes include removing commands, injecting full memory bodies by default, mixing memory into OpenSpec facts, or allowing hooks to write memory automatically.
 
 ## Experimental Contracts
 
@@ -141,13 +155,14 @@ Experimental capabilities can change, but documentation must clearly state:
 The following are not stable contracts or sources of truth:
 
 - `aisee/cache/knowledge-index.json`;
+- `aisee/cache/memory-index.json`;
 - parser internals;
 - scoring weights;
 - build caches;
 - internal test fixture layout;
 - chat summaries.
 
-Caches must be deletable and rebuildable. Sources of truth can only come from OpenSpec artifacts, source-map, tasks, and explicitly pinned team knowledge card/pack files.
+Caches must be deletable and rebuildable. Sources of truth can only come from OpenSpec artifacts, source-map, tasks, and explicitly pinned team knowledge card/pack files. Project memory is project guidance, not an OpenSpec source of truth.
 
 ## Version Rules
 

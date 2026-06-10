@@ -64,7 +64,7 @@ change_refs: []
 
 ## 可执行选项
 - 回复 `保存复盘` 写入 `aisee/docs/reflect/`
-- 回复 `写入 memory 1` 将候选 1 按 `aisee/memory/rules.md` 提升为项目记忆
+- 回复 `写入 memory 1` 将候选 1 交给 `aisee:memory`，并通过 `aisee memory add` 提升为项目记忆
 - 回复 `保存技能 1` 写入技能草案
 - 回复 `保存补丁 1` 写入技能优化建议
 - 回复 `保存知识候选 1` 写入 reusable knowledge candidate
@@ -134,9 +134,9 @@ _Date: YYYY-MM-DD_
 
 ## 提升为项目 Memory
 
-只有用户明确要求时执行。必须遵循项目根目录下 `aisee/memory/rules.md`。
+只有用户明确要求时执行。先运行 `aisee memory inspect --json`，再通过 `aisee memory add ... --json` 写入 canonical `aisee/memory/`。
 
-推荐结构：
+CLI 维护的推荐结构：
 
 ```text
 aisee/memory/
@@ -147,28 +147,26 @@ aisee/memory/
   stack/{technology}.md
 ```
 
-记忆文件模板：
+`aisee memory add` 写入 YAML frontmatter + Markdown 正文；不要手工维护旧粗体 metadata 模板。最小字段为：
 
 ```markdown
-# {标题}
+---
+id: <safe-slug>
+title: <标题>
+type: arch | pref | ctx | stack
+status: active
+priority: high | normal | low
+summary: <一句话摘要>
+source_refs: []
+updated_at: <ISO datetime>
+---
 
-**日期：** YYYY-MM-DD
-**类型：** arch | pref | ctx | stack
+# <标题>
 
-## 摘要
-
-一到两句话说明这条记忆记录了什么。
-
-## 详情
-
-正文内容。
-
-## 引用
-
-- 相关 reflect 文档、项目文件或会话依据
+<正文>
 ```
 
-更新 `aisee/memory/index.md` 时只追加一行摘要链接，不把正文写进 index。
+CLI 会更新 `aisee/memory/index.md` 和 `aisee/cache/memory-index.json`；cache 不是事实源。
 
 ## 新技能草案
 

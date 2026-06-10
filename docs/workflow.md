@@ -30,7 +30,6 @@ aisee doctor --json
 
 - `AGENTS.md`
 - `openspec/project.md`
-- `aisee/registry/`
 - `aisee/memory/`
 - 必要 hooks
 
@@ -45,7 +44,8 @@ aisee doctor --json
 - `aisee:design-spec` / `aisee:design-assets`：只有存在视觉规范、参考图或素材需求时才进入。
 - `aisee:svg-assets` / `aisee:image-object`：只有素材生产或图片处理工作时才进入。
 - `aisee:spec-migrate`：只用于已有项目建立 baseline spec，不是每次迭代必经步骤。
-- `aisee:reflect` / `aisee:knowledge-curate`：只用于复盘和团队知识沉淀。
+- `aisee:memory`：只用于项目记忆的受控检索、写入和索引维护。
+- `aisee:reflect` / `aisee:knowledge-curate`：只用于复盘、项目记忆候选和团队知识沉淀。
 - `hw:*`：仅用于硬件、嵌入式或实验域，不影响 app 默认流程。
 
 ## 1. 前置澄清
@@ -133,6 +133,15 @@ data-model.md            # 按需
 aisee context pack --change <change> --for ce-work --json
 ```
 
+如果项目有长期本地 guidance，例如提交偏好、测试命令、架构决策摘要或技术栈约束，可以显式检索项目记忆：
+
+```bash
+aisee memory search --query "<当前实现任务>" --json
+aisee context pack --change <change> --for ce-work --project-memory --json
+```
+
+Project memory matches 只作为 guidance，不改变当前 change 的规范事实源，也不应复制进 OpenSpec artifacts。
+
 如果项目配置了 team knowledge，可以在公开接口、schema、路径读取、安全、跨仓库契约等高风险实现前额外读取少量 guardrails：
 
 ```bash
@@ -199,7 +208,28 @@ aisee context pack --change <change> --for aisee-verify --json
 openspec archive <change>
 ```
 
-## 7. Team Knowledge 复用
+## 7. Project Memory 使用
+
+项目记忆服务当前仓库长期 guidance，不服务跨项目复用，也不替代 OpenSpec。
+
+推荐路径：
+
+```bash
+aisee memory inspect --json
+aisee memory search --query "<task>" --json
+aisee memory add --type pref --title "<title>" --summary "<summary>" --body "<body>" --json
+aisee memory update-index --json
+```
+
+边界：
+
+- 默认检索只返回少量 active metadata，不返回完整正文。
+- 只有用户明确说“记住 / 以后本项目都 / 写入项目记忆”时才写入。
+- 写入只进入 canonical `aisee/memory/`；legacy `.memory/` 只作为 fallback 读取。
+- hooks 只读，不自动写 memory。
+- 与 OpenSpec artifacts、`source-map.md` 或 `tasks.md` 冲突时，以 OpenSpec 相关产物为准。
+
+## 8. Team Knowledge 复用
 
 当一个项目沉淀出可复用经验时，先由用户明确触发 `aisee:reflect` 生成项目内 candidate，再按需运行 `aisee:knowledge-curate` 做批量审查、去敏、泛化和去重。
 

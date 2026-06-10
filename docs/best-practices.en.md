@@ -233,7 +233,27 @@ Best practices:
 - Use human-confirmed paths and excerpts to keep context bounded.
 - Do not expose source code, secrets, environment variables, or full-repository search results.
 
-## 14. Team Knowledge Only Provides Guardrails
+## 14. Project Memory Only Provides Current-Project Guidance
+
+Project memory is for long-lived current-repository guidance that does not belong in the OpenSpec baseline.
+
+Recommended:
+
+- Use `aisee memory inspect --json` to discover status and command entry points.
+- Use `aisee memory search --query "<task>" --json` to retrieve a few active metadata entries.
+- Use `--include-body` explicitly when a bounded body excerpt is needed.
+- Write only when the user explicitly asks to remember long-term guidance, using `aisee memory add ... --json`.
+- Use `aisee memory update-index --json` to rebuild `index.md` and cache.
+
+Avoid:
+
+- Recursively reading the whole `aisee/memory/` or `.memory/` tree as AI context.
+- Writing project memory into OpenSpec artifacts or treating it as baseline truth.
+- Letting hooks write memory automatically.
+- Treating `aisee/cache/memory-index.json` as a source of truth.
+- Copying current-project memory into team knowledge; cross-project reuse should go through `aisee:knowledge-curate`.
+
+## 15. Team Knowledge Only Provides Guardrails
 
 Team knowledge helps reuse engineering lessons across projects, but it must not become a second specification source.
 
@@ -254,13 +274,13 @@ Avoid:
 - Treating vector indexes, caches, or AI summaries as fact sources.
 - Automatically writing team knowledge after archive or verify.
 
-## 15. Do Not Make Aisee Another OpenSpec
+## 16. Do Not Make Aisee Another OpenSpec
 
 Aisee should solve what OpenSpec does not:
 
 - upfront clarification;
 - schema-aware planning;
-- ID and source-map traceability;
+- document-local numbering constraints and source-map routing;
 - AI context packs;
 - implementation handoff;
 - verify / archive guard.
@@ -275,7 +295,7 @@ It should not add:
 
 When OpenSpec already owns a capability, Aisee should only bridge, validate, or optimize context around it.
 
-## 16. Dogfood Real Projects Instead Of Expanding Abstractions
+## 17. Dogfood Real Projects Instead Of Expanding Abstractions
 
 Once the main path is usable, validate it with real or sample projects:
 

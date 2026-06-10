@@ -44,6 +44,7 @@ def test_project_local_commands_remain_on_top_level_help(tmp_path: Path) -> None
         "openspec",
         "context",
         "knowledge",
+        "memory",
     ):
         assert command in result.stdout
 
@@ -93,6 +94,13 @@ def test_knowledge_help_shows_init_repo_and_configure(tmp_path: Path) -> None:
 
     assert "init-repo" in result.stdout
     assert "configure" in result.stdout
+
+
+def test_memory_help_shows_public_subcommands(tmp_path: Path) -> None:
+    result = run_aisee(tmp_path, "memory", "--help")
+
+    for command in ("inspect", "list", "search", "add", "update-index"):
+        assert command in result.stdout
 
 
 def test_schemas_help_shows_format_subcommand(tmp_path: Path) -> None:

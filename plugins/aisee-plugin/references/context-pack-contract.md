@@ -50,6 +50,7 @@ Aisee CLI 对 OpenSpec artifacts 只做 metadata scan：
 
 ```bash
 aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --project-memory --json
 aisee context pack --change <change> --for aisee-verify --json
 aisee context pack --change <change> --for ce-doc-review --json
 aisee context pack --change <change> --for ce-code-review --json
@@ -79,6 +80,7 @@ aisee context pack --change <change> --for ce-code-review --json
   "gaps": [],
   "guardrails": [],
   "evidence": {},
+  "project_memory": {},
   "meta": {}
 }
 ```
@@ -94,6 +96,7 @@ Field rules:
 - `gaps`：缺口和断链，不是自动补齐结果。结构见 [context-pack-gaps.md](context-pack-gaps.md)。
 - `guardrails`：执行限制和禁止越界项。
 - `evidence`：validate、review、test、verification 的记录入口。
+- `project_memory`：只在显式 `--project-memory` 时出现；包含受控 memory matches，不得写入 `facts.parsed` 或 `facts.derived`。
 - `meta`：命令、时间、工具版本、解析置信度和错误。
 
 ## Parsed Facts

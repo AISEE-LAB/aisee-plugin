@@ -71,7 +71,7 @@ CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/docs/**
 - 执行前列出源路径、目标路径、冲突情况和文件操作，等待用户确认。
 - 只迁移 Aisee 产物；不移动 OpenSpec baseline/change，不修改业务代码。
 - 新旧同时存在时，不自动合并、不覆盖 canonical、不删除旧路径。
-- cache 不迁移；hooks 通过重新安装修复；registry 和 memory 合并必须单独确认策略。
+- cache 不迁移；hooks 通过重新安装修复；memory 合并必须单独确认策略。
 
 模板填充规则：
 
@@ -82,7 +82,7 @@ CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/docs/**
 - Hook 命令只引用项目内 `aisee/hooks/`，不要引用技能安装路径。
 - 运行安装器时可以引用 `<skill-dir>/scripts/setup-hooks.js`；写入目标项目的 hook runtime 命令不能引用 `<skill-dir>`、`aisee-init/scripts/`、全局 skill 缓存或用户 home 下的技能路径。
 - 记忆规则使用项目本地 `aisee/memory/rules.md`，不再引用或写入任何全局 memory rules 文件。
-- `aisee/memory/` 是长期项目记忆的权威位置；`aisee/docs/reflect/` 只作为复盘、草案和待确认候选区。
+- `aisee/memory/` 是长期项目记忆的 canonical 位置；它是 guidance，不替代 OpenSpec 事实源；`aisee/docs/reflect/` 只作为复盘、草案和待确认候选区。
 - OpenSpec custom schemas 由 `aisee-schema-pack` 负责；本技能不安装或维护 schema pack。
 
 ## Hook 安装
@@ -107,7 +107,7 @@ node <skill-dir>/scripts/setup-hooks.js
 
 Hook 职责：
 
-- `SessionStart` → `session-inject.js`：注入 OpenSpec、活跃 change、memory 和 Aisee docs 入口摘要；只提供路径和轻量提示，不作为事实源。
+- `SessionStart` → `session-inject.js`：注入 OpenSpec、活跃 change、memory CLI 入口和 Aisee docs 入口摘要；只提供轻量提示和少量高优先级 memory 摘要，不作为事实源。
 - `UserPromptSubmit` → `spec-drift.js`：发现疑似越过当前 spec 的需求，注入轻量自检上下文；优先匹配用户提到的 change，最多摘要 3 个 active changes，不阻断。
 - `UserPromptSubmit` / `PreToolUse` → `prompt-scan.js`：发现明显密钥、token、private key、JWT 或高置信 `.env` secret 赋值时阻断。
 

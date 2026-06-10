@@ -21,6 +21,14 @@ from aisee_cli.knowledge import (
     build_knowledge_query,
     build_knowledge_update,
 )
+from aisee_cli.memory import (
+    build_memory_add,
+    build_memory_inspect,
+    build_memory_list,
+    build_memory_query_for_context_pack,
+    build_memory_search,
+    build_memory_update_index,
+)
 from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
 from aisee_cli.plugin_assets import inspect_plugin_assets, plugin_path
@@ -74,6 +82,7 @@ def main() -> int:
     pack_parser.add_argument("--change", required=True, help="OpenSpec change name")
     pack_parser.add_argument("--for", dest="target", required=True, help="context target")
     pack_parser.add_argument("--knowledge", action="store_true", help="include knowledge guardrail matches")
+    pack_parser.add_argument("--project-memory", action="store_true", help="include bounded project memory matches")
     pack_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_parser = subparsers.add_parser("knowledge")
     knowledge_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -130,6 +139,35 @@ def main() -> int:
     knowledge_index_parser = knowledge_subparsers.add_parser("index")
     knowledge_index_parser.add_argument("--team-path", help="team knowledge repository path")
     knowledge_index_parser.add_argument("--json", action="store_true", help="output JSON")
+    memory_parser = subparsers.add_parser("memory")
+    memory_parser.add_argument("--json", action="store_true", help="output JSON")
+    memory_subparsers = memory_parser.add_subparsers(dest="memory_command")
+    memory_inspect_parser = memory_subparsers.add_parser("inspect")
+    memory_inspect_parser.add_argument("--json", action="store_true", help="output JSON")
+    memory_list_parser = memory_subparsers.add_parser("list")
+    memory_list_parser.add_argument("--type", dest="types", action="append", default=[], help="memory type filter; can be repeated")
+    memory_list_parser.add_argument("--status", help="memory status filter; default: active")
+    memory_list_parser.add_argument("--priority", help="memory priority filter")
+    memory_list_parser.add_argument("--include-body", action="store_true", help="include bounded body excerpts")
+    memory_list_parser.add_argument("--json", action="store_true", help="output JSON")
+    memory_search_parser = memory_subparsers.add_parser("search")
+    memory_search_parser.add_argument("--query", required=True, help="task or topic query")
+    memory_search_parser.add_argument("--type", dest="types", action="append", default=[], help="memory type filter; can be repeated")
+    memory_search_parser.add_argument("--limit", type=int, help="maximum matches")
+    memory_search_parser.add_argument("--include-body", action="store_true", help="include bounded body excerpts")
+    memory_search_parser.add_argument("--include-stale", action="store_true", help="include stale entries")
+    memory_search_parser.add_argument("--include-deprecated", action="store_true", help="include deprecated entries")
+    memory_search_parser.add_argument("--json", action="store_true", help="output JSON")
+    memory_add_parser = memory_subparsers.add_parser("add")
+    memory_add_parser.add_argument("--type", dest="memory_type", required=True, help="memory type")
+    memory_add_parser.add_argument("--title", required=True, help="memory title")
+    memory_add_parser.add_argument("--summary", required=True, help="bounded memory summary")
+    memory_add_parser.add_argument("--body", required=True, help="memory body")
+    memory_add_parser.add_argument("--priority", default="normal", help="memory priority; default: normal")
+    memory_add_parser.add_argument("--source-ref", action="append", default=[], help="source reference; can be repeated")
+    memory_add_parser.add_argument("--json", action="store_true", help="output JSON")
+    memory_update_index_parser = memory_subparsers.add_parser("update-index")
+    memory_update_index_parser.add_argument("--json", action="store_true", help="output JSON")
     args = parser.parse_args()
 
     if args.version:
@@ -215,6 +253,8 @@ def main() -> int:
             if args.knowledge:
                 knowledge = build_knowledge_query(root, from_change=args.change, target=args.target)
                 pack["knowledge"] = compact_knowledge_for_context_pack(knowledge)
+            if args.project_memory:
+                pack["project_memory"] = build_memory_query_for_context_pack(root, change=args.change, target=args.target)
         except ValueError as error:
             print_json(error_response(str(error)), stderr=True)
             return 2
@@ -282,6 +322,54 @@ def main() -> int:
                 return 2
         except ValueError as error:
             print_json(error_response(str(error), "KNOWLEDGE_ERROR"), stderr=True)
+            return 2
+        print_json(result)
+        return exit_code_for(result, fail_on_blocker=False)
+
+    if args.command == "memory" and args.memory_command is None:
+        print_json(error_response("Use one of: inspect, list, search, add, update-index.", "MISSING_SUBCOMMAND"), stderr=True)
+        return 2
+
+    if args.command == "memory":
+        root = resolve_project_root(Path.cwd())
+        try:
+            if args.memory_command == "inspect":
+                result = build_memory_inspect(root)
+            elif args.memory_command == "list":
+                result = build_memory_list(
+                    root,
+                    types=args.types,
+                    status=args.status,
+                    priority=args.priority,
+                    include_body=args.include_body,
+                )
+            elif args.memory_command == "search":
+                result = build_memory_search(
+                    root,
+                    query=args.query,
+                    types=args.types,
+                    limit=args.limit,
+                    include_body=args.include_body,
+                    include_stale=args.include_stale,
+                    include_deprecated=args.include_deprecated,
+                )
+            elif args.memory_command == "add":
+                result = build_memory_add(
+                    root,
+                    memory_type=args.memory_type,
+                    title=args.title,
+                    summary=args.summary,
+                    body=args.body,
+                    priority=args.priority,
+                    source_refs=args.source_ref,
+                )
+            elif args.memory_command == "update-index":
+                result = build_memory_update_index(root)
+            else:
+                print_json(error_response("Use one of: inspect, list, search, add, update-index.", "MISSING_SUBCOMMAND"), stderr=True)
+                return 2
+        except ValueError as error:
+            print_json(error_response(str(error), "MEMORY_ERROR"), stderr=True)
             return 2
         print_json(result)
         return exit_code_for(result, fail_on_blocker=False)

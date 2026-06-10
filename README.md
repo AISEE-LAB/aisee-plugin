@@ -31,18 +31,15 @@
 
 **Aisee** 是 **AI-Enhanced Software Engineering** 的缩写。
 
-Aisee Plugin 是一个面向 OpenSpec 工作流的 AI 软件工程插件。它帮助团队把模糊想法整理成可审查的需求、UI 内容规格、技术架构上下文、schema-aware OpenSpec changes、实现交接 brief、验证检查和归档门禁。
+Aisee Plugin 是一个面向 OpenSpec 工作流的 AI 软件工程插件。它帮助团队把模糊想法整理成可审查的需求、UI 内容规格、技术架构上下文、OpenSpec changes、项目记忆、团队知识 guardrails、实现交接 brief、验证检查和归档门禁。
 
-Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、schema packs、JSON context tooling 和工程交接规则。
+Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、project memory、team knowledge、JSON context tooling 和工程交接规则。
 
-## Schema Capability Boundary
+## OpenSpec Boundary
 
-Aisee CLI 现在按当前 schema 声明工作，而不是把 `aisee-app-spec-driven` 当作隐藏默认模型：
+Aisee 不替代 OpenSpec，也不维护第二套 schema 状态机。只有在处理 OpenSpec change、context pack 或 schema pack 检查时，Aisee 才读取当前 schema 声明；project memory 和 team knowledge 始终只是 guidance / guardrails。
 
-- schema 必须显式声明 `capabilities`、artifact `requiredness`、`na_requires_reason`、`apply.tracks` 和 `archive.tracks`；
-- CLI 只做 parser / checker / projector，不根据 artifact 名称猜 app 语义；
-- `source-map.md`、contracts 和领域证据都只在 schema 或 capability 明确声明时参与门禁；
-- `openspec validate` / `openspec archive` 仍由 OpenSpec 负责，Aisee 只消费证据和输出补充风险。
+当 Aisee 处理 OpenSpec artifacts 时，它只做 parser / checker / projector；`openspec validate` / `openspec archive` 仍由 OpenSpec 负责。
 
 ## 为什么需要 Aisee？
 
@@ -52,10 +49,10 @@ Aisee 的目标是让这些上下文显式化：
 
 - 在实现前澄清业务需求；
 - 分离需求、UI 内容、技术架构和 change planning；
-- 以 schema-aware 的方式创建和补齐 OpenSpec changes；
+- 创建和补齐 OpenSpec changes，并按当前 schema 读取必要 artifacts；
 - 保持 OpenSpec 作为唯一持久规范事实源；
 - 为实现、验证和审查生成机器可读的 context pack；
-- 用 schema 和 skill 约束文档内编号，减少临时发明和重复命名；
+- 用 skill/template 约束文档内编号，减少临时发明和重复命名；
 - 检查 artifacts、tasks、source-map、测试和 review evidence 是否闭环。
 
 ## 敏捷开发模型
@@ -122,7 +119,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 按需扩展：
 
 - 可选扩展：`aisee:design-spec`、`aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object`、`aisee:spec-migrate`
-- 知识循环：`aisee:reflect`、`aisee:knowledge`、`aisee:knowledge-curate`
+- 知识循环：`aisee:reflect`、`aisee:memory`、`aisee:knowledge`、`aisee:knowledge-curate`
 - 硬件 / 实验域：`hw:srs`、`hw:architecture`、`hw:init`、`hw:change-plan`
 
 ## 功能特性
@@ -133,6 +130,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 - **Schema-aware change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
 - **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
 - **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
+- **项目记忆**：`aisee memory` 受控检索和写入当前仓库长期 guidance，不替代 OpenSpec 事实源。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
 - **轻量上下文路由**：`aisee context pack` 在 `source-map.md` 存在时解析来源、编号、候选路径和 evidence 入口。
 - **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
@@ -206,7 +204,7 @@ codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main
 codex plugin add aisee-plugin@aisee-plugin
 ```
 
-检查 CLI-only 状态和 marketplace 提示：
+检查 CLI 与插件内容状态：
 
 ```bash
 aisee plugin inspect --json
@@ -256,7 +254,7 @@ openspec init . --tools none --profile core
 openspec config profile core
 ```
 
-Schema packs 来自 marketplace-installed plugin。`aisee schemas list/check` 只报告项目已安装 schema 状态或开发期源码 schema 状态；不会从 PyPI wheel 安装 schema。
+Schema packs 来自 marketplace-installed plugin。`aisee schemas list/check` 只报告项目已安装 schema 状态或开发期源码 schema 状态；不会由 CLI 自动安装 schema。
 
 再次检查项目状态：
 
@@ -322,6 +320,7 @@ quick-fix / quick-research / 其它轻量 schema
 | `aisee:svg-assets` | 生成、矢量化、优化和校验 SVG assets。 |
 | `aisee:image-object` | 对象级图片分割、mask、去背景和导出工作流。 |
 | `aisee:reflect` | 沉淀可复用项目经验和工作流改进。 |
+| `aisee:memory` | 引导项目记忆 CLI 的 inspect/search/add/update-index 使用。 |
 | `aisee:knowledge` | 引导团队知识 CLI 的初始化、配置、同步、检索和 promote 流程。 |
 | `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
 
@@ -373,8 +372,14 @@ aisee plugin inspect --json
 aisee schemas list --json
 aisee schemas check --json
 aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --project-memory --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee memory inspect --json
+aisee memory list --json
+aisee memory search --query "<task>" --json
+aisee memory add --type pref --title "<title>" --summary "<summary>" --body "<body>" --json
+aisee memory update-index --json
 aisee knowledge inspect --json
 aisee knowledge doctor --json
 aisee knowledge check --json
@@ -391,12 +396,36 @@ aisee knowledge promote-batch --curation <path> --team-path .aisee/team-knowledg
 CLI 关键规则：
 
 - JSON 输出只是上下文视图，不是事实源。
+- `aisee memory` 管理当前仓库项目记忆；`aisee/cache/memory-index.json` 是可删除、可重建 cache。
 - `aisee/cache/knowledge-index.json` 也是可删除、可重建的 cache；team knowledge 的持久来源是已 pin 的 pack/card 文件。
 - `aisee knowledge promote-batch` 只写本地 team knowledge worktree，不自动 commit、push 或创建 PR。
 - OpenSpec artifacts 和 `source-map.md` 是 context pack 的正式输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
 - `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
 - `aisee knowledge query` 只返回少量 guardrails；默认只读 pack manifest 和 card frontmatter，`--debug` 才包含命中 card 的正文摘要。
+
+### 项目记忆
+
+项目记忆用于当前仓库长期有效、但不属于 OpenSpec baseline 的工程 guidance，例如稳定偏好、架构决策摘要、有时效的上下文快照和技术栈约束。
+
+常用命令：
+
+```bash
+aisee memory inspect --json
+aisee memory search --query "commit style" --json
+aisee memory search --query "test command" --type stack --include-body --json
+aisee memory add --type pref --title "提交信息语言" --summary "本项目提交信息默认使用中文。" --body "本项目 commit message 默认使用中文，并遵循 AGENTS.md。" --source-ref AGENTS.md --priority high --json
+aisee memory update-index --json
+aisee context pack --change <change> --for ce-work --project-memory --json
+```
+
+使用原则：
+
+- `aisee:memory` 负责引导这些 CLI 的日常使用；`aisee:reflect` 仍负责会话复盘和候选生成。
+- 默认检索只返回少量 active metadata；需要正文时显式使用 `--include-body`。
+- 新写入只进入 canonical `aisee/memory/`；legacy `.memory/` 只作为 fallback 读取。
+- hooks 只读，只提示 `inspect/search` 和少量高优先级摘要，不能自动写 memory。
+- 项目记忆是 guidance；若与 OpenSpec artifacts、`source-map.md` 或 `tasks.md` 冲突，以 OpenSpec 相关产物为准。
 
 ### 团队知识 Guardrails
 
@@ -434,7 +463,7 @@ aisee knowledge promote-batch --curation <path> --team-path ../aisee-team-knowle
 使用原则：
 
 - `aisee:knowledge` 负责引导这些 CLI 的日常使用，降低初始化、同步、检索和 promote 的门槛。
-- `install`、`update` 和 `promote-batch` 是实验性能力；本地默认 scaffold 不再由 PyPI CLI 提供。PR 自动化和 MCP 服务仍未稳定。
+- `install`、`update` 和 `promote-batch` 是实验性能力；team knowledge 示例来自 marketplace plugin 或外部仓库。PR 自动化和 MCP 服务仍未稳定。
 - 通过 CLI 查询，不让 AI 直接扫描 `knowledge/cards/**/*.md`。
 - 只返回少量带边界的 matches，作为实现、review 或 verify 的提醒。
 - 项目内 `aisee/docs/reflect/knowledge-candidates/` 仍是候选区，不自动进入 team knowledge。
@@ -453,10 +482,8 @@ plugins/aisee-plugin/
   references/        跨 skill contracts 和 references
 bin/                 本地 CLI 入口
 src/aisee_cli/       Aisee Python CLI
-src/aisee_plugin_assets/
-                     最小兼容 package；不再携带 skills、schemas、references 或 plugin metadata
-docs/                用户 workflow、最佳实践、架构、计划和 review 文档
-docs/architecture/   架构与历史决策文档
+docs/                用户 workflow、最佳实践、架构和发布文档
+docs/architecture/   架构文档
 docs/plans/          开发计划
 docs/reviews/        审计和 review 记录
 scripts/             开发和发布辅助脚本
@@ -513,7 +540,7 @@ python scripts/smoke_release.py --with-pipx
 - OpenSpec 是 canonical specification source。
 - 不在 Aisee docs、CLI cache 或聊天总结中创建平行事实源。
 - Skill 保持单一职责：需求、UI 内容、架构、change planning、implementation bridge、verify、archive guard。
-- 优先使用 schema-aware 检查，而不是硬编码 artifact 假设。
+- 处理 OpenSpec change 时读取当前 schema 声明，不硬编码 app artifact 假设。
 - `SKILL.md` 保持精简，长规则放到 references 或 architecture docs。
 - 硬件和嵌入式流程作为专用扩展处理，不强行套入 app schema。
 
@@ -527,12 +554,12 @@ python scripts/smoke_release.py --with-pipx
 
 ### 持续兼容治理
 
-- 继续按 Compatibility Policy 维护 CLI JSON、schema packs、context packs、marketplace plugin content 和 skill contracts；新增或破坏公开契约时同步补测试、迁移说明和 release notes。
-- 增加 app 场景之外的真实生命周期 fixtures，优先覆盖 quick-fix、quick-research、docsite 和 infra-change。
+- 继续按 Compatibility Policy 维护 CLI JSON、project memory、team knowledge、context packs、marketplace plugin content 和 skill contracts；新增或破坏公开契约时同步补测试、迁移说明和 release notes。
+- 用真实项目 dogfood 验证 memory 检索、context pack 交接和 knowledge guardrails，不为了覆盖 schema 类型扩展抽象流程。
 
 ### 后续
 
-- 扩展跨仓库契约协作示例。
+- 完善 project memory 的冲突提示、过期策略和低上下文注入规则。
 - 收敛 team knowledge 的远程同步、promote workflow、生命周期管理和可选 MCP 包装。
 
 ## License

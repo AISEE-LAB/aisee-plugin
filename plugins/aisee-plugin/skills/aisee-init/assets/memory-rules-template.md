@@ -11,7 +11,7 @@
 {project-root}/
 └── aisee/
     └── memory/
-        ├── index.md       ← 入口文件；始终先读它
+        ├── index.md       ← 入口摘要；由 CLI 重建
         ├── rules.md       ← 写入与读取规则
         ├── arch/          ← 架构决策，长期保留
         │   └── YYYY-MM-DD-{slug}.md
@@ -32,7 +32,7 @@
 | `ctx/` | `YYYY-MM-DD-{slug}.md` | 约 30 天 | 每次快照追加新文件 |
 | `stack/` | `{technology}.md` | 长期 | 技术栈信息变化时覆盖 |
 
-Slug 规则：小写、只用连字符、无空格、无特殊字符。
+Slug 由 `aisee memory add` 自动生成：小写、只用连字符、无空格、无特殊字符；中文标题会生成安全 hash slug。
 示例：`use-postgres`、`auth-refactor`、`drop-redux`。
 
 ## index.md 格式
@@ -61,34 +61,33 @@ Slug 规则：小写、只用连字符、无空格、无特殊字符。
 
 ## 执行规则
 
-1. 始终先读 `aisee/memory/index.md`，不要直接扫描整个 `aisee/memory/` 树。
-2. 只加载当前任务相关的具体记忆文件。
-3. 写入前确认 `aisee/memory/` 位于项目根目录；不存在则在项目根目录创建。
-4. 先写 memory 文件，再更新 `aisee/memory/index.md`。
-5. 不要把项目记忆写到项目根目录之外的位置。
-6. 无法判断项目根目录时，停止并询问用户，不要退回到全局路径。
+1. 使用 `aisee memory inspect --json` 发现项目记忆状态和命令入口。
+2. 使用 `aisee memory search --query "<task>" --json` 只加载当前任务相关记忆。
+3. 只有需要正文时才显式使用 `--include-body`。
+4. 写入必须来自用户明确意图，并通过 `aisee memory add ... --json` 写入 canonical `aisee/memory/`。
+5. 重建入口和 cache 使用 `aisee memory update-index --json`。
+6. 不要把项目记忆写到项目根目录之外的位置。
+7. 无法判断项目根目录时，停止并询问用户，不要退回到全局路径。
 
-违反第 5 或第 6 条属于严重执行错误。
+违反第 6 或第 7 条属于严重执行错误。
 
 ## 记忆文件格式
 
-每个记忆文件使用以下结构：
+CLI 新写入的每个记忆文件使用 YAML frontmatter + Markdown 正文。旧粗体 metadata 只作为 legacy fallback 读取，不再作为新写入格式。
 
 ```markdown
-# {标题}
+---
+id: <safe-slug>
+title: <标题>
+type: arch | pref | ctx | stack
+status: active
+priority: high | normal | low
+summary: <一句话摘要>
+source_refs: []
+updated_at: <ISO datetime>
+---
 
-**日期：** YYYY-MM-DD
-**类型：** arch | pref | ctx | stack
-
-## 摘要
-
-一到两句话说明这条记忆记录了什么。
-
-## 详情
+# <标题>
 
 正文内容。
-
-## 引用
-
-- 相关文件或链接（如有）
 ```
