@@ -5,7 +5,7 @@ This document describes the recommended software development workflow for Aisee 
 ## Core Principles
 
 - OpenSpec is the specification state machine and baseline source of truth.
-- Aisee handles requirement clarification, context shaping, schema-aware handoff, and guardrails.
+- Aisee handles requirement clarification, context shaping, memory/knowledge enhancement, schema-aware handoff, and guardrails.
 - Aisee CLI emits JSON context views. It does not create a second specification source.
 - Implementation, review, and test work can be handled by Compound Engineering or another coding agent.
 - `openspec archive <change>` is the final operation that merges a verified change into the baseline.
@@ -30,7 +30,6 @@ Use `aisee:init` to audit or create:
 
 - `AGENTS.md`
 - `openspec/project.md`
-- `aisee/registry/`
 - `aisee/memory/`
 - required hooks
 
@@ -45,7 +44,8 @@ The following capabilities are conditional, not mandatory on every iteration:
 - `aisee:design-spec` / `aisee:design-assets`: only when visual rules, references, or asset planning are needed.
 - `aisee:svg-assets` / `aisee:image-object`: only for asset production or image-object workflows.
 - `aisee:spec-migrate`: only when onboarding an existing project into a baseline spec flow.
-- `aisee:reflect` / `aisee:knowledge-curate`: only for retrospectives and team knowledge curation.
+- `aisee:memory`: only for controlled project memory retrieval, writes, and index maintenance.
+- `aisee:reflect` / `aisee:knowledge-curate`: only for retrospectives, project memory candidates, and team knowledge curation.
 - `hw:*`: only for hardware, embedded, or experimental domains; they do not affect the default app workflow.
 
 ## 1. Upfront Clarification
@@ -133,6 +133,15 @@ Before implementation, confirm the change is authored.
 aisee context pack --change <change> --for ce-work --json
 ```
 
+If the project has long-lived local guidance such as commit preferences, test commands, architecture decision summaries, or stack constraints, retrieve project memory explicitly:
+
+```bash
+aisee memory search --query "<current implementation task>" --json
+aisee context pack --change <change> --for ce-work --project-memory --json
+```
+
+Project memory matches are guidance only. They do not change the current change's specification source and should not be copied into OpenSpec artifacts.
+
 If the project has configured team knowledge, read a small number of guardrails before high-risk implementation such as public interfaces, schemas, path reads, security, or cross-repository contracts:
 
 ```bash
@@ -205,6 +214,27 @@ Then run:
 ```bash
 openspec archive <change>
 ```
+
+## 7. Project Memory Usage
+
+Project memory serves current-repository guidance. It is not cross-project reuse and does not replace OpenSpec.
+
+Recommended path:
+
+```bash
+aisee memory inspect --json
+aisee memory search --query "<task>" --json
+aisee memory add --type pref --title "<title>" --summary "<summary>" --body "<body>" --json
+aisee memory update-index --json
+```
+
+Boundaries:
+
+- Default retrieval returns a small number of active metadata entries, not full bodies.
+- Write only when the user explicitly says "remember", "from now on", or asks to write project memory.
+- New writes go only to canonical `aisee/memory/`; legacy `.memory/` is read-only fallback.
+- Hooks are read-only and never write memory automatically.
+- If memory conflicts with OpenSpec artifacts, `source-map.md`, or `tasks.md`, OpenSpec artifacts win.
 
 ## 8. Team Knowledge Reuse
 

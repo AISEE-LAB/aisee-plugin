@@ -122,7 +122,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 按需扩展：
 
 - 可选扩展：`aisee:design-spec`、`aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object`、`aisee:spec-migrate`
-- 知识循环：`aisee:reflect`、`aisee:knowledge`、`aisee:knowledge-curate`
+- 知识循环：`aisee:reflect`、`aisee:memory`、`aisee:knowledge`、`aisee:knowledge-curate`
 - 硬件 / 实验域：`hw:srs`、`hw:architecture`、`hw:init`、`hw:change-plan`
 
 ## 功能特性
@@ -133,6 +133,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 - **Schema-aware change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
 - **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
 - **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
+- **项目记忆**：`aisee memory` 受控检索和写入当前仓库长期 guidance，不替代 OpenSpec 事实源。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
 - **轻量上下文路由**：`aisee context pack` 在 `source-map.md` 存在时解析来源、编号、候选路径和 evidence 入口。
 - **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
@@ -322,6 +323,7 @@ quick-fix / quick-research / 其它轻量 schema
 | `aisee:svg-assets` | 生成、矢量化、优化和校验 SVG assets。 |
 | `aisee:image-object` | 对象级图片分割、mask、去背景和导出工作流。 |
 | `aisee:reflect` | 沉淀可复用项目经验和工作流改进。 |
+| `aisee:memory` | 引导项目记忆 CLI 的 inspect/search/add/update-index 使用。 |
 | `aisee:knowledge` | 引导团队知识 CLI 的初始化、配置、同步、检索和 promote 流程。 |
 | `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
 
@@ -373,8 +375,14 @@ aisee plugin inspect --json
 aisee schemas list --json
 aisee schemas check --json
 aisee context pack --change <change> --for ce-work --json
+aisee context pack --change <change> --for ce-work --project-memory --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
+aisee memory inspect --json
+aisee memory list --json
+aisee memory search --query "<task>" --json
+aisee memory add --type pref --title "<title>" --summary "<summary>" --body "<body>" --json
+aisee memory update-index --json
 aisee knowledge inspect --json
 aisee knowledge doctor --json
 aisee knowledge check --json
@@ -391,12 +399,36 @@ aisee knowledge promote-batch --curation <path> --team-path .aisee/team-knowledg
 CLI 关键规则：
 
 - JSON 输出只是上下文视图，不是事实源。
+- `aisee memory` 管理当前仓库项目记忆；`aisee/cache/memory-index.json` 是可删除、可重建 cache。
 - `aisee/cache/knowledge-index.json` 也是可删除、可重建的 cache；team knowledge 的持久来源是已 pin 的 pack/card 文件。
 - `aisee knowledge promote-batch` 只写本地 team knowledge worktree，不自动 commit、push 或创建 PR。
 - OpenSpec artifacts 和 `source-map.md` 是 context pack 的正式输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
 - `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
 - `aisee knowledge query` 只返回少量 guardrails；默认只读 pack manifest 和 card frontmatter，`--debug` 才包含命中 card 的正文摘要。
+
+### 项目记忆
+
+项目记忆用于当前仓库长期有效、但不属于 OpenSpec baseline 的工程 guidance，例如稳定偏好、架构决策摘要、有时效的上下文快照和技术栈约束。
+
+常用命令：
+
+```bash
+aisee memory inspect --json
+aisee memory search --query "commit style" --json
+aisee memory search --query "test command" --type stack --include-body --json
+aisee memory add --type pref --title "提交信息语言" --summary "本项目提交信息默认使用中文。" --body "本项目 commit message 默认使用中文，并遵循 AGENTS.md。" --source-ref AGENTS.md --priority high --json
+aisee memory update-index --json
+aisee context pack --change <change> --for ce-work --project-memory --json
+```
+
+使用原则：
+
+- `aisee:memory` 负责引导这些 CLI 的日常使用；`aisee:reflect` 仍负责会话复盘和候选生成。
+- 默认检索只返回少量 active metadata；需要正文时显式使用 `--include-body`。
+- 新写入只进入 canonical `aisee/memory/`；legacy `.memory/` 只作为 fallback 读取。
+- hooks 只读，只提示 `inspect/search` 和少量高优先级摘要，不能自动写 memory。
+- 项目记忆是 guidance；若与 OpenSpec artifacts、`source-map.md` 或 `tasks.md` 冲突，以 OpenSpec 相关产物为准。
 
 ### 团队知识 Guardrails
 

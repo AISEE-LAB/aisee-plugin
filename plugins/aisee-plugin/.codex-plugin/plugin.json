@@ -1,6 +1,6 @@
 {
   "name": "aisee-plugin",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "AI-Enhanced Software Engineering plugin for OpenSpec and Compound Engineering workflows.",
   "author": {
     "name": "Fengliang"
@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "Aisee",
     "shortDescription": "AI-Enhanced Software Engineering for OpenSpec-driven development.",
-    "longDescription": "Aisee helps teams run OpenSpec-driven development with structured requirements, schema-aware change authoring, context packs, team knowledge guardrails, and Compound Engineering handoffs.",
+    "longDescription": "Aisee helps teams run OpenSpec-driven development with structured requirements, schema-aware change authoring, project memory, team knowledge guardrails, context packs, and Compound Engineering handoffs.",
     "developerName": "Fengliang",
     "category": "Coding",
     "capabilities": [

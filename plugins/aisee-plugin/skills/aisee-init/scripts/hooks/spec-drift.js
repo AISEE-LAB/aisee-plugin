@@ -29,6 +29,12 @@ const IGNORE_PATTERNS = [
   /运行|测试|部署|install|npm|pnpm|yarn|git|提交|commit|push/i
 ];
 
+const MEMORY_WRITE_SIGNALS = [
+  /记住|保存到项目记忆|写入项目记忆|更新项目记忆|加入项目记忆|提升到记忆/,
+  /以后(都|默认)|后续(都|默认)|本项目以后|本项目默认/,
+  /project memory|aisee memory|remember this|from now on|always use/i
+];
+
 const ARTIFACT_EXCERPTS = [
   {
     file: 'proposal.md',
@@ -74,6 +80,10 @@ function scorePrompt(prompt) {
 
 function shouldIgnore(prompt) {
   return IGNORE_PATTERNS.some(pattern => pattern.test(prompt.trim()));
+}
+
+function hasMemoryWriteIntent(prompt) {
+  return MEMORY_WRITE_SIGNALS.some(pattern => pattern.test(prompt));
 }
 
 function activeChanges(cwd) {
@@ -196,6 +206,19 @@ function buildInjection(prompt, data) {
   ].join('\n');
 }
 
+function buildMemoryGuidance(prompt) {
+  return [
+    '[Aisee 项目记忆写入提示]',
+    '用户请求可能是在表达长期项目记忆或稳定偏好。',
+    '不要由 hook 自动写文件；先确认这是否应成为长期项目记忆。',
+    '如确认写入，使用 `aisee:memory` 工作流，并优先通过 `aisee memory add --type <arch|pref|ctx|stack> --title "<title>" --summary "<summary>" --body "<body>" --json` 写入 canonical `aisee/memory/`。',
+    '如果只是会话复盘或候选沉淀，使用 `aisee:reflect` 生成候选，不直接提升为 active memory。',
+    '项目记忆是 guidance，不替代 OpenSpec、source-map 或 tasks。',
+    '',
+    `用户请求：${prompt}`
+  ].join('\n');
+}
+
 function outputAdditionalContext(eventName, context) {
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: {
@@ -221,6 +244,11 @@ process.stdin.on('end', () => {
   const prompt = input.prompt || input.tool_input?.prompt || '';
   const cwd = input.cwd || process.cwd();
   const eventName = input.hook_event_name || 'UserPromptSubmit';
+
+  if (prompt && hasMemoryWriteIntent(prompt)) {
+    outputAdditionalContext(eventName, buildMemoryGuidance(prompt));
+    process.exit(0);
+  }
 
   if (!prompt || shouldIgnore(prompt) || scorePrompt(prompt) < THRESHOLD) process.exit(0);
 

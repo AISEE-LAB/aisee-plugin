@@ -233,7 +233,27 @@ archive 前应满足：
 - 用人工确认的路径和摘录控制上下文大小。
 - 不暴露源码、密钥、环境变量或全仓库搜索结果。
 
-## 14. Team knowledge 只提供 guardrails
+## 14. Project memory 只提供当前项目 guidance
+
+Project memory 用于当前仓库长期有效、但不属于 OpenSpec baseline 的 guidance。
+
+推荐：
+
+- 用 `aisee memory inspect --json` 发现状态和命令入口。
+- 用 `aisee memory search --query "<task>" --json` 按任务检索少量 active metadata。
+- 需要正文时显式传 `--include-body`，不要默认读完整正文。
+- 只有用户明确要求长期记住时，才用 `aisee memory add ... --json` 写入。
+- 用 `aisee memory update-index --json` 重建 `index.md` 和 cache。
+
+避免：
+
+- 直接递归读取整个 `aisee/memory/` 或 `.memory/` 树作为 AI 上下文。
+- 把 project memory 写进 OpenSpec artifacts，或把它当 baseline 事实源。
+- 让 hooks 自动写 memory。
+- 把 `aisee/cache/memory-index.json` 当事实源。
+- 将当前项目 memory 复制到团队知识库；跨项目复用应先走 `aisee:knowledge-curate`。
+
+## 15. Team knowledge 只提供 guardrails
 
 团队知识库用于跨项目复用工程经验，但不能成为第二套规范事实源。
 
@@ -254,13 +274,13 @@ archive 前应满足：
 - 让向量索引、cache 或 AI 摘要成为事实源。
 - 在 archive、verify 后自动写入 team knowledge。
 
-## 15. 不要把 Aisee 做成另一个 OpenSpec
+## 16. 不要把 Aisee 做成另一个 OpenSpec
 
 Aisee 应解决 OpenSpec 不负责的部分：
 
 - 前置澄清；
 - schema-aware 规划；
-- ID 和 source-map 追踪；
+- 文档内编号约束和 source-map 路由；
 - AI context pack；
 - 实现交接；
 - verify / archive guard。
@@ -275,7 +295,7 @@ Aisee 应解决 OpenSpec 不负责的部分：
 
 当某个能力已经由 OpenSpec 原生提供时，Aisee 只应做衔接、校验或上下文优化。
 
-## 16. 从真实项目 dogfood，而不是无限补抽象
+## 17. 从真实项目 dogfood，而不是无限补抽象
 
 主链路可用后，优先用真实或样例项目验证：
 

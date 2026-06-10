@@ -1,8 +1,8 @@
 # Memory Index
 
-> 项目记忆入口。
+> 项目记忆入口；Project memory 是项目本地指导信息，不是 OpenSpec 事实源。
 > 项目记忆规则：`aisee/memory/rules.md`
-> 先读本索引，再只加载当前任务相关条目。
+> 使用 `aisee memory inspect --json` 发现状态，使用 `aisee memory search --query "<task>" --json` 按需检索。
 
 ## 架构决策（arch/）
 

@@ -181,6 +181,7 @@ def run_cli_smoke(aisee: Path, project_dir: Path) -> None:
     schemas = assert_json_command([str(aisee), "schemas", "list", "--json"], cwd=project_dir, env=env)
     assert_json_command([str(aisee), "schemas", "check", "--json"], cwd=project_dir, env=env)
     assert_json_command([str(aisee), "schemas", "format", "--check", "--json"], cwd=project_dir, env=env)
+    memory = assert_json_command([str(aisee), "memory", "inspect", "--json"], cwd=project_dir, env=env)
     if "codex_marketplace" not in doctor:
         raise RuntimeError("doctor output did not include codex_marketplace")
     if inspect.get("mode") != "cli-only":
@@ -191,6 +192,8 @@ def run_cli_smoke(aisee: Path, project_dir: Path) -> None:
         raise RuntimeError("plugin export invalid choice should not create the destination directory")
     if schemas.get("source") is not None:
         raise RuntimeError("schema list should not report packaged schema source in installed wheel")
+    if memory.get("status") != "missing" or memory.get("meta", {}).get("writes") is not False:
+        raise RuntimeError("memory inspect should be a read-only missing-status command in an empty CLI-only project")
 
 
 def parse_args() -> argparse.Namespace:

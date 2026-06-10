@@ -10,6 +10,8 @@ const path = require('path');
 
 const MAX_ACTIVE_CHANGES = 8;
 const MAX_KNOWLEDGE_ENTRIES = 10;
+const MAX_MEMORY_HINTS = 3;
+const MAX_MEMORY_SUMMARY_CHARS = 140;
 
 const KNOWLEDGE_SOURCES = [
   {
@@ -73,6 +75,67 @@ function countMarkdownFiles(dirPath) {
   }
 }
 
+function readMemoryMetadata(filePath) {
+  const content = readLines(filePath, 80);
+  if (!content) return null;
+
+  const frontmatter = content.match(/^---\n([\s\S]*?)\n---/);
+  const pick = (name) => {
+    if (frontmatter) {
+      const match = frontmatter[1].match(new RegExp(`^${name}:\\s*(.+)$`, 'm'));
+      if (match) return match[1].trim().replace(/^['"]|['"]$/g, '');
+    }
+    const legacyNames = {
+      type: '(?:类型|Type)',
+      status: '(?:状态|Status)',
+      priority: '(?:优先级|Priority)',
+      summary: '(?:摘要|Summary)'
+    };
+    if (!legacyNames[name]) return '';
+    const legacy = content.match(new RegExp(`\\*\\*${legacyNames[name]}：?\\*\\*\\s*([^\\n]+)`, 'i'));
+    return legacy ? legacy[1].trim() : '';
+  };
+
+  const heading = (content.match(/^#\s+(.+)$/m) || [])[1] || path.basename(filePath, '.md');
+  return {
+    title: pick('title') || heading,
+    type: pick('type') || path.basename(path.dirname(filePath)),
+    status: pick('status') || 'active',
+    priority: pick('priority') || 'normal',
+    summary: (pick('summary') || heading).slice(0, MAX_MEMORY_SUMMARY_CHARS),
+    relativePath: filePath
+  };
+}
+
+function highPriorityMemoryHints(cwd, baseDir) {
+  const hints = [];
+  for (const memoryType of ['arch', 'pref', 'ctx', 'stack']) {
+    const dirPath = path.join(baseDir, memoryType);
+    let files = [];
+    try {
+      files = fs.readdirSync(dirPath)
+        .filter(name => name.endsWith('.md') && !name.startsWith('.'))
+        .map(name => path.join(dirPath, name))
+        .sort();
+    } catch {
+      files = [];
+    }
+
+    for (const filePath of files) {
+      const item = readMemoryMetadata(filePath);
+      if (!item || item.status !== 'active' || item.priority !== 'high') continue;
+      hints.push({
+        type: item.type,
+        title: item.title,
+        summary: item.summary,
+        path: path.relative(cwd, filePath)
+      });
+    }
+  }
+
+  return hints.slice(0, MAX_MEMORY_HINTS);
+}
+
 function schemaName(changeDir, cwd) {
   const changeConfig = path.join(changeDir, '.openspec.yaml');
   const projectConfig = path.join(cwd, 'openspec', 'config.yaml');
@@ -121,28 +184,33 @@ function summarizeChanges(cwd) {
 }
 
 function summarizeMemory(cwd) {
-  const canonicalRules = path.join(cwd, 'aisee', 'memory', 'rules.md');
-  const canonicalIndex = path.join(cwd, 'aisee', 'memory', 'index.md');
-  const legacyRules = path.join(cwd, '.memory', 'rules.md');
-  const legacyIndex = path.join(cwd, '.memory', 'index.md');
-  const hasCanonical = fs.existsSync(canonicalRules) || fs.existsSync(canonicalIndex);
-  const hasLegacy = fs.existsSync(legacyRules) || fs.existsSync(legacyIndex);
+  const canonicalRoot = path.join(cwd, 'aisee', 'memory');
+  const legacyRoot = path.join(cwd, '.memory');
+  const hasCanonical = fs.existsSync(canonicalRoot);
+  const hasLegacy = fs.existsSync(legacyRoot);
 
   if (!hasCanonical && !hasLegacy) return null;
 
-  const rulesPath = fs.existsSync(canonicalRules) ? canonicalRules : legacyRules;
-  const indexPath = fs.existsSync(canonicalIndex) ? canonicalIndex : legacyIndex;
-  const files = [
-    fs.existsSync(rulesPath) && path.relative(cwd, rulesPath),
-    fs.existsSync(indexPath) && path.relative(cwd, indexPath)
-  ].filter(Boolean).join('、');
+  const activeRoot = hasCanonical ? canonicalRoot : legacyRoot;
+  const hints = highPriorityMemoryHints(cwd, activeRoot);
   const legacyNote = hasLegacy && hasCanonical
     ? '检测到 legacy `.memory/`，仅作迁移提示；优先使用 `aisee/memory/`。'
     : hasLegacy
       ? '当前仅发现 legacy `.memory/`，可 fallback 读取；新写入应使用 `aisee/memory/`。'
       : '';
+  const hintText = hints.length
+    ? [
+        '高优先级项目记忆摘要（最多 3 条，正文不注入）：',
+        ...hints.map(item => `- [${item.type}] ${item.title}：${item.summary}（${item.path}）`)
+      ].join('\n')
+    : '未注入具体记忆正文；按任务需要检索。';
 
-  return `项目记忆入口：${files}。先读规则和索引，再只加载本任务相关条目。${legacyNote}`;
+  return [
+    '项目记忆：Project memory 是项目本地指导信息，不是 OpenSpec 事实源。',
+    '使用 `aisee memory inspect --json` 发现状态；使用 `aisee memory search --query "<当前任务>" --json` 受控检索。',
+    hintText,
+    legacyNote
+  ].filter(Boolean).join('\n');
 }
 
 function summarizeKnowledge(cwd) {

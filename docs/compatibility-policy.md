@@ -80,6 +80,7 @@
 - `facts.parsed` 表示从文件解析出的事实；
 - `facts.derived` 表示 CLI 派生视图；
 - `knowledge.matches` 是可选 guardrails，不得污染 `facts.parsed` 或 `facts.derived`；
+- `project_memory.matches` 只在显式 `--project-memory` 时出现，不得污染 `facts.parsed` 或 `facts.derived`；
 - context pack 可以变大，但默认输出必须保持可控；
 - 新 target 必须说明消费方、读取顺序和缺失字段处理方式。
 
@@ -88,7 +89,7 @@
 以下属于公开契约：
 
 - GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
-- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 core / optional / knowledge / hardware 分层，以及 core 11 skill 集合；
+- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 core / optional / knowledge / hardware 分层，以及 core 10 skill 集合；
 - `aisee plugin inspect --json` 在 CLI-only 安装中返回稳定状态和 setup hint；
 - PyPI wheel 只承诺 CLI 能力；skills、references、schema packs、team knowledge templates 和 plugin metadata 通过 marketplace plugin 或外部仓库分发。
 
@@ -119,6 +120,19 @@
 
 破坏性变更包括把 planning doc diagnostics 变成写入命令，或改变 root resolution 使 monorepo 子项目误读为仓库顶层。
 
+### Project Memory
+
+以下属于公开契约：
+
+- `aisee memory inspect/list/search/add/update-index --json` 命令存在且输出合法 JSON；
+- project memory 的 canonical 路径是 `aisee/memory/`，legacy `.memory/` 只作为 fallback 读取；
+- `inspect/search/list` 默认只读，`add/update-index` 必须通过 `meta.writes` 标记写入；
+- 默认检索只返回 bounded metadata，不返回完整正文；
+- `aisee/cache/memory-index.json` 是可删除、可重建 cache，不是事实源；
+- `aisee context pack --project-memory` 只把 matches 放入独立 `project_memory` 字段。
+
+破坏性变更包括删除命令、默认注入完整正文、把 memory 混入 OpenSpec facts、或让 hooks 自动写 memory。
+
 ## Experimental Contracts
 
 当前仍为 experimental：
@@ -141,13 +155,14 @@ Experimental 能力可以变化，但文档必须清楚说明：
 以下不能作为事实源或稳定 contract：
 
 - `aisee/cache/knowledge-index.json`；
+- `aisee/cache/memory-index.json`；
 - parser 内部 helper；
 - scoring 权重；
 - 构建缓存；
 - 测试 fixture 的内部组织；
 - chat summary。
 
-缓存必须可删除、可重建；事实源只能来自 OpenSpec artifacts、source-map、tasks、明确 pin 的 team knowledge card/pack。
+缓存必须可删除、可重建；事实源只能来自 OpenSpec artifacts、source-map、tasks、明确 pin 的 team knowledge card/pack。Project memory 是项目 guidance，不是 OpenSpec 事实源。
 
 ## 版本规则
 

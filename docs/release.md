@@ -34,6 +34,20 @@ Aisee 使用 SemVer：
 
 公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
 
+## 0.9.0 合同提示
+
+`0.9.0` 新增公开 project memory CLI 面：
+
+- 新增 `aisee memory inspect/list/search/add/update-index --json`。
+- canonical 项目记忆路径是 `aisee/memory/`；legacy `.memory/` 只作为 fallback 读取。
+- 默认检索只返回少量 active metadata；正文必须显式 `--include-body`。
+- `aisee context pack --project-memory` 显式 opt-in 注入独立 `project_memory` 字段，不污染 `facts.parsed` 或 `facts.derived`。
+- hooks 只读，只提示 `aisee memory inspect/search` 和少量 high-priority 摘要；写入必须来自用户明确意图。
+- 新增 `aisee:memory` skill，并与 `aisee:reflect` 联动：reflect 负责候选，确认提升后通过 `aisee memory add` 写入。
+- `aisee/cache/memory-index.json` 是可删除、可重建 cache，不是事实源。
+
+本版本属于 minor release，因为新增了公开 CLI 命令组、公开 skill 和 JSON contract。
+
 ## 0.8.0 合同提示
 
 `0.8.0` 继续收缩 CLI 职责，把编号降级为 skill/template 写作约束：
@@ -116,6 +130,7 @@ python scripts/smoke_release.py
 
 - `aisee plugin inspect --json` 在 installed wheel 中返回 `mode=cli-only`；
 - `aisee doctor --json` 仍输出 Codex marketplace setup hint；
+- `aisee memory inspect --json` 在 installed wheel 中可用且只读；
 - `aisee plugin export ...` 返回 argparse `invalid choice`，且不会创建目标目录；
 - `aisee schemas list --json` 在 wheel-only 环境不报告 packaged schema source。
 
@@ -188,7 +203,7 @@ python scripts/smoke_release.py --with-pipx
 - `docs/compatibility-policy.md` 是否覆盖新增或破坏的公开契约。
 - `docs/schema-packs.md` 是否覆盖新增或调整的 schema。
 - `docs/plugin-marketplace.md` 是否覆盖 plugin manifest、marketplace listing 和 Codex 安装路径。
-- `plugins/aisee-plugin/references/skill-taxonomy.md`、README 和 workflow 是否仍与 core 11 / 扩展 skill 分层一致。
+- `plugins/aisee-plugin/references/skill-taxonomy.md`、README 和 workflow 是否仍与 core 10 / 扩展 skill 分层一致。
 - 新增 skill、reference、schema pack 或 team knowledge template 是否位于 repository plugin content 源内，并能通过 Codex marketplace 安装读取。
 - 新增 CLI JSON 字段是否有 contract tests。
 - 破坏性或用户可见变更是否写入 `CHANGELOG.md`。

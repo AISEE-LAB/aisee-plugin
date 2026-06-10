@@ -10,7 +10,7 @@ GitHub / Codex marketplace
 
 PyPI / pipx
   -> installs the Aisee CLI
-  -> provides project-local JSON context tooling, OpenSpec companion checks, registry, ID, and knowledge query commands
+  -> provides project-local JSON context tooling, OpenSpec companion checks, project memory, team knowledge, and version/distribution governance commands
 ```
 
 Marketplace installation does not install the `aisee` CLI. PyPI / pipx installation does not install bundled skills, schema packs, references, or team knowledge templates.
