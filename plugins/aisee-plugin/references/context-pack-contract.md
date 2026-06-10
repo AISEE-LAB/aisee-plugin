@@ -108,9 +108,12 @@ Field rules:
   "schema": {
     "name": "aisee-app-spec-driven",
     "version": 2,
+    "capabilities": ["source_map_traceability", "apply_execution", "contract_helper"],
     "artifacts": [],
     "apply_requires": ["tasks"],
-    "archive_tracks": ["tasks.md", "source-map.md", "specs/**/*.md"]
+    "apply_tracks": "tasks.md",
+    "archive_tracks": ["tasks.md", "source-map.md"],
+    "issues": []
   },
   "artifacts": {},
   "sources": [],
@@ -126,6 +129,7 @@ Rules:
 - `project_rules.primary` 优先为 `AGENTS.md`。
 - `CLAUDE.md` 只能作为 legacy fallback。
 - `schema.artifacts` 来自当前 change schema 或 OpenSpec CLI 输出，不得硬编码 app/device artifact。
+- `schema.capabilities`、artifact `requiredness` 和 `na_requires_reason` 来自当前 schema 声明；skill 不得自行补默认 app 语义。
 - `artifacts` 只承诺 metadata scan 和原文入口；不要把 contract 内容解析成业务语义。
 - `source_map` 作为 Aisee companion artifact，可包含 `upstream_sources`、`id_trace`、`artifact_applicability`、`implementation_paths`、`verification_evidence`、`out_of_scope` 和 parse issues。
 - `sources` 只包含 `aisee/registry/sources.json` 和 `source-map.md` 明确引用的上游来源。

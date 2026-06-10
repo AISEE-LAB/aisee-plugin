@@ -1,227 +1,444 @@
 name: aisee-device-spec-driven
 version: 3
-description: |
-  适用场景：硬件相关项目的 OpenSpec 执行层，包括 MCU、RTOS、bare-metal、嵌入式 Linux、IoT 设备、网关、驱动、协议库、板级 bring-up、量产导入和现场维护。
+description: '适用场景：硬件相关项目的 OpenSpec 执行层，包括 MCU、RTOS、bare-metal、嵌入式 Linux、IoT 设备、网关、驱动、协议库、板级 bring-up、量产导入和现场维护。
+
   与 aisee-app-spec-driven 的区别：不假设 Web UI、数据库或 HTTP 服务合同，而是围绕硬件资源、固件/设备软件、运行时约束、通信连接、安全、生产制造、运维和验证计划组织 artifacts。
+
   本 schema 设计为承接 hw:srs、hw:architecture 和 hw:change-plan 的 OpenSpec change 模板。
+
   不适用的 contract artifact 必须写 N/A 原因，不能删除 artifact 以绕过追踪。
+
   创建时间：2026-05-24
+
   更新：2026-05-27
+
   维护人：@aisee
 
+  '
+capabilities:
+- source_map_traceability
+- apply_execution
+- archive_authority
 artifacts:
-  - id: proposal
-    generates: proposal.md
-    description: "变更提案：为什么做、做什么、不做什么、目标平台、项目阶段和成功标准"
-    template: proposal.md
-    requires: []
-    instruction: |
-      proposal.md 必须明确：
-      - 背景、问题、目标、非目标和用户/系统价值
-      - 项目阶段：PoC / EVT / DVT / PVT / MP / field update / maintenance / research
-      - 交付形态：prototype / production firmware / Linux image / kernel driver / user-space service / SDK / library / host tool / manufacturing tool
-      - 目标平台：MCU / RTOS / bare-metal / embedded Linux / gateway / host-side tool / FPGA or custom hardware / other
-      - 硬件、固件/软件、运行时、连接、安全、生产、运维和验证范围
-      - 成功标准必须可验证，避免只写“功能正常”
-      - 如果本 change 来自 hw:change-plan，必须说明 change-plan 中的名称、依赖和 source-map seed
-      - 不要写寄存器细节、完整引脚表、任务调度细节或测试步骤；这些进入对应 contract artifacts
+- id: proposal
+  generates: proposal.md
+  description: 变更提案：为什么做、做什么、不做什么、目标平台、项目阶段和成功标准
+  template: proposal.md
+  requires: []
+  requiredness: always
+  capabilities:
+  - primary_brief
+  instruction: 'proposal.md 必须明确：
 
-  - id: source-map
-    generates: source-map.md
-    description: "来源映射：绑定规划文档、硬件资料、外部系统、工程事实与本 change 范围"
-    template: source-map.md
-    requires: [proposal]
-    instruction: |
-      source-map.md 是本 schema 的追踪核心，必须：
-      - 列出上游来源：aisee/docs/requirements/*-hw-srs.md、aisee/docs/architecture/*-hw-architecture.md、docs/modules/*.md、aisee/docs/change-plan/*-hw-change-plan.md
-      - 如存在初始化输出，列出 docs/project-structure.md、docs/clock-contract.md、docs/memory-device-contract.md
-      - 列出硬件来源：原理图、PCB、Pinout、BOM、数据手册、Reference Manual、errata、BSP/SDK/HAL、vendor sample、map/build/flash log
-      - 列出外部系统来源：cloud API、MQTT/topic spec、protocol spec、mobile app/gateway contract、manufacturing test spec、security policy、compliance requirement、field failure report
-      - 映射本 change 覆盖的 FR / HW / FW / RT / CONN / SEC / PROD / OPS / VER
-      - 明确不在范围内的上游条目
-      - 声明所有 contract artifact 是否适用；verification-contract.md 默认必须适用
-      - 涉及工程结构、时钟、型号、Flash/RAM、启动文件、linker/scatter、下载/部署、云端连接、证书密钥、产测、现场运维时，必须保留对应来源或阻塞标签
-      - 保留 [ASSUMPTION]、[SPEC-GAP]、[HW-DOC-MISSING]、[PROJECT-STRUCTURE-MISSING]、[CLOCK-CONTRACT-MISSING]、[MEMORY-DEVICE-CONTRACT-MISSING]、[CONNECTIVITY-SPEC-MISSING]、[SECURITY-DECISION-REQUIRED]、[PRODUCTION-DECISION-REQUIRED]、[OPS-DECISION-REQUIRED]、[BUDGET-RISK]、[FLASH-DOWNLOAD-RISK]、[SAFETY-RISK] 等阻塞标签
+    - 背景、问题、目标、非目标和用户/系统价值
 
-  - id: specs
-    generates: specs/**/*.md
-    description: "设备、固件、系统或生产/运维流程的可观察行为与验收场景"
-    template: spec.md
-    requires: [source-map]
-    instruction: |
-      specs 必须只描述可观察行为和验收条件：
-      - 使用 SHALL/MUST 或 Given/When/Then 场景表达行为
-      - 覆盖 source-map.md 中本 change 的 FR
-      - 场景应覆盖正常路径、异常输入、故障恢复、启动/复位、边界时序、资源边界、安全边界、连接异常、升级/回滚或生产/运维目标
-      - 可以引用 HW / FW / RT / CONN / SEC / PROD / OPS / VER ID 作为追踪信息，但不要写寄存器配置或完整测试步骤
-      - 发现需求缺口时标注 [SPEC-GAP]，不要自行新增业务需求
+    - 项目阶段：PoC / EVT / DVT / PVT / MP / field update / maintenance / research
 
-  - id: design
-    generates: design.md
-    description: "单个 change 技术方案：平台边界、分层、状态机、数据流、资源、安全和关键决策"
-    template: design.md
-    requires: [specs]
-    instruction: |
-      design.md 必须先于各 contract 生成，负责本 change 的技术设计：
-      - 读取 proposal.md、source-map.md 和 specs
-      - 明确平台边界：MCU / bare-metal / RTOS / Linux user-space / Linux kernel / bootloader / host tool / production tool
-      - 明确硬件抽象层、驱动层、应用层、通信层、安全层、生产工具、运维诊断等职责
-      - 明确数据流、控制流、状态机、错误处理、升级/回滚、资源预算和关键风险
-      - 必须引用全局 hw:architecture 中对本 change 有约束力的架构规则和资源预算
-      - 必须确认每个 contract artifact 的适用性和 N/A 原因
-      - 不要展开完整引脚表、任务表、寄存器表、协议帧表、产测矩阵或测试步骤；这些进入对应 contract
+    - 交付形态：prototype / production firmware / Linux image / kernel driver / user-space service / SDK / library / host tool
+    / manufacturing tool
 
-  - id: hardware-contract
-    generates: hardware-contract.md
-    description: "硬件合同：板级资源、型号/存储边界、接口、时钟、电源、环境、法规和硬件约束"
-    template: hardware-contract.md
-    requires: [design]
-    instruction: |
-      hardware-contract.md 仅在涉及硬件资源、板级约束、外设、引脚、总线、时钟、电源、传感器/执行器、MCU/SoC/FPGA、Linux 目标硬件或烧录边界时适用。
-      如果不适用，必须写 N/A 原因。
-      适用时必须覆盖：
-      - 目标板卡 / MCU / SoC / FPGA / 模组 / gateway / host adapter / BSP / SDK
-      - 具体型号、封装、硬件版本、BOM 版本、Flash/RAM/storage、device macro、startup、linker/scatter、flash/download/deployment 配置
-      - 引脚、外设、总线、地址、中断、DMA、时钟、电源域、复位线、boot strap、connector、cable、mechanical constraints
-      - 项目适用的外部接口、传感器/执行器、模拟/数字信号通路、电气/协议约束及其软件影响
-      - 电源预算、上电时序、brown-out、ESD/surge/reverse polarity、热设计、EMC/EMI、环境范围和法规/认证目标
-      - 冲突资源、复用限制、硬件版本兼容、同系列型号迁移规则、硬件风险和需要硬件确认的问题
+    - 目标平台：MCU / RTOS / bare-metal / embedded Linux / gateway / host-side tool / FPGA or custom hardware / other
 
-  - id: firmware-contract
-    generates: firmware-contract.md
-    description: "固件/设备软件合同：工程目录、模块、驱动接口、协议、配置、日志、依赖和错误处理"
-    template: firmware-contract.md
-    requires: [design, hardware-contract]
-    instruction: |
-      firmware-contract.md 仅在涉及固件、驱动、Linux 设备程序、内核模块、host tool、生产工具、通信协议或控制逻辑时适用。
-      如果不适用，必须写 N/A 原因。
-      适用时必须覆盖：
-      - 工程目录和文件归属，例如 Core / Function / Drivers / vendor path / app path / kernel path / tools / scripts
-      - 固件 / 设备软件 / host tool / production tool 的模块边界、初始化顺序、生命周期和 API/ABI
-      - 驱动接口、HAL/API、ioctl/sysfs/netlink/dbus/socket/CLI、寄存器访问策略、错误码
-      - 数据所有权、缓冲区生命周期、ISR/DMA 与主循环/任务/线程/进程之间的交接规则
-      - ISR、DMA、回调、任务间通信、进程间通信、状态机、错误处理
-      - 配置存储、日志、诊断、兼容策略、外部库/算法库/SDK/协议栈依赖、license 和资源成本
+    - 硬件、固件/软件、运行时、连接、安全、生产、运维和验证范围
 
-  - id: runtime-contract
-    generates: runtime-contract.md
-    description: "运行时合同：MCU/RTOS/Linux 调度、时钟、内存、存储、进程、服务、功耗和启动恢复流程"
-    template: runtime-contract.md
-    requires: [design, firmware-contract]
-    instruction: |
-      runtime-contract.md 仅在涉及调度、时序、实时性、内存、存储、功耗、启动流程、线程/任务、进程、服务或资源预算时适用。
-      如果不适用，必须写 N/A 原因。
-      适用时必须覆盖：
-      - 运行环境：bare-metal / RTOS / Linux user-space / Linux kernel / bootloader / host tool / production environment
-      - 工具链、构建配置、调度模型、主循环、ISR、任务、线程、进程、systemd service、udev、IPC、权限和启动顺序
-      - Device tree、kernel config、rootfs/package、filesystem path、log path、service dependency 等 Linux 约束，如适用
-      - 时钟基础、时序预算、延迟、事件频率、数据率、吞吐、看门狗、超时和恢复
-      - Flash / ROM / RAM / storage / disk / network / .data / .bss / heap / stack / CPU / power 预算
-      - map 文件、链接结果、image/package size、大库成员、下载/部署镜像大小和资源 margin
-      - 启动、复位、低功耗、升级、异常恢复、crash dump、fault 诊断流程
+    - 成功标准必须可验证，避免只写“功能正常”
 
-  - id: connectivity-contract
-    generates: connectivity-contract.md
-    description: "连接与数据合同：网络/总线、设备身份、协议、payload、离线重连、云/APP/网关联调和 OTA 数据路径"
-    template: connectivity-contract.md
-    requires: [design, hardware-contract, firmware-contract, runtime-contract]
-    instruction: |
-      connectivity-contract.md 仅在涉及网络、总线、协议、云端、APP、网关、设备间通信、远程配置、OTA 或数据上报/下发时适用。
-      如果不适用，必须写 N/A 原因。
-      适用时必须覆盖：
-      - 连接介质：Ethernet / Wi-Fi / cellular / BLE / LoRa / Zigbee / RS485 / CAN / USB / UART / custom / local IPC
-      - 协议和端点：MQTT / HTTP / CoAP / Modbus / CANopen / custom frame / topic / API / register map / file path
-      - 设备身份与 provisioning：serial / device id / certificate / key / token / QR code / binding
-      - 数据模型：telemetry / event / command / config / shadow / file / stream / alarm
-      - payload schema、版本、endianness、checksum/CRC、sequence、ack/nack、retry、timeout、idempotency、offline cache
-      - 云端/APP/网关/host 兼容性、联调方式、抓包和回归验证
+    - 如果本 change 来自 hw:change-plan，必须说明 change-plan 中的名称、依赖和 source-map seed
 
-  - id: security-contract
-    generates: security-contract.md
-    description: "安全合同：威胁边界、身份认证、密钥证书、secure boot、debug lock、数据保护和安全验证"
-    template: security-contract.md
-    requires: [design, hardware-contract, firmware-contract, runtime-contract, connectivity-contract]
-    instruction: |
-      security-contract.md 仅在涉及设备身份、联网、调试口、固件升级、外部输入、敏感配置、用户数据、证书密钥或生产写入时适用。
-      如果不适用，必须写 N/A 原因和接受该风险的依据。
-      适用时必须覆盖：
-      - 信任边界、攻击面、外部输入、物理访问、调试访问和供应链风险
-      - 身份认证、授权、证书、密钥、token、secure element/TPM/TEE/TrustZone/flash protected storage，如适用
-      - secure boot、firmware/package signature、anti-rollback、debug lock、readout protection、factory reset 安全
-      - 通信加密、证书轮换、敏感日志脱敏、隐私数据处理、配置保护、漏洞响应
-      - 安全测试、负面测试、密钥注入验证和安全回归
+    - 不要写寄存器细节、完整引脚表、任务调度细节或测试步骤；这些进入对应 contract artifacts
 
-  - id: production-contract
-    generates: production-contract.md
-    description: "生产制造合同：量产烧录、工装测试、序列号/证书写入、校准、追溯、返修和发布冻结"
-    template: production-contract.md
-    requires: [hardware-contract, firmware-contract, runtime-contract, connectivity-contract, security-contract]
-    instruction: |
-      production-contract.md 仅在涉及 EVT/DVT/PVT/MP、量产、产测、工装、校准、证书注入、序列号写入、返修或生产发布时适用。
-      如果不适用，必须写 N/A 原因。
-      适用时必须覆盖：
-      - 生产阶段、发布包、烧录/部署文件、factory programming、fixture、test station、operator flow
-      - 序列号、MAC、IMEI、EUI、device id、证书、key、出厂配置和云端绑定写入
-      - 校准流程、校准设备、参数范围、有效期、存储位置和追溯记录
-      - 产测项目、pass/fail 标准、测试时间预算、失败处理、返修/重刷/解绑流程
-      - 批次、PCB/BOM/firmware/tool version、测试日志、生产报告和发布冻结规则
+    '
+- id: source-map
+  generates: source-map.md
+  description: 来源映射：绑定规划文档、硬件资料、外部系统、工程事实与本 change 范围
+  template: source-map.md
+  requires:
+  - proposal
+  requiredness: always
+  capabilities:
+  - source_map
+  instruction: 'source-map.md 是本 schema 的追踪核心，必须：
 
-  - id: operations-contract
-    generates: operations-contract.md
-    description: "现场运维合同：部署、升级、回滚、日志、远程诊断、兼容性、支持流程和生命周期维护"
-    template: operations-contract.md
-    requires: [firmware-contract, runtime-contract, connectivity-contract, security-contract, production-contract]
-    instruction: |
-      operations-contract.md 仅在涉及现场部署、远程升级、日志诊断、客户支持、返修、fleet management、版本兼容或长期维护时适用。
-      如果不适用，必须写 N/A 原因。
-      适用时必须覆盖：
-      - 部署方式：factory flash / OTA / package / image / container / installer / field service tool
-      - 版本策略、兼容矩阵、升级路径、回滚路径、配置迁移和数据保留
-      - 观测性：日志、metrics、health check、crash dump、诊断命令、远程采集、证据留存
-      - 现场故障处理：恢复模式、factory reset、safe mode、RMA、返修重刷、解绑、备份恢复
-      - 生命周期：支持周期、废弃策略、云端/APP/网关兼容、客户/生产/运维文档
+    - 列出上游来源：aisee/docs/requirements/*-hw-srs.md、aisee/docs/architecture/*-hw-architecture.md、docs/modules/*.md、aisee/docs/change-plan/*-hw-change-plan.md
 
-  - id: verification-contract
-    generates: verification-contract.md
-    description: "验证合同：单元、仿真、HIL、板级、系统、连接、安全、生产、运维、合规和回归验证"
-    template: verification-contract.md
-    requires: [hardware-contract, firmware-contract, runtime-contract, connectivity-contract, security-contract, production-contract, operations-contract]
-    instruction: |
-      verification-contract.md 必须覆盖本 change 的验证方式：
-      - 单元测试、静态分析、仿真、协议测试、集成测试、系统测试、HIL、板级测试和项目适用仪器测量
-      - 连接/云端/APP/网关联调，安全验证，生产/产测验证，现场升级/回滚/诊断验证
-      - 烧录/部署、版本、配置、测试环境、测试夹具、测试数据、测试证据和回归矩阵
-      - 空片下载、已有程序覆盖下载、全片擦除后下载、verify/reset/connect-under-reset/下载频率等关键下载场景，如适用
-      - map/image/package size、资源预算、型号/容量匹配、startup/linker/scatter/flash algorithm 或 Linux image/package 一致性检查
-      - specs 中每个验收场景必须映射到至少一种验证方式
-      - 无法自动化验证的项目必须写明人工验证步骤和证据留存方式
+    - 如存在初始化输出，列出 docs/project-structure.md、docs/clock-contract.md、docs/memory-device-contract.md
 
-  - id: tasks
-    generates: tasks.md
-    description: "实现清单：从 specs、design 和所有适用 contract artifacts 生成可执行任务"
-    template: tasks.md
-    requires: [specs, design, hardware-contract, firmware-contract, runtime-contract, connectivity-contract, security-contract, production-contract, operations-contract, verification-contract]
-    instruction: |
-      tasks.md 必须先做一致性检查，再列实现任务：
-      - 每个 FR 必须能追踪到 specs
-      - 涉及硬件资源、型号、引脚、时钟、启动/链接/下载配置的 FR 必须追踪到 hardware-contract.md
-      - 涉及固件、驱动、协议、目录归属、ISR/DMA、数据所有权的 FR 必须追踪到 firmware-contract.md
-      - 涉及时序、内存、功耗、调度、map、Flash/RAM、heap/stack、Linux service 或库资源成本的 FR 必须追踪到 runtime-contract.md
-      - 涉及通信、云端、APP、网关、协议、OTA 数据路径的 FR 必须追踪到 connectivity-contract.md
-      - 涉及身份、证书、密钥、debug lock、secure boot、敏感数据或安全更新的 FR 必须追踪到 security-contract.md
-      - 涉及量产、产测、工装、校准、序列号、证书写入或追溯的 FR 必须追踪到 production-contract.md
-      - 涉及现场部署、升级、回滚、日志、诊断、兼容或维护的 FR 必须追踪到 operations-contract.md
-      - 每个验收场景、烧录风险、资源风险、连接风险、安全风险、生产风险、运维风险和边界场景必须追踪到 verification-contract.md
-      - 不适用 artifact 必须已有 N/A 原因
-      - 如果本 change 是 initialize-hardware-project，tasks 必须包含使用 hw:init generate-skeleton 的任务和生成 project/clock/memory contracts 的任务
+    - 列出硬件来源：原理图、PCB、Pinout、BOM、数据手册、Reference Manual、errata、BSP/SDK/HAL、vendor sample、map/build/flash log
 
+    - 列出外部系统来源：cloud API、MQTT/topic spec、protocol spec、mobile app/gateway contract、manufacturing test spec、security policy、compliance
+    requirement、field failure report
+
+    - 映射本 change 覆盖的 FR / HW / FW / RT / CONN / SEC / PROD / OPS / VER
+
+    - 明确不在范围内的上游条目
+
+    - 声明所有 contract artifact 是否适用；verification-contract.md 默认必须适用
+
+    - 涉及工程结构、时钟、型号、Flash/RAM、启动文件、linker/scatter、下载/部署、云端连接、证书密钥、产测、现场运维时，必须保留对应来源或阻塞标签
+
+    - 保留 [ASSUMPTION]、[SPEC-GAP]、[HW-DOC-MISSING]、[PROJECT-STRUCTURE-MISSING]、[CLOCK-CONTRACT-MISSING]、[MEMORY-DEVICE-CONTRACT-MISSING]、[CONNECTIVITY-SPEC-MISSING]、[SECURITY-DECISION-REQUIRED]、[PRODUCTION-DECISION-REQUIRED]、[OPS-DECISION-REQUIRED]、[BUDGET-RISK]、[FLASH-DOWNLOAD-RISK]、[SAFETY-RISK]
+    等阻塞标签
+
+    '
+- id: specs
+  generates: specs/**/*.md
+  description: 设备、固件、系统或生产/运维流程的可观察行为与验收场景
+  template: spec.md
+  requires:
+  - source-map
+  requiredness: always
+  capabilities:
+  - behavior_spec
+  instruction: 'specs 必须只描述可观察行为和验收条件：
+
+    - 使用 SHALL/MUST 或 Given/When/Then 场景表达行为
+
+    - 覆盖 source-map.md 中本 change 的 FR
+
+    - 场景应覆盖正常路径、异常输入、故障恢复、启动/复位、边界时序、资源边界、安全边界、连接异常、升级/回滚或生产/运维目标
+
+    - 可以引用 HW / FW / RT / CONN / SEC / PROD / OPS / VER ID 作为追踪信息，但不要写寄存器配置或完整测试步骤
+
+    - 发现需求缺口时标注 [SPEC-GAP]，不要自行新增业务需求
+
+    '
+- id: design
+  generates: design.md
+  description: 单个 change 技术方案：平台边界、分层、状态机、数据流、资源、安全和关键决策
+  template: design.md
+  requires:
+  - specs
+  requiredness: always
+  capabilities:
+  - design_spec
+  instruction: 'design.md 必须先于各 contract 生成，负责本 change 的技术设计：
+
+    - 读取 proposal.md、source-map.md 和 specs
+
+    - 明确平台边界：MCU / bare-metal / RTOS / Linux user-space / Linux kernel / bootloader / host tool / production tool
+
+    - 明确硬件抽象层、驱动层、应用层、通信层、安全层、生产工具、运维诊断等职责
+
+    - 明确数据流、控制流、状态机、错误处理、升级/回滚、资源预算和关键风险
+
+    - 必须引用全局 hw:architecture 中对本 change 有约束力的架构规则和资源预算
+
+    - 必须确认每个 contract artifact 的适用性和 N/A 原因
+
+    - 不要展开完整引脚表、任务表、寄存器表、协议帧表、产测矩阵或测试步骤；这些进入对应 contract
+
+    '
+- id: hardware-contract
+  generates: hardware-contract.md
+  description: 硬件合同：板级资源、型号/存储边界、接口、时钟、电源、环境、法规和硬件约束
+  template: hardware-contract.md
+  requires:
+  - design
+  requiredness: conditional
+  na_requires_reason: true
+  capabilities:
+  - device_contract
+  instruction: 'hardware-contract.md 仅在涉及硬件资源、板级约束、外设、引脚、总线、时钟、电源、传感器/执行器、MCU/SoC/FPGA、Linux 目标硬件或烧录边界时适用。
+
+    如果不适用，必须写 N/A 原因。
+
+    适用时必须覆盖：
+
+    - 目标板卡 / MCU / SoC / FPGA / 模组 / gateway / host adapter / BSP / SDK
+
+    - 具体型号、封装、硬件版本、BOM 版本、Flash/RAM/storage、device macro、startup、linker/scatter、flash/download/deployment 配置
+
+    - 引脚、外设、总线、地址、中断、DMA、时钟、电源域、复位线、boot strap、connector、cable、mechanical constraints
+
+    - 项目适用的外部接口、传感器/执行器、模拟/数字信号通路、电气/协议约束及其软件影响
+
+    - 电源预算、上电时序、brown-out、ESD/surge/reverse polarity、热设计、EMC/EMI、环境范围和法规/认证目标
+
+    - 冲突资源、复用限制、硬件版本兼容、同系列型号迁移规则、硬件风险和需要硬件确认的问题
+
+    '
+- id: firmware-contract
+  generates: firmware-contract.md
+  description: 固件/设备软件合同：工程目录、模块、驱动接口、协议、配置、日志、依赖和错误处理
+  template: firmware-contract.md
+  requires:
+  - design
+  - hardware-contract
+  requiredness: conditional
+  na_requires_reason: true
+  capabilities:
+  - device_contract
+  instruction: 'firmware-contract.md 仅在涉及固件、驱动、Linux 设备程序、内核模块、host tool、生产工具、通信协议或控制逻辑时适用。
+
+    如果不适用，必须写 N/A 原因。
+
+    适用时必须覆盖：
+
+    - 工程目录和文件归属，例如 Core / Function / Drivers / vendor path / app path / kernel path / tools / scripts
+
+    - 固件 / 设备软件 / host tool / production tool 的模块边界、初始化顺序、生命周期和 API/ABI
+
+    - 驱动接口、HAL/API、ioctl/sysfs/netlink/dbus/socket/CLI、寄存器访问策略、错误码
+
+    - 数据所有权、缓冲区生命周期、ISR/DMA 与主循环/任务/线程/进程之间的交接规则
+
+    - ISR、DMA、回调、任务间通信、进程间通信、状态机、错误处理
+
+    - 配置存储、日志、诊断、兼容策略、外部库/算法库/SDK/协议栈依赖、license 和资源成本
+
+    '
+- id: runtime-contract
+  generates: runtime-contract.md
+  description: 运行时合同：MCU/RTOS/Linux 调度、时钟、内存、存储、进程、服务、功耗和启动恢复流程
+  template: runtime-contract.md
+  requires:
+  - design
+  - firmware-contract
+  requiredness: conditional
+  na_requires_reason: true
+  capabilities:
+  - device_contract
+  instruction: 'runtime-contract.md 仅在涉及调度、时序、实时性、内存、存储、功耗、启动流程、线程/任务、进程、服务或资源预算时适用。
+
+    如果不适用，必须写 N/A 原因。
+
+    适用时必须覆盖：
+
+    - 运行环境：bare-metal / RTOS / Linux user-space / Linux kernel / bootloader / host tool / production environment
+
+    - 工具链、构建配置、调度模型、主循环、ISR、任务、线程、进程、systemd service、udev、IPC、权限和启动顺序
+
+    - Device tree、kernel config、rootfs/package、filesystem path、log path、service dependency 等 Linux 约束，如适用
+
+    - 时钟基础、时序预算、延迟、事件频率、数据率、吞吐、看门狗、超时和恢复
+
+    - Flash / ROM / RAM / storage / disk / network / .data / .bss / heap / stack / CPU / power 预算
+
+    - map 文件、链接结果、image/package size、大库成员、下载/部署镜像大小和资源 margin
+
+    - 启动、复位、低功耗、升级、异常恢复、crash dump、fault 诊断流程
+
+    '
+- id: connectivity-contract
+  generates: connectivity-contract.md
+  description: 连接与数据合同：网络/总线、设备身份、协议、payload、离线重连、云/APP/网关联调和 OTA 数据路径
+  template: connectivity-contract.md
+  requires:
+  - design
+  - hardware-contract
+  - firmware-contract
+  - runtime-contract
+  requiredness: conditional
+  na_requires_reason: true
+  capabilities:
+  - device_contract
+  instruction: 'connectivity-contract.md 仅在涉及网络、总线、协议、云端、APP、网关、设备间通信、远程配置、OTA 或数据上报/下发时适用。
+
+    如果不适用，必须写 N/A 原因。
+
+    适用时必须覆盖：
+
+    - 连接介质：Ethernet / Wi-Fi / cellular / BLE / LoRa / Zigbee / RS485 / CAN / USB / UART / custom / local IPC
+
+    - 协议和端点：MQTT / HTTP / CoAP / Modbus / CANopen / custom frame / topic / API / register map / file path
+
+    - 设备身份与 provisioning：serial / device id / certificate / key / token / QR code / binding
+
+    - 数据模型：telemetry / event / command / config / shadow / file / stream / alarm
+
+    - payload schema、版本、endianness、checksum/CRC、sequence、ack/nack、retry、timeout、idempotency、offline cache
+
+    - 云端/APP/网关/host 兼容性、联调方式、抓包和回归验证
+
+    '
+- id: security-contract
+  generates: security-contract.md
+  description: 安全合同：威胁边界、身份认证、密钥证书、secure boot、debug lock、数据保护和安全验证
+  template: security-contract.md
+  requires:
+  - design
+  - hardware-contract
+  - firmware-contract
+  - runtime-contract
+  - connectivity-contract
+  requiredness: conditional
+  na_requires_reason: true
+  capabilities:
+  - device_contract
+  instruction: 'security-contract.md 仅在涉及设备身份、联网、调试口、固件升级、外部输入、敏感配置、用户数据、证书密钥或生产写入时适用。
+
+    如果不适用，必须写 N/A 原因和接受该风险的依据。
+
+    适用时必须覆盖：
+
+    - 信任边界、攻击面、外部输入、物理访问、调试访问和供应链风险
+
+    - 身份认证、授权、证书、密钥、token、secure element/TPM/TEE/TrustZone/flash protected storage，如适用
+
+    - secure boot、firmware/package signature、anti-rollback、debug lock、readout protection、factory reset 安全
+
+    - 通信加密、证书轮换、敏感日志脱敏、隐私数据处理、配置保护、漏洞响应
+
+    - 安全测试、负面测试、密钥注入验证和安全回归
+
+    '
+- id: production-contract
+  generates: production-contract.md
+  description: 生产制造合同：量产烧录、工装测试、序列号/证书写入、校准、追溯、返修和发布冻结
+  template: production-contract.md
+  requires:
+  - hardware-contract
+  - firmware-contract
+  - runtime-contract
+  - connectivity-contract
+  - security-contract
+  requiredness: conditional
+  na_requires_reason: true
+  capabilities:
+  - device_contract
+  instruction: 'production-contract.md 仅在涉及 EVT/DVT/PVT/MP、量产、产测、工装、校准、证书注入、序列号写入、返修或生产发布时适用。
+
+    如果不适用，必须写 N/A 原因。
+
+    适用时必须覆盖：
+
+    - 生产阶段、发布包、烧录/部署文件、factory programming、fixture、test station、operator flow
+
+    - 序列号、MAC、IMEI、EUI、device id、证书、key、出厂配置和云端绑定写入
+
+    - 校准流程、校准设备、参数范围、有效期、存储位置和追溯记录
+
+    - 产测项目、pass/fail 标准、测试时间预算、失败处理、返修/重刷/解绑流程
+
+    - 批次、PCB/BOM/firmware/tool version、测试日志、生产报告和发布冻结规则
+
+    '
+- id: operations-contract
+  generates: operations-contract.md
+  description: 现场运维合同：部署、升级、回滚、日志、远程诊断、兼容性、支持流程和生命周期维护
+  template: operations-contract.md
+  requires:
+  - firmware-contract
+  - runtime-contract
+  - connectivity-contract
+  - security-contract
+  - production-contract
+  requiredness: conditional
+  na_requires_reason: true
+  capabilities:
+  - device_contract
+  instruction: 'operations-contract.md 仅在涉及现场部署、远程升级、日志诊断、客户支持、返修、fleet management、版本兼容或长期维护时适用。
+
+    如果不适用，必须写 N/A 原因。
+
+    适用时必须覆盖：
+
+    - 部署方式：factory flash / OTA / package / image / container / installer / field service tool
+
+    - 版本策略、兼容矩阵、升级路径、回滚路径、配置迁移和数据保留
+
+    - 观测性：日志、metrics、health check、crash dump、诊断命令、远程采集、证据留存
+
+    - 现场故障处理：恢复模式、factory reset、safe mode、RMA、返修重刷、解绑、备份恢复
+
+    - 生命周期：支持周期、废弃策略、云端/APP/网关兼容、客户/生产/运维文档
+
+    '
+- id: verification-contract
+  generates: verification-contract.md
+  description: 验证合同：单元、仿真、HIL、板级、系统、连接、安全、生产、运维、合规和回归验证
+  template: verification-contract.md
+  requires:
+  - hardware-contract
+  - firmware-contract
+  - runtime-contract
+  - connectivity-contract
+  - security-contract
+  - production-contract
+  - operations-contract
+  requiredness: always
+  capabilities:
+  - device_contract
+  - verification_contract
+  instruction: 'verification-contract.md 必须覆盖本 change 的验证方式：
+
+    - 单元测试、静态分析、仿真、协议测试、集成测试、系统测试、HIL、板级测试和项目适用仪器测量
+
+    - 连接/云端/APP/网关联调，安全验证，生产/产测验证，现场升级/回滚/诊断验证
+
+    - 烧录/部署、版本、配置、测试环境、测试夹具、测试数据、测试证据和回归矩阵
+
+    - 空片下载、已有程序覆盖下载、全片擦除后下载、verify/reset/connect-under-reset/下载频率等关键下载场景，如适用
+
+    - map/image/package size、资源预算、型号/容量匹配、startup/linker/scatter/flash algorithm 或 Linux image/package 一致性检查
+
+    - specs 中每个验收场景必须映射到至少一种验证方式
+
+    - 无法自动化验证的项目必须写明人工验证步骤和证据留存方式
+
+    '
+- id: tasks
+  generates: tasks.md
+  description: 实现清单：从 specs、design 和所有适用 contract artifacts 生成可执行任务
+  template: tasks.md
+  requires:
+  - specs
+  - design
+  - hardware-contract
+  - firmware-contract
+  - runtime-contract
+  - connectivity-contract
+  - security-contract
+  - production-contract
+  - operations-contract
+  - verification-contract
+  requiredness: always
+  capabilities:
+  - apply_track
+  instruction: 'tasks.md 必须先做一致性检查，再列实现任务：
+
+    - 每个 FR 必须能追踪到 specs
+
+    - 涉及硬件资源、型号、引脚、时钟、启动/链接/下载配置的 FR 必须追踪到 hardware-contract.md
+
+    - 涉及固件、驱动、协议、目录归属、ISR/DMA、数据所有权的 FR 必须追踪到 firmware-contract.md
+
+    - 涉及时序、内存、功耗、调度、map、Flash/RAM、heap/stack、Linux service 或库资源成本的 FR 必须追踪到 runtime-contract.md
+
+    - 涉及通信、云端、APP、网关、协议、OTA 数据路径的 FR 必须追踪到 connectivity-contract.md
+
+    - 涉及身份、证书、密钥、debug lock、secure boot、敏感数据或安全更新的 FR 必须追踪到 security-contract.md
+
+    - 涉及量产、产测、工装、校准、序列号、证书写入或追溯的 FR 必须追踪到 production-contract.md
+
+    - 涉及现场部署、升级、回滚、日志、诊断、兼容或维护的 FR 必须追踪到 operations-contract.md
+
+    - 每个验收场景、烧录风险、资源风险、连接风险、安全风险、生产风险、运维风险和边界场景必须追踪到 verification-contract.md
+
+    - 不适用 artifact 必须已有 N/A 原因
+
+    - 如果本 change 是 initialize-hardware-project，tasks 必须包含使用 hw:init generate-skeleton 的任务和生成 project/clock/memory contracts
+    的任务
+
+    '
 apply:
-  requires: [tasks]
+  requires:
+  - tasks
   tracks: tasks.md
-  instruction: |
-    实现时必须按 tasks.md 执行并逐项打勾。
+  instruction: '实现时必须按 tasks.md 执行并逐项打勾。
+
     发现 specs、design 或 contract 与硬件/代码/外部系统事实冲突时：
+
     - 暂停实现
+
     - 更新对应 artifact
+
     - 保持 source-map.md 的追踪关系闭合
+
     - 对硬件、固件、运行时、连接、安全、生产、运维或验证风险补充任务
+
+    '
+archive:
+  tracks:
+  - tasks.md
+  - source-map.md

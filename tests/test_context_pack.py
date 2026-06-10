@@ -60,34 +60,58 @@ def create_project(root: Path) -> None:
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
 version: 2
+capabilities:
+  - source_map_traceability
+  - apply_execution
+  - archive_authority
+  - contract_helper
+  - contract_sync
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: source-map
     generates: source-map.md
     template: source-map.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [source_map]
   - id: specs
     generates: specs/**/*.md
     template: spec.md
     requires: [source-map]
+    requiredness: always
+    capabilities: [behavior_spec]
   - id: change-context
     generates: change-context.md
     template: change-context.md
     requires: [specs]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [contract_surface]
   - id: service-contract
     generates: service-contract.md
     template: service-contract.md
     requires: [source-map, specs, change-context]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [contract_surface, contract_sync]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [specs, change-context, service-contract]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - source-map.md
 """,
     )
     schema_templates = root / "openspec" / "schemas" / "aisee-app-spec-driven" / "templates"
@@ -187,22 +211,35 @@ def create_quick_fix_project(root: Path) -> None:
         root / "openspec" / "schemas" / "quick-fix" / "schema.yaml",
         """name: quick-fix
 version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+  - quick_fix_evidence
 artifacts:
   - id: problem
     generates: problem.md
     template: problem.md
     requires: []
+    requiredness: always
+    capabilities: [problem_statement]
   - id: solution
     generates: solution.md
     template: solution.md
     requires: [problem]
+    requiredness: always
+    capabilities: [solution_design]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [solution]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
 """,
     )
     change = root / "openspec" / "changes" / "fix-login-copy"

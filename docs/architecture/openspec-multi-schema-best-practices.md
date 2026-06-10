@@ -21,6 +21,12 @@
 
 每个 Change Folder 里的 artifacts 完全由其所绑定的 Schema 决定，不同 Change 之间不共享 artifacts，因此 **Schema 定义本身不会互相冲突**。
 
+补充边界：
+
+- 不要把 `aisee-app-spec-driven` 当成其它 schema 的隐式父类。
+- CLI / skill / template 都应读取当前 schema 的 `capabilities`、artifact `requiredness` 和 apply/archive tracks，而不是复制 app artifact 清单。
+- `aisee schemas format --check --json` 可用于机械检查 schema contract 是否漂移。
+
 ---
 
 ## 二、两个需要主动管理的潜在冲突点

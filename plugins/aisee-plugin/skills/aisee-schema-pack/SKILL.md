@@ -57,6 +57,8 @@ openspec init
 ```bash
 aisee schemas list --json
 aisee schemas check --json
+aisee schemas format --check --json
+aisee schemas format --write --json
 node <skill-dir>/scripts/setup-schemas.js --list
 node <skill-dir>/scripts/setup-schemas.js --all
 node <skill-dir>/scripts/setup-schemas.js --schema aisee-docsite-driven
@@ -112,8 +114,10 @@ openspec/project-docs.md
 - `template` 是否写成模板目录内文件名，如 `proposal.md`，不要写 `templates/proposal.md`。
 - `requires` 是否只引用已存在 artifact，且无循环依赖。
 - `generates` 是否符合 artifact 语义；spec delta 通常使用 `specs/**/*.md`。
+- `capabilities`、artifact `requiredness`、`na_requires_reason`、`apply.tracks` 和 `archive.tracks` 是否齐全且只表达 schema 规则，不偷带 app 默认语义。
 - `apply.requires` 是否足以支持实现阶段。
 - `apply.tracks` 是否指向实际需要打勾或维护的文件。
+- `aisee schemas format --check --json` 是否无 drift；需要机械收敛时用 `aisee schemas format --write --json`。
 - artifact id 与 `openspec/config.yaml` 的 `rules` 是否匹配；不匹配时用 `instruction` 补齐团队约束。
 - schema 名称是否避开官方内置 schema 名称，除非明确要覆盖。
 

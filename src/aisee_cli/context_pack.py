@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref
 from aisee_cli.assets import resolve_source_asset_root
 from aisee_cli.index import build_index
@@ -32,17 +34,8 @@ PATH_PATTERN = re.compile(
     r"/[A-Za-z0-9_./@:+-]+)"
 )
 CHECKBOX_PATTERN = re.compile(r"^\s*-\s+\[(?P<mark>[ xX~-])\]\s*(?P<title>.*)$")
-OPTIONAL_APP_ARTIFACTS = {
-    "change-context",
-    "change-context.md",
-    "ui-contract",
-    "ui-contract.md",
-    "service-contract",
-    "service-contract.md",
-    "data-model",
-    "data-model.md",
-}
 PRODUCED_LOCAL_ID_PREFIXES = ("SPEC-", "API-", "DATA-", "TASK-", "TEST-", "HW-", "FW-", "RT-", "VER-")
+REQUIREDNESS_VALUES = {"always", "conditional", "never"}
 
 
 @dataclass(frozen=True)
@@ -51,6 +44,10 @@ class ArtifactSpec:
     generates: str | None = None
     template: str | None = None
     requires: tuple[str, ...] = ()
+    requiredness: str = "always"
+    na_requires_reason: bool = False
+    capabilities: tuple[str, ...] = ()
+    role: str | None = None
 
 
 @dataclass(frozen=True)
@@ -77,13 +74,14 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     schema_path = schema_paths.effective_path
     schema_info = parse_schema(schema_path) if schema_path else default_schema_info(schema_name)
     artifact_specs = schema_info["artifacts"]
-    source_map_required = schema_generates_source_map(artifact_specs)
+    source_map_required = schema_generates_source_map(schema_info)
+    tasks_required = schema_requires_tasks(schema_info)
     source_map = parse_source_map(change_path) if source_map_required else not_applicable_source_map()
 
     artifact_entries = build_artifact_entries(change_path, artifact_specs)
     full_parsed_artifacts = parse_artifacts(change_path, artifact_entries)
     source_map_text = read_text(change_path / "source-map.md") if source_map_required else ""
-    tasks_text = read_text(change_path / "tasks.md")
+    tasks_text = read_text(change_path / "tasks.md") if tasks_required else ""
     combined_text = collect_artifact_text(full_parsed_artifacts)
 
     task_paths = sorted(extract_paths(tasks_text))
@@ -124,6 +122,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         source_map_required=source_map_required,
         unmapped_reference_paths=unmapped_reference_paths,
         tasks_text=tasks_text,
+        schema_info=schema_info,
         schema_resolution=schema_resolution,
         schema_paths=schema_paths,
         produced_local_ids=produced_local_ids,
@@ -159,10 +158,13 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                     "resolved_from": schema_resolution["resolved_from"],
                     "hint_mismatches": schema_resolution["hint_mismatches"],
                     "artifacts": artifact_entries,
+                    "capabilities": schema_info.get("capabilities", []),
                     "apply_requires": schema_info.get("apply_requires", []),
+                    "apply_tracks": schema_info.get("apply_tracks"),
                     "archive_tracks": derive_archive_tracks(schema_info),
                     "source_map_required": source_map_required,
-                    "tasks_required": schema_requires_tasks(schema_info, artifact_specs),
+                    "tasks_required": tasks_required,
+                    "issues": schema_info.get("issues", []),
                 },
                 "artifacts": parsed_artifacts,
                 "source_map": source_map,
@@ -198,7 +200,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         },
         "generated": None,
         "gaps": gaps,
-        "guardrails": build_guardrails(target, source_map_required),
+        "guardrails": build_guardrails(target, source_map_required, tasks_required),
         "evidence": build_evidence(root, change),
         "meta": {
             "command": f"aisee context pack --change {change} --for {target} --json",
@@ -245,7 +247,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 mode=traceability_mode,
             ),
             "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
+            "contracts": summarize_contract_checks(artifact_entries, source_map, source_map.get("contract_sync")),
             "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
             "review_and_tests": [],
         }
@@ -261,7 +263,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 mode=traceability_mode,
             ),
             "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
+            "contracts": summarize_contract_checks(artifact_entries, source_map, source_map.get("contract_sync")),
         }
     elif target == "ce-code-review":
         pack["facts"]["derived"]["review"] = {
@@ -327,54 +329,48 @@ def read_schema_hints(change_path: Path) -> list[dict[str, str]]:
 
 def parse_schema(schema_path: Path) -> dict[str, Any]:
     text = read_text(schema_path)
+    data = yaml.safe_load(text) if text else {}
+    if not isinstance(data, dict):
+        raise ValueError("schema.yaml must be a YAML mapping")
+
+    issues: list[dict[str, str]] = []
+    raw_capabilities = data.get("capabilities")
+    capabilities = parse_capabilities(raw_capabilities)
+    if raw_capabilities is None:
+        issues.append(schema_issue("SCHEMA_CAPABILITIES_MISSING", "blocker", "schema.yaml must define top-level capabilities"))
+    elif not isinstance(raw_capabilities, list) or any(not isinstance(item, str) or not item.strip() for item in raw_capabilities):
+        issues.append(schema_issue("SCHEMA_CAPABILITIES_INVALID", "blocker", "schema capabilities must be a non-empty string list"))
+
     artifacts: list[ArtifactSpec] = []
-    current: dict[str, Any] | None = None
-    apply_requires: list[str] = []
-    apply_tracks: str | None = None
-    in_apply = False
+    raw_artifacts = data.get("artifacts")
+    if not isinstance(raw_artifacts, list):
+        raise ValueError("schema.yaml must define artifacts")
+    for item in raw_artifacts:
+        if not isinstance(item, dict):
+            raise ValueError("schema artifact entries must be mappings")
+        artifact_issues = validate_artifact_schema(item)
+        issues.extend(artifact_issues)
+        artifacts.append(to_artifact_spec(item))
 
-    for raw_line in text.splitlines():
-        line = raw_line.rstrip()
-        stripped = line.strip()
-
-        if stripped == "apply:":
-            if current:
-                artifacts.append(to_artifact_spec(current))
-                current = None
-            in_apply = True
-            continue
-
-        if stripped.startswith("- id:"):
-            if current:
-                artifacts.append(to_artifact_spec(current))
-            current = {"id": clean_value(stripped.split(":", 1)[1])}
-            in_apply = False
-            continue
-
-        if current is not None:
-            if stripped.startswith("generates:"):
-                current["generates"] = clean_value(stripped.split(":", 1)[1])
-            elif stripped.startswith("template:"):
-                current["template"] = clean_value(stripped.split(":", 1)[1])
-            elif stripped.startswith("requires:"):
-                current["requires"] = parse_inline_list(stripped.split(":", 1)[1])
-            continue
-
-        if in_apply:
-            if stripped.startswith("requires:"):
-                apply_requires = parse_inline_list(stripped.split(":", 1)[1])
-            elif stripped.startswith("tracks:"):
-                apply_tracks = clean_value(stripped.split(":", 1)[1])
-
-    if current:
-        artifacts.append(to_artifact_spec(current))
+    apply = data.get("apply") if isinstance(data.get("apply"), dict) else {}
+    archive = data.get("archive") if isinstance(data.get("archive"), dict) else {}
+    apply_requires = parse_string_list(apply.get("requires"))
+    apply_tracks = normalize_track_value(apply.get("tracks"))
+    archive_tracks = parse_tracks(archive.get("tracks"))
+    if apply_tracks is None and "apply_execution" in capabilities:
+        issues.append(schema_issue("SCHEMA_APPLY_TRACKS_MISSING", "blocker", "schema capability apply_execution requires apply.tracks"))
+    if "archive_authority" in capabilities and not archive_tracks:
+        issues.append(schema_issue("SCHEMA_ARCHIVE_TRACKS_MISSING", "risk", "schema capability archive_authority should declare archive.tracks"))
 
     return {
-        "name": read_yaml_scalar(text, "name") or schema_path.parent.name,
-        "version": parse_int(read_yaml_scalar(text, "version")),
+        "name": str(data.get("name") or schema_path.parent.name),
+        "version": parse_int(None if data.get("version") is None else str(data.get("version"))),
         "artifacts": artifacts,
+        "capabilities": capabilities,
         "apply_requires": apply_requires,
         "apply_tracks": apply_tracks,
+        "archive_tracks": archive_tracks,
+        "issues": issues,
     }
 
 
@@ -388,25 +384,121 @@ def default_schema_info(schema_name: str) -> dict[str, Any]:
         "name": schema_name,
         "version": None,
         "artifacts": artifacts,
+        "capabilities": [],
         "apply_requires": ["tasks"],
         "apply_tracks": "tasks.md",
+        "archive_tracks": ["tasks.md"],
+        "issues": [schema_issue("SCHEMA_CONTRACT_UNAVAILABLE", "blocker", "schema.yaml is unavailable, so capability parsing cannot proceed")],
     }
 
 
-def schema_generates_source_map(artifact_specs: list[ArtifactSpec]) -> bool:
-    return any(
-        spec.artifact_id == "source-map" or spec.generates == "source-map.md"
-        for spec in artifact_specs
-    )
+def parse_capabilities(value: Any) -> list[str]:
+    return dedupe(parse_string_list(value))
 
 
-def schema_requires_tasks(schema_info: dict[str, Any], artifact_specs: list[ArtifactSpec]) -> bool:
-    apply_requires = schema_info.get("apply_requires", [])
+def parse_string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str):
+        return parse_inline_list(value)
+    return []
+
+
+def parse_tracks(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    normalized = normalize_track_value(value)
+    return [normalized] if normalized else []
+
+
+def normalize_track_value(value: Any) -> str | None:
+    if isinstance(value, str):
+        stripped = value.strip()
+        return stripped or None
+    return None
+
+
+def validate_artifact_schema(data: dict[str, Any]) -> list[dict[str, str]]:
+    issues: list[dict[str, str]] = []
+    artifact_id = str(data.get("id") or "")
+    requiredness = str(data.get("requiredness") or "")
+    capabilities = data.get("capabilities")
+    if not artifact_id:
+        issues.append(schema_issue("SCHEMA_ARTIFACT_ID_MISSING", "blocker", "schema artifact is missing id"))
+    if requiredness not in REQUIREDNESS_VALUES:
+        issues.append(
+            schema_issue(
+                "SCHEMA_ARTIFACT_REQUIREDNESS_INVALID",
+                "blocker",
+                f"artifact {artifact_id or '<unknown>'} must declare requiredness as one of: always, conditional, never",
+            )
+        )
+    if capabilities is None:
+        issues.append(
+            schema_issue(
+                "SCHEMA_ARTIFACT_CAPABILITIES_MISSING",
+                "blocker",
+                f"artifact {artifact_id or '<unknown>'} must declare capabilities",
+            )
+        )
+    elif not isinstance(capabilities, list) or any(not isinstance(item, str) or not item.strip() for item in capabilities):
+        issues.append(
+            schema_issue(
+                "SCHEMA_ARTIFACT_CAPABILITIES_INVALID",
+                "blocker",
+                f"artifact {artifact_id or '<unknown>'} capabilities must be a string list",
+            )
+        )
+    na_requires_reason = data.get("na_requires_reason")
+    if requiredness == "conditional" and not isinstance(na_requires_reason, bool):
+        issues.append(
+            schema_issue(
+                "SCHEMA_ARTIFACT_NA_POLICY_MISSING",
+                "blocker",
+                f"artifact {artifact_id or '<unknown>'} must declare na_requires_reason for conditional requiredness",
+            )
+        )
+    return issues
+
+
+def schema_issue(code: str, severity: str, message: str) -> dict[str, str]:
+    return {
+        "code": code,
+        "severity": severity,
+        "message": message,
+    }
+
+
+def schema_has_capability(schema_info: dict[str, Any], capability: str) -> bool:
+    capabilities = schema_info.get("capabilities", [])
+    return capability in capabilities if isinstance(capabilities, list) else False
+
+
+def artifact_has_capability(artifact: ArtifactSpec | dict[str, Any], capability: str) -> bool:
+    if isinstance(artifact, ArtifactSpec):
+        capabilities = artifact.capabilities
+    else:
+        capabilities = artifact.get("capabilities", [])
+    return capability in capabilities if isinstance(capabilities, (list, tuple)) else False
+
+
+def schema_generates_source_map(schema_info: dict[str, Any]) -> bool:
+    return schema_has_capability(schema_info, "source_map_traceability")
+
+
+def schema_requires_tasks(schema_info: dict[str, Any]) -> bool:
     apply_tracks = schema_info.get("apply_tracks")
+    if apply_tracks == "tasks.md":
+        return True
     return any(
         spec.artifact_id == "tasks" or spec.generates == "tasks.md"
-        for spec in artifact_specs
-    ) or "tasks" in apply_requires or apply_tracks == "tasks.md"
+        for spec in schema_info.get("artifacts", [])
+        if isinstance(spec, ArtifactSpec)
+    )
 
 
 def not_applicable_source_map() -> dict[str, Any]:
@@ -440,8 +532,12 @@ def build_artifact_entries(change_path: Path, artifact_specs: list[ArtifactSpec]
                 "generates": spec.generates,
                 "template": spec.template,
                 "requires": list(spec.requires),
+                "requiredness": spec.requiredness,
+                "na_requires_reason": spec.na_requires_reason,
+                "capabilities": list(spec.capabilities),
+                "role": spec.role,
                 "path": ", ".join(paths) if len(paths) > 1 else (paths[0] if paths else None),
-                "required": True,
+                "required": spec.requiredness == "always",
                 "status": "present" if paths else "missing",
             }
         )
@@ -661,6 +757,7 @@ def build_gaps(
     source_map_required: bool,
     unmapped_reference_paths: list[str],
     tasks_text: str,
+    schema_info: dict[str, Any],
     schema_resolution: dict[str, Any],
     schema_paths: SchemaPaths,
     produced_local_ids: list[str],
@@ -723,12 +820,21 @@ def build_gaps(
 
     if source_map_required:
         gaps.extend(source_map.get("issues", []))
+    for schema_issue_item in schema_info.get("issues", []):
+        gaps.append(
+            gap(
+                str(schema_issue_item.get("code") or "SCHEMA_ISSUE"),
+                str(schema_issue_item.get("severity") or "risk"),
+                str(schema_issue_item.get("message") or "schema issue"),
+                f"openspec/schemas/{schema_resolution['effective_schema']}/schema.yaml",
+            )
+        )
 
     for entry in artifact_entries:
         if entry["status"] == "missing":
             if artifact_not_required(entry, source_map):
                 continue
-            severity = "blocker" if entry["id"] in {"proposal", "source-map", "tasks"} else "risk"
+            severity = "blocker" if entry.get("requiredness") == "always" else "risk"
             gaps.append(
                 gap(
                     "MISSING_ARTIFACT",
@@ -784,7 +890,7 @@ def build_gaps(
         )
 
     if target == "ce-work":
-        if task_state["total"] == 0:
+        if schema_requires_tasks(schema_info) and task_state["total"] == 0:
             gaps.append(gap("TASK_GAP", "blocker", "tasks.md has no checkbox tasks", "tasks.md"))
         if not code_paths and not test_paths:
             owner_artifact = "source-map.md" if source_map_required else "tasks.md"
@@ -811,7 +917,7 @@ def build_gaps(
                     unmapped_reference_paths,
                 )
             )
-    gaps.extend(contract_sync_gaps(artifact_entries, source_map, tasks_text))
+    gaps.extend(contract_sync_gaps(schema_info, artifact_entries, source_map, tasks_text))
     return gaps
 
 
@@ -834,27 +940,34 @@ def gap(
 
 
 def artifact_not_required(entry: dict[str, Any], source_map: dict[str, Any]) -> bool:
-    artifact_id = str(entry.get("id") or "")
-    generates = str(entry.get("generates") or "")
-    if artifact_id not in OPTIONAL_APP_ARTIFACTS and generates not in OPTIONAL_APP_ARTIFACTS:
+    requiredness = str(entry.get("requiredness") or "always")
+    if requiredness == "never":
+        return True
+    if requiredness != "conditional":
         return False
     for row in source_map.get("artifact_applicability", []):
         if not isinstance(row, dict):
             continue
+        artifact_id = str(entry.get("id") or "")
+        generates = str(entry.get("generates") or "")
         artifact = str(row.get("artifact") or "")
         if artifact not in {artifact_id, generates}:
             continue
-        if row.get("required") == "no" and str(row.get("reason") or "").strip():
+        required = str(row.get("required") or "").strip().lower()
+        if required == "no" and str(row.get("reason") or "").strip():
             return True
     return False
 
 
 def contract_sync_gaps(
+    schema_info: dict[str, Any],
     artifact_entries: list[dict[str, Any]],
     source_map: dict[str, Any],
     tasks_text: str,
 ) -> list[dict[str, Any]]:
-    service_contract = next((entry for entry in artifact_entries if entry.get("id") == "service-contract"), None)
+    if not schema_has_capability(schema_info, "contract_sync"):
+        return []
+    service_contract = next((entry for entry in artifact_entries if artifact_has_capability(entry, "contract_sync")), None)
     if service_contract is None or artifact_not_required(service_contract, source_map):
         return []
     if service_contract.get("status") == "missing":
@@ -975,15 +1088,13 @@ def build_read_order(root: Path, change_path: Path, artifact_entries: list[dict[
 
 
 def derive_archive_tracks(schema_info: dict[str, Any]) -> list[str]:
-    tracks = schema_info.get("apply_tracks")
-    if isinstance(tracks, str) and tracks:
-        return [tracks]
-    artifact_tracks = [
-        spec.generates
-        for spec in schema_info.get("artifacts", [])
-        if isinstance(spec, ArtifactSpec) and spec.generates in {"tasks.md", "source-map.md", "specs/**/*.md"}
-    ]
-    return artifact_tracks
+    tracks = schema_info.get("archive_tracks")
+    if isinstance(tracks, list) and tracks:
+        return [str(item) for item in tracks if str(item).strip()]
+    apply_tracks = schema_info.get("apply_tracks")
+    if isinstance(apply_tracks, str) and apply_tracks:
+        return [apply_tracks]
+    return []
 
 
 def derive_scope(proposal_text: str, source_map_text: str) -> dict[str, list[str]]:
@@ -1067,16 +1178,18 @@ def build_execution_brief(
     }
 
 
-def build_guardrails(target: str, source_map_required: bool) -> list[str]:
+def build_guardrails(target: str, source_map_required: bool, tasks_required: bool) -> list[str]:
     common = [
         "Use the current change as the only scope entry.",
         "Do not treat generated summaries as authoritative.",
         "Write durable conclusions back to OpenSpec artifacts.",
     ]
     if target == "ce-work":
-        common.extend([
-            "Follow tasks.md; do not create a parallel durable plan.",
-        ])
+        common.append(
+            "Follow tasks.md; do not create a parallel durable plan."
+            if tasks_required
+            else "Follow the current schema apply tracks; do not create a parallel durable plan."
+        )
         if source_map_required:
             common.append("Use source-map Affected Paths Index for executable paths; metadata fallback is a risk, and other path references remain gaps or follow-up findings.")
         else:
@@ -1383,12 +1496,13 @@ def summarize_task_checks(task_state: dict[str, Any]) -> list[dict[str, Any]]:
 
 def summarize_contract_checks(
     artifact_entries: list[dict[str, Any]],
+    source_map: dict[str, Any],
     contract_sync: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     checks = [
-        {"artifact": entry["id"], "status": entry["status"]}
+        {"artifact": entry["id"], "status": "not_required" if artifact_not_required(entry, source_map) else entry["status"]}
         for entry in artifact_entries
-        if "contract" in entry["id"] or entry["id"] in {"change-context", "design"}
+        if artifact_has_capability(entry, "contract_surface")
     ]
     if contract_sync:
         values = contract_sync.get("values", {}) if isinstance(contract_sync, dict) else {}
@@ -1501,6 +1615,10 @@ def to_artifact_spec(data: dict[str, Any]) -> ArtifactSpec:
         generates=data.get("generates"),
         template=data.get("template"),
         requires=tuple(data.get("requires", [])),
+        requiredness=str(data.get("requiredness") or "always"),
+        na_requires_reason=bool(data.get("na_requires_reason", False)),
+        capabilities=tuple(parse_capabilities(data.get("capabilities"))),
+        role=clean_value(str(data.get("role") or "")) or None,
     )
 
 

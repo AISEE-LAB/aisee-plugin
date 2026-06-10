@@ -29,6 +29,16 @@ Compound Engineering
 - Aisee 不替代 OpenSpec state machine
 - Compound 不替代 OpenSpec 规范事实源
 - OpenSpec 不负责 AI 友好的上下文切片和路由
+- Aisee CLI core 只绑定当前 schema contract，不绑定 `aisee-app-spec-driven` 的 artifact 语义
+
+## 1.1 Schema capability boundary
+
+当前正式规则：
+
+- schema 必须声明 `capabilities`、artifact `requiredness`、`na_requires_reason`、`apply.tracks` 和 `archive.tracks`。
+- Aisee CLI 只按 schema contract 做解析、门禁和投影，不再根据 `service-contract.md`、`ui-contract.md` 或 `source-map.md` 这些 app 名称推断全局规则。
+- app-specific check 只能在当前 schema 显式声明对应 capability 时触发；轻量 schema 不补伪 source-map 或 app contracts。
+- OpenSpec CLI 仍是 validate / archive authority；Aisee 只消费证据并增加 schema-aware 风险。
 
 ## 2. 当前正式流程
 

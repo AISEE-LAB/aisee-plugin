@@ -5,15 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.context_pack import build_context_pack
+from aisee_cli.context_pack import build_context_pack, schema_has_capability
 from aisee_cli.output import issue, summarize_issues
 
 
 SCHEMA_EVIDENCE_REQUIREMENTS = {
-    "aisee-docsite-driven": ("docsite", ("build", "links", "preview", "manual")),
-    "infra-change": ("infra", ("rollback", "post_change")),
-    "security-audit": ("security", ("reviews", "sast", "dependency_scan", "penetration_test", "tests")),
-    "quick-fix": ("quick_fix", ("tests", "manual_verification", "monitoring", "rollback")),
+    "docsite_evidence": ("docsite", ("build", "links", "preview", "manual")),
+    "infra_evidence": ("infra", ("rollback", "post_change")),
+    "security_evidence": ("security", ("reviews", "sast", "dependency_scan", "penetration_test", "tests")),
+    "quick_fix_evidence": ("quick_fix", ("tests", "manual_verification", "monitoring", "rollback")),
 }
 
 
@@ -102,10 +102,9 @@ def schema_requires_verification_evidence(pack: dict[str, Any]) -> bool:
     schema = pack["facts"]["parsed"].get("schema", {})
     if not schema.get("tasks_required"):
         return False
-    schema_name = str(schema.get("name") or "")
-    if schema_name in SCHEMA_EVIDENCE_REQUIREMENTS:
+    if any(schema_has_capability(schema, capability) for capability in SCHEMA_EVIDENCE_REQUIREMENTS):
         return False
-    return schema_name != "quick-research"
+    return not schema_has_capability(schema, "research_only")
 
 
 def append_schema_evidence_issues(
@@ -117,37 +116,36 @@ def append_schema_evidence_issues(
 ) -> None:
     schema = pack["facts"]["parsed"].get("schema", {})
     schema_name = str(schema.get("name") or "")
-    requirement = SCHEMA_EVIDENCE_REQUIREMENTS.get(schema_name)
-    if not requirement:
-        return
-
-    domain, categories = requirement
     evidence = pack["evidence"]
-    evidence_paths = [
-        path
-        for category in categories
-        for path in evidence.get(domain, {}).get(category, [])
-    ]
-    if not evidence_paths:
-        target = blockers if archive_mode else warnings
-        severity = "blocker" if archive_mode else "risk"
-        target.append(
-            issue(
-                "SCHEMA_EVIDENCE_MISSING",
-                severity,
-                f"{schema_name} requires evidence for {domain}: {', '.join(categories)}",
-                "docs/verification",
+    for capability, requirement in SCHEMA_EVIDENCE_REQUIREMENTS.items():
+        if not schema_has_capability(schema, capability):
+            continue
+        domain, categories = requirement
+        evidence_paths = [
+            path
+            for category in categories
+            for path in evidence.get(domain, {}).get(category, [])
+        ]
+        if not evidence_paths:
+            target = blockers if archive_mode else warnings
+            severity = "blocker" if archive_mode else "risk"
+            target.append(
+                issue(
+                    "SCHEMA_EVIDENCE_MISSING",
+                    severity,
+                    f"{schema_name} requires evidence for {domain}: {', '.join(categories)}",
+                    "docs/verification",
+                )
             )
-        )
-        return
+            continue
 
-    for item in parsed_domain_evidence(evidence, domain, categories):
-        status = item.get("status")
-        path = str(item.get("path") or "docs/verification")
-        if status == "failed":
-            blockers.append(issue("SCHEMA_EVIDENCE_FAILED", "blocker", f"{schema_name} evidence reports failure", path))
-        elif status == "unknown":
-            warnings.append(issue("SCHEMA_EVIDENCE_UNKNOWN", "risk", f"{schema_name} evidence has unknown status", path))
+        for item in parsed_domain_evidence(evidence, domain, categories):
+            status = item.get("status")
+            path = str(item.get("path") or "docs/verification")
+            if status == "failed":
+                blockers.append(issue("SCHEMA_EVIDENCE_FAILED", "blocker", f"{schema_name} evidence reports failure", path))
+            elif status == "unknown":
+                warnings.append(issue("SCHEMA_EVIDENCE_UNKNOWN", "risk", f"{schema_name} evidence has unknown status", path))
 
 
 def parsed_domain_evidence(evidence: dict[str, Any], domain: str, categories: tuple[str, ...]) -> list[dict[str, Any]]:

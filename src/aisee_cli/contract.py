@@ -9,12 +9,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.context_pack import build_context_pack
+from aisee_cli.context_pack import artifact_has_capability, build_context_pack, schema_has_capability
 
 
 DEFAULT_MAX_CHARS = 4000
 SUMMARY_MAX_CHARS = 800
-CONTRACT_ARTIFACT_IDS = {"service-contract", "ui-contract", "data-model", "change-context"}
 SECTION_PATTERN = re.compile(r"^(?P<level>#{2,6})\s+(?P<title>.+?)\s*$")
 CHANGE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
@@ -36,9 +35,9 @@ def build_contract_manifest(project_root: Path, max_chars: int = SUMMARY_MAX_CHA
             pack = build_context_pack(root, change, "aisee-verify")
         except ValueError:
             continue
-        contracts = contract_entries_from_pack(root, change_path, pack, include_sections=False, max_chars=max_chars)
-        if not contracts:
+        if not schema_supports_contract_helper(pack):
             continue
+        contracts = contract_entries_from_pack(root, change_path, pack, include_sections=False, max_chars=max_chars)
         changes.append(
             {
                 "id": change,
@@ -66,6 +65,12 @@ def build_contract_summary(project_root: Path, change: str, max_chars: int = SUM
     root = project_root.resolve()
     change_path = resolve_change_path(root, change)
     pack = build_context_pack(root, change, "aisee-verify")
+    if not schema_supports_contract_helper(pack):
+        return not_applicable_contract_result(
+            pack,
+            f"aisee contract summary --change {change} --json",
+            f"schema {pack['change']['schema']} does not declare contract_helper capability",
+        )
     contracts = contract_entries_from_pack(root, change_path, pack, include_sections=True, max_chars=max_chars)
     return {
         "schema_version": "1.0",
@@ -92,6 +97,12 @@ def build_contract_get(
     root = project_root.resolve()
     change_path = resolve_change_path(root, change)
     pack = build_context_pack(root, change, "aisee-verify")
+    if not schema_supports_contract_helper(pack):
+        return not_applicable_contract_result(
+            pack,
+            f"aisee contract get --change {change} --artifact {artifact} --json",
+            f"schema {pack['change']['schema']} does not declare contract_helper capability",
+        )
     artifact_entry = find_contract_artifact(pack, artifact)
     if artifact_entry is None:
         raise ValueError(f"contract artifact not found: {artifact}")
@@ -171,6 +182,8 @@ def contract_entries_from_pack(
     include_sections: bool,
     max_chars: int,
 ) -> list[dict[str, Any]]:
+    if not schema_supports_contract_helper(pack):
+        return []
     entries = []
     for artifact in pack["facts"]["parsed"]["schema"].get("artifacts", []):
         if not is_contract_artifact(artifact):
@@ -207,6 +220,8 @@ def contract_entries_from_pack(
 
 
 def find_contract_artifact(pack: dict[str, Any], artifact_name: str) -> dict[str, Any] | None:
+    if not schema_supports_contract_helper(pack):
+        return None
     normalized = normalize_artifact_name(artifact_name)
     for artifact in pack["facts"]["parsed"]["schema"].get("artifacts", []):
         if not is_contract_artifact(artifact):
@@ -222,9 +237,26 @@ def find_contract_artifact(pack: dict[str, Any], artifact_name: str) -> dict[str
 
 
 def is_contract_artifact(artifact: dict[str, Any]) -> bool:
-    artifact_id = str(artifact.get("id") or "")
-    generates = str(artifact.get("generates") or "")
-    return artifact_id in CONTRACT_ARTIFACT_IDS or "contract" in artifact_id or "contract" in generates
+    return artifact_has_capability(artifact, "contract_surface")
+
+
+def schema_supports_contract_helper(pack: dict[str, Any]) -> bool:
+    schema = pack.get("facts", {}).get("parsed", {}).get("schema", {})
+    return schema_has_capability(schema, "contract_helper")
+
+
+def not_applicable_contract_result(pack: dict[str, Any], command: str, reason: str) -> dict[str, Any]:
+    return {
+        "schema_version": "1.0",
+        "status": "not_applicable",
+        "change": pack["change"],
+        "contracts": [],
+        "reason": reason,
+        "meta": {
+            "command": command,
+            "generated_at": now_iso(),
+        },
+    }
 
 
 def contract_artifact_identity(root: Path, change_path: Path, artifact: dict[str, Any]) -> dict[str, Any]:

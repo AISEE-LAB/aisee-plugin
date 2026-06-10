@@ -1,79 +1,137 @@
 name: security-audit
 version: 1
-description: |
-  适用场景：涉及认证、授权、数据隐私、加密、外部输入处理的变更。
+description: '适用场景：涉及认证、授权、数据隐私、加密、外部输入处理的变更。
+
   与 spec-driven 的区别：在 proposal 和 specs 之间强制插入 threat-model.md（STRIDE 威胁建模），
+
   specs 和 design 都必须包含安全相关内容，tasks 包含安全验收门控。
+
   创建时间：2026-04-20
+
   维护人：@security-team
 
+  '
+capabilities:
+- apply_execution
+- archive_authority
+- security_evidence
 artifacts:
-  - id: proposal
-    generates: proposal.md
-    description: "变更提案：为什么做、做什么、安全相关的成功标准"
-    template: proposal.md
-    requires: []
-    instruction: |
-      除标准 proposal 要求外，安全变更还需要：
-      - 在 Scope 中明确列出所有涉及的安全边界（认证、授权、数据流）
-      - Success Criteria 必须包含至少一条安全相关的验收标准
-      - 明确写出 Spec Owner 和 Security Reviewer（两个不同的人）
-      - 写明是否需要安全团队参与 review，原因是什么
+- id: proposal
+  generates: proposal.md
+  description: 变更提案：为什么做、做什么、安全相关的成功标准
+  template: proposal.md
+  requires: []
+  requiredness: always
+  capabilities:
+  - primary_brief
+  instruction: '除标准 proposal 要求外，安全变更还需要：
 
-  - id: threat-model
-    generates: threat-model.md
-    description: "威胁建模：用 STRIDE 模型识别攻击面、评估风险、制定缓解措施"
-    template: threat-model.md
-    requires: [proposal]
-    instruction: |
-      填写威胁模型时：
-      - 必须覆盖 STRIDE 六个维度（Spoofing / Tampering / Repudiation / Information Disclosure / Denial of Service / Elevation of Privilege）
-      - 每个威胁必须有：描述 + 影响级别（Critical/High/Medium/Low）+ 缓解措施
-      - 没有缓解措施的 Critical/High 威胁必须写明接受风险的理由（需 Security Owner 签字）
-      - 数据流图必须标注所有信任边界（Trust Boundary）
-      - 如有第三方依赖，列出其已知 CVE 和当前处理方式
+    - 在 Scope 中明确列出所有涉及的安全边界（认证、授权、数据流）
 
-  - id: specs
-    generates: specs/**/*.md
-    description: "需求场景（必须包含安全场景和边界条件）"
-    template: spec.md
-    requires: [threat-model]
-    instruction: |
-      基于威胁模型的结果，specs 必须：
-      - 每个威胁缓解措施对应至少一个 SHALL/MUST 需求
-      - 场景必须覆盖：正常路径 + 攻击路径 + 异常处理
-      - 认证/授权场景必须覆盖：未登录、权限不足、令牌过期、并发会话
-      - 输入处理场景必须覆盖：超长输入、特殊字符、空值、重复提交
+    - Success Criteria 必须包含至少一条安全相关的验收标准
 
-  - id: design
-    generates: design.md
-    description: "技术方案（必须包含安全控制设计）"
-    template: design.md
-    requires: [proposal]
-    instruction: |
-      design.md 必须包含：
-      - 安全控制清单：每条威胁对应的技术实现方式
-      - 数据分类：处理的数据属于什么级别（PII / 敏感 / 普通）
-      - 密钥和凭证管理方式（禁止硬编码，写明存储和轮转策略）
-      - 所有涉及外部输入的地方标注验证和过滤逻辑
-      - 标注所有 [SECURITY-CRITICAL] 的代码路径，这些路径需要额外 review
+    - 明确写出 Spec Owner 和 Security Reviewer（两个不同的人）
 
-  - id: tasks
-    generates: tasks.md
-    description: "实现清单（包含安全验收门控）"
-    template: tasks.md
-    requires: [specs, design]
-    instruction: |
-      tasks.md 除标准格式外必须：
-      - 包含"安全验收"阶段，覆盖：渗透测试 / SAST 扫描 / 依赖漏洞检查
-      - 每个 [SECURITY-CRITICAL] 路径有对应的专项测试 task
-      - 最后一个 task 必须是：Security Reviewer 签字确认
+    - 写明是否需要安全团队参与 review，原因是什么
 
+    '
+- id: threat-model
+  generates: threat-model.md
+  description: 威胁建模：用 STRIDE 模型识别攻击面、评估风险、制定缓解措施
+  template: threat-model.md
+  requires:
+  - proposal
+  requiredness: always
+  capabilities:
+  - threat_model
+  instruction: '填写威胁模型时：
+
+    - 必须覆盖 STRIDE 六个维度（Spoofing / Tampering / Repudiation / Information Disclosure / Denial of Service / Elevation of Privilege）
+
+    - 每个威胁必须有：描述 + 影响级别（Critical/High/Medium/Low）+ 缓解措施
+
+    - 没有缓解措施的 Critical/High 威胁必须写明接受风险的理由（需 Security Owner 签字）
+
+    - 数据流图必须标注所有信任边界（Trust Boundary）
+
+    - 如有第三方依赖，列出其已知 CVE 和当前处理方式
+
+    '
+- id: specs
+  generates: specs/**/*.md
+  description: 需求场景（必须包含安全场景和边界条件）
+  template: spec.md
+  requires:
+  - threat-model
+  requiredness: always
+  capabilities:
+  - behavior_spec
+  instruction: '基于威胁模型的结果，specs 必须：
+
+    - 每个威胁缓解措施对应至少一个 SHALL/MUST 需求
+
+    - 场景必须覆盖：正常路径 + 攻击路径 + 异常处理
+
+    - 认证/授权场景必须覆盖：未登录、权限不足、令牌过期、并发会话
+
+    - 输入处理场景必须覆盖：超长输入、特殊字符、空值、重复提交
+
+    '
+- id: design
+  generates: design.md
+  description: 技术方案（必须包含安全控制设计）
+  template: design.md
+  requires:
+  - proposal
+  requiredness: always
+  capabilities:
+  - design_spec
+  instruction: 'design.md 必须包含：
+
+    - 安全控制清单：每条威胁对应的技术实现方式
+
+    - 数据分类：处理的数据属于什么级别（PII / 敏感 / 普通）
+
+    - 密钥和凭证管理方式（禁止硬编码，写明存储和轮转策略）
+
+    - 所有涉及外部输入的地方标注验证和过滤逻辑
+
+    - 标注所有 [SECURITY-CRITICAL] 的代码路径，这些路径需要额外 review
+
+    '
+- id: tasks
+  generates: tasks.md
+  description: 实现清单（包含安全验收门控）
+  template: tasks.md
+  requires:
+  - specs
+  - design
+  requiredness: always
+  capabilities:
+  - apply_track
+  instruction: 'tasks.md 除标准格式外必须：
+
+    - 包含"安全验收"阶段，覆盖：渗透测试 / SAST 扫描 / 依赖漏洞检查
+
+    - 每个 [SECURITY-CRITICAL] 路径有对应的专项测试 task
+
+    - 最后一个 task 必须是：Security Reviewer 签字确认
+
+    '
 apply:
-  requires: [tasks]
+  requires:
+  - tasks
   tracks: tasks.md
-  instruction: |
-    实现过程中特别注意：
+  instruction: '实现过程中特别注意：
+
     - 所有标注 [SECURITY-CRITICAL] 的代码路径，实现完成后立即通知 Security Reviewer
+
     - 禁止为了通过测试而绕过安全检查
+
     - 发现 threat-model.md 中未覆盖的新威胁：暂停 → 更新 threat-model.md → 继续
+
+    '
+archive:
+  tracks:
+  - tasks.md
+  - threat-model.md

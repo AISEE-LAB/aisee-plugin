@@ -35,7 +35,7 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 ## 不负责
 
 - 创建、拆分或重新规划 change。
-- 生成或补齐 `proposal.md`、`specs/**`、`change-context.md`、contracts、`source-map.md` 或 `tasks.md`。
+- 生成或补齐任何 OpenSpec change artifact 正文。
 - 让 `ce-plan` 生成长期任务清单。
 - 默认写入新的长期交接文档。
 - 写代码或执行实现。
@@ -100,7 +100,7 @@ aisee context pack --change <change> --for ce-work --json
 - `facts.derived.traceability`：上游 ID、产出 ID、ID links。
 - `facts.derived.execution.brief`：给 `ce-work` 的最小执行索引。优先消费它，不要自己重新拼接 full artifact text。
 - `facts.parsed.schema.source_map_required` / `tasks_required` / `archive_tracks`：当前 schema 的实现前置。
-- `facts.derived.code_paths` / `test_paths`：允许读取和修改入口；source-map schema 优先来自 `Affected Paths Index`，缺表时只能使用 source-map metadata fallback 且必须保留 risk；轻量 schema 来自当前 schema artifacts 中明确引用的执行路径。
+- `facts.derived.code_paths` / `test_paths`：允许读取和修改入口；source-map schema 只来自 `Affected Paths Index`；轻量 schema 来自当前 schema artifacts 中明确引用的执行路径。
 - `facts.derived.implementation_references.source`：路径来源，可能是 `source-map` 或 `schema-artifacts`。
 - `facts.derived.implementation_references.unmapped_reference_paths`：source-map schema 中 artifacts 提到但未在 source-map 声明的路径，只能作为缺口处理，不能交给 `ce-work` 自动修改。
 - `facts.derived.execution`：执行顺序、是否需要先 ce-plan、禁止越界项。
@@ -120,8 +120,8 @@ aisee context pack --change <change> --for ce-work --json
 2. `openspec/changes/<change>/proposal.md`
 3. 当前 schema 生成的追踪 artifact，例如 `source-map.md`、`problem.md`、`solution.md`、`doc-change.md`、`impact-assessment.md`、`rollback-plan.md`、`findings.md`
 4. `openspec/changes/<change>/specs/**/*.md`，仅当当前 schema 生成 specs
-5. Required=yes 的 `openspec/changes/<change>/change-context.md` 或 schema 明确生成的 `design.md`
-6. Required=yes 的 contracts：`ui-contract.md`、`service-contract.md`、`data-model.md`、device contracts
+5. schema 明确生成且当前 change Required=yes 的 supporting artifacts，例如 `change-context.md`、`design.md` 或其它 schema 专属 contract/document
+6. schema 声明且当前 change Required=yes 的 contracts / supporting artifacts；名称以当前 schema 为准，不预设 app artifact 列表
 7. 当前 schema 的 apply tracks，通常是 `tasks.md`
 8. context pack 明确给出的相关代码路径、测试路径、路由、API、模型和配置
 
@@ -180,7 +180,7 @@ Brief 只做执行索引，不复制 OpenSpec artifact 正文：
 - `specs/**/spec.md` 是行为契约。
 - 当前 schema 的 apply tracks 是长期执行清单；app/device/quick-fix 通常是 `tasks.md`，无 apply schema 不强制 tasks。
 - `source-map.md` 只在当前 schema 生成它时是代码定位入口；不生成 source-map 的 schema 使用 context pack 从 schema artifacts 中提取的 implementation references。
-- app schema 中，`ui-contract.md`、`service-contract.md`、`data-model.md` 和 `change-context.md` 只有在 `source-map.md` 标记 Required=yes 时才是实现 contracts；不要要求每个 change 都展开全部 contracts。
+- app schema 中，按 `source-map.md` 的 Artifact Applicability 判断哪些 supporting artifacts 是 Required=yes；不要要求每个 change 都展开全部 contracts。
 - device schema 中，`design.md` 和 hardware/firmware/runtime/verification contracts 是实现 contracts；不要把 app contract 假设套到设备项目。
 - `ce-work` 的允许路径应来自 context pack 的 `allowed_paths`、`code_paths` 和 `test_paths`。缺失时标记 `[SOURCE-MAP-GAP]` 或 `[IMPLEMENTATION-PATH-GAP]`，不要自行扩大实现范围。
 - 实现中发现需求/spec/contract/code 事实不一致，先回写当前 OpenSpec change，再继续实现。

@@ -79,6 +79,15 @@ def check_schema_packs(root: Path) -> dict[str, Any]:
         except Exception as error:
             issues.append(issue("SCHEMA_PARSE_FAILED", "blocker", f"{item['name']} schema failed to parse: {error}", schema_dir_label))
             continue
+        for schema_issue in schema_info.get("issues", []):
+            issues.append(
+                issue(
+                    str(schema_issue.get("code") or "SCHEMA_ISSUE"),
+                    str(schema_issue.get("severity") or "risk"),
+                    str(schema_issue.get("message") or "schema issue"),
+                    f"{schema_dir_label}/schema.yaml",
+                )
+            )
         for artifact in schema_info["artifacts"]:
             template = artifact.template
             if template and not (schema_file.parent / "templates" / template).exists():
@@ -104,9 +113,108 @@ def validate_schema_yaml(schema_file: Path) -> None:
         raise ValueError("schema.yaml must be a YAML mapping")
     if not data.get("name"):
         raise ValueError("schema.yaml is missing name")
+    if "capabilities" not in data:
+        raise ValueError("schema.yaml must define capabilities")
     artifacts = data.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
         raise ValueError("schema.yaml must define artifacts")
+
+
+def format_schema_packs(root: Path, *, check: bool = False, write: bool = False) -> dict[str, Any]:
+    listed = list_schema_packs(root)
+    issues = list(listed["issues"])
+    drifted: list[dict[str, Any]] = []
+    written: list[str] = []
+    for item in listed["schemas"]:
+        schema_dir_label = item["installed_path"] if item["installed"] else item["source"]
+        if schema_dir_label is None:
+            continue
+        schema_file = root / schema_dir_label / "schema.yaml"
+        try:
+            original = schema_file.read_text(encoding="utf-8")
+            data = yaml.safe_load(original)
+            if not isinstance(data, dict):
+                raise ValueError("schema.yaml must be a YAML mapping")
+            canonical = dump_schema_yaml(canonicalize_schema_yaml(data))
+        except Exception as error:
+            issues.append(issue("SCHEMA_FORMAT_FAILED", "blocker", f"{item['name']} schema could not be formatted: {error}", f"{schema_dir_label}/schema.yaml"))
+            continue
+        if original != canonical:
+            drifted.append({"name": item["name"], "path": f"{schema_dir_label}/schema.yaml"})
+            if write:
+                schema_file.write_text(canonical, encoding="utf-8")
+                written.append(f"{schema_dir_label}/schema.yaml")
+    if check and drifted:
+        for item in drifted:
+            issues.append(issue("SCHEMA_FORMAT_DRIFT", "risk", f"{item['name']} schema.yaml is not in canonical format", item["path"]))
+    return {
+        **listed,
+        "status": status_from_issues(issues),
+        "issues": issues,
+        "summary": summarize_issues(issues),
+        "drifted": drifted,
+        "written": written,
+        "meta": {
+            "command": "aisee schemas format --json",
+            "writes": write,
+            "check": check,
+        },
+    }
+
+
+def canonicalize_schema_yaml(data: dict[str, Any]) -> dict[str, Any]:
+    canonical: dict[str, Any] = {}
+    for key in ("name", "version", "description", "capabilities"):
+        if key in data:
+            canonical[key] = data[key]
+    artifacts = data.get("artifacts")
+    if isinstance(artifacts, list):
+        canonical["artifacts"] = [canonicalize_artifact_yaml(item) for item in artifacts if isinstance(item, dict)]
+    for key in ("apply", "archive"):
+        if isinstance(data.get(key), dict):
+            canonical[key] = canonicalize_block_yaml(data[key])
+    for key, value in data.items():
+        if key not in canonical:
+            canonical[key] = value
+    return canonical
+
+
+def canonicalize_artifact_yaml(data: dict[str, Any]) -> dict[str, Any]:
+    canonical: dict[str, Any] = {}
+    ordered_keys = (
+        "id",
+        "generates",
+        "description",
+        "template",
+        "requires",
+        "requiredness",
+        "na_requires_reason",
+        "capabilities",
+        "role",
+        "instruction",
+    )
+    for key in ordered_keys:
+        if key in data:
+            canonical[key] = data[key]
+    for key, value in data.items():
+        if key not in canonical:
+            canonical[key] = value
+    return canonical
+
+
+def canonicalize_block_yaml(data: dict[str, Any]) -> dict[str, Any]:
+    canonical: dict[str, Any] = {}
+    for key in ("requires", "tracks", "instruction"):
+        if key in data:
+            canonical[key] = data[key]
+    for key, value in data.items():
+        if key not in canonical:
+            canonical[key] = value
+    return canonical
+
+
+def dump_schema_yaml(data: dict[str, Any]) -> str:
+    return yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=120).rstrip() + "\n"
 
 
 def install_schema_packs(root: Path, selected: list[str], *, force: bool = False) -> dict[str, Any]:

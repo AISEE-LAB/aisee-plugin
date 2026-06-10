@@ -36,34 +36,58 @@ def create_contract_project(root: Path) -> None:
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
 version: 2
+capabilities:
+  - source_map_traceability
+  - apply_execution
+  - archive_authority
+  - contract_helper
+  - contract_sync
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: source-map
     generates: source-map.md
     template: source-map.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [source_map]
   - id: specs
     generates: specs/**/*.md
     template: spec.md
     requires: [source-map]
+    requiredness: always
+    capabilities: [behavior_spec]
   - id: ui-contract
     generates: ui-contract.md
     template: ui-contract.md
     requires: [source-map, specs]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [contract_surface]
   - id: service-contract
     generates: service-contract.md
     template: service-contract.md
     requires: [source-map, specs]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [contract_surface, contract_sync]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [specs, service-contract]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - source-map.md
 """,
     )
     change = root / "openspec" / "changes" / "add-auth"
@@ -135,6 +159,51 @@ Contract owner is backend.
     )
 
 
+def create_quick_fix_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: quick-fix\n")
+    write(
+        root / "openspec" / "schemas" / "quick-fix" / "schema.yaml",
+        """name: quick-fix
+version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+  - quick_fix_evidence
+artifacts:
+  - id: problem
+    generates: problem.md
+    template: problem.md
+    requires: []
+    requiredness: always
+    capabilities: [problem_statement]
+  - id: solution
+    generates: solution.md
+    template: solution.md
+    requires: [problem]
+    requiredness: always
+    capabilities: [solution_design]
+  - id: tasks
+    generates: tasks.md
+    template: tasks.md
+    requires: [solution]
+    requiredness: always
+    capabilities: [apply_track]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+""",
+    )
+    change = root / "openspec" / "changes" / "fix-login-copy"
+    write(change / ".openspec.yaml", "schema: quick-fix\n")
+    write(change / "problem.md", "# Problem\n\n登录按钮文案错误。\n")
+    write(change / "solution.md", "# Solution\n\n修改文案。\n")
+    write(change / "tasks.md", "# Tasks\n\n- [ ] 修改文案。\n")
+
+
 def test_contract_manifest_lists_change_contracts(tmp_path: Path) -> None:
     create_contract_project(tmp_path)
 
@@ -168,6 +237,15 @@ def test_contract_manifest_marks_not_required_contracts(tmp_path: Path) -> None:
     assert service["required"] is False
     assert service["status"] == "not_required"
     assert service["reason"] == "本 change 不涉及 API"
+
+
+def test_contract_manifest_omits_non_contract_schema_changes(tmp_path: Path) -> None:
+    create_quick_fix_project(tmp_path)
+
+    manifest = build_contract_manifest(tmp_path)
+
+    assert manifest["status"] == "ok"
+    assert manifest["changes"] == []
 
 
 def test_contract_summary_returns_section_index_without_raw_dump(tmp_path: Path) -> None:
@@ -258,21 +336,37 @@ def test_contract_get_rejects_artifact_path_outside_change(tmp_path: Path) -> No
         tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
 version: 2
+capabilities:
+  - source_map_traceability
+  - apply_execution
+  - archive_authority
+  - contract_helper
+  - contract_sync
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: source-map
     generates: source-map.md
     template: source-map.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [source_map]
   - id: service-contract
     generates: ../secret.md
     template: service-contract.md
     requires: [source-map]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [contract_surface, contract_sync]
 apply:
   requires: []
+archive:
+  tracks:
+    - source-map.md
 """,
     )
     write(tmp_path / "openspec" / "changes" / "secret.md", "# Secret\n\nTOKEN=secret\n")

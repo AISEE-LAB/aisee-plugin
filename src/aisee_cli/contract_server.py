@@ -100,6 +100,8 @@ def route_contract_request(root: Path, path: str, host: str, port: int) -> tuple
         if parts[2] == "contracts":
             if len(parts) == 3:
                 summary = build_contract_summary(root, change, max_chars=max_chars)
+                if summary.get("status") != "ok":
+                    return HTTPStatus.OK, summary
                 return HTTPStatus.OK, {
                     "schema_version": "1.0",
                     "status": "ok",
@@ -111,6 +113,8 @@ def route_contract_request(root: Path, path: str, host: str, port: int) -> tuple
                 return HTTPStatus.OK, build_contract_get(root, change, artifact, max_chars=max_chars)
             if len(parts) == 5 and parts[4] == "sections":
                 detail = build_contract_get(root, change, artifact, max_chars=max_chars)
+                if detail.get("status") != "ok":
+                    return HTTPStatus.OK, detail
                 return HTTPStatus.OK, {
                     "schema_version": "1.0",
                     "status": "ok",

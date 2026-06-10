@@ -50,30 +50,51 @@ def create_change_project(root: Path, *, task_mark: str = " ") -> None:
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
 version: 2
+capabilities:
+  - source_map_traceability
+  - apply_execution
+  - archive_authority
+  - contract_helper
+  - contract_sync
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: source-map
     generates: source-map.md
     template: source-map.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [source_map]
   - id: specs
     generates: specs/**/*.md
     template: spec.md
     requires: [source-map]
+    requiredness: always
+    capabilities: [behavior_spec]
   - id: service-contract
     generates: service-contract.md
     template: service-contract.md
     requires: [specs]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [contract_surface, contract_sync]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [specs, service-contract]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - source-map.md
 """,
     )
     change = root / "openspec" / "changes" / "add-auth"
@@ -130,42 +151,68 @@ def create_device_project(root: Path) -> None:
         root / "openspec" / "schemas" / "aisee-device-spec-driven" / "schema.yaml",
         """name: aisee-device-spec-driven
 version: 3
+capabilities:
+  - source_map_traceability
+  - apply_execution
+  - archive_authority
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: source-map
     generates: source-map.md
     template: source-map.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [source_map]
   - id: specs
     generates: specs/**/*.md
     template: spec.md
     requires: [source-map]
+    requiredness: always
+    capabilities: [behavior_spec]
   - id: design
     generates: design.md
     template: design.md
     requires: [specs]
+    requiredness: always
+    capabilities: [design_spec]
   - id: hardware-contract
     generates: hardware-contract.md
     template: hardware-contract.md
     requires: [design]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [device_contract]
   - id: firmware-contract
     generates: firmware-contract.md
     template: firmware-contract.md
     requires: [design, hardware-contract]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [device_contract]
   - id: verification-contract
     generates: verification-contract.md
     template: verification-contract.md
     requires: [hardware-contract, firmware-contract]
+    requiredness: always
+    capabilities: [device_contract, verification_contract]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [specs, design, hardware-contract, firmware-contract, verification-contract]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - source-map.md
 """,
     )
     change = root / "openspec" / "changes" / "sample-sensor"
@@ -191,22 +238,35 @@ def create_quick_fix_project(root: Path, *, task_mark: str = "x") -> None:
         root / "openspec" / "schemas" / "quick-fix" / "schema.yaml",
         """name: quick-fix
 version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+  - quick_fix_evidence
 artifacts:
   - id: problem
     generates: problem.md
     template: problem.md
     requires: []
+    requiredness: always
+    capabilities: [problem_statement]
   - id: solution
     generates: solution.md
     template: solution.md
     requires: [problem]
+    requiredness: always
+    capabilities: [solution_design]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [solution]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
 """,
     )
     change = root / "openspec" / "changes" / "fix-login-copy"
@@ -223,19 +283,31 @@ def create_quick_research_project(root: Path) -> None:
         root / "openspec" / "schemas" / "quick-research" / "schema.yaml",
         """name: quick-research
 version: 1
+capabilities:
+  - research_only
+  - archive_authority
 artifacts:
   - id: question
     generates: question.md
     template: question.md
     requires: []
+    requiredness: always
+    capabilities: [research_question]
   - id: findings
     generates: findings.md
     template: findings.md
     requires: [question]
+    requiredness: always
+    capabilities: [research_findings]
   - id: recommendation
     generates: recommendation.md
     template: recommendation.md
     requires: [findings]
+    requiredness: always
+    capabilities: [research_recommendation]
+archive:
+  tracks:
+    - recommendation.md
 """,
     )
     change = root / "openspec" / "changes" / "research-cache"
@@ -245,6 +317,58 @@ artifacts:
     write(change / "recommendation.md", "# Recommendation\n\n有条件支持，后续另起实现 change。\n")
 
 
+def create_opsx_collab_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: opsx-collab-pr-loop\n")
+    write(
+        root / "openspec" / "schemas" / "opsx-collab-pr-loop" / "schema.yaml",
+        """name: opsx-collab-pr-loop
+version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+artifacts:
+  - id: intake
+    generates: loop/intake.md
+    template: intake.md
+    requires: []
+    requiredness: always
+    capabilities: [intake_brief]
+  - id: research-plan
+    generates: loop/research-plan.md
+    template: research-plan.md
+    requires: [intake]
+    requiredness: always
+    capabilities: [research_plan]
+  - id: implementation
+    generates: loop/implementation.md
+    template: implementation.md
+    requires: [research-plan]
+    requiredness: always
+    capabilities: [implementation_record]
+  - id: checkpoints
+    generates: loop/checkpoints.md
+    template: checkpoints.md
+    requires: [implementation]
+    requiredness: always
+    capabilities: [checkpoint_log]
+apply:
+  requires: [research-plan]
+  tracks: loop/implementation.md
+archive:
+  tracks:
+    - loop/implementation.md
+    - loop/checkpoints.md
+""",
+    )
+    change = root / "openspec" / "changes" / "review-auth-pr"
+    write(change / ".openspec.yaml", "schema: opsx-collab-pr-loop\n")
+    write(change / "loop" / "intake.md", "# Intake\n\nPR review request.\n")
+    write(change / "loop" / "research-plan.md", "# Research Plan\n\nCheck compatibility and correctness.\n")
+    write(change / "loop" / "implementation.md", "# Implementation\n\nReview findings recorded.\n")
+    write(change / "loop" / "checkpoints.md", "# Checkpoints\n\n本轮完成。\n")
+
+
 def create_docsite_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "openspec" / "config.yaml", "schema: aisee-docsite-driven\n")
@@ -252,22 +376,36 @@ def create_docsite_project(root: Path) -> None:
         root / "openspec" / "schemas" / "aisee-docsite-driven" / "schema.yaml",
         """name: aisee-docsite-driven
 version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+  - docsite_evidence
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: doc-change
     generates: doc-change.md
     template: doc-change.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [doc_change]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [doc-change]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - doc-change.md
 """,
     )
     change = root / "openspec" / "changes" / "update-docs"
@@ -284,26 +422,42 @@ def create_infra_project(root: Path) -> None:
         root / "openspec" / "schemas" / "infra-change" / "schema.yaml",
         """name: infra-change
 version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+  - infra_evidence
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: impact-assessment
     generates: impact-assessment.md
     template: impact-assessment.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [infra_impact]
   - id: rollback-plan
     generates: rollback-plan.md
     template: rollback-plan.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [infra_rollback]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [impact-assessment, rollback-plan]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - rollback-plan.md
 """,
     )
     change = root / "openspec" / "changes" / "update-ci"
@@ -321,30 +475,48 @@ def create_security_project(root: Path) -> None:
         root / "openspec" / "schemas" / "security-audit" / "schema.yaml",
         """name: security-audit
 version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+  - security_evidence
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: threat-model
     generates: threat-model.md
     template: threat-model.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [threat_model]
   - id: specs
     generates: specs/**/*.md
     template: spec.md
     requires: [threat-model]
+    requiredness: always
+    capabilities: [behavior_spec]
   - id: design
     generates: design.md
     template: design.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [design_spec]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [specs, design]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - threat-model.md
 """,
     )
     change = root / "openspec" / "changes" / "secure-login"
@@ -569,6 +741,19 @@ def test_quick_research_verify_and_archive_do_not_require_tasks_or_tests(tmp_pat
     assert verify["status"] == "ready"
     assert "TASKS_MISSING" not in {item["code"] for item in verify["issues"]}
     assert "TEST_EVIDENCE_MISSING" not in {item["code"] for item in verify["issues"]}
+    assert archive["status"] == "archive-ready"
+
+
+def test_opsx_collab_verify_and_archive_do_not_require_tasks_md(tmp_path: Path) -> None:
+    create_opsx_collab_project(tmp_path)
+    write(tmp_path / "docs" / "verification" / "review-auth-pr-openspec-validate.md", "passed\n")
+
+    verify = run_json(tmp_path, "change", "verify-check", "review-auth-pr", "--json")
+    archive = run_json(tmp_path, "change", "archive-check", "review-auth-pr", "--json")
+
+    assert verify["status"] == "ready"
+    assert "TASKS_MISSING" not in {item["code"] for item in verify["issues"]}
+    assert "TASK_GAP" not in {item["code"] for item in verify["issues"]}
     assert archive["status"] == "archive-ready"
 
 

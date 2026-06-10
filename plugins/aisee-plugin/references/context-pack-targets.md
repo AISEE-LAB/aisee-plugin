@@ -41,7 +41,7 @@ Required additions:
 
 Rules:
 
-- 对生成 `source-map.md` 的 schema，`allowed_paths` 来自 `source-map.md` 的 `Affected Paths Index`；缺表时可从 `source-map.md` 本文 metadata fallback 并输出 risk。
+- 对生成 `source-map.md` 的 schema，`allowed_paths` 只来自 `source-map.md` 的 `Affected Paths Index`；缺表时输出 risk，不做隐式 fallback。
 - artifact 文本提到但未在 source-map 声明的路径只能作为 `unmapped_reference_paths` 和 gap 输出。
 - 对不生成 `source-map.md` 的 schema，`allowed_paths` 来自当前 schema artifacts / apply tracks 的显式路径引用；缺路径时要求补当前 schema artifact，而不是创建假 source-map。
 - 如果当前 schema apply tracks 太粗、路径缺失或 contract 冲突，`requires_ce_plan` 可以为 `true`，但 `ce-plan` 结论必须回写当前 schema apply tracks；仅 source-map schema 需要回写 `source-map.md`。

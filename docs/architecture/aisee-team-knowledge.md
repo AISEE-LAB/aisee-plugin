@@ -88,6 +88,12 @@ CLI 负责 knowledge retrieval 的全部边界控制：
 7. 执行 project-local / team knowledge 去重。
 8. 输出 top N guardrails。
 
+card frontmatter 还应声明 `scope_level`：
+
+- `pattern`：可跨项目复用的工程模式。
+- `policy`：团队约束或流程规则。
+- `project-fact`：只适用于特定项目的事实，默认不得跨项目召回。
+
 Skill 和 AI 提示不得直接扫描 `knowledge/cards/**/*.md`。所有调用都应通过：
 
 ```bash

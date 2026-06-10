@@ -50,14 +50,23 @@ def create_schema_pack(root: Path) -> None:
         root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "schema.yaml",
         """name: quick-fix
 version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+  - quick_fix_evidence
 artifacts:
   - id: problem
     generates: problem.md
     template: problem.md
     requires: []
+    requiredness: always
+    capabilities: [problem_statement]
 apply:
   requires: [problem]
   tracks: problem.md
+archive:
+  tracks:
+    - problem.md
 """,
     )
     write(
@@ -75,26 +84,42 @@ def create_open_project(root: Path) -> None:
         root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
         """name: aisee-app-spec-driven
 version: 2
+capabilities:
+  - source_map_traceability
+  - apply_execution
+  - archive_authority
 artifacts:
   - id: proposal
     generates: proposal.md
     template: proposal.md
     requires: []
+    requiredness: always
+    capabilities: [primary_brief]
   - id: source-map
     generates: source-map.md
     template: source-map.md
     requires: [proposal]
+    requiredness: always
+    capabilities: [source_map]
   - id: specs
     generates: specs/**/*.md
     template: spec.md
     requires: [source-map]
+    requiredness: always
+    capabilities: [behavior_spec]
   - id: tasks
     generates: tasks.md
     template: tasks.md
     requires: [specs]
+    requiredness: always
+    capabilities: [apply_track]
 apply:
   requires: [tasks]
   tracks: tasks.md
+archive:
+  tracks:
+    - tasks.md
+    - source-map.md
         """,
     )
     for template in ("proposal.md", "source-map.md", "spec.md", "tasks.md"):
@@ -115,19 +140,31 @@ def create_quick_research_project(root: Path) -> None:
         root / "openspec" / "schemas" / "quick-research" / "schema.yaml",
         """name: quick-research
 version: 1
+capabilities:
+  - research_only
+  - archive_authority
 artifacts:
   - id: question
     generates: question.md
     template: question.md
     requires: []
+    requiredness: always
+    capabilities: [research_question]
   - id: findings
     generates: findings.md
     template: findings.md
     requires: [question]
+    requiredness: always
+    capabilities: [research_findings]
   - id: recommendation
     generates: recommendation.md
     template: recommendation.md
     requires: [findings]
+    requiredness: always
+    capabilities: [research_recommendation]
+archive:
+  tracks:
+    - recommendation.md
         """,
     )
     for template in ("question.md", "findings.md", "recommendation.md"):
@@ -138,6 +175,62 @@ artifacts:
     write(change / "findings.md", "# Findings\n")
     write(change / "recommendation.md", "# Recommendation\n")
     write(root / "docs" / "verification" / "research-cache-openspec-validate.md", "passed\n")
+
+
+def create_opsx_collab_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: opsx-collab-pr-loop\n")
+    write(root / "openspec" / "changes" / ".gitkeep", "")
+    write(
+        root / "openspec" / "schemas" / "opsx-collab-pr-loop" / "schema.yaml",
+        """name: opsx-collab-pr-loop
+version: 1
+capabilities:
+  - apply_execution
+  - archive_authority
+artifacts:
+  - id: intake
+    generates: loop/intake.md
+    template: intake.md
+    requires: []
+    requiredness: always
+    capabilities: [intake_brief]
+  - id: research-plan
+    generates: loop/research-plan.md
+    template: research-plan.md
+    requires: [intake]
+    requiredness: always
+    capabilities: [research_plan]
+  - id: implementation
+    generates: loop/implementation.md
+    template: implementation.md
+    requires: [research-plan]
+    requiredness: always
+    capabilities: [implementation_record]
+  - id: checkpoints
+    generates: loop/checkpoints.md
+    template: checkpoints.md
+    requires: [implementation]
+    requiredness: always
+    capabilities: [checkpoint_log]
+apply:
+  requires: [research-plan]
+  tracks: loop/implementation.md
+archive:
+  tracks:
+    - loop/implementation.md
+    - loop/checkpoints.md
+        """,
+    )
+    for template in ("intake.md", "research-plan.md", "implementation.md", "checkpoints.md"):
+        write(root / "openspec" / "schemas" / "opsx-collab-pr-loop" / "templates" / template, f"# {template}\n")
+    change = root / "openspec" / "changes" / "review-auth-pr"
+    write(change / ".openspec.yaml", "schema: opsx-collab-pr-loop\n")
+    write(change / "loop" / "intake.md", "# Intake\n")
+    write(change / "loop" / "research-plan.md", "# Research Plan\n")
+    write(change / "loop" / "implementation.md", "# Implementation\n")
+    write(change / "loop" / "checkpoints.md", "# Checkpoints\n")
+    write(root / "docs" / "verification" / "review-auth-pr-openspec-validate.md", "passed\n")
 
 
 def test_doctor_reports_missing_openspec_as_blocked(tmp_path: Path) -> None:
@@ -387,8 +480,8 @@ def test_flow_ignores_ce_work_gaps_for_no_apply_schema(tmp_path: Path) -> None:
     assert data["status"] == "blocked"
     assert data["stage"] == "verified"
     assert data["recommended_path"] == ["aisee:archive-guard"]
-    assert data["checks"]["gaps"]["status"] == "blocked"
-    assert "TASK_GAP" in data["checks"]["gaps"]["codes"]
+    assert data["checks"]["gaps"]["status"] == "risk"
+    assert "TASK_GAP" not in data["checks"]["gaps"]["codes"]
     assert data["checks"]["implementation_gaps"]["status"] == "clear"
     assert "TASK_GAP" not in data["checks"]["implementation_gaps"]["codes"]
 
@@ -456,4 +549,17 @@ def test_flow_inspect_reports_archive_ready_for_quick_research(tmp_path: Path) -
     assert data["schema"]["source_map_required"] is False
     assert data["schema"]["tasks_required"] is False
     assert data["checks"]["archive"]["status"] == "archive-ready"
+    assert data["recommended_path"] == ["openspec archive"]
+
+
+def test_flow_inspect_does_not_block_opsx_collab_on_missing_tasks_md(tmp_path: Path) -> None:
+    create_opsx_collab_project(tmp_path)
+
+    data = run_json(tmp_path, "flow", "inspect", "--change", "review-auth-pr", "--json")
+
+    assert data["status"] == "ok"
+    assert data["stage"] == "archive-ready"
+    assert data["schema"]["name"] == "opsx-collab-pr-loop"
+    assert data["schema"]["tasks_required"] is False
+    assert "TASK_GAP" not in data["checks"]["gaps"]["codes"]
     assert data["recommended_path"] == ["openspec archive"]

@@ -23,6 +23,7 @@ KNOWLEDGE_SCHEMA_VERSION = "1.0"
 DEFAULT_MAX_CARDS = 3
 CARD_REQUIRED_FIELDS = ("id", "title", "status", "applies_to", "trigger", "recommended_action", "boundaries")
 CARD_STATUSES = {"candidate", "active", "deprecated"}
+CARD_SCOPE_LEVELS = {"pattern", "policy", "project-fact"}
 TEXT_TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_:+.-]+|[\u4e00-\u9fff]+")
 SCAFFOLD_MARKER = ".aisee-team-knowledge"
 DEFAULT_INITIAL_PACK = "web-app"
@@ -72,6 +73,7 @@ INIT_REPO_CARDS = {
                 "不适用于仅面向人类的非 JSON 日志输出",
             ],
             "tags": ["cli", "json-output"],
+            "scope_level": "pattern",
         },
         "body": "Public CLI JSON 会被 agent 和自动化消费。优先做 additive change；破坏性调整必须配套迁移说明和 contract test。\n",
     },
@@ -98,6 +100,7 @@ INIT_REPO_CARDS = {
                 "不要把 source-map.md 变成 requirements、tasks 或 contract 的平行事实源",
             ],
             "tags": ["openspec", "source-map"],
+            "scope_level": "policy",
         },
         "body": "source-map.md 帮助 agent 路由实现与评审，但不替代规范事实源。\n",
     },
@@ -1020,6 +1023,9 @@ def validate_card_metadata(root: Path, metadata: dict[str, Any], path_label: str
     status = str(metadata.get("status") or "")
     if status not in CARD_STATUSES:
         issues.append(issue("KNOWLEDGE_CARD_STATUS_INVALID", "risk", f"card has invalid status: {status}", path_label))
+    scope_level = str(metadata.get("scope_level") or "pattern")
+    if scope_level not in CARD_SCOPE_LEVELS:
+        issues.append(issue("KNOWLEDGE_CARD_SCOPE_INVALID", "risk", f"card has invalid scope_level: {scope_level}", path_label))
     applies = metadata.get("applies_to")
     if not isinstance(applies, dict):
         issues.append(issue("KNOWLEDGE_CARD_APPLIES_TO_INVALID", "risk", "applies_to must be a mapping", path_label))
@@ -1123,7 +1129,7 @@ def parse_project_candidate(path: Path) -> tuple[dict[str, Any], str]:
         if line.startswith("# "):
             title = line[2:].strip()
             break
-    return {"id": path.stem, "title": title or path.stem, "status": "candidate"}, text
+    return {"id": path.stem, "title": title or path.stem, "status": "candidate", "scope_level": "project-fact"}, text
 
 
 def extract_fenced_yaml_after_heading(text: str, heading: str) -> str:
@@ -1282,6 +1288,9 @@ def match_cards(
 def passes_hard_filters(metadata: dict[str, Any], features: dict[str, Any]) -> tuple[bool, str]:
     if metadata.get("status") != "active":
         return False, f"status is {metadata.get('status') or 'missing'}"
+    scope_level = str(metadata.get("scope_level") or "pattern")
+    if scope_level == "project-fact" and not features.get("allow_project_facts"):
+        return False, "project-fact cards are excluded outside an explicit project pin"
     applies = metadata.get("applies_to") if isinstance(metadata.get("applies_to"), dict) else {}
     checks = (
         ("phases", features.get("phases", [])),
