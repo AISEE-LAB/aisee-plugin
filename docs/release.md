@@ -34,6 +34,14 @@ Aisee 使用 SemVer：
 
 公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
 
+## 0.7.1 Patch 提示
+
+`0.7.1` 修复 `0.7.0` 插件发布面一致性问题：
+
+- Codex plugin manifest 的 `defaultPrompt` 不再引用已删除的 `aisee:flow` skill。
+- 删除半残留的 `plugins/aisee-plugin/skills/aisee-flow/` 目录。
+- 增加 marketplace manifest 测试，确保默认提示引用的 `aisee:*` skill 都真实存在，且发布的 skill 目录都可被运行时加载。
+
 ## 0.7.0 合同提示
 
 `0.7.0` 引入的是命令面重分层与 CLI 职责收缩：

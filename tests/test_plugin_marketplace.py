@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 try:
@@ -45,3 +46,26 @@ def test_codex_manifest_is_loadable_from_marketplace_plugin_root() -> None:
     assert manifest["skills"] == "./skills/"
     assert (plugin_root / "skills" / "aisee-srs" / "SKILL.md").exists()
     assert (plugin_root / "skills" / "aisee-knowledge-curate" / "assets" / "team-knowledge" / "README.md").exists()
+
+
+def test_plugin_skill_directories_are_loadable_skills() -> None:
+    marketplace = read_json(".agents/plugins/marketplace.json")
+    plugin_root = ROOT / marketplace["plugins"][0]["source"]["path"]
+
+    skill_dirs = [path for path in (plugin_root / "skills").iterdir() if path.is_dir()]
+    assert skill_dirs
+    assert all((path / "SKILL.md").exists() for path in skill_dirs)
+
+
+def test_codex_default_prompts_reference_existing_skills() -> None:
+    marketplace = read_json(".agents/plugins/marketplace.json")
+    plugin_root = ROOT / marketplace["plugins"][0]["source"]["path"]
+    manifest = json.loads((plugin_root / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+
+    prompts = manifest["interface"]["defaultPrompt"]
+    assert prompts
+
+    for prompt in prompts:
+        match = re.search(r"\baisee:([a-z0-9-]+)\b", prompt)
+        assert match, f"default prompt should name an aisee skill: {prompt}"
+        assert (plugin_root / "skills" / f"aisee-{match.group(1)}" / "SKILL.md").exists()

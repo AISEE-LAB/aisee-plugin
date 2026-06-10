@@ -6,6 +6,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
+    import tomli as tomllib
+
 
 def run_aisee(
     root: Path,
@@ -38,7 +43,12 @@ def run_json(root: Path, *args: str, env: dict[str, str] | None = None) -> dict:
     return json.loads(result.stdout)
 
 
-def create_plugin_root(path: Path, *, version: str = "0.7.0") -> Path:
+def package_version() -> str:
+    data = tomllib.loads((Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(encoding="utf-8"))
+    return str(data["project"]["version"])
+
+
+def create_plugin_root(path: Path, *, version: str = "0.7.1") -> Path:
     (path / "skills" / "aisee-srs").mkdir(parents=True)
     (path / "skills" / "aisee-srs" / "SKILL.md").write_text("# aisee:srs\n", encoding="utf-8")
     (path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix").mkdir(parents=True)
@@ -149,7 +159,7 @@ enabled = true
     assert data["status"] == "risk"
     mismatch = next(item for item in data["issues"] if item["code"] == "SCHEMA_PACK_VERSION_MISMATCH")
     assert mismatch["severity"] == "risk"
-    assert data["cli_version"] == "0.7.0"
+    assert data["cli_version"] == package_version()
     assert data["source_version"] == "0.5.0"
 
 

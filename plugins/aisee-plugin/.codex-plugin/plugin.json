@@ -1,6 +1,6 @@
 {
   "name": "aisee-plugin",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "AI-Enhanced Software Engineering plugin for OpenSpec and Compound Engineering workflows.",
   "author": {
     "name": "Fengliang"
@@ -27,8 +27,8 @@
       "Write"
     ],
     "defaultPrompt": [
-      "aisee:flow 判断当前项目下一步",
       "aisee:init 审计 AGENTS.md、OpenSpec 项目配置和 Codex hooks",
+      "aisee:change-plan 规划当前需求的 OpenSpec changes",
       "aisee:srs 帮我整理这个需求"
     ]
   }
