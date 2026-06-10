@@ -40,11 +40,17 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
     sources = sources_path(root)
     if not sources.exists():
         actions.append(action("create", rel(root, sources), "Create empty sources registry."))
-    if not (root / "openspec" / "schemas").exists():
+    if doctor["codex_marketplace"]["status"] != "ok":
         actions.append(action(
             "install",
             "aisee-plugin marketplace",
-            f"Install Aisee plugin content with `{MARKETPLACE_ADD_COMMAND}` and `{PLUGIN_ADD_COMMAND}`; the CLI no longer installs schema packs from PyPI.",
+            f"Install Aisee plugin content with `{MARKETPLACE_ADD_COMMAND}` and `{PLUGIN_ADD_COMMAND}`.",
+        ))
+    if not (root / "openspec" / "schemas").exists():
+        actions.append(action(
+            "create",
+            "openspec/schemas",
+            "Use the marketplace-installed `aisee:schema-pack` skill to initialize project schema packs; bootstrap only reports the missing project directory.",
         ))
 
     return {

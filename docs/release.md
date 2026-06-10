@@ -34,6 +34,13 @@ Aisee 使用 SemVer：
 
 公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
 
+## 0.7.2 Patch 提示
+
+`0.7.2` 修复 bootstrap plan 的提示语义：
+
+- `aisee bootstrap --plan --json` 在 Codex marketplace 已安装时，不再因为项目缺少 `openspec/schemas` 而提示重新安装 `aisee-plugin marketplace`。
+- 缺少项目 schema 目录时，plan 改为提示用 marketplace 中的 `aisee:schema-pack` 初始化 `openspec/schemas`。
+
 ## 0.7.1 Patch 提示
 
 `0.7.1` 修复 `0.7.0` 插件发布面一致性问题：
