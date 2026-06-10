@@ -470,35 +470,6 @@ archive:
     assert any(item["code"] == "SCHEMA_PACK_VERSION_MISMATCH" for item in data["issues"])
 
 
-def test_flow_inspect_recommends_implementation_for_authored_change(tmp_path: Path, monkeypatch) -> None:
-    create_open_project(tmp_path)
-    monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-work")))
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
-
-    assert data["status"] == "risk"
-    assert data["stage"] == "change-authored"
-    assert "ce-plan" in data["recommended_path"]
-    assert data["doctor"]["status"] == "ok"
-    assert data["schema"]["name"] == "aisee-app-spec-driven"
-    assert data["schema"]["source_map_required"] is True
-    assert data["schema"]["tasks_required"] is True
-    assert data["inputs"]["source_map"] == "present"
-    assert data["inputs"]["source_map_parse_level"] == "metadata"
-    assert "SOURCE_MAP_UNSTRUCTURED" in data["inputs"]["source_map_issue_codes"]
-    assert data["inputs"]["execution"]["requires_ce_plan"] is True
-    candidates = data["reuse"]["workflow_candidates"]
-    assert all(set(candidate) == {"name", "kind", "status", "reason"} for candidate in candidates)
-    candidates_by_name = {candidate["name"]: candidate for candidate in candidates}
-    assert candidates_by_name["aisee:implementation-bridge"]["status"] == "recommended"
-    assert candidates_by_name["ce-plan"]["status"] == "missing" or candidates_by_name["ce-plan"]["status"] == "available"
-    assert data["checks"]["author"]["status"] == "needs-work"
-    assert data["checks"]["gaps"]["status"] == "risk"
-    assert data["checks"]["implementation_gaps"]["status"] == "risk"
-    assert data["checks"]["verify"]["status"] == "risk"
-    assert any("context pack --change add-auth --for ce-work" in item for item in data["required_commands"])
-
-
 def test_root_resolution_prefers_nearest_project_markers_inside_git_monorepo(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -511,13 +482,10 @@ def test_root_resolution_prefers_nearest_project_markers_inside_git_monorepo(tmp
     workdir.mkdir(parents=True)
 
     doctor = run_json(workdir, "doctor", "--json")
-    flow = run_json(workdir, "flow", "inspect", "--change", "add-auth", "--json")
 
     assert doctor["status"] == "ok"
     assert doctor["project_rules"]["primary"] == "AGENTS.md"
     assert doctor["openspec"]["config"] == "openspec/config.yaml"
-    assert flow["stage"] == "change-authored"
-    assert flow["change"] == "add-auth"
 
 
 def test_root_resolution_falls_back_to_git_root_without_aisee_markers(tmp_path: Path) -> None:
@@ -534,124 +502,3 @@ def test_root_resolution_falls_back_to_git_root_without_aisee_markers(tmp_path: 
     assert data["status"] == "blocked"
     assert any(item["code"] == "OPENSPEC_CONFIG_MISSING" for item in data["issues"])
 
-
-def test_flow_inspect_recommends_ce_plan_when_execution_paths_are_missing(tmp_path: Path) -> None:
-    create_open_project(tmp_path)
-    write(tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md", "auth:FR-001 is covered.\n")
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
-
-    assert data["status"] == "risk"
-    assert data["stage"] == "change-authored"
-    assert data["recommended_path"] == ["aisee:implementation-bridge", "ce-plan"]
-    assert data["inputs"]["execution"]["requires_ce_plan"] is True
-    assert {candidate["name"] for candidate in data["reuse"]["workflow_candidates"]} >= {
-        "aisee:implementation-bridge",
-        "ce-plan",
-    }
-    assert "SOURCE_MAP_PATHS_MISSING" in data["inputs"]["source_map_issue_codes"]
-    assert "SOURCE_MAP_GAP" in data["checks"]["gaps"]["codes"]
-    assert "SOURCE_MAP_GAP" in data["checks"]["implementation_gaps"]["codes"]
-    assert any("context pack --change add-auth --for ce-work" in item for item in data["required_commands"])
-
-
-def test_flow_next_reports_next_command_in_metadata(tmp_path: Path) -> None:
-    create_open_project(tmp_path)
-
-    data = run_json(tmp_path, "flow", "next", "--change", "add-auth", "--json")
-
-    assert data["meta"]["command"] == "aisee flow next --change add-auth --json"
-
-
-def test_flow_ignores_ce_work_gaps_for_no_apply_schema(tmp_path: Path) -> None:
-    create_quick_research_project(tmp_path)
-    (tmp_path / "docs" / "verification" / "research-cache-openspec-validate.md").unlink()
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "research-cache", "--json")
-
-    assert data["status"] == "blocked"
-    assert data["stage"] == "verified"
-    assert data["recommended_path"] == ["aisee:archive-guard"]
-    assert data["checks"]["gaps"]["status"] == "risk"
-    assert "TASK_GAP" not in data["checks"]["gaps"]["codes"]
-    assert data["checks"]["implementation_gaps"]["status"] == "clear"
-    assert "TASK_GAP" not in data["checks"]["implementation_gaps"]["codes"]
-
-
-def test_flow_status_is_blocked_when_author_check_blocks(tmp_path: Path) -> None:
-    create_open_project(tmp_path)
-    (tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven" / "templates" / "tasks.md").unlink()
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
-
-    assert data["status"] == "blocked"
-    assert data["stage"] == "change-authored"
-    assert data["recommended_path"] == ["aisee:change-author"]
-    assert "SCHEMA_TEMPLATE_MISSING" in data["checks"]["author"]["blocker_codes"]
-    assert data["blocking"]
-
-
-def test_flow_blocks_when_change_schema_metadata_is_missing(tmp_path: Path) -> None:
-    create_open_project(tmp_path)
-    (tmp_path / "openspec" / "changes" / "add-auth" / ".openspec.yaml").unlink()
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
-
-    assert data["status"] == "blocked"
-    assert data["stage"] == "change-authored"
-    assert data["recommended_path"] == ["aisee:change-author"]
-    assert "SCHEMA_METADATA_MISSING" in data["checks"]["author"]["blocker_codes"]
-
-
-def test_flow_blocks_when_schema_is_not_installed_even_if_source_assets_exist(tmp_path: Path, monkeypatch) -> None:
-    create_open_project(tmp_path)
-    write(tmp_path / "skills" / "aisee-srs" / "SKILL.md", "# aisee:srs\n")
-    write(tmp_path / "references" / "README.md", "# refs\n")
-    monkeypatch.setenv("AISEE_PLUGIN_ASSET_ROOT", str(tmp_path))
-    source_root = tmp_path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "aisee-app-spec-driven"
-    write(
-        source_root / "schema.yaml",
-        (tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml").read_text(encoding="utf-8"),
-    )
-    for template in ("proposal.md", "source-map.md", "spec.md", "tasks.md"):
-        write(source_root / "templates" / template, f"# {template}\n")
-    schema_dir = tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven"
-    for path in reversed(sorted(schema_dir.rglob("*"))):
-        if path.is_file():
-            path.unlink()
-        else:
-            path.rmdir()
-    schema_dir.rmdir()
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
-
-    assert data["status"] == "blocked"
-    assert data["recommended_path"] == ["aisee:change-author"]
-    assert "SCHEMA_NOT_INSTALLED" in data["checks"]["author"]["blocker_codes"]
-
-
-def test_flow_inspect_reports_archive_ready_for_quick_research(tmp_path: Path) -> None:
-    create_quick_research_project(tmp_path)
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "research-cache", "--json")
-
-    assert data["status"] == "ok"
-    assert data["stage"] == "archive-ready"
-    assert data["schema"]["name"] == "quick-research"
-    assert data["schema"]["source_map_required"] is False
-    assert data["schema"]["tasks_required"] is False
-    assert data["checks"]["archive"]["status"] == "archive-ready"
-    assert data["recommended_path"] == ["openspec archive"]
-
-
-def test_flow_inspect_does_not_block_opsx_collab_on_missing_tasks_md(tmp_path: Path) -> None:
-    create_opsx_collab_project(tmp_path)
-
-    data = run_json(tmp_path, "flow", "inspect", "--change", "review-auth-pr", "--json")
-
-    assert data["status"] == "ok"
-    assert data["stage"] == "archive-ready"
-    assert data["schema"]["name"] == "opsx-collab-pr-loop"
-    assert data["schema"]["tasks_required"] is False
-    assert "TASK_GAP" not in data["checks"]["gaps"]["codes"]
-    assert data["recommended_path"] == ["openspec archive"]

@@ -92,8 +92,6 @@ Compound Engineering
 
 进入实现前使用：
 
-- `aisee change author-check`
-- `aisee gaps`
 - `aisee context pack --for ce-work`
 - `aisee:implementation-bridge`
 
@@ -166,10 +164,7 @@ srs:auth-login#FR-001
 
 跨仓库消费者通过：
 
-- `aisee contract manifest`
-- `aisee contract summary`
-- `aisee contract get`
-- `aisee contract serve`
+不再提供跨项目制品获取命令或本地只读服务；当前项目上下文通过 OpenSpec artifacts、`aisee context pack` 和 knowledge 检索提供。
 
 读取 provider 明确暴露的片段。
 

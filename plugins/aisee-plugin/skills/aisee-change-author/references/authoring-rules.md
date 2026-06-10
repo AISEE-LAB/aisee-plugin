@@ -136,10 +136,9 @@ Required=no 的 artifact 不能留空原因。生成 `source-map.md` 的 schema 
 
 ## Anchor / Local ID Preflight
 
-优先使用 `aisee change author-check <change> --json` 中的 `anchors.actions`。需要手动补查时使用：
+优先使用当前 change、schema 模板和已存在 artifact 中的 anchor/local ID 信息。需要手动补查时使用：
 
 ```bash
-aisee change author-check <change> --json
 aisee get <anchor-ref> --json
 aisee trace <anchor-ref> --json
 aisee index --json

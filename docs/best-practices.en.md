@@ -160,7 +160,7 @@ Rules:
 
 Before creating tasks, entering implementation, proposing reviewer lenses, or recommending a next step, check existing workflows and skills first:
 
-- When there is no explicit change, use `aisee:flow` or `aisee flow inspect --json` to identify the current stage.
+- When there is no explicit change, return to requirements clarification, change-plan, or the current change itself rather than relying on a dedicated flow command.
 - When there is an explicit change, read the target context pack first, such as `aisee context pack --change <change> --for ce-work --json`.
 - `reusable_workflow_candidates` in the `ce-work` context pack is a routing hint only, not a source of truth.
 - Use `ce-plan` only when `requires_ce_plan=true`; its conclusions must be written back to the current schema apply tracks, and only source-map schemas write back to `source-map.md`.
@@ -223,7 +223,7 @@ When `aisee:archive-guard` says archive is not recommended, fix blockers first.
 For frontend/backend split work, the contract provider can expose read-only context:
 
 ```bash
-aisee contract serve --host 127.0.0.1 --port 8765
+Read the current project's OpenSpec artifacts directly or use `aisee context pack`
 ```
 
 Best practices:

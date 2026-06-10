@@ -7,7 +7,7 @@
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| 已运行 author preflight | yes / no | `aisee change author-check {{change-name}} --json` | |
+| 已运行 author preflight | yes / no | 当前 change 与 schema 的本地预检 | |
 | anchor refs 可解析 | yes / no | `aisee get <anchor-ref> --json` / `aisee trace <anchor-ref> --json` | |
 | 存在未解析 anchor | yes / no | `author-check.anchors.resolution.missing_references` | |
 | 存在临时 local ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
@@ -150,5 +150,5 @@
 - service-contract.md 仅在 Required=yes 时覆盖 API / backend service / async job / CLI / integration，并满足适用的前端数据需求。
 - 每个新增 ID 激活后必须回填到“本 Change 产出 ID”并记录 owner artifact。
 - tasks.md 内新增 TASK / TEST ID 前必须先 reserve；无法 reserve 时只使用临时 ID。
-- tasks.md 生成前必须重新运行 `aisee change author-check {{change-name}} --json`，确认 blocker 已清除或明确保留。
+- tasks.md 生成前必须重新检查当前 change 与 schema 的预检结果，确认 blocker 已清除或明确保留。
 - tasks.md 生成前必须确认 Required=yes 的追踪关系闭合；Required=no 的 artifact 必须有明确原因。

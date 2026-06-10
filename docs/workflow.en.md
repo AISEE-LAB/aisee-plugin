@@ -38,7 +38,7 @@ For existing projects, avoid writing new changes immediately. Prefer `aisee:spec
 
 ## Default Path vs On-Demand Extensions
 
-The default new-feature happy path depends only on the core workflow: `aisee:flow`, `aisee:init`, `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, `aisee:implementation-bridge`, `aisee:verify`, and `aisee:archive-guard`.
+The default new-feature happy path depends only on the core workflow: `aisee:init`, `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, and `aisee:implementation-bridge`.
 
 The following capabilities are conditional, not mandatory on every iteration:
 
@@ -102,7 +102,6 @@ Typical commands:
 
 ```bash
 /opsx:new "<change>" --schema aisee-app-spec-driven
-aisee change author-check <change> --json
 openspec validate <change>
 ```
 
@@ -128,11 +127,9 @@ data-model.md            # as needed
 
 ## 4. Implementation Handoff
 
-Before implementation, confirm the change is authored and has no blockers.
+Before implementation, confirm the change is authored.
 
 ```bash
-aisee change author-check <change> --json
-aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 ```
 
@@ -173,7 +170,7 @@ Read-only Aisee reviewer lens timing:
 | --- | --- | --- |
 | `aisee-change-architect` | After `aisee:change-plan` and before `aisee:change-author` when the change has complex boundaries, cross-module or cross-schema impact, unclear dependencies, or uncertain granularity | Review change boundaries, dependencies, granularity, and independent deliverability |
 | `aisee-spec-reviewer` | After `aisee:change-author` and before `aisee:implementation-bridge` / `ce-work` | Review whether artifacts, contracts, source-map, and tasks are complete, consistent, and verifiable |
-| `aisee-implementation-reviewer` | After `ce-work` and before `aisee:verify` / `aisee:archive-guard` | Compare implementation, tasks, specs/source-map, and evidence for drift |
+| `aisee-implementation-reviewer` | After `ce-work` | Compare implementation, tasks, specs/source-map, and evidence for drift |
 
 These reviewers only return structured review conclusions. They do not edit code, run tests, submit PRs, or replace `ce-doc-review`, `ce-code-review`, `ce-test-*`, or `ce-work`. Interface, UI, hardware, firmware, security, and verification differences should remain schema-aware check lenses rather than new all-purpose agents.
 
@@ -183,11 +180,10 @@ After implementation, run:
 
 ```bash
 openspec validate <change>
-aisee change verify-check <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 ```
 
-Then use `aisee:verify` to produce a schema-aware report that checks:
+Then use `aisee:verify` or a manual review pass to check:
 
 - whether schema artifacts exist;
 - whether Required=yes contracts are closed;
@@ -197,53 +193,20 @@ Then use `aisee:verify` to produce a schema-aware report that checks:
 - whether review/test/manual evidence is sufficient;
 - whether Tier 2 review is still needed.
 
-Verify is not archive approval. It reports issues and risks.
-
-## 7. Archive Guard
-
-Before archive, run:
-
-```bash
-aisee change archive-check <change> --json
-```
-
-Then use `aisee:archive-guard` to decide whether:
+Before archive, confirm that:
 
 - `openspec validate <change>` passed;
-- `aisee:verify` has no blockers;
 - apply tracks are closed;
-- review/test/manual evidence satisfies the current schema;
+- review/test/manual evidence is sufficient;
 - accepted risks have an owner, reason, impact, and follow-up path.
 
-Only run archive when archive guard says the change is ready:
+Then run:
 
 ```bash
 openspec archive <change>
 ```
 
-## 8. Cross-Repository Contracts
-
-When frontend and backend live in separate repositories, the backend repository, BFF repository, or independent contract repository should own the contract facts.
-
-Provider repository:
-
-```bash
-aisee contract manifest --json
-aisee contract summary --change <change> --json
-aisee contract serve --host 127.0.0.1 --port 8765
-```
-
-Consumer repository:
-
-```bash
-curl http://127.0.0.1:8765/manifest
-curl http://127.0.0.1:8765/changes/<change>/summary
-curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections/<section>?max_chars=4000"
-```
-
-`aisee contract serve` is a read-only context service. It is not a mock backend, API gateway, or second API source of truth.
-
-## 9. Team Knowledge Reuse
+## 8. Team Knowledge Reuse
 
 When a project produces reusable engineering lessons, first let the user explicitly trigger `aisee:reflect` to create project-local candidates, then run `aisee:knowledge-curate` when batch review, desensitization, generalization, and deduplication are needed.
 
@@ -269,7 +232,7 @@ Boundaries:
 | Scenario | Recommended Path |
 | --- | --- |
 | New feature | SRS -> UI/Architecture -> change-plan -> change-author -> implementation-bridge -> verify -> archive-guard |
-| Small fix | `quick-fix` schema -> author-check -> implementation-bridge -> verify -> archive-guard |
+| Small fix | `quick-fix` schema -> change-author -> implementation-bridge -> implementation / review / test -> archive |
 | Technical research | `quick-research` schema -> findings/recommendation -> validate -> archive-guard |
 | Documentation site change | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive-guard |
 | Existing project adoption | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> new change |

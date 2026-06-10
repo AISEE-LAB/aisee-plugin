@@ -79,7 +79,7 @@ artifacts:
   - source_map
   instruction: 'source-map.md 是本 schema 的追踪核心，必须：
 
-    - 记录 `aisee change author-check <change> --json` 的状态、blockers、missing_artifacts 和 next_actions
+    - 记录当前 author preflight 的状态、blockers、missing_artifacts 和 next_actions
 
     - 列出上游来源：SRS、UI Content、Design Spec / Design Assets、Architecture、Change Plan、Issue 或用户输入
 

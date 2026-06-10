@@ -41,7 +41,7 @@
 | canonical_source | service-contract.md | confirmed | Human-readable contract for this change |
 | provider_repo | backend-api | confirmed | Provider implementation |
 | consumer_repo | frontend-app | confirmed | Consumer integration |
-| sync_mode | local-http | confirmed | `aisee contract serve` can expose this change |
+| sync_mode | local-http | confirmed | Use project-local OpenSpec artifacts and context pack when a summary is needed |
 | machine_readable_contract | contracts/openapi.yaml | confirmed | Optional OpenAPI artifact |
 | version_ref | change:add-passwordless-login | confirmed | Replace with tag or commit when released |
 

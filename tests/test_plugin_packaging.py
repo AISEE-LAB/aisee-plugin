@@ -38,7 +38,7 @@ def run_json(root: Path, *args: str, env: dict[str, str] | None = None) -> dict:
     return json.loads(result.stdout)
 
 
-def create_plugin_root(path: Path, *, version: str = "0.6.0") -> Path:
+def create_plugin_root(path: Path, *, version: str = "0.7.0") -> Path:
     (path / "skills" / "aisee-srs").mkdir(parents=True)
     (path / "skills" / "aisee-srs" / "SKILL.md").write_text("# aisee:srs\n", encoding="utf-8")
     (path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix").mkdir(parents=True)
@@ -149,7 +149,7 @@ enabled = true
     assert data["status"] == "risk"
     mismatch = next(item for item in data["issues"] if item["code"] == "SCHEMA_PACK_VERSION_MISMATCH")
     assert mismatch["severity"] == "risk"
-    assert data["cli_version"] == "0.6.0"
+    assert data["cli_version"] == "0.7.0"
     assert data["source_version"] == "0.5.0"
 
 

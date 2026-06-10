@@ -34,13 +34,13 @@ Aisee 使用 SemVer：
 
 公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
 
-## 0.6.0 合同提示
+## 0.7.0 合同提示
 
-`0.6.0` 引入的是向后兼容的 CLI JSON 增量字段与执行投影调整：
+`0.7.0` 引入的是命令面重分层与 CLI 职责收缩：
 
-- `aisee context pack --for aisee-verify --json` / `--for ce-work --json` 的 traceability 增加 `intake_sources` 与 `mode`。
-- `aisee context pack --for ce-work --json` 新增 `facts.derived.execution.brief`，并且 ce-work target 不再携带 artifact 正文副本。
-- schema metadata、schema mismatch、schema installed 状态被提升为 author / implementation blocker。
+- `aisee flow *`、`aisee gaps`、`aisee change author-check`、`aisee change verify-check`、`aisee change archive-check`、`aisee contract *` 已从公开 CLI 命令面删除。
+- `aisee context pack --for ce-work --json` / `--for aisee-verify --json` 继续保留，但定位为最小上下文投影，不再搭配独立 gate 命令使用。
+- CLI 重心收敛到 knowledge / memory / bridge / governance；OpenSpec 继续负责 change lifecycle、validate 与 archive authority。
 
 发布说明必须同时覆盖两条分发面：
 

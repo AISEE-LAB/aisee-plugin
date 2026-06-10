@@ -1,6 +1,6 @@
 ---
 name: aisee:archive-guard
-description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当前 change 的 author-check、gaps、verify-check、archive-check、context pack、openspec validate、aisee:verify、tasks、review/test/manual evidence，判断是否建议执行 openspec archive。它只按当前 schema 的 artifacts、apply tracks、source-map/contracts 适用性和 domain evidence 做放行判断，不重新做深度验证、不重新跑测试、不替代 openspec archive。
+description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当前 change 的 context pack、openspec validate、aisee:verify、tasks、review/test/manual evidence，判断是否建议执行 openspec archive。它只按当前 schema 的 artifacts、apply tracks、source-map/contracts 适用性和 domain evidence 做放行判断，不重新做深度验证、不重新跑测试、不替代 openspec archive。
 ---
 
 # aisee:archive-guard
@@ -24,9 +24,9 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 ## 职责
 
 - 识别当前 change schema，并按 schema 判断归档必需 artifacts、tasks、apply tracks、source-map、contracts 和验证证据。
-- 自动调用只读 CLI JSON：`author-check`、`gaps`、`verify-check`、`archive-check`、`context pack --for aisee-verify`；这些检查不要求用户手工执行常规命令。
+- 自动读取只读 CLI JSON：`change inspect`、`context pack --for aisee-verify`；这些检查不要求用户手工执行常规命令。
 - 读取已有 validate、verify、review、test、manual verification、preview、monitoring 或设备验证结果。
-- 运行或读取 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change verify-check <change> --json`、`aisee change archive-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 运行或读取 `aisee change inspect <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
 - 检查 `aisee:verify` 的 Review Recommendation 是否已有审查证据、本地重点自审证据或正式 accepted risk。
 - 判断是否建议执行 `openspec archive <change>`。
 - 输出 `可以 archive` / `有风险但可接受` / `暂不建议 archive`，并列出阻断项、接受风险和归档后基线影响。
@@ -45,10 +45,7 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 按顺序读取或运行：
 
 ```bash
-aisee change author-check <change> --json
-aisee gaps --change <change> --json
-aisee change verify-check <change> --json
-aisee change archive-check <change> --json
+aisee change inspect <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 openspec validate <change>
 ```
@@ -76,11 +73,8 @@ openspec archive <change>
 
 ## 归档前检查
 
-- `author-check` 无 blocker；schema 声明的必需 artifacts 已存在。
-- `gaps` 无 blocker；risk 均有接受理由、owner 和后续处理方式。
 - 若 blocker 来自 `SCHEMA_METADATA_MISSING` / `SCHEMA_MISMATCH` / `SCHEMA_NOT_INSTALLED` / `SCHEMA_NOT_FOUND`，必须先回到 change metadata 或 schema 安装修复；不得 archive。
-- `verify-check` / `aisee:verify` 无未处理 BLOCKER。
-- `archive-check` 无 blocker；如 blocker 来自不适用的 source-map/contracts，必须在报告中说明 schema mismatch。
+- `aisee:verify` 无未处理 BLOCKER。
 - `openspec validate <change>` 已通过。未运行或失败时，不得输出 `可以 archive`。
 - `tasks.md` 或 schema apply tracks 中的实现、验证、证据记录和 archive gate 任务已关闭；N/A 必须有原因。
 - 需要 `source-map.md` 的 schema：ID、Required=yes contracts、代码路径、测试路径和 evidence 必须闭合；Required=no contracts 以 source-map N/A 原因为准。
@@ -105,9 +99,9 @@ openspec archive <change>
 
 - `暂不建议 archive`：存在 blocker；validate 未运行或失败；verify 缺失且无等价证据；tasks/apply tracks 未关闭；P0/P1 未处理；schema 必需 evidence 缺失；verify 建议 Tier 2 review 但没有审查 evidence 或 accepted risk。
 - `有风险但可接受`：无 blocker，但存在 risk；每项 risk 均有 owner、接受理由、影响范围和后续处理方式。
-- `可以 archive`：validate 通过、verify 无 blocker、archive-check ready、tasks/apply tracks 关闭、schema 必需 artifacts/evidence 闭合，且无未接受 risk。
+- `可以 archive`：validate 通过、verify 无 blocker、tasks/apply tracks 关闭、schema 必需 artifacts/evidence 闭合，且无未接受 risk。
 
-如果缺少 `aisee:verify` 报告或 `archive-check` 结果，不得给出 `可以 archive`；最多输出 `有风险但可接受`，并说明缺少的门禁证据。
+如果缺少 `aisee:verify` 报告，不得给出 `可以 archive`；最多输出 `有风险但可接受`，并说明缺少的门禁证据。
 
 ## 输出
 

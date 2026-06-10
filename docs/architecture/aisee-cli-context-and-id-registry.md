@@ -117,24 +117,6 @@ aisee get srs:auth-login#FR-001 --json
 
 它不把缓存或摘要当事实源。
 
-### 3.5 `aisee contract *`
-
-只读暴露 change contracts 和被允许的上下文片段。
-
-支持：
-
-- `manifest`
-- `summary`
-- `get`
-- `serve`
-
-跨项目消费者必须：
-
-1. 先读 manifest
-2. 再按 change / artifact / anchor 获取片段
-
-禁止 provider 暴露全仓库任意读取。
-
 ## 4. Source Map 规则
 
 `source-map.md` 是当前 change 的路由中心。

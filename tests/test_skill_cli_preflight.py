@@ -60,9 +60,8 @@ def test_skill_taxonomy_contract_covers_all_public_skills() -> None:
     taxonomy = read_taxonomy()
 
     assert set(taxonomy) == EXPECTED_TAXONOMY_SECTIONS
-    assert len(taxonomy["Core Workflow"]) == 11
+    assert len(taxonomy["Core Workflow"]) == 10
     assert set(taxonomy["Core Workflow"]) == {
-        "aisee:flow",
         "aisee:init",
         "aisee:srs",
         "aisee:ui-content",
@@ -83,18 +82,16 @@ def test_readme_highlights_core_workflow_taxonomy() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "## Skill 分层" in readme
-    assert "11 个核心主流程 skill" in readme
+    assert "10 个核心主流程 skill" in readme
     for skill in read_taxonomy()["Core Workflow"]:
         assert f"`{skill}`" in readme
 
 
 def test_core_skills_document_auto_cli_consumption_and_lean_projection() -> None:
     expectations = {
-        "plugins/aisee-plugin/skills/aisee-change-author/SKILL.md": "自动运行并解释 `aisee change author-check <change> --json`",
         "plugins/aisee-plugin/skills/aisee-implementation-bridge/SKILL.md": "只消费 `--for ce-work` 的 lean projection",
-        "plugins/aisee-plugin/skills/aisee-verify/SKILL.md": "自动调用只读 CLI JSON",
-        "plugins/aisee-plugin/skills/aisee-archive-guard/SKILL.md": "自动调用只读 CLI JSON",
-        "plugins/aisee-plugin/skills/aisee-flow/SKILL.md": "不要把常规路径退化为“提示用户手工运行命令”",
+        "plugins/aisee-plugin/skills/aisee-verify/SKILL.md": "OpenSpec artifact 合法性以 `openspec validate` 和当前 schema 为准",
+        "plugins/aisee-plugin/skills/aisee-archive-guard/SKILL.md": "OpenSpec artifact 合法性和 baseline merge 仍以 `openspec validate` / `openspec archive` 为准",
     }
     for relative_path, marker in expectations.items():
         assert marker in (ROOT / relative_path).read_text(encoding="utf-8")

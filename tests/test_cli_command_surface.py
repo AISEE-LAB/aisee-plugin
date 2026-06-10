@@ -46,9 +46,6 @@ def test_project_local_commands_remain_on_top_level_help(tmp_path: Path) -> None
         "change",
         "context",
         "knowledge",
-        "contract",
-        "flow",
-        "gaps",
         "trace",
         "get",
     ):
@@ -106,3 +103,19 @@ def test_schemas_help_shows_format_subcommand(tmp_path: Path) -> None:
     result = run_aisee(tmp_path, "schemas", "--help")
 
     assert "format" in result.stdout
+
+
+def test_removed_change_and_contract_commands_are_not_public_subcommands(tmp_path: Path) -> None:
+    removed_commands = [
+        ("contract", "manifest", "--json"),
+        ("flow", "inspect", "--json"),
+        ("gaps", "--change", "add-auth", "--json"),
+        ("change", "author-check", "add-auth", "--json"),
+        ("change", "verify-check", "add-auth", "--json"),
+        ("change", "archive-check", "add-auth", "--json"),
+    ]
+
+    for args in removed_commands:
+        result = run_aisee(tmp_path, *args, check=False)
+        assert result.returncode == 2
+        assert "invalid choice" in result.stderr or "Use one of: inspect." in result.stderr

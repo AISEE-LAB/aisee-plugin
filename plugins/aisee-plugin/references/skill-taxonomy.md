@@ -4,9 +4,8 @@
 
 ## Core Workflow
 
-默认 happy path 只包含 11 个核心主流程 skill：
+默认 happy path 只包含 10 个核心主流程 skill：
 
-- `aisee:flow`
 - `aisee:init`
 - `aisee:srs`
 - `aisee:ui-content`

@@ -6,15 +6,10 @@ import argparse
 from pathlib import Path
 
 from aisee_cli import __version__
-from aisee_cli.author_check import build_author_check
 from aisee_cli.bootstrap import build_bootstrap_plan
 from aisee_cli.change import build_change_inspect
-from aisee_cli.change_checks import build_archive_check, build_verify_check
-from aisee_cli.contract import build_contract_get, build_contract_manifest, build_contract_summary
-from aisee_cli.contract_server import lan_warning, serve_contract_context
 from aisee_cli.context_pack import build_context_pack
 from aisee_cli.doctor import build_doctor
-from aisee_cli.flow import build_flow
 from aisee_cli.index import build_index
 from aisee_cli.knowledge import (
     build_knowledge_check,
@@ -106,17 +101,6 @@ def main() -> int:
     inspect_parser = change_subparsers.add_parser("inspect")
     inspect_parser.add_argument("change", help="OpenSpec change name")
     inspect_parser.add_argument("--json", action="store_true", help="output JSON")
-    author_check_parser = change_subparsers.add_parser("author-check")
-    author_check_parser.add_argument("change", help="OpenSpec change name")
-    author_check_parser.add_argument("--json", action="store_true", help="output JSON")
-    verify_check_parser = change_subparsers.add_parser("verify-check")
-    verify_check_parser.add_argument("change", help="OpenSpec change name")
-    verify_check_parser.add_argument("--json", action="store_true", help="output JSON")
-    verify_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
-    archive_check_parser = change_subparsers.add_parser("archive-check")
-    archive_check_parser.add_argument("change", help="OpenSpec change name")
-    archive_check_parser.add_argument("--json", action="store_true", help="output JSON")
-    archive_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
     context_parser = subparsers.add_parser("context")
     context_parser.add_argument("--json", action="store_true", help="output JSON")
     context_subparsers = context_parser.add_subparsers(dest="context_command")
@@ -180,39 +164,6 @@ def main() -> int:
     knowledge_index_parser = knowledge_subparsers.add_parser("index")
     knowledge_index_parser.add_argument("--team-path", help="team knowledge repository path")
     knowledge_index_parser.add_argument("--json", action="store_true", help="output JSON")
-    contract_parser = subparsers.add_parser("contract")
-    contract_parser.add_argument("--json", action="store_true", help="output JSON")
-    contract_subparsers = contract_parser.add_subparsers(dest="contract_command")
-    contract_manifest_parser = contract_subparsers.add_parser("manifest")
-    contract_manifest_parser.add_argument("--max-chars", type=int, default=800, help="maximum summary characters per contract")
-    contract_manifest_parser.add_argument("--json", action="store_true", help="output JSON")
-    contract_summary_parser = contract_subparsers.add_parser("summary")
-    contract_summary_parser.add_argument("--change", required=True, help="OpenSpec change name")
-    contract_summary_parser.add_argument("--max-chars", type=int, default=800, help="maximum summary characters per contract")
-    contract_summary_parser.add_argument("--json", action="store_true", help="output JSON")
-    contract_get_parser = contract_subparsers.add_parser("get")
-    contract_get_parser.add_argument("--change", required=True, help="OpenSpec change name")
-    contract_get_parser.add_argument("--artifact", required=True, help="contract artifact id or path")
-    contract_get_parser.add_argument("--section", help="contract section id or title")
-    contract_get_parser.add_argument("--max-chars", type=int, default=4000, help="maximum content characters")
-    contract_get_parser.add_argument("--raw", action="store_true", help="return raw artifact content when no section is selected")
-    contract_get_parser.add_argument("--json", action="store_true", help="output JSON")
-    contract_serve_parser = contract_subparsers.add_parser("serve")
-    contract_serve_parser.add_argument("--host", default="127.0.0.1", help="host to bind; default: 127.0.0.1")
-    contract_serve_parser.add_argument("--port", type=int, default=8765, help="port to bind; default: 8765")
-    contract_serve_parser.add_argument("--json", action="store_true", help="output JSON startup metadata")
-    flow_parser = subparsers.add_parser("flow")
-    flow_parser.add_argument("--json", action="store_true", help="output JSON")
-    flow_subparsers = flow_parser.add_subparsers(dest="flow_command")
-    flow_inspect_parser = flow_subparsers.add_parser("inspect")
-    flow_inspect_parser.add_argument("--change", help="OpenSpec change name")
-    flow_inspect_parser.add_argument("--json", action="store_true", help="output JSON")
-    flow_next_parser = flow_subparsers.add_parser("next")
-    flow_next_parser.add_argument("--change", help="OpenSpec change name")
-    flow_next_parser.add_argument("--json", action="store_true", help="output JSON")
-    gaps_parser = subparsers.add_parser("gaps")
-    gaps_parser.add_argument("--change", required=True, help="OpenSpec change name")
-    gaps_parser.add_argument("--json", action="store_true", help="output JSON")
     trace_parser = subparsers.add_parser("trace")
     trace_parser.add_argument("reference", help="anchor ref to trace, for example docs/requirements/auth-srs.md#FR-001")
     trace_parser.add_argument("--json", action="store_true", help="output JSON")
@@ -375,68 +326,8 @@ def main() -> int:
         print_json(result)
         return exit_code_for(result, fail_on_blocker=False)
 
-    if args.command == "contract" and args.contract_command is None:
-        print_json(error_response("Use one of: manifest, summary, get, serve.", "MISSING_SUBCOMMAND"), stderr=True)
-        return 2
-
-    if args.command == "contract":
-        try:
-            root = resolve_project_root(Path.cwd())
-            if args.contract_command == "manifest":
-                result = build_contract_manifest(root, max_chars=args.max_chars)
-            elif args.contract_command == "summary":
-                result = build_contract_summary(root, args.change, max_chars=args.max_chars)
-            elif args.contract_command == "get":
-                result = build_contract_get(
-                    root,
-                    args.change,
-                    args.artifact,
-                    section=args.section,
-                    max_chars=args.max_chars,
-                    raw=args.raw,
-                )
-            elif args.contract_command == "serve":
-                if not args.host:
-                    print_json(error_response("contract serve host must not be empty", "CONTRACT_CONTEXT_ERROR"), stderr=True)
-                    return 2
-                startup = {
-                    "schema_version": "1.0",
-                    "status": "serving",
-                    "host": args.host,
-                    "port": args.port,
-                    "warning": lan_warning(args.host),
-                }
-                print_json(startup, stderr=True)
-                serve_contract_context(root, host=args.host, port=args.port)
-                return 0
-            else:
-                print_json(error_response("Use one of: manifest, summary, get, serve.", "MISSING_SUBCOMMAND"), stderr=True)
-                return 2
-        except ValueError as error:
-            print_json(error_response(str(error), "CONTRACT_CONTEXT_ERROR"), stderr=True)
-            return 2
-        print_json(result)
-        return 0
-
-    if args.command == "gaps":
-        root = resolve_project_root(Path.cwd())
-        pack = build_context_pack(root, args.change, "aisee-verify")
-        result = {
-            "schema_version": pack["schema_version"],
-            "change": pack["change"],
-            "result": summarize_gaps(pack["gaps"]),
-            "gaps": pack["gaps"],
-            "guardrails": pack["guardrails"],
-            "meta": {
-                "command": f"aisee gaps --change {args.change} --json",
-                "source_context_target": "aisee-verify",
-            },
-        }
-        print_json(result)
-        return 0
-
     if args.command == "change" and args.change_command is None:
-        print_json(error_response("Use one of: inspect, author-check, verify-check, archive-check.", "MISSING_SUBCOMMAND"), stderr=True)
+        print_json(error_response("Use one of: inspect.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "change" and args.change_command == "inspect":
@@ -444,24 +335,6 @@ def main() -> int:
         result = build_change_inspect(root, args.change)
         print_json(result)
         return 0
-
-    if args.command == "change" and args.change_command == "author-check":
-        root = resolve_project_root(Path.cwd())
-        result = build_author_check(root, args.change)
-        print_json(result)
-        return 0
-
-    if args.command == "change" and args.change_command == "verify-check":
-        root = resolve_project_root(Path.cwd())
-        result = build_verify_check(root, args.change)
-        print_json(result)
-        return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
-
-    if args.command == "change" and args.change_command == "archive-check":
-        root = resolve_project_root(Path.cwd())
-        result = build_archive_check(root, args.change)
-        print_json(result)
-        return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
 
     if args.command == "sources":
         root = resolve_project_root(Path.cwd())
@@ -514,15 +387,6 @@ def main() -> int:
         print_json(result)
         return 0
 
-    if args.command == "flow":
-        root = resolve_project_root(Path.cwd())
-        if args.flow_command is None:
-            print_json(error_response("Use one of: inspect, next.", "MISSING_SUBCOMMAND"), stderr=True)
-            return 2
-        result = build_flow(root, change=getattr(args, "change", None), command=args.flow_command)
-        print_json(result)
-        return 0
-
     print_json(error_response("Use a supported Aisee command.", "MISSING_COMMAND"), stderr=True)
     return 2
 
@@ -541,20 +405,6 @@ def compact_knowledge_for_context_pack(knowledge: dict) -> dict:
             "cache_is_fact_source": meta.get("cache_is_fact_source", False),
             "full_card_body_read": meta.get("full_card_body_read", False),
         },
-    }
-
-
-def summarize_gaps(gaps: list[dict[str, object]]) -> dict[str, int | str]:
-    blocker = sum(1 for gap in gaps if gap.get("severity") == "blocker")
-    risk = sum(1 for gap in gaps if gap.get("severity") == "risk")
-    info = sum(1 for gap in gaps if gap.get("severity") == "info")
-    status = "blocked" if blocker else ("risk" if risk else "clear")
-    return {
-        "status": status,
-        "blocker": blocker,
-        "risk": risk,
-        "info": info,
-        "total": len(gaps),
     }
 
 

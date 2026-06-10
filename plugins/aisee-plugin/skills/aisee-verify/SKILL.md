@@ -1,6 +1,6 @@
 ---
 name: aisee:verify
-description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、source-map、ID、review/test evidence、OpenSpec validate 和实现状态是否一致。用于实现前后运行 author-check、gaps、inspect、verify-check 和 context pack，输出 schema-aware 问题清单与修复建议；不把 app schema 的 source-map/contracts 要求套到 quick-fix、quick-research、docsite、infra、security 或其它轻量 schema。
+description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、source-map、ID、review/test evidence、OpenSpec validate 和实现状态是否一致。用于实现前后读取 change inspect、context pack 和当前 artifacts，输出 schema-aware 问题清单与修复建议；不把 app schema 的 source-map/contracts 要求套到 quick-fix、quick-research、docsite、infra、security 或其它轻量 schema。
 ---
 
 # aisee:verify
@@ -26,9 +26,9 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 ## 职责
 
 - 识别当前 change 使用的 schema，并只检查该 schema 声明的 artifacts、requires、apply tracks 和验证证据。
-- 自动调用只读 CLI JSON：`author-check`、`gaps`、`inspect`、`verify-check`、`context pack --for aisee-verify`。用户不承担常规手工运行 CLI 的路径。
+- 自动读取只读 CLI JSON：`change inspect`、`context pack --for aisee-verify`。用户不承担常规手工运行 CLI 的路径。
 - 运行或建议运行 `openspec validate <change>`。
-- 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change inspect <change> --json`、`aisee change verify-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
+- 运行 `aisee change inspect <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`，并结合当前 artifacts/evidence 诊断一致性。
 - 对需要 `source-map.md` 的 schema，检查 ID、source-map、artifact applicability、代码路径、测试路径和 evidence 是否闭合。
 - 对不生成 `source-map.md` 的 schema，只检查 schema artifacts、tasks、OpenSpec validate、review/test/manual evidence 和当前 change 明确引用的路径。
 - 消费已有 `ce-doc-review`、`ce-code-review`、`ce-test-*`、人工验证记录和监控/预览证据。
@@ -49,10 +49,7 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 必须以当前 change 为入口。按顺序运行：
 
 ```bash
-aisee change author-check <change> --json
-aisee gaps --change <change> --json
 aisee change inspect <change> --json
-aisee change verify-check <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 ```
 
@@ -78,11 +75,9 @@ openspec validate <change>
 
 ## 输入处理规则
 
-- `author-check.status=blocked`：输出 fail，引用 `author-check.blockers`，不要继续推断实现状态。
-- `gaps.result.status=blocked`：输出 fail，要求回到对应 artifact 修复。
 - `SCHEMA_METADATA_MISSING` / `SCHEMA_MISMATCH` / `SCHEMA_NOT_INSTALLED` / `SCHEMA_NOT_FOUND`：直接输出 BLOCKER，不接受 default schema fallback。
 - `change inspect.ids.registry.missing / temporary / inactive` 非空：app/device/source-map schema 至少输出 RISK；inactive 或 removed ID 输出 BLOCKER。非 source-map schema 只检查当前 artifacts 明确声明的 ID。
-- `verify-check` 是机器门禁入口；`context pack.facts.derived.checks` 是补充结构化检查入口。verify 报告不是新事实源。
+- `context pack.facts.derived.checks` 是结构化检查入口。verify 报告不是新事实源。
 - `context pack.evidence.details` 可用于读取 validate/test/review 的轻量解析结果；路径数组仍是 evidence 原始入口。
 - `openspec validate` 未运行时输出 RISK；运行失败且无接受理由时输出 BLOCKER。
 - 已有 CE review/test 结果只作为 evidence；verify 不替代它们。

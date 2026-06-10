@@ -160,7 +160,7 @@ aisee context pack --change <change> --for ce-code-review --json
 
 创建任务、进入实现、提出审查角色或推荐下一步前，先检查已有 workflow 和 skill：
 
-- 无明确 change 时，先用 `aisee:flow` 或 `aisee flow inspect --json` 判断当前 stage。
+- 无明确 change 时，先回到需求澄清、change-plan 或当前 change 本身，不再依赖单独的 flow 命令判断阶段。
 - 有明确 change 时，优先读取目标 context pack，例如 `aisee context pack --change <change> --for ce-work --json`。
 - `ce-work` context pack 的 `reusable_workflow_candidates` 只是路由提示，不是事实源。
 - `requires_ce_plan=true` 时才按需使用 `ce-plan` 细化执行顺序；结论必须回写当前 schema apply tracks，只有 source-map schema 才回写 `source-map.md`。
@@ -223,7 +223,7 @@ archive 前应满足：
 前后端分离时，推荐 contract provider 暴露只读上下文：
 
 ```bash
-aisee contract serve --host 127.0.0.1 --port 8765
+直接读取当前项目内的 OpenSpec artifacts 或 `aisee context pack` 输出
 ```
 
 最佳实践：

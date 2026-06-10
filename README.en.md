@@ -95,11 +95,10 @@ Compound Engineering = optional implementation / review / test consumer
 
 ## Skill Taxonomy
 
-`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all 22 public skills through `skills: "./skills/"`, but the default happy path contains only **11 core workflow skills**. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
+`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all public skills through `skills: "./skills/"`, but the default happy path contains only **10 core workflow skills**. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
 
 Core workflow:
 
-- `aisee:flow`
 - `aisee:init`
 - `aisee:srs`
 - `aisee:ui-content`
@@ -125,7 +124,6 @@ On-demand extensions:
 - **Schema-aware change planning**: `aisee:change-plan` maps confirmed inputs into independently deliverable OpenSpec changes.
 - **OpenSpec schema pack**: includes app, device, docsite, infra, security, quick-fix, quick-research, and collaboration schemas.
 - **Context packs**: `aisee context pack` generates JSON context for implementation, verification, and review.
-- **Contract context service**: `aisee contract` exposes service contracts through manifest-first and section-level reads for cross-repository frontend/backend collaboration.
 - **Team knowledge guardrails**: `aisee knowledge` retrieves a small number of reviewed engineering lessons through pack/card protocols without turning the knowledge repository into a second specification source.
 - **Anchor-aware traceability**: `aisee get`, `aisee trace`, and `aisee index` connect upstream documents, OpenSpec artifacts, tasks, code paths, tests, and evidence through `doc-ref#LOCAL-ID` or alias anchors.
 - **Verification and archive guardrails**: `aisee:verify` and `aisee:archive-guard` diagnose gaps and risks before archive.
@@ -255,7 +253,6 @@ Check the project state again:
 
 ```bash
 aisee doctor --json
-aisee flow inspect --json
 ```
 
 ## Documentation
@@ -282,9 +279,7 @@ aisee flow inspect --json
 5. openspec validate <change>
 6. aisee:implementation-bridge
 7. implementation / review / test
-8. aisee:verify
-9. aisee:archive-guard
-10. openspec archive <change>
+8. openspec archive <change>
 
 For small, bounded, low-risk work, an abbreviated path is also valid:
 
@@ -292,8 +287,8 @@ For small, bounded, low-risk work, an abbreviated path is also valid:
 quick-fix / quick-research / another lightweight schema
   -> change-author
   -> implementation-bridge
-  -> verify
-  -> archive-guard
+  -> implementation / review / test
+  -> archive
 ```
 ```
 
@@ -305,7 +300,6 @@ For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline spec
 
 | Skill | Purpose |
 | --- | --- |
-| `aisee:flow` | Inspect the current workflow stage and recommend the next step. |
 | `aisee:init` | Initialize or audit `AGENTS.md`, `openspec/project.md`, Aisee docs, memory, and Codex hooks. |
 | `aisee:srs` | Clarify software requirements and produce planning-level SRS documents. |
 | `aisee:ui-content` | Produce UI content specs for pages, elements, states, flows, permissions, and platform differences. |
@@ -372,11 +366,7 @@ aisee schemas check --json
 aisee sources list --json
 aisee sources check --json
 aisee index --json
-aisee flow inspect --json
-aisee flow inspect --change <change> --json
 aisee change inspect <change> --json
-aisee change author-check <change> --json
-aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --knowledge --json
 aisee context pack --change <change> --for aisee-verify --json
@@ -391,12 +381,6 @@ aisee knowledge query --from-change <change> --for ce-work --json
 aisee knowledge index --json
 aisee knowledge index --team-path .aisee/team-knowledge --json
 aisee knowledge promote-batch --curation <path> --team-path .aisee/team-knowledge --pack web-app --json
-aisee contract manifest --json
-aisee contract summary --change <change> --json
-aisee contract get --change <change> --artifact service-contract --section capabilities --json
-aisee contract serve --host 127.0.0.1 --port 8765
-aisee change verify-check <change> --json
-aisee change archive-check <change> --json
 aisee index --json
 aisee get docs/requirements/auth-srs.md#FR-001 --json
 aisee trace srs:auth-login#FR-001 --json
@@ -412,28 +396,7 @@ Key CLI rules:
 - If `aisee/registry/id-registry.json` still exists, treat it as legacy compatibility data rather than a formal authoring entry point.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
 - `aisee openspec ensure` only bridges OpenSpec initialization and profile setup. It does not replace `aisee:init`.
-- `aisee contract serve` is a read-only contract context service, not a mock backend, API gateway, or second API source of truth. It binds to `127.0.0.1` by default; LAN access requires explicit `--host 0.0.0.0` and exposes local contract documents to that network.
 - `aisee knowledge query` returns only a small number of guardrails. By default it reads pack manifests and card frontmatter; `--debug` is required for matched card body excerpts.
-
-### Cross-Repository Contract Reads
-
-When frontend and backend are developed in separate repositories, the backend repository, BFF repository, or independent contract repository should own `service-contract.md` and optional machine-readable attachments such as `contracts/openapi.yaml`, `contracts/events.yaml`, `contracts/webhooks.yaml`, or `contracts/proto/*.proto`.
-
-Recommended flow:
-
-```bash
-# In the contract provider repository
-aisee contract manifest --json
-aisee contract summary --change <change> --json
-aisee contract serve --host 127.0.0.1 --port 8765
-
-# In the consumer repository AI context, read the manifest first and fetch small sections as needed
-curl http://127.0.0.1:8765/manifest
-curl http://127.0.0.1:8765/changes/<change>/summary
-curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections/<section>?max_chars=4000"
-```
-
-OpenSpec/Aisee artifacts remain the authoritative contract source. The HTTP service reads current files on request and returns a JSON view; it does not persist contract copies and does not expose source code, environment variables, secrets, or full-repository search results.
 
 ### Team Knowledge Guardrails
 

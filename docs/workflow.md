@@ -5,7 +5,7 @@
 ## 核心原则
 
 - OpenSpec 是规范状态机和 baseline 事实源。
-- Aisee 负责需求澄清、上下文整理、schema-aware 交接和门禁。
+- Aisee 负责需求澄清、上下文整理、knowledge/memory 增强和 Compound 交接。
 - Aisee CLI 输出 JSON context view，不创建第二份规范事实源。
 - 实现、review、test 可以由 Compound Engineering 或其他 coding agent 承接。
 - `openspec archive <change>` 是已验证 change 合入 baseline 的最终动作。
@@ -38,7 +38,7 @@ aisee doctor --json
 
 ## 默认主路径与按需扩展
 
-默认新功能 happy path 只依赖 core workflow：`aisee:flow`、`aisee:init`、`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard`。
+默认新功能 happy path 只依赖 core workflow：`aisee:init`、`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`。
 
 以下能力按条件触发，不是每次都要走：
 
@@ -102,7 +102,6 @@ aisee:change-plan
 
 ```bash
 /opsx:new "<change>" --schema aisee-app-spec-driven
-aisee change author-check <change> --json
 openspec validate <change>
 ```
 
@@ -128,11 +127,9 @@ data-model.md            # 按需
 
 ## 4. 实现交接
 
-进入实现前，先确认 change 已 authored 且无 blocker。
+进入实现前，先确认 change 已 authored。
 
 ```bash
-aisee change author-check <change> --json
-aisee gaps --change <change> --json
 aisee context pack --change <change> --for ce-work --json
 ```
 
@@ -173,7 +170,7 @@ Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，
 | --- | --- | --- |
 | `aisee-change-architect` | `aisee:change-plan` 后、`aisee:change-author` 前按需触发；仅用于边界复杂、跨模块、跨 schema、依赖不清或粒度不确定的 change | 审查 change 边界、依赖、粒度和可独立交付性 |
 | `aisee-spec-reviewer` | `aisee:change-author` 后、`aisee:implementation-bridge` / `ce-work` 前建议触发 | 审查 artifacts、contracts、source-map、tasks 是否完整、一致、可验证 |
-| `aisee-implementation-reviewer` | `ce-work` 完成后、`aisee:verify` / `aisee:archive-guard` 前建议触发 | 比对实现、tasks、spec/source-map 和 evidence 是否一致 |
+| `aisee-implementation-reviewer` | `ce-work` 完成后建议触发 | 比对实现、tasks、spec/source-map 和 evidence 是否一致 |
 
 这些 reviewer 只输出结构化审查结论，不改代码、不跑测试、不提交 PR，也不替代 `ce-doc-review`、`ce-code-review`、`ce-test-*` 或 `ce-work`。接口、UI、硬件、固件、安全和验证差异应作为 schema-aware check lenses，而不是新增独立全能 agent。
 
@@ -183,11 +180,10 @@ Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，
 
 ```bash
 openspec validate <change>
-aisee change verify-check <change> --json
 aisee context pack --change <change> --for aisee-verify --json
 ```
 
-再使用 `aisee:verify` 输出 schema-aware 报告，重点检查：
+再使用 `aisee:verify` 或人工审查输出一致性报告，重点检查：
 
 - schema artifacts 是否存在。
 - Required=yes contracts 是否闭合。
@@ -197,53 +193,13 @@ aisee context pack --change <change> --for aisee-verify --json
 - review/test/manual evidence 是否足够。
 - 是否仍需要 Tier 2 review。
 
-verify 不是 archive 审批，它只输出问题和风险。
-
-## 7. Archive Guard
-
-archive 前运行：
-
-```bash
-aisee change archive-check <change> --json
-```
-
-然后使用 `aisee:archive-guard` 判断：
-
-- `openspec validate <change>` 是否通过。
-- `aisee:verify` 是否无 blocker。
-- apply tracks 是否关闭。
-- review/test/manual evidence 是否满足当前 schema。
-- accepted risk 是否有 owner、理由、影响范围和后续处理方式。
-
-只有 archive guard 给出“可以 archive”时，才执行：
+确认 `openspec validate` 通过、apply tracks 关闭、review/test/manual evidence 齐全且 accepted risk 已说明后，执行：
 
 ```bash
 openspec archive <change>
 ```
 
-## 8. 跨仓库接口协作
-
-前后端分离或多仓库协作时，推荐由后端仓库、BFF 仓库或独立契约仓库维护契约事实。
-
-契约提供方：
-
-```bash
-aisee contract manifest --json
-aisee contract summary --change <change> --json
-aisee contract serve --host 127.0.0.1 --port 8765
-```
-
-契约消费方：
-
-```bash
-curl http://127.0.0.1:8765/manifest
-curl http://127.0.0.1:8765/changes/<change>/summary
-curl "http://127.0.0.1:8765/changes/<change>/contracts/service-contract/sections/<section>?max_chars=4000"
-```
-
-`aisee contract serve` 是只读上下文服务，不是 mock backend，不是 API gateway，也不是第二份接口事实源。
-
-## 9. Team Knowledge 复用
+## 7. Team Knowledge 复用
 
 当一个项目沉淀出可复用经验时，先由用户明确触发 `aisee:reflect` 生成项目内 candidate，再按需运行 `aisee:knowledge-curate` 做批量审查、去敏、泛化和去重。
 
@@ -268,10 +224,10 @@ aisee:reflect
 
 | 场景 | 推荐路径 |
 | --- | --- |
-| 新功能 | SRS -> UI/Architecture -> change-plan -> change-author -> implementation-bridge -> verify -> archive-guard |
-| 小修复 | `quick-fix` schema -> author-check -> implementation-bridge -> verify -> archive-guard |
-| 技术调研 | `quick-research` schema -> findings/recommendation -> validate -> archive-guard |
-| 文档站变更 | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive-guard |
+| 新功能 | SRS -> UI/Architecture -> change-plan -> change-author -> implementation-bridge -> implementation / review / test -> archive |
+| 小修复 | `quick-fix` schema -> change-author -> implementation-bridge -> implementation / review / test -> archive |
+| 技术调研 | `quick-research` schema -> findings/recommendation -> validate -> archive |
+| 文档站变更 | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive |
 | 已有项目接入 | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> 新 change |
 
 ## 何时停止
