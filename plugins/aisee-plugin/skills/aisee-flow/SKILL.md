@@ -30,7 +30,7 @@ Reviewer 触发建议：
 ## 职责
 
 - 读取项目状态、OpenSpec change、`aisee/registry/sources.json`、schema artifacts、Aisee companion artifacts 和 CE review/test evidence；必要时把旧 full ID 文本只当成兼容诊断，不当成正式事实源。
-- 优先调用 Aisee CLI 的 `doctor`、`flow inspect/next`、`change inspect`、`author-check`、`gaps`、`verify-check`、`archive-check` 和 `context pack` 获取当前事实。
+- 优先自动调用 Aisee CLI 的只读 JSON：`doctor`、`flow inspect/next`、`change inspect`、`author-check`、`gaps`、`verify-check`、`archive-check` 和 `context pack` 获取当前事实；不要把常规路径退化为“提示用户手工运行命令”。
 - 展示当前 schema、source-map/tasks 是否必需、implementation references、verify/archive checks 和 required commands。
 - 判断当前 workflow stage。
 - 识别缺口、断链、过期和冲突。
@@ -106,6 +106,7 @@ CLI flow 的 JSON 只做状态汇总：
 - `inputs`：source-map 状态、parse level、source-map issues、task_state、implementation references、execution、evidence 计数。
 - `checks.author`：author-check 的状态、schema 有效性、blocker/warning codes。
 - `checks.gaps`：context pack gaps 的 blocker/risk/info 计数和 issue codes。
+- `SCHEMA_METADATA_MISSING` / `SCHEMA_MISMATCH` / `SCHEMA_NOT_INSTALLED` / `SCHEMA_NOT_FOUND` 属于 author / implementation blocker；flow 只能推荐回到 `aisee:change-author` 或 `aisee-schema-pack`。
 - `checks.implementation_gaps`：过滤掉当前 schema 不适用的实现阶段 gap 后，用于判断能否进入 `implementation-bridge` / `ce-work`。
 - `checks.verify`：verify-check 的状态、summary 和 issue codes。
 - `checks.archive`：archive-check 的状态、summary 和 issue codes。

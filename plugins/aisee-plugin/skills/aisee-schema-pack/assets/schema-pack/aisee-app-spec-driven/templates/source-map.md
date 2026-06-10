@@ -8,7 +8,6 @@
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
 | 已运行 author preflight | yes / no | `aisee change author-check {{change-name}} --json` | |
-| 已运行 author preflight | yes / no | `aisee change author-check {{change-name}} --json` | |
 | anchor refs 可解析 | yes / no | `aisee get <anchor-ref> --json` / `aisee trace <anchor-ref> --json` | |
 | 存在未解析 anchor | yes / no | `author-check.anchors.resolution.missing_references` | |
 | 存在临时 local ID | yes / no | `[ID-FINALIZATION-REQUIRED]` | |
@@ -42,15 +41,23 @@
 | Design Spec / Assets | docs/design/... / assets/... | SRC-003 / N/A | 已确认 / 缺失 / N/A | |
 | Architecture | aisee/docs/architecture/... | SRC-004 | 已确认 / 缺失 / N/A | |
 | Change Plan | aisee/docs/change-plan/... | SRC-005 | 已确认 / 缺失 / N/A | |
-| Issue / 用户输入 |  | SRC-006 / N/A | 已确认 / 缺失 / N/A | |
+| Issue / 用户输入 | 摘要化描述或外部链接 | SRC-006 / N/A | 已确认 / 缺失 / N/A | 不保存原始长提示词全文 |
+
+## Intake 来源
+
+> 当没有 SRS / UI Content / Architecture 等前置 planning docs 时使用。本表记录 authoring 线索，不分配 `FR-001`、不参与 anchor 解析，也不是新的规范事实源。
+
+| Type | Title / 名称 | Path / Description | External Ref | Status | Summary | 承接 Artifact | Notes |
+|---|---|---|---|---|---|---|---|
+| user-input / issue / ticket / PR / change-plan | | | issue://... / PR URL / N/A | confirmed / pending / N/A | 1-5 句精简摘要 | specs/... / tasks.md / proposal.md | 不复制原始长提示词 |
 
 ## 上游输入 Anchor
 
 | 类型 | Ref | 标题 / 名称 | 来源 | 本 change 处理方式 | 后续 artifact |
 |---|---|---|---|---|---|
-| FR | docs/requirements/...#FR-001 | | SRS | 覆盖 / 部分覆盖 / 不覆盖 | specs / tasks |
-| NFR | docs/requirements/...#NFR-001 | | SRS / Architecture | 覆盖 / 部分覆盖 / 不覆盖 | specs / change-context / tasks |
-| RULE | docs/requirements/...#RULE-001 | | SRS | 覆盖 / 部分覆盖 / 不覆盖 | specs / service-contract |
+| FR | docs/requirements/...#FR-001 / N/A | | SRS | 覆盖 / 部分覆盖 / 不覆盖 | specs / tasks |
+| NFR | docs/requirements/...#NFR-001 / N/A | | SRS / Architecture | 覆盖 / 部分覆盖 / 不覆盖 | specs / change-context / tasks |
+| RULE | docs/requirements/...#RULE-001 / N/A | | SRS | 覆盖 / 部分覆盖 / 不覆盖 | specs / service-contract |
 | PAGE | docs/ui-content/...#PAGE-001 | | UI Content | 新增 / 修改 / 复用 / 不覆盖 | ui-contract |
 | FLOW | docs/ui-content/...#FLOW-001 | | UI Content / SRS | 新增 / 修改 / 复用 / 不覆盖 | specs / ui-contract / service-contract |
 | STATE | docs/ui-content/...#STATE-001 | | UI Content / SRS | 新增 / 修改 / 复用 / 不覆盖 | specs / ui-contract / service-contract |
@@ -135,6 +142,7 @@
 
 ## 追踪规则
 
+- 无前置 planning docs 时，合法路径是：`upstream_refs=[]` + `intake_sources!=[]` + 当前 change 产出 local IDs。不要为了消除空值伪造 `docs/...#FR-001`。
 - specs 必须覆盖本 change 的全部 FR。
 - change-context.md 仅在 Required=yes 时覆盖 ARCH / DEC / CONSTRAINT / RISK。
 - ui-contract.md 仅在 Required=yes 时覆盖 PAGE / FLOW。

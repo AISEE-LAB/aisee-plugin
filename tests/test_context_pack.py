@@ -21,6 +21,16 @@ def install_compound_skills(root: Path, *skills: str) -> Path:
     return skills_dir
 
 
+def create_plugin_asset_root(root: Path, schema_name: str, schema_yaml: str, templates: tuple[str, ...]) -> Path:
+    write(root / "skills" / "aisee-srs" / "SKILL.md", "# aisee:srs\n")
+    write(root / "references" / "README.md", "# references\n")
+    schema_dir = root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / schema_name
+    write(schema_dir / "schema.yaml", schema_yaml)
+    for template in templates:
+        write(schema_dir / "templates" / template, f"# {template}\n")
+    return root
+
+
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(
@@ -235,6 +245,12 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) ->
     assert pack["generated"] is None
     assert pack["facts"]["parsed"]["source_map"]["parse_level"] == "structured"
     assert pack["facts"]["parsed"]["source_map"]["implementation_paths"]
+    assert "text" not in pack["facts"]["parsed"]["artifacts"]["proposal"]
+    brief = pack["facts"]["derived"]["execution"]["brief"]
+    assert brief["source_refs"]["mode"] == "anchor"
+    assert brief["allowed_paths"] == ["src/auth/session.py", "tests/auth/test_session.py"]
+    assert brief["produced_local_ids"] == ["SPEC-001", "TASK-001", "TEST-001"]
+    assert any(path.endswith("proposal.md") for path in brief["authoritative_sources"])
 
 
 def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None:
@@ -256,6 +272,144 @@ def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None
     assert "src/auth/side_effect.py" not in execution["allowed_paths"]
     assert references["unmapped_reference_paths"] == ["src/auth/side_effect.py"]
     assert "SOURCE_MAP_UNMAPPED_PATH" in {gap["code"] for gap in pack["gaps"]}
+
+
+def test_context_pack_accepts_intake_only_traceability_path(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
+        """# Source Map
+
+## Intake Sources
+
+| Type | Title / 名称 | Path / Description | External Ref | Status | Summary | 承接 Artifact | Notes |
+|---|---|---|---|---|---|---|---|
+| user-input | 登录改造 | 用户直接输入 | issue://AUTH-9 | confirmed | 摘要化输入，避免保存长提示词 | specs/auth.md | |
+
+## Artifact 适用性
+
+| Artifact | Required | Refs | Reason | Handoff |
+|---|---|---|---|---|
+| service-contract.md | yes | SPEC-001 | 需要服务接口 | tasks.md |
+
+## Affected Paths Index
+
+| Kind | Path | Refs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/auth/session.py | SPEC-001 | modify | |
+| test | tests/auth/test_session.py | TEST-001 | add | |
+
+## Contract Ownership / Sync
+
+| Key | Value | Status | Notes |
+|---|---|---|---|
+| contract_owner | backend | confirmed | |
+| canonical_source | contracts/openapi.yaml | confirmed | |
+| provider_repo | backend-api | confirmed | |
+| consumer_repo | frontend-app | confirmed | |
+| sync_mode | local-http | confirmed | |
+| machine_readable_contract | contracts/openapi.yaml | confirmed | |
+""",
+    )
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "specs" / "auth.md",
+        """## ADDED Requirements
+
+### Requirement: SPEC-001 Login
+
+系统 MUST allow login by password.
+""",
+    )
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md",
+        """# Tasks
+
+- [ ] TASK-001 Provider implementation: implement src/auth/session.py for SPEC-001.
+- [ ] TEST-001 Contract test: verify tests/auth/test_session.py.
+""",
+    )
+
+    pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
+
+    traceability = pack["facts"]["derived"]["traceability"]
+    assert traceability["upstream_refs"] == []
+    assert traceability["mode"] == "intake"
+    assert traceability["intake_sources"][0]["ref"] == "issue://AUTH-9"
+    assert "SPEC-001" in traceability["produced_local_ids"]
+    assert pack["facts"]["parsed"]["anchor_index"]["missing_references"] == []
+    assert "SOURCE_TRACE_MISSING" not in {gap["code"] for gap in pack["gaps"]}
+
+
+def test_context_pack_reports_source_trace_missing_when_no_anchor_or_intake(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md",
+        """# Source Map
+
+## Affected Paths Index
+
+| Kind | Path | Refs | Mode | Notes |
+|---|---|---|---|---|
+| code | src/auth/session.py | N/A | modify | |
+""",
+    )
+    write(tmp_path / "openspec" / "changes" / "add-auth" / "specs" / "auth.md", "# Spec\n")
+    write(tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md", "# Tasks\n\n- [ ] Implement src/auth/session.py.\n")
+
+    pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
+
+    assert "SOURCE_TRACE_MISSING" in {gap["code"] for gap in pack["gaps"]}
+    assert pack["facts"]["derived"]["traceability"]["mode"] == "empty"
+
+
+def test_context_pack_blocks_when_change_schema_metadata_is_missing(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    (tmp_path / "openspec" / "changes" / "add-auth" / ".openspec.yaml").unlink()
+
+    pack = build_context_pack(tmp_path, "add-auth", "ce-work")
+
+    gap_codes = {gap["code"] for gap in pack["gaps"]}
+    assert "SCHEMA_METADATA_MISSING" in gap_codes
+    assert pack["facts"]["parsed"]["schema"]["metadata_present"] is False
+    assert pack["facts"]["parsed"]["schema"]["resolved_from"] == "project-config"
+
+
+def test_context_pack_blocks_when_schema_only_exists_in_plugin_assets(tmp_path: Path, monkeypatch) -> None:
+    create_project(tmp_path)
+    schema_dir = tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven"
+    schema_yaml = (schema_dir / "schema.yaml").read_text(encoding="utf-8")
+    templates = tuple(path.name for path in (schema_dir / "templates").iterdir())
+    plugin_root = create_plugin_asset_root(tmp_path / "mock-plugin", "aisee-app-spec-driven", schema_yaml, templates)
+    monkeypatch.setenv("AISEE_PLUGIN_ASSET_ROOT", str(plugin_root))
+    for path in reversed(sorted(schema_dir.rglob("*"))):
+        if path.is_file():
+            path.unlink()
+        else:
+            path.rmdir()
+
+    pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
+
+    schema = pack["facts"]["parsed"]["schema"]
+    blocker = next(gap for gap in pack["gaps"] if gap["code"] == "SCHEMA_NOT_INSTALLED")
+    assert schema["installed"] is False
+    assert schema["source_path"].endswith("mock-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/schema.yaml")
+    assert blocker["suggested_fix"]["skill"] == "aisee-schema-pack"
+    assert blocker["suggested_fix"]["command"].endswith("--schema aisee-app-spec-driven")
+
+
+def test_context_pack_blocks_when_schema_hint_conflicts_with_metadata(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "proposal.md",
+        """Schema: quick-fix
+
+# Proposal
+""",
+    )
+
+    pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
+
+    assert "SCHEMA_MISMATCH" in {gap["code"] for gap in pack["gaps"]}
 
 
 def test_ce_work_pack_reports_missing_ce_plan_as_limitation(tmp_path: Path, monkeypatch) -> None:

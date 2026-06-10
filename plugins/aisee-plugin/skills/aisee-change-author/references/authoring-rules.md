@@ -4,12 +4,23 @@
 
 ## 目录
 
+- [无前置 planning docs 的 intake 路径](#无前置-planning-docs-的-intake-路径)
 - [无 source-map schema 的缺口落点](#无-source-map-schema-的缺口落点)
 - [Schema DAG 规则](#schema-dag-规则)
 - [Artifact 编写边界](#artifact-编写边界)
 - [App Schema v2 顺序](#app-schema-v2-顺序)
 - [Artifact 适用性判断](#artifact-适用性判断)
 - [ID Preflight](#id-preflight)
+
+## 无前置 planning docs 的 intake 路径
+
+当当前 change 没有 SRS / UI Content / Architecture 等前置 planning docs 时：
+
+- `proposal.md` 只写范围摘要和来源类型，不复制原始长提示词。
+- `source-map.md` 使用 `Intake 来源` 表记录 `type / external ref / summary / artifact`。
+- `upstream_refs=[]` 是合法状态；不要为了满足模板创建假 `docs/...#FR-001`。
+- 正式 local ID 仍由当前 change artifacts 产生，例如 `SPEC-001`、`API-001`、`TASK-001`。
+- 如果输入无法压缩为摘要，写 `[SPEC-GAP]` 或 blocker，等待确认；不要把整段聊天记录写进 source-map。
 
 ## 无 source-map schema 的缺口落点
 
@@ -29,6 +40,7 @@
 - 不要因为某个模板常见就创建 schema 未声明的 artifact。
 - 不要给 `quick-fix`、`quick-research`、`infra-change`、`aisee-docsite-driven` 等无 source-map schema 补 `source-map.md`。
 - 对 app schema 的按需 artifacts，先读取 `source-map.md` 的 Artifact 适用性；Required=no 且有原因时不展开完整模板。
+- schema metadata 缺失、不一致、未安装或找不到时，不继续 author；先回到 change creation / schema installation 修复。
 - 如果项目要求保留 N/A 文件，只写状态和 N/A 原因；不要为了填模板而复制无关表格。
 - 生成每个 artifact 前，读取它的 `instruction` 和 `template`。
 - 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`；优先引用 `author-check.schema.issues`。

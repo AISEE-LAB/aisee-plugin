@@ -26,6 +26,7 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 ## 职责
 
 - 识别当前 change 使用的 schema，并只检查该 schema 声明的 artifacts、requires、apply tracks 和验证证据。
+- 自动调用只读 CLI JSON：`author-check`、`gaps`、`inspect`、`verify-check`、`context pack --for aisee-verify`。用户不承担常规手工运行 CLI 的路径。
 - 运行或建议运行 `openspec validate <change>`。
 - 运行 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change inspect <change> --json`、`aisee change verify-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
 - 对需要 `source-map.md` 的 schema，检查 ID、source-map、artifact applicability、代码路径、测试路径和 evidence 是否闭合。
@@ -79,6 +80,7 @@ openspec validate <change>
 
 - `author-check.status=blocked`：输出 fail，引用 `author-check.blockers`，不要继续推断实现状态。
 - `gaps.result.status=blocked`：输出 fail，要求回到对应 artifact 修复。
+- `SCHEMA_METADATA_MISSING` / `SCHEMA_MISMATCH` / `SCHEMA_NOT_INSTALLED` / `SCHEMA_NOT_FOUND`：直接输出 BLOCKER，不接受 default schema fallback。
 - `change inspect.ids.registry.missing / temporary / inactive` 非空：app/device/source-map schema 至少输出 RISK；inactive 或 removed ID 输出 BLOCKER。非 source-map schema 只检查当前 artifacts 明确声明的 ID。
 - `verify-check` 是机器门禁入口；`context pack.facts.derived.checks` 是补充结构化检查入口。verify 报告不是新事实源。
 - `context pack.evidence.details` 可用于读取 validate/test/review 的轻量解析结果；路径数组仍是 evidence 原始入口。

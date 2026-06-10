@@ -64,3 +64,13 @@ def test_schema_examples_are_repository_plugin_content_not_packaged_assets() -> 
 
     assert source.exists()
     assert not PACKAGED_SCHEMA_PACK_ROOT.exists()
+
+
+def test_app_schema_templates_allow_intake_without_fake_srs_anchor() -> None:
+    source_map_template = (SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "templates" / "source-map.md").read_text(encoding="utf-8")
+    proposal_template = (SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "templates" / "proposal.md").read_text(encoding="utf-8")
+
+    assert "## Intake 来源" in source_map_template
+    assert "FR | docs/requirements/...#FR-001 / N/A" in source_map_template
+    assert "不要为了消除空值伪造" in source_map_template
+    assert "Intake 来源" in proposal_template

@@ -34,6 +34,19 @@ Aisee 使用 SemVer：
 
 公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
 
+## 0.6.0 合同提示
+
+`0.6.0` 引入的是向后兼容的 CLI JSON 增量字段与执行投影调整：
+
+- `aisee context pack --for aisee-verify --json` / `--for ce-work --json` 的 traceability 增加 `intake_sources` 与 `mode`。
+- `aisee context pack --for ce-work --json` 新增 `facts.derived.execution.brief`，并且 ce-work target 不再携带 artifact 正文副本。
+- schema metadata、schema mismatch、schema installed 状态被提升为 author / implementation blocker。
+
+发布说明必须同时覆盖两条分发面：
+
+- PyPI / pipx：CLI 命令面与 JSON 合同变化。
+- marketplace plugin：skills、references、schema pack assets、templates 的 intake 路径与 schema preflight 规则变化。
+
 ## 本地检查
 
 检查版本一致性：

@@ -406,6 +406,45 @@ def test_flow_status_is_blocked_when_author_check_blocks(tmp_path: Path) -> None
     assert data["blocking"]
 
 
+def test_flow_blocks_when_change_schema_metadata_is_missing(tmp_path: Path) -> None:
+    create_open_project(tmp_path)
+    (tmp_path / "openspec" / "changes" / "add-auth" / ".openspec.yaml").unlink()
+
+    data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
+
+    assert data["status"] == "blocked"
+    assert data["stage"] == "change-authored"
+    assert data["recommended_path"] == ["aisee:change-author"]
+    assert "SCHEMA_METADATA_MISSING" in data["checks"]["author"]["blocker_codes"]
+
+
+def test_flow_blocks_when_schema_is_not_installed_even_if_source_assets_exist(tmp_path: Path, monkeypatch) -> None:
+    create_open_project(tmp_path)
+    write(tmp_path / "skills" / "aisee-srs" / "SKILL.md", "# aisee:srs\n")
+    write(tmp_path / "references" / "README.md", "# refs\n")
+    monkeypatch.setenv("AISEE_PLUGIN_ASSET_ROOT", str(tmp_path))
+    source_root = tmp_path / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "aisee-app-spec-driven"
+    write(
+        source_root / "schema.yaml",
+        (tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml").read_text(encoding="utf-8"),
+    )
+    for template in ("proposal.md", "source-map.md", "spec.md", "tasks.md"):
+        write(source_root / "templates" / template, f"# {template}\n")
+    schema_dir = tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven"
+    for path in reversed(sorted(schema_dir.rglob("*"))):
+        if path.is_file():
+            path.unlink()
+        else:
+            path.rmdir()
+    schema_dir.rmdir()
+
+    data = run_json(tmp_path, "flow", "inspect", "--change", "add-auth", "--json")
+
+    assert data["status"] == "blocked"
+    assert data["recommended_path"] == ["aisee:change-author"]
+    assert "SCHEMA_NOT_INSTALLED" in data["checks"]["author"]["blocker_codes"]
+
+
 def test_flow_inspect_reports_archive_ready_for_quick_research(tmp_path: Path) -> None:
     create_quick_research_project(tmp_path)
 

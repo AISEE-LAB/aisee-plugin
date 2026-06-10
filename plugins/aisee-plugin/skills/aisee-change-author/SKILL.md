@@ -12,7 +12,7 @@ description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifac
 负责：
 
 - 读取 change-plan、当前 change 目录、所选 schema、schema templates 和直接相关上游事实。
-- 运行并解释 `aisee change author-check <change> --json`。
+- 自动运行并解释 `aisee change author-check <change> --json`；这是只读 CLI preflight，不要求用户手工执行常规命令。
 - 按 `author-check.artifact_order` 和 schema `artifacts[].requires` 生成或补齐 artifacts。
 - 当前 schema 生成 `source-map.md` 时，用它串联上游 anchor refs、产出 local ID、artifact 适用性、路径和验证证据。
 - 当前 schema 不生成 `source-map.md` 时，不伪造 source-map；用该 schema 的主 artifact 承载缺口、方案、调研、文档或运维信息。
@@ -38,6 +38,7 @@ aisee change author-check <change> --json
 
 - `status=blocked`：停止 author，列出 `blockers`；不要创建或修改 artifacts。
 - `schema.valid=false`：停止 author；不得自造 schema 未声明的 artifact 或模板。
+- `SCHEMA_METADATA_MISSING` / `SCHEMA_MISMATCH` / `SCHEMA_NOT_INSTALLED` / `SCHEMA_NOT_FOUND`：停止 author；不得根据 project default schema、现有 artifacts 形状或默认模板猜 schema。
 - `missing_artifacts` 非空：只按 `artifact_order` 和 schema templates 补齐缺失项；不重排 schema。
 - `anchors.actions.finalize_local_ids` 非空：先确定最终 local ID，再写入当前 artifact。
 - `anchors.actions.fix_missing_references` 非空：先修复断链 anchor ref；不要把未解析引用写入新的 artifact。
@@ -55,6 +56,7 @@ aisee change author-check <change> --json
 - 能读取 `openspec/changes/<change>/`，或用户明确要求只输出补丁 / 草稿。
 - `aisee change author-check <change> --json` 已完成，且没有 blocker。
 - 能读取当前 schema 的 `schema.yaml` 和所有 `templates/`。
+- 当前 change metadata 已声明 schema，且项目内已安装该 schema；如只有 plugin source 可见但项目未安装，先转交 `aisee-schema-pack`。
 - 已收集与所选 schema 直接相关的上游输入：Change Plan、Issue / 用户输入；只有 app/device schema 需要读取对应 SRS、UI Content、Architecture 或设备上下文。
 - 已读取项目规则：优先 `AGENTS.md`，`CLAUDE.md` 只作为 legacy fallback。
 - 既有系统或二次开发场景下，已读取相关 existing specs、代码事实、路由/API/模型/测试。
@@ -69,6 +71,8 @@ CHECKPOINT: 写入或修改任何 artifact 前，必须输出当前 change、sch
 2. 读取当前 schema 的 `schema.yaml`，再按需读取每个 artifact 的 `instruction` 和 `template`。
 3. 读取当前 change 已有 artifacts，增量补齐，不覆盖用户内容。
 4. 读取与当前 schema 直接相关的上游事实。
+   - 有 SRS / UI Content / Architecture 时读取对应 planning docs 的 anchor refs。
+   - 没有前置 planning docs 时，只读取 Change Plan、Issue、PR 或用户输入的 intake 摘要；不要伪造 `FR-001`。
 5. 如 schema 生成 `source-map.md`，先写或补 source-map 的来源、anchor 路由、artifact 适用性和缺口。
 6. 按 artifact DAG 生成 proposal、specs、contracts、tasks 或轻量 schema artifacts。
 7. 写入后运行或要求运行 `aisee change author-check <change> --json`、`aisee get <anchor-ref> --json`（按需）和 `aisee gaps --change <change> --json`。
@@ -106,6 +110,7 @@ final check -> aisee change author-check + aisee gaps
 - 对生成 `source-map.md` 的 schema，先在 source-map 写 artifact 适用性；Required=no 且有原因时不展开完整模板。
 - 对不生成 `source-map.md` 的 schema，按 schema 模板写对应 artifact，不套 app artifact 假设。
 - 正式 authoring 只使用 local ID 与 anchor refs；不要再要求 `aisee id reserve/activate/check`。
+- 对 intake 路径，`upstream_refs=[]` 是合法状态；只要 `intake_sources` 和当前 change 产出 local IDs 完整，就不要为了消除空值补假 anchor。
 - CLI 或索引不可用时，只能写 `TYPE-NEW-001` 临时占位符，并标注 `[ID-FINALIZATION-REQUIRED]`。
 - app schema 的 `tasks.md` 只记录实现顺序、任务状态和验证证据，不承载需求、契约、ID 注册、来源追踪或归档判断。
 - 轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。

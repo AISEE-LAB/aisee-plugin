@@ -44,6 +44,16 @@
 - 在 `Schema rationale` 中说明该 schema 是否匹配。
 - 如果指定 schema 明显过重或过轻，只输出风险提示，不擅自改 schema。
 
+## Availability Preflight
+
+选定 schema 后，`aisee:change-plan` 还必须检查它是否能被当前项目消费：
+
+- 已安装在 `openspec/schemas/<name>/`：可以继续输出 `/opsx:new "<change>" --schema <name>`。
+- 未安装但 marketplace plugin source 可见：输出 blocker，转交 `aisee-schema-pack`，建议 `node <skill-dir>/scripts/setup-schemas.js --schema <name>`。
+- source 也不可见：输出 schema availability blocker，并说明 author / implementation 无法继续。
+
+不要建议 `aisee schemas install`。公开 CLI 只保留 `list/check` 这类只读状态检查。
+
 ## 混合系统
 
 混合系统可以同时需要 app 与 device schema，但每个具体 change 仍只能选择一个 schema。不要为了省事把云端、App、设备和固件塞进一个超大 change。

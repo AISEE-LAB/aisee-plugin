@@ -86,3 +86,26 @@ def test_readme_highlights_core_workflow_taxonomy() -> None:
     assert "11 个核心主流程 skill" in readme
     for skill in read_taxonomy()["Core Workflow"]:
         assert f"`{skill}`" in readme
+
+
+def test_core_skills_document_auto_cli_consumption_and_lean_projection() -> None:
+    expectations = {
+        "plugins/aisee-plugin/skills/aisee-change-author/SKILL.md": "自动运行并解释 `aisee change author-check <change> --json`",
+        "plugins/aisee-plugin/skills/aisee-implementation-bridge/SKILL.md": "只消费 `--for ce-work` 的 lean projection",
+        "plugins/aisee-plugin/skills/aisee-verify/SKILL.md": "自动调用只读 CLI JSON",
+        "plugins/aisee-plugin/skills/aisee-archive-guard/SKILL.md": "自动调用只读 CLI JSON",
+        "plugins/aisee-plugin/skills/aisee-flow/SKILL.md": "不要把常规路径退化为“提示用户手工运行命令”",
+    }
+    for relative_path, marker in expectations.items():
+        assert marker in (ROOT / relative_path).read_text(encoding="utf-8")
+
+
+def test_change_plan_rules_and_templates_support_intake_traceability() -> None:
+    expected_markers = {
+        "plugins/aisee-plugin/skills/aisee-change-plan/references/source-map-rules.md": "Intake 来源",
+        "plugins/aisee-plugin/skills/aisee-change-plan/references/output-template.md": "Schema availability:",
+        "plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/templates/source-map.md": "合法路径是：`upstream_refs=[]` + `intake_sources!=[]`",
+        "plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/templates/proposal.md": "Intake 来源",
+    }
+    for relative_path, marker in expected_markers.items():
+        assert marker in (ROOT / relative_path).read_text(encoding="utf-8")

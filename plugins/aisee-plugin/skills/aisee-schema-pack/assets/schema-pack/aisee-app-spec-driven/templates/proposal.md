@@ -7,7 +7,8 @@
 - 当前问题：
 - 触发原因：
 - 上游来源：SRS / UI Content / Architecture / Change Plan / Issue / 用户输入
-- 主要来源 anchor / local ID：docs/...#FR-001 / docs/...#PAGE-001 / DEC-001
+- 主要来源 anchor / local ID：docs/...#FR-001 / docs/...#PAGE-001 / DEC-001 / N/A
+- 如果没有前置 planning docs：这里只写 intake 摘要，不复制原始长提示词；正式追踪放到 `source-map.md` 的 `Intake 来源`
 
 ## 上下文读取顺序
 
@@ -30,9 +31,9 @@
 
 | 类型 | Ref / Local ID | 说明 |
 |---|---|---|
-| 功能需求 | docs/...#FR-xxx / N/A | |
-| 非功能需求 | docs/...#NFR-xxx / N/A | |
-| 业务规则 | docs/...#RULE-xxx / N/A | |
+| 功能需求 | docs/...#FR-xxx / N/A — no SRS planning doc | |
+| 非功能需求 | docs/...#NFR-xxx / N/A — no SRS planning doc | |
+| 业务规则 | docs/...#RULE-xxx / N/A — no SRS planning doc | |
 | 页面 / 视图 | docs/...#PAGE-xxx / N/A | |
 | 流程 / 状态 | docs/...#FLOW-xxx / docs/...#STATE-xxx / N/A | |
 | 架构 / 决策 / 约束 | docs/...#ARCH-xxx / docs/...#DEC-xxx / docs/...#CONSTRAINT-xxx / N/A | |

@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref
-from aisee_cli.assets import repo_asset_root
+from aisee_cli.assets import resolve_source_asset_root
 from aisee_cli.index import build_index
 from aisee_cli.paths import sources_path as aisee_sources_path
 from aisee_cli.project import inspect_project_rules, rel
@@ -42,6 +42,7 @@ OPTIONAL_APP_ARTIFACTS = {
     "data-model",
     "data-model.md",
 }
+PRODUCED_LOCAL_ID_PREFIXES = ("SPEC-", "API-", "DATA-", "TASK-", "TEST-", "HW-", "FW-", "RT-", "VER-")
 
 
 @dataclass(frozen=True)
@@ -52,6 +53,16 @@ class ArtifactSpec:
     requires: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class SchemaPaths:
+    installed_path: Path | None
+    source_path: Path | None
+
+    @property
+    def effective_path(self) -> Path | None:
+        return self.installed_path or self.source_path
+
+
 def build_context_pack(project_root: Path, change: str, target: str) -> dict[str, Any]:
     """Build a conservative context pack for a single OpenSpec change."""
 
@@ -60,18 +71,20 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
 
     root = project_root.resolve()
     change_path = root / "openspec" / "changes" / change
-    schema_name = resolve_change_schema(root, change_path)
-    schema_path = find_schema_path(root, schema_name)
+    schema_resolution = resolve_change_schema(root, change_path)
+    schema_name = schema_resolution["effective_schema"]
+    schema_paths = find_schema_paths(root, schema_name)
+    schema_path = schema_paths.effective_path
     schema_info = parse_schema(schema_path) if schema_path else default_schema_info(schema_name)
     artifact_specs = schema_info["artifacts"]
     source_map_required = schema_generates_source_map(artifact_specs)
     source_map = parse_source_map(change_path) if source_map_required else not_applicable_source_map()
 
     artifact_entries = build_artifact_entries(change_path, artifact_specs)
-    parsed_artifacts = parse_artifacts(change_path, artifact_entries)
+    full_parsed_artifacts = parse_artifacts(change_path, artifact_entries)
     source_map_text = read_text(change_path / "source-map.md") if source_map_required else ""
     tasks_text = read_text(change_path / "tasks.md")
-    combined_text = collect_artifact_text(parsed_artifacts)
+    combined_text = collect_artifact_text(full_parsed_artifacts)
 
     task_paths = sorted(extract_paths(tasks_text))
     artifact_paths = sorted(extract_paths(combined_text))
@@ -92,9 +105,12 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     sources = inspect_sources(root, source_map_text)
     task_state = parse_task_state(tasks_text)
     upstream_refs = sorted(extract_anchor_refs(source_map_text))
-    produced_local_ids = sorted(extract_ids(tasks_text) | extract_ids(combined_text))
+    intake_sources = source_map.get("intake_sources", [])
+    produced_local_ids = sorted(extract_produced_local_ids(tasks_text) | extract_produced_local_ids(combined_text))
     all_change_local_ids = sorted(extract_ids(combined_text))
     anchor_index = inspect_anchor_index(root, upstream_refs, all_change_local_ids)
+    traceability_mode = derive_traceability_mode(upstream_refs, intake_sources)
+    parsed_artifacts = slim_artifacts(full_parsed_artifacts) if target == "ce-work" else full_parsed_artifacts
 
     gaps = build_gaps(
         change_path=change_path,
@@ -108,6 +124,9 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         source_map_required=source_map_required,
         unmapped_reference_paths=unmapped_reference_paths,
         tasks_text=tasks_text,
+        schema_resolution=schema_resolution,
+        schema_paths=schema_paths,
+        produced_local_ids=produced_local_ids,
     )
 
     read_order = build_read_order(root, change_path, artifact_entries, read_paths)
@@ -130,6 +149,15 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                     "name": schema_name,
                     "version": schema_info.get("version"),
                     "path": rel(root, schema_path) if schema_path else None,
+                    "installed": schema_paths.installed_path is not None,
+                    "installed_path": rel(root, schema_paths.installed_path) if schema_paths.installed_path else None,
+                    "source_path": rel(root, schema_paths.source_path) if schema_paths.source_path else None,
+                    "metadata_present": schema_resolution["metadata_present"],
+                    "metadata_path": schema_resolution["metadata_path"],
+                    "metadata_schema": schema_resolution["metadata_schema"],
+                    "config_schema": schema_resolution["config_schema"],
+                    "resolved_from": schema_resolution["resolved_from"],
+                    "hint_mismatches": schema_resolution["hint_mismatches"],
                     "artifacts": artifact_entries,
                     "apply_requires": schema_info.get("apply_requires", []),
                     "archive_tracks": derive_archive_tracks(schema_info),
@@ -146,6 +174,8 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 "scope": derive_scope(read_text(change_path / "proposal.md"), source_map_text),
                 "traceability": {
                     "upstream_refs": upstream_refs,
+                    "intake_sources": intake_sources,
+                    "mode": traceability_mode,
                     "produced_local_ids": produced_local_ids,
                     "resolved_anchors": anchor_index["resolved"],
                     "unresolved_anchors": anchor_index["missing_references"],
@@ -194,10 +224,26 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 gaps=gaps,
             ),
         }
+        pack["facts"]["derived"]["execution"]["brief"] = build_execution_brief(
+            root=root,
+            change_path=change_path,
+            read_order=read_order,
+            scope=pack["facts"]["derived"]["scope"],
+            traceability=pack["facts"]["derived"]["traceability"],
+            allowed_paths=pack["facts"]["derived"]["execution"]["allowed_paths"],
+            start_from=pack["facts"]["derived"]["execution"]["start_from"],
+            verification_requirements=pack["facts"]["derived"]["verification_requirements"],
+            gaps=gaps,
+        )
     elif target == "aisee-verify":
         pack["facts"]["derived"]["checks"] = {
             "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(upstream_refs, produced_local_ids),
+            "traceability": summarize_trace_checks(
+                upstream_refs,
+                produced_local_ids,
+                intake_sources=intake_sources,
+                mode=traceability_mode,
+            ),
             "tasks": summarize_task_checks(task_state),
             "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
             "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
@@ -208,7 +254,12 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         pack["facts"]["derived"]["review"] = {
             "focus": ["schema_artifacts", "traceability", "tasks", "contracts", "open_questions"],
             "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(upstream_refs, produced_local_ids),
+            "traceability": summarize_trace_checks(
+                upstream_refs,
+                produced_local_ids,
+                intake_sources=intake_sources,
+                mode=traceability_mode,
+            ),
             "tasks": summarize_task_checks(task_state),
             "contracts": summarize_contract_checks(artifact_entries, source_map.get("contract_sync")),
         }
@@ -223,28 +274,55 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     return pack
 
 
-def resolve_change_schema(root: Path, change_path: Path) -> str:
+def resolve_change_schema(root: Path, change_path: Path) -> dict[str, Any]:
     metadata = read_text(change_path / ".openspec.yaml")
-    schema = read_yaml_scalar(metadata, "schema")
-    if schema:
-        return schema
-
+    metadata_schema = read_yaml_scalar(metadata, "schema")
     config = read_text(root / "openspec" / "config.yaml")
-    schema = read_yaml_scalar(config, "schema")
-    return schema or "spec-driven"
+    config_schema = read_yaml_scalar(config, "schema")
+    schema_hints = read_schema_hints(change_path)
+    effective_schema = metadata_schema or config_schema or "spec-driven"
+    hint_mismatches = []
+    for hint in schema_hints:
+        if metadata_schema and hint["schema"] != metadata_schema:
+            hint_mismatches.append({
+                "path": hint["path"],
+                "declared_schema": hint["schema"],
+                "metadata_schema": metadata_schema,
+            })
+    return {
+        "effective_schema": effective_schema,
+        "metadata_present": bool(metadata_schema),
+        "metadata_path": rel(root, change_path / ".openspec.yaml") if (change_path / ".openspec.yaml").exists() else None,
+        "metadata_schema": metadata_schema,
+        "config_schema": config_schema,
+        "resolved_from": "change-metadata" if metadata_schema else ("project-config" if config_schema else "default"),
+        "hint_mismatches": hint_mismatches,
+    }
 
 
-def find_schema_path(root: Path, schema_name: str) -> Path | None:
-    asset_root = repo_asset_root(root)
-    candidates = [
-        root / "openspec" / "schemas" / schema_name / "schema.yaml",
-    ]
+def find_schema_paths(root: Path, schema_name: str) -> SchemaPaths:
+    asset_root = resolve_source_asset_root(root)
+    installed_path = root / "openspec" / "schemas" / schema_name / "schema.yaml"
+    source_path = None
     if asset_root is not None:
-        candidates.append(asset_root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / schema_name / "schema.yaml")
-    for candidate in candidates:
+        candidate = asset_root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / schema_name / "schema.yaml"
         if candidate.exists():
-            return candidate
-    return None
+            source_path = candidate
+    return SchemaPaths(
+        installed_path=installed_path if installed_path.exists() else None,
+        source_path=source_path,
+    )
+
+
+def read_schema_hints(change_path: Path) -> list[dict[str, str]]:
+    hints: list[dict[str, str]] = []
+    for relative_path in ("proposal.md", "source-map.md"):
+        text = read_text(change_path / relative_path)
+        for line in text.splitlines():
+            match = re.match(r"^\s*schema\s*:\s*([A-Za-z0-9_.-]+)\s*$", line, flags=re.IGNORECASE)
+            if match:
+                hints.append({"path": relative_path, "schema": match.group(1)})
+    return hints
 
 
 def parse_schema(schema_path: Path) -> dict[str, Any]:
@@ -337,6 +415,7 @@ def not_applicable_source_map() -> dict[str, Any]:
         "status": "not_applicable",
         "parse_level": "not_applicable",
         "upstream_sources": [],
+        "intake_sources": [],
         "anchor_trace": [],
         "artifact_applicability": [],
         "contract_sync": {"available": False, "values": {}, "machine_readable_contracts": []},
@@ -422,6 +501,37 @@ def collect_artifact_text(parsed_artifacts: dict[str, Any]) -> str:
                 if isinstance(item, dict):
                     chunks.append(item.get("text", ""))
     return "\n".join(chunks)
+
+
+def extract_produced_local_ids(text: str) -> set[str]:
+    return {item for item in extract_ids(text) if item.startswith(PRODUCED_LOCAL_ID_PREFIXES)}
+
+
+def slim_artifacts(parsed_artifacts: dict[str, Any]) -> dict[str, Any]:
+    slimmed: dict[str, Any] = {}
+    for key, value in parsed_artifacts.items():
+        if isinstance(value, dict):
+            slimmed[key] = {field: field_value for field, field_value in value.items() if field != "text"}
+        elif isinstance(value, list):
+            slimmed[key] = [{field: field_value for field, field_value in item.items() if field != "text"} for item in value]
+        else:
+            slimmed[key] = value
+    return slimmed
+
+
+def derive_traceability_mode(upstream_refs: list[str], intake_sources: list[dict[str, Any]]) -> str:
+    has_anchors = bool(upstream_refs)
+    has_intake = any(
+        any(str(item.get(field) or "").strip() for field in ("type", "title", "path", "ref", "summary", "artifact"))
+        for item in intake_sources
+    )
+    if has_anchors and has_intake:
+        return "mixed"
+    if has_anchors:
+        return "anchor"
+    if has_intake:
+        return "intake"
+    return "empty"
 
 
 def resolve_artifact_paths(change_path: Path, generates: str | None) -> list[str]:
@@ -551,11 +661,65 @@ def build_gaps(
     source_map_required: bool,
     unmapped_reference_paths: list[str],
     tasks_text: str,
+    schema_resolution: dict[str, Any],
+    schema_paths: SchemaPaths,
+    produced_local_ids: list[str],
 ) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if not change_path.exists():
         gaps.append(gap("MISSING_CHANGE", "blocker", "Change directory does not exist", "openspec/changes"))
         return gaps
+
+    if not schema_resolution.get("metadata_present"):
+        gaps.append(
+            gap(
+                "SCHEMA_METADATA_MISSING",
+                "blocker",
+                "Change metadata does not declare a schema; author and execution stages must stop until .openspec.yaml is fixed",
+                ".openspec.yaml",
+            )
+        )
+
+    hint_mismatches = schema_resolution.get("hint_mismatches", [])
+    if hint_mismatches:
+        details = ", ".join(
+            f"{item['path']} declares {item['declared_schema']}" for item in hint_mismatches if item.get("path")
+        )
+        gaps.append(
+            gap(
+                "SCHEMA_MISMATCH",
+                "blocker",
+                f"Change schema metadata conflicts with schema hints in current artifacts: {details}",
+                ".openspec.yaml",
+            )
+        )
+
+    if schema_paths.installed_path is None:
+        schema_name = schema_resolution["effective_schema"]
+        owner_artifact = f"openspec/schemas/{schema_name}/schema.yaml"
+        if schema_paths.source_path is not None:
+            gaps.append(
+                gap(
+                    "SCHEMA_NOT_INSTALLED",
+                    "blocker",
+                    "Selected schema is available from marketplace plugin assets but not installed into the current project",
+                    owner_artifact,
+                    suggested_fix={
+                        "skill": "aisee-schema-pack",
+                        "command": f"node <skill-dir>/scripts/setup-schemas.js --schema {schema_name}",
+                        "writes": True,
+                    },
+                )
+            )
+        else:
+            gaps.append(
+                gap(
+                    "SCHEMA_NOT_FOUND",
+                    "blocker",
+                    "Selected schema is not available in the current project or marketplace plugin assets",
+                    owner_artifact,
+                )
+            )
 
     if source_map_required:
         gaps.extend(source_map.get("issues", []))
@@ -595,6 +759,16 @@ def build_gaps(
                 "Change references anchor refs that could not be resolved",
                 anchor_owner_artifact,
                 missing_references,
+            )
+        )
+    intake_sources = source_map.get("intake_sources", [])
+    if source_map_required and not missing_references and not anchor_index.get("resolved") and not intake_sources and not produced_local_ids:
+        gaps.append(
+            gap(
+                "SOURCE_TRACE_MISSING",
+                "risk",
+                "source-map.md has no anchor refs, no intake sources, and no produced local IDs",
+                "source-map.md",
             )
         )
     legacy_full_ids = source_map.get("legacy_full_ids", [])
@@ -641,14 +815,21 @@ def build_gaps(
     return gaps
 
 
-def gap(code: str, severity: str, message: str, owner_artifact: str, related_ids: list[str] | None = None) -> dict[str, Any]:
+def gap(
+    code: str,
+    severity: str,
+    message: str,
+    owner_artifact: str,
+    related_ids: list[str] | None = None,
+    suggested_fix: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     return {
         "code": code,
         "severity": severity,
         "message": message,
         "owner_artifact": owner_artifact,
         "related_ids": related_ids or [],
-        "suggested_fix": None,
+        "suggested_fix": suggested_fix,
     }
 
 
@@ -842,6 +1023,48 @@ def derive_verification_requirements(tasks_text: str) -> list[str]:
         for line in tasks_text.splitlines()
         if any(term in line.lower() for term in ("test", "verify", "验证", "检查", "evidence"))
     ]
+
+
+def build_execution_brief(
+    *,
+    root: Path,
+    change_path: Path,
+    read_order: list[str],
+    scope: dict[str, Any],
+    traceability: dict[str, Any],
+    allowed_paths: list[str],
+    start_from: list[str],
+    verification_requirements: list[str],
+    gaps: list[dict[str, Any]],
+) -> dict[str, Any]:
+    authoritative_sources = [
+        rel(root, change_path / relative_path)
+        for relative_path in ("proposal.md", "source-map.md", "tasks.md")
+        if (change_path / relative_path).exists()
+    ]
+    risk_items = [
+        {"code": item["code"], "severity": item["severity"], "message": item["message"]}
+        for item in gaps
+        if item.get("severity") in {"blocker", "risk"}
+    ]
+    return {
+        "authoritative_sources": authoritative_sources,
+        "scope": {
+            "in": scope.get("in", []),
+            "out": scope.get("out", []),
+        },
+        "read_first": read_order[:8],
+        "source_refs": {
+            "upstream_refs": traceability.get("upstream_refs", []),
+            "intake_sources": traceability.get("intake_sources", []),
+            "mode": traceability.get("mode"),
+        },
+        "produced_local_ids": traceability.get("produced_local_ids", []),
+        "allowed_paths": allowed_paths,
+        "task_start": start_from,
+        "verification": verification_requirements,
+        "risks": risk_items,
+    }
 
 
 def build_guardrails(target: str, source_map_required: bool) -> list[str]:
@@ -1140,8 +1363,18 @@ def summarize_artifact_checks(artifact_entries: list[dict[str, Any]]) -> list[di
     return [{"artifact": entry["id"], "status": entry["status"], "path": entry.get("path")} for entry in artifact_entries]
 
 
-def summarize_trace_checks(upstream_refs: list[str], produced_local_ids: list[str]) -> list[dict[str, Any]]:
-    return [{"upstream_ref_count": len(upstream_refs), "produced_local_id_count": len(produced_local_ids)}]
+def summarize_trace_checks(
+    upstream_refs: list[str],
+    produced_local_ids: list[str],
+    intake_sources: list[dict[str, Any]] | None = None,
+    mode: str | None = None,
+) -> list[dict[str, Any]]:
+    return [{
+        "mode": mode,
+        "upstream_ref_count": len(upstream_refs),
+        "intake_source_count": len(intake_sources or []),
+        "produced_local_id_count": len(produced_local_ids),
+    }]
 
 
 def summarize_task_checks(task_state: dict[str, Any]) -> list[dict[str, Any]]:

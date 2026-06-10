@@ -24,6 +24,7 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 ## 职责
 
 - 识别当前 change schema，并按 schema 判断归档必需 artifacts、tasks、apply tracks、source-map、contracts 和验证证据。
+- 自动调用只读 CLI JSON：`author-check`、`gaps`、`verify-check`、`archive-check`、`context pack --for aisee-verify`；这些检查不要求用户手工执行常规命令。
 - 读取已有 validate、verify、review、test、manual verification、preview、monitoring 或设备验证结果。
 - 运行或读取 `aisee change author-check <change> --json`、`aisee gaps --change <change> --json`、`aisee change verify-check <change> --json`、`aisee change archive-check <change> --json`、`aisee context pack --change <change> --for aisee-verify --json`。
 - 检查 `aisee:verify` 的 Review Recommendation 是否已有审查证据、本地重点自审证据或正式 accepted risk。
@@ -77,6 +78,7 @@ openspec archive <change>
 
 - `author-check` 无 blocker；schema 声明的必需 artifacts 已存在。
 - `gaps` 无 blocker；risk 均有接受理由、owner 和后续处理方式。
+- 若 blocker 来自 `SCHEMA_METADATA_MISSING` / `SCHEMA_MISMATCH` / `SCHEMA_NOT_INSTALLED` / `SCHEMA_NOT_FOUND`，必须先回到 change metadata 或 schema 安装修复；不得 archive。
 - `verify-check` / `aisee:verify` 无未处理 BLOCKER。
 - `archive-check` 无 blocker；如 blocker 来自不适用的 source-map/contracts，必须在报告中说明 schema mismatch。
 - `openspec validate <change>` 已通过。未运行或失败时，不得输出 `可以 archive`。

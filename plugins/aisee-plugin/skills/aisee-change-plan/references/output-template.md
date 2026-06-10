@@ -67,9 +67,12 @@ Out of Scope:
 Source-map seed:
   - If schema does not generate source-map.md: N/A — schema does not generate source-map.md
   - If schema generates source-map.md:
+      Intake sources:
+        - Type / ref / summary / artifact when no SRS / UI / Architecture doc exists
+        - Keep only condensed intake summary; never paste the raw long prompt
       Upstream:
-        FR:          <scope>:FR-001, <scope>:FR-002
-        NFR/RULE:    <scope>:NFR-001, <scope>:RULE-001 (or "N/A")
+        FR:          <scope>:FR-001, <scope>:FR-002 (or "N/A — no SRS planning doc")
+        NFR/RULE:    <scope>:NFR-001, <scope>:RULE-001 (or "N/A — no SRS planning doc")
         PAGE/FLOW:   <scope>:PAGE-001, <scope>:FLOW-001 (or "N/A")
         DESIGN:      Design Spec / Design Assets / dev-visual-brief refs (or "N/A")
         ARCH/DEC:    <scope>:ARCH-001, <scope>:DEC-001 (or "N/A")
@@ -103,6 +106,15 @@ Parallel with: change-name, change-name（或 none）
 
 Change rationale:
   说明为什么这是自然边界，以及它为什么可以独立交付。
+
+Schema availability:
+  - Installed in project: yes/no
+  - Plugin source visible: yes/no
+  - If not installed: transfer to aisee-schema-pack and stop before authoring/execution
+
+Metadata gate:
+  - /opsx:new must use: /opsx:new "change-name-kebab-case" --schema <selected-schema>
+  - 后续 author / implementation 只读取 change metadata 中固化的 schema，不根据 artifacts 猜测或重选
 
 Command:
   /opsx:new "change-name-kebab-case" --schema <selected-schema>

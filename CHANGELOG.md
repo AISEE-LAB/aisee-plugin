@@ -6,11 +6,27 @@
 
 ### Added
 
-- 暂无。
+- `source-map.md` 新增 `intake_sources` 兼容路径，支持无 SRS / UI / Architecture 前置文档时记录精简 intake 来源。
 
 ### Changed
 
-- 暂无。
+- `aisee context pack --for ce-work --json` 改为输出 lean execution brief，并移除 `ce-work` target 中的 artifact 正文副本。
+- author / verify / implementation / flow 路径新增 schema metadata、schema mismatch 与 schema installed gate；缺 metadata 或仅有 plugin source 而未安装 schema 时会阻断执行。
+- `aisee:change-plan`、`aisee:change-author`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard` 和 `aisee:flow` 明确自动消费只读 CLI JSON、intake 路径和 `aisee-schema-pack` 转交流程。
+- app schema proposal / source-map 模板改为显式支持 `Intake 来源`，并避免伪造 SRS anchor。
+
+## [0.6.0] - 2026-06-10
+
+### Added
+
+- CLI context pack traceability 新增 `intake_sources` 和 `mode`，区分 `anchor`、`intake`、`mixed`、`empty` 四种来源状态。
+- `ce-work` target 新增 `facts.derived.execution.brief`，作为面向执行器的最小交接索引。
+
+### Changed
+
+- `upstream_refs=[]` 不再被误判为“没有来源”；只要存在 intake 来源和当前 change 产出 local IDs，即视为合法 traceability 路径。
+- `aisee-app-spec-driven` 模板与相关 skill 规则改为支持无前置 planning docs 的 authoring 路径，并把 schema availability / metadata gate 提前到 planning 与 authoring 前置。
+- 发布说明明确区分 PyPI CLI 合同与 marketplace plugin assets：PyPI 承载 CLI JSON 合同，plugin 承载 skills、references、schema pack assets 与模板。
 
 ## [0.5.0] - 2026-06-09
 
