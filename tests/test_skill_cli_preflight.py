@@ -42,7 +42,6 @@ def test_planning_doc_frontmatter_contract_exists_and_representative_templates_r
         assert marker in text
         assert "source_refs:" in text
         assert "change_refs:" in text
-        assert "anchors:" in text
 
 
 def test_cli_outputs_keep_marketplace_recovery_hints() -> None:

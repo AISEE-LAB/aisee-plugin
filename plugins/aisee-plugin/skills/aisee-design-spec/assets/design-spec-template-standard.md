@@ -13,7 +13,6 @@ owner: "{作者或团队}"
 source_refs:
   - "{SRS / UI Content / Architecture / Design Assets}"
 change_refs: []
-anchors: []
 ---
 
 # Design Spec：{项目 / 模块 / 功能名}

@@ -132,12 +132,12 @@ Document-local numbers reduce duplicate naming and let source-map and context pa
 Recommended:
 
 - Use document-local numbers such as `FR-001`, `PAGE-001`, or `API-001`.
-- Put cross-document sources in `source-map.md`; do not create an extra ID lifecycle.
+- Put cross-document sources in `source-map.md`; keep only routing information useful for implementation and verification.
 - Keep temporary `TYPE-NEW-001` IDs short-lived; they must not enter archive.
 - When replacing or removing numbers, keep migration notes.
 - Do not treat headings, filenames, or natural-language descriptions as stable identifiers.
 
-Use `source-map.md` and context pack's rebuildable scan view as context entries; do not return to the full ID lifecycle model.
+Use `source-map.md` and context pack's rebuildable scan view as context entries; durable specification facts still belong in OpenSpec artifacts and baseline specs.
 
 ## 8. Context Pack Is A Read Entry, Not A New Document
 
@@ -229,10 +229,9 @@ Read the current project's OpenSpec artifacts directly or use `aisee context pac
 Best practices:
 
 - The provider owns the contract source.
-- The consumer reads manifest first, then summary or sections as needed.
-- Use `max_chars` to control context size.
-- LAN access requires explicit `--host 0.0.0.0`.
-- Do not use the contract service to expose source code, secrets, environment variables, or full-repository search results.
+- The consumer only reads explicitly shared OpenSpec artifacts, contract attachments, or context pack summaries.
+- Use human-confirmed paths and excerpts to keep context bounded.
+- Do not expose source code, secrets, environment variables, or full-repository search results.
 
 ## 14. Team Knowledge Only Provides Guardrails
 

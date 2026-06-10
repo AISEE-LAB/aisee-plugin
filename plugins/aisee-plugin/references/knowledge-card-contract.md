@@ -22,7 +22,7 @@ CLI 的默认读取入口固定为：
 <team-knowledge>/knowledge/cards/**/*.yaml
 ```
 
-独立 team knowledge 仓库的默认初始化入口是 `aisee knowledge init-repo --dest <path> --initial-pack <id> --json`。marketplace-installed plugin 的 `skills/aisee-knowledge-curate/assets/team-knowledge/` 仍是 contract-valid 示例模板，也可以使用团队维护的外部模板仓库。`aisee knowledge scaffold` 已从公开 CLI 命令面移除。配置完成后，用 `aisee knowledge configure --path <path> --enable-pack <id> --json` 写入项目 pin，再运行 `aisee knowledge doctor --json` 检查配置 path 与实际目录是否一致。需要预检该仓库能否被 `promote-batch` 写入时，可读取 `aisee knowledge check --team-path <path> --json` 返回中的 `team_knowledge.write_ready`。
+独立 team knowledge 仓库的默认初始化入口是 `aisee knowledge init-repo --dest <path> --initial-pack <id> --json`。marketplace-installed plugin 的 `skills/aisee-knowledge-curate/assets/team-knowledge/` 是 contract-valid 示例模板，也可以使用团队维护的外部模板仓库。配置完成后，用 `aisee knowledge configure --path <path> --enable-pack <id> --json` 写入项目 pin，再运行 `aisee knowledge doctor --json` 检查配置 path 与实际目录是否一致。需要预检该仓库能否被 `promote-batch` 写入时，可读取 `aisee knowledge check --team-path <path> --json` 返回中的 `team_knowledge.write_ready`。
 
 读取顺序：
 
@@ -64,7 +64,7 @@ retrieval:
   vector: optional
 ```
 
-`repo` 是远程来源，`path` 是本地 checkout 或 vendored fixture。`install` 和 `update` 可同步已 pin 的远程仓库，但仍属于实验性能力；业务项目不得把生成的 `context-index.json` 当作事实源。
+`repo` 是远程来源，`path` 是本地 checkout 或 vendored fixture。`install` 和 `update` 可同步已 pin 的远程仓库，但仍属于实验性能力；业务项目不得把生成的 `knowledge-index.json` 当作事实源。
 
 ## Pack Schema
 

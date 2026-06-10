@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref
+from aisee_cli.anchor_refs import extract_anchor_refs, extract_local_ids, parse_anchor_ref
 from aisee_cli.output import status_from_issues, summarize_issues
 from aisee_cli.planning_docs import inspect_planning_docs
 from aisee_cli.project import inspect_project_rules, rel
@@ -73,7 +73,6 @@ def scan_documents(root: Path) -> list[dict[str, Any]]:
                 "status": "missing",
                 "local_ids": [],
                 "anchor_refs": [],
-                "legacy_full_ids": [],
                 "paths": [],
                 "headings": [],
                 "hash": None,
@@ -87,7 +86,6 @@ def scan_documents(root: Path) -> list[dict[str, Any]]:
 def parse_document(path: str, text: str) -> dict[str, Any]:
     local_ids = sorted(extract_local_ids(text))
     anchor_refs = sorted(extract_anchor_refs(text))
-    legacy_full_ids = sorted(extract_legacy_full_ids(text))
     paths = sorted(set(PATH_PATTERN.findall(text)))
     headings: list[dict[str, Any]] = []
     current_heading: dict[str, Any] | None = None
@@ -105,8 +103,7 @@ def parse_document(path: str, text: str) -> dict[str, Any]:
 
         line_local_ids = sorted(extract_local_ids(line))
         line_anchor_refs = sorted(extract_anchor_refs(line))
-        line_legacy_full_ids = sorted(extract_legacy_full_ids(line))
-        if not line_local_ids and not line_anchor_refs and not line_legacy_full_ids:
+        if not line_local_ids and not line_anchor_refs:
             continue
         line_paths = sorted(set(PATH_PATTERN.findall(line)))
         occurrences.append({
@@ -114,7 +111,6 @@ def parse_document(path: str, text: str) -> dict[str, Any]:
             "heading": current_heading,
             "local_ids": line_local_ids,
             "anchor_refs": line_anchor_refs,
-            "legacy_full_ids": line_legacy_full_ids,
             "paths": line_paths,
             "text": line.strip(),
         })
@@ -125,7 +121,6 @@ def parse_document(path: str, text: str) -> dict[str, Any]:
         "hash": "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest(),
         "local_ids": local_ids,
         "anchor_refs": anchor_refs,
-        "legacy_full_ids": legacy_full_ids,
         "paths": paths,
         "headings": headings,
         "occurrences": occurrences,
@@ -186,6 +181,5 @@ def append_anchor_occurrence(
         "text": occurrence.get("text", ""),
         "related_local_ids": related_local_ids,
         "anchor_refs": occurrence.get("anchor_refs", []),
-        "legacy_full_ids": occurrence.get("legacy_full_ids", []),
         "paths": occurrence.get("paths", []),
     })

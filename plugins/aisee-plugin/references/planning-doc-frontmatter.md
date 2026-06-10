@@ -37,8 +37,6 @@ source_refs:
   - "docs/...#FR-001"
 change_refs:
   - "openspec/changes/<change>"
-anchors:
-  - "docs/...#LOCAL-ID"
 ```
 
 ## 字段规则
@@ -49,13 +47,12 @@ anchors:
 - `date`：当前文档版本日期。
 - `scope`：文档覆盖范围；允许项目、模块、功能、页面组或 change。
 - `owner`：当前维护者、团队或 `待填写`。
-- `source_refs`：上游来源，优先使用 repo-relative path 或 anchor ref。
+- `source_refs`：上游来源，优先使用 repo-relative path、外部 issue/ticket/PR 引用或 `path#编号` source ref。
 - `change_refs`：已关联的 OpenSpec changes；没有时可为空数组。
-- `anchors`：本文档内主要 local IDs 对外暴露的 anchor refs；没有时可为空数组。
 
 ## 边界
 
 - frontmatter 不承载需求正文、验收规则、实现约束或 baseline 事实。
 - planning docs 的长期规范事实仍由 OpenSpec change 和 baseline specs 持有。
-- 旧 `scope:TYPE-001` full ID 不得进入 frontmatter。
-- `source_refs`、`change_refs`、`anchors` 应优先使用 anchor ref 或 repo-relative path。
+- frontmatter 只记录来源和 change 关联，不承载对象生命周期。
+- `source_refs`、`change_refs` 应优先使用 repo-relative path、OpenSpec change path 或外部引用；不要为了填字段创建无用编号引用。

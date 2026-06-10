@@ -35,7 +35,7 @@ Epic 模式下，每份模块文档使用本模板。
 
 ## 3. 功能需求
 
-> 每条需求只使用文档内 local ID。跨文档引用由 `doc-ref#LOCAL-ID` 或 alias anchor 处理；不要再保留 `<!-- aisee:id ... -->` marker。
+> 每条需求只使用文档内编号。跨文档来源由主文档索引、`source_refs` 或后续 `source-map.md` 处理；不要再保留 `<!-- aisee:id ... -->` marker。
 
 ### 3.{N} {能力模块名称}
 

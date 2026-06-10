@@ -9,8 +9,6 @@ source_refs:
   - "ticket://passwordless-login"
 change_refs:
   - "openspec/changes/add-passwordless-login"
-anchors:
-  - "aisee/docs/requirements/auth-srs.md#FR-001"
 ---
 
 # Auth SRS

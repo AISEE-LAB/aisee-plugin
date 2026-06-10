@@ -9,10 +9,6 @@ source_refs:
   - "aisee/docs/requirements/auth-srs.md#FR-001"
 change_refs:
   - "openspec/changes/add-passwordless-login"
-anchors:
-  - "aisee/docs/ui-content/auth-ui.md#PAGE-001"
-  - "aisee/docs/ui-content/auth-ui.md#FLOW-001"
-  - "aisee/docs/ui-content/auth-ui.md#STATE-001"
 ---
 
 # Auth UI Content

@@ -334,26 +334,3 @@ def canonicalize_block_yaml(data: dict[str, Any]) -> dict[str, Any]:
 
 def dump_schema_yaml(data: dict[str, Any]) -> str:
     return yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=120).rstrip() + "\n"
-
-
-def install_schema_packs(root: Path, selected: list[str], *, force: bool = False) -> dict[str, Any]:
-    issues = [marketplace_issue(
-        "SCHEMA_INSTALL_DEPRECATED",
-        "blocker",
-        "aisee schemas install no longer installs schema packs from the PyPI package; install the Aisee plugin from the Codex marketplace and use the plugin workflow.",
-    )]
-    return {
-        "status": "blocked",
-        "installed": [],
-        "selected": selected,
-        "target": rel(root, root / "openspec" / "schemas"),
-        "issues": issues,
-        "summary": summarize_issues(issues),
-        "setup_hint": marketplace_setup_hint(),
-        "meta": {
-            "command": "aisee schemas install --json",
-            "writes": False,
-            "deprecated": True,
-            "force": force,
-        },
-    }

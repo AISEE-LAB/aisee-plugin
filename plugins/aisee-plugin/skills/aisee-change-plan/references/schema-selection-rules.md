@@ -52,7 +52,7 @@
 - 未安装但 marketplace plugin source 可见：输出 blocker，转交 `aisee-schema-pack`，建议 `node <skill-dir>/scripts/setup-schemas.js --schema <name>`。
 - source 也不可见：输出 schema availability blocker，并说明 author / implementation 无法继续。
 
-不要建议 `aisee schemas install`。公开 CLI 只保留 `list/check` 这类只读状态检查。
+schema 状态检查只使用 `aisee schemas list/check --json`。
 
 ## 混合系统
 

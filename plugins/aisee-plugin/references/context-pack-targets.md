@@ -25,7 +25,7 @@ Required additions:
             "name": "aisee:implementation-bridge",
             "kind": "aisee-skill",
             "status": "recommended",
-            "reason": "preflight author-check, gaps, context pack, scope guardrails, and review recommendation before CE execution"
+            "reason": "prepare context pack summary, scope guardrails, and review recommendation before CE execution"
           }
         ]
       }
@@ -48,7 +48,7 @@ Rules:
 - `reusable_workflow_candidates` 是路由提示，不是事实源；item 必须包含 `name`、`kind`、`status`、`reason`。
 - `kind` 只能表达能力来源，例如 `aisee-skill` 或 `compound-skill`；不能表达事实源。
 - `status` 使用 `required`、`recommended`、`available`、`missing`：Aisee 修补 gate 用 `required/recommended`，CE skill 可用性用 `available/missing`。
-- 有 blocker gap 时，候选只应要求回到 `aisee:change-author` 修补 artifacts/traceability，不应继续推荐 `ce-plan` 或 `ce-work`。
+- 有 blocker gap 时，候选只应要求回到 `aisee:change-author` 修补 artifacts 或 source routing，不应继续推荐 `ce-plan` 或 `ce-work`。
 - 无 blocker 且 `requires_ce_plan=true` 时，候选包含 `aisee:implementation-bridge` 和 `ce-plan`，并用 `ce_plan_reason` 说明为什么只做执行细化。
 - 无 blocker 且 `requires_ce_plan=false` 时，候选包含 `aisee:implementation-bridge` 和 `ce-work`。
 - 不包含完整 SRS / UI Content / Architecture 正文，只包含当前 change 追踪到的 ID、路径和必要摘录。
@@ -103,12 +103,12 @@ Rules:
 
 ## ce-doc-review Pack
 
-`--for ce-doc-review` 面向文档审核阶段，重点检查 schema artifacts、traceability、tasks、contracts 和 open questions。
+`--for ce-doc-review` 面向文档审核阶段，重点检查 schema artifacts、source routing、tasks、contracts 和 open questions。
 
 Rules:
 
 - 只审当前 change 的文档，不重新做 SRS 或 change 边界规划。
-- 必须暴露 schema artifact DAG、缺失 artifact、ID trace、source-map gaps 和 open questions。
+- 必须暴露 schema artifact DAG、缺失 artifact、source-map gaps 和 open questions。
 - 不应生成实现任务之外的长期计划；有效结论应回写当前 OpenSpec artifacts。
 
 ## ce-code-review Pack

@@ -7,21 +7,22 @@
 - Target-specific 规则：[context-pack-targets.md](context-pack-targets.md)
 - Gap 对象与门禁语义：[context-pack-gaps.md](context-pack-gaps.md)
 - Source Map 解析规则：[source-map-contract.md](source-map-contract.md)
-- ID 生命周期规则：[id-policy.md](id-policy.md)
+- 编号规则：[id-policy.md](id-policy.md)
 
 `aisee context pack` 是 OpenSpec context companion。它默认调用时衔接 OpenSpec change、Aisee 补充信息和 CE evidence，不维护第二份内容事实源，也不替代 OpenSpec parser。
 
 ## Fact Sources
 
-- OpenSpec artifacts / Markdown：内容事实源。
-- `aisee/registry/id-registry.json`：历史兼容数据；当前主链路不把它当作正式事实源。
-- `aisee/registry/sources.json`：change 外部 Aisee 产物来源登记事实源。
-- `aisee/cache/context-index.json`：可删除、可重建缓存，不是事实源。
+- OpenSpec change artifacts / baseline specs：规范事实源。
+- `source-map.md`：当前 change 的来源、适用性、候选路径和 evidence 路由。
+- `tasks.md`：当前 change 的长期任务清单。
+- review / test / verification evidence：实现后验证记录入口。
+- planning docs frontmatter 和明确 source refs：版本或迭代输入索引，不是 baseline。
 
 默认输出只包含：
 
 - `parsed`：从 Aisee 自有补充文件、OpenSpec metadata scan 和可用 OpenSpec CLI 输出解析。
-- `derived`：根据 source-map、ID registry、文件关系和校验规则推导。
+- `derived`：根据 source-map、文件关系、编号和轻量校验规则推导。
 
 AI 生成摘要必须显式启用，并在 JSON 中标记为 `generated`。
 
@@ -37,9 +38,9 @@ Aisee CLI 不解析 OpenSpec 已负责的规范语义：
 Aisee CLI 对 OpenSpec artifacts 只做 metadata scan：
 
 - artifact 路径、存在性、hash。
-- heading、line、ID 引用、路径引用。
+- heading、line、编号、source ref 和路径引用。
 - checkbox 任务状态。
-- 与 `source-map.md`、ID registry、review/test evidence 的链接。
+- 与 `source-map.md`、review/test evidence 的链接。
 
 `source-map.md` 是 Aisee companion 路由表，允许结构化解析。除 `source-map.md` 外，OpenSpec artifacts 只承诺 metadata scan。
 
@@ -88,7 +89,7 @@ Field rules:
 - `target`：只能是明确目标，如 `ce-work`、`aisee-verify`、`ce-doc-review`、`ce-code-review`。
 - `change`：当前 change 是唯一入口。
 - `facts.parsed`：只放从 Aisee 补充文件、OpenSpec metadata scan 或 OpenSpec CLI 输出得到的事实。
-- `facts.derived`：只放由 `source-map.md`、ID registry、文件关系和轻量校验规则推导出的事实。
+- `facts.derived`：只放由 `source-map.md`、文件关系、编号和轻量校验规则推导出的事实。
 - `generated`：默认 `null`。只有显式启用生成摘要时才允许出现 AI 生成内容。
 - `gaps`：缺口和断链，不是自动补齐结果。结构见 [context-pack-gaps.md](context-pack-gaps.md)。
 - `guardrails`：执行限制和禁止越界项。
@@ -116,11 +117,9 @@ Field rules:
     "issues": []
   },
   "artifacts": {},
+  "source_map": {},
   "sources": [],
-  "id_registry": {
-    "available": true,
-    "checked": true
-  }
+  "source_reference_index": {}
 }
 ```
 
@@ -131,9 +130,9 @@ Rules:
 - `schema.artifacts` 来自当前 change schema 或 OpenSpec CLI 输出，不得硬编码 app/device artifact。
 - `schema.capabilities`、artifact `requiredness` 和 `na_requires_reason` 来自当前 schema 声明；skill 不得自行补默认 app 语义。
 - `artifacts` 只承诺 metadata scan 和原文入口；不要把 contract 内容解析成业务语义。
-- `source_map` 作为 Aisee companion artifact，可包含 `upstream_sources`、`id_trace`、`artifact_applicability`、`implementation_paths`、`verification_evidence`、`out_of_scope` 和 parse issues。
-- `sources` 只包含 `aisee/registry/sources.json` 和 `source-map.md` 明确引用的上游来源。
-- `id_registry` 只报告历史兼容状态；缺失不是当前 authoring / lookup / traceability blocker。
+- `source_map` 作为 Aisee companion artifact，可包含 `upstream_sources`、`source_context`、`artifact_applicability`、`implementation_paths`、`verification_evidence`、`out_of_scope` 和 parse issues。
+- `sources` 只包含 `source-map.md` 明确引用的文档路径摘要，用于提示 read order，不是 registry。
+- `source_reference_index` 是调用时生成的内部扫描视图，用于报告缺失 source ref 和临时编号风险；不是持久事实源。
 
 ## Derived Facts
 
@@ -148,9 +147,12 @@ Rules:
     "follow_up_candidates": []
   },
   "traceability": {
-    "upstream_ids": [],
-    "produced_ids": [],
-    "id_links": []
+    "upstream_refs": [],
+    "mode": "empty",
+    "produced_local_ids": [],
+    "resolved_source_refs": [],
+    "unresolved_source_refs": [],
+    "numbering_links": []
   },
   "artifact_applicability": [],
   "code_paths": [],

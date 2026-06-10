@@ -90,10 +90,9 @@ The following are public contracts:
 - `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
 - the core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 11 workflow skills;
 - `aisee plugin inspect --json` returns stable status and setup hints in CLI-only installs;
-- `aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` have been removed from the public CLI surface;
-- the PyPI wheel no longer promises bundled copies of skills, references, schema packs, team knowledge templates, or plugin metadata.
+- the PyPI wheel only promises CLI capabilities; skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
 
-Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, changing the core set of 11 workflow skills, or reintroducing legacy content-distribution commands without a clear single owner.
+Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or changing the core workflow skill set.
 
 ### Plugin Marketplace
 
@@ -114,11 +113,11 @@ See [Plugin Marketplace](plugin-marketplace.en.md) for details.
 The following are public contracts:
 
 - the planning-doc frontmatter contract and the read-only diagnostics exposed through `aisee doctor --json` and `aisee context pack --json`;
-- the basic semantics of planning-doc fields such as `status`, `doc_type`, `source_refs`, `change_refs`, and `anchors`;
+- the basic semantics of planning-doc fields such as `status`, `doc_type`, `source_refs`, and `change_refs`;
 - `resolve_project_root` preferring the nearest Aisee/OpenSpec project marker before falling back to the Git top-level;
-- release smoke checks for CLI-only wheels, marketplace setup hints, removed-command invalid choice behavior, and root-resolver fixtures.
+- release smoke checks for CLI-only wheels, marketplace setup hints, the public command surface, and root-resolver fixtures.
 
-Breaking changes include turning planning-doc diagnostics into write commands, changing root resolution so monorepo subprojects are silently interpreted as repository roots, or restoring old blocker-JSON assumptions for removed commands.
+Breaking changes include turning planning-doc diagnostics into write commands or changing root resolution so monorepo subprojects are silently interpreted as repository roots.
 
 ## Experimental Contracts
 
@@ -148,7 +147,7 @@ The following are not stable contracts or sources of truth:
 - internal test fixture layout;
 - chat summaries.
 
-Caches must be deletable and rebuildable. Sources of truth can only come from OpenSpec artifacts, Aisee registry, source-map, tasks, and explicitly pinned team knowledge card/pack files.
+Caches must be deletable and rebuildable. Sources of truth can only come from OpenSpec artifacts, source-map, tasks, and explicitly pinned team knowledge card/pack files.
 
 ## Version Rules
 

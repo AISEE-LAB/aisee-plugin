@@ -10,9 +10,9 @@
 {
   "code": "SOURCE_MAP_GAP",
   "severity": "blocker",
-  "message": "tasks references auth:API-001 but source-map has no code path",
+  "message": "tasks reference API-001 but source-map has no code path",
   "owner_artifact": "source-map.md",
-  "related_ids": ["auth:API-001"],
+  "related_refs": ["API-001"],
   "suggested_fix": "Update source-map.md with code and test paths before ce-work"
 }
 ```
@@ -23,7 +23,7 @@ Rules:
 - `severity`：只能是 `blocker`、`risk` 或 `info`。
 - `message`：人类可读说明。
 - `owner_artifact`：应修复或确认的 artifact / 文件。
-- `related_ids`：可为空，但涉及 ID trace 时必须使用完整 ID。
+- `related_refs`：可为空；需要定位来源或编号时使用 source ref 或短编号。
 - `suggested_fix`：给出最小修复方向，不自动生成内容。
 
 ## Severity
@@ -36,8 +36,8 @@ Rules:
 
 - `MISSING_ARTIFACT`
 - `SOURCE_MAP_GAP`
-- `ID_REGISTRY_GAP`
-- `TRACE_GAP`
+- `SOURCE_REF_GAP`
+- `SOURCE_ROUTING_GAP`
 - `TASK_GAP`
 - `CONTRACT_GAP`
 - `SPEC_DRIFT`

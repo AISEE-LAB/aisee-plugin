@@ -15,7 +15,7 @@ from typing import Any
 
 import yaml
 
-from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids, parse_anchor_ref
+from aisee_cli.anchor_refs import extract_anchor_refs, extract_local_ids, parse_anchor_ref
 from aisee_cli.assets import resolve_source_asset_root
 from aisee_cli.index import build_index
 from aisee_cli.project import inspect_project_rules, rel
@@ -177,7 +177,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                     "produced_local_ids": produced_local_ids,
                     "resolved_source_refs": source_reference_index["resolved"],
                     "unresolved_source_refs": source_reference_index["missing_references"],
-                    "legacy_full_ids": source_reference_index["legacy_full_ids"],
                     "numbering_links": derive_id_links(source_map_text, tasks_text),
                 },
                 "artifact_applicability": source_map["artifact_applicability"] or derive_artifact_applicability(source_map_text),
@@ -509,7 +508,6 @@ def not_applicable_source_map() -> dict[str, Any]:
         "out_of_scope": [],
         "anchor_refs": [],
         "local_ids": [],
-        "legacy_full_ids": [],
         "paths": [],
         "issues": [],
     }
@@ -671,7 +669,6 @@ def inspect_source_reference_index(root: Path, references: list[str], local_ids:
         "resolved": sorted(resolved, key=lambda item: item["reference"]),
         "missing_references": sorted(set(missing_references)),
         "temporary_local_ids": sorted([item for item in local_ids if "-NEW-" in item]),
-        "legacy_full_ids": sorted(set(extract_legacy_full_ids("\n".join(references)))),
         "documents": sorted(path for path in documents if isinstance(path, str)),
         "errors": errors,
     }
@@ -849,18 +846,6 @@ def build_gaps(
                 "source-map.md",
             )
         )
-    legacy_full_ids = source_map.get("legacy_full_ids", [])
-    if legacy_full_ids:
-        gaps.append(
-            gap(
-                "LEGACY_FULL_ID_REFERENCE",
-                "risk",
-                "Change still contains legacy full ID text",
-                anchor_owner_artifact,
-                legacy_full_ids,
-            )
-        )
-
     if target == "ce-work":
         if schema_requires_tasks(schema_info) and task_state["total"] == 0:
             gaps.append(gap("TASK_GAP", "blocker", "tasks.md has no checkbox tasks", "tasks.md"))
@@ -898,7 +883,7 @@ def gap(
     severity: str,
     message: str,
     owner_artifact: str,
-    related_ids: list[str] | None = None,
+    related_refs: list[str] | None = None,
     suggested_fix: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
@@ -906,7 +891,7 @@ def gap(
         "severity": severity,
         "message": message,
         "owner_artifact": owner_artifact,
-        "related_ids": related_ids or [],
+        "related_refs": related_refs or [],
         "suggested_fix": suggested_fix,
     }
 

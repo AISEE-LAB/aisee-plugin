@@ -14,7 +14,6 @@ scope: "session"
 owner: "{作者或团队}"
 source_refs: []
 change_refs: []
-anchors: []
 ---
 
 # Reflect 报告
@@ -95,7 +94,6 @@ scope: "session"
 owner: "{作者或团队}"
 source_refs: []
 change_refs: []
-anchors: []
 ---
 
 # Reflect: <Session Title>

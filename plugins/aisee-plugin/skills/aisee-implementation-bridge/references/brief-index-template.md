@@ -21,7 +21,6 @@ source_refs:
   - "openspec/changes/<change>"
 change_refs:
   - "openspec/changes/<change>"
-anchors: []
 ---
 
 # Brief Batch Index

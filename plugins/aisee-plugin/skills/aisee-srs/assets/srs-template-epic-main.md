@@ -60,12 +60,12 @@
 
 ## 2. 整体描述
 
-### 2.0 ID Registry 状态
+### 2.0 编号状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| local ID 已稳定 | yes / no | 文档内编号检查 | |
-| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#FR-001` / `srs:...#FR-001` | |
+| 编号已稳定 | yes / no | 文档内编号检查 | |
+| 跨文档来源已记录 | yes / no / N/A | 模块索引 / `source_refs` / `source-map.md` | |
 | 存在临时编号 | yes / no | `[NUMBERING-FINALIZATION-REQUIRED]` | |
 
 ### 2.1 产品概述

@@ -2,7 +2,7 @@
 
 ## 维护边界
 
-本文记录当前生效的高层职责边界和主流程。旧 full ID lifecycle、独立 lookup / trace 命令、跨项目制品读取和本地 context 服务都不再属于当前方案。
+本文记录当前生效的高层职责边界和主流程。
 
 细节以以下事实源为准：
 
@@ -43,7 +43,7 @@ Compound Engineering
 - `aisee:design-assets`
 - `aisee:architecture`
 
-编号规则由对应 skill 约束，例如 `FR-001`、`PAGE-001`、`ARCH-001`。编号用于写作一致性，不形成独立 CLI 生命周期。
+编号规则由对应 skill 约束，例如 `FR-001`、`PAGE-001`、`ARCH-001`。编号用于写作一致性。
 
 ### Change 规划
 
@@ -67,7 +67,7 @@ Compound Engineering
 
 - 文档内编号由 skill/template 约束。
 - 跨文档来源和候选影响路径由 `source-map.md` 记录。
-- 不要求旧 ID lifecycle 或独立 lookup / trace 流程。
+- 不要求额外的编号前置流程。
 
 ### Implementation
 

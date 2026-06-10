@@ -65,7 +65,7 @@ description: 在 aisee:change-plan 之前生成软件项目技术架构文档，
 - `CONSTRAINT`：技术约束、平台约束、集成约束、运行环境限制
 - `RISK`：技术风险、阻塞项、冲突或需要验证的风险
 
-正式写法只使用文档内编号，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档来源由后续 `change-context.md` 或 `source-map.md` 记录；不要使用旧 full ID、ID lifecycle 或 lookup/trace 流程。
+正式写法只使用文档内编号，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档来源由后续 `change-context.md` 或 `source-map.md` 记录；不要为了满足模板创建无用编号或无用来源引用。
 
 如果当前轮次还不能确定最终编号，可以使用 `DEC-NEW-001` 这类临时占位符，并显式标注 `[NUMBERING-FINALIZATION-REQUIRED]`。Architecture 不负责 `API / DATA / TASK / TEST`，也不负责 UI 的 `PAGE` 分配。它只输出后续 `change-context.md` 或 change artifacts 可以引用的架构编号。
 

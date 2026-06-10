@@ -132,12 +132,12 @@ data-model.md
 推荐：
 
 - 文档内编号使用 `FR-001`、`PAGE-001`、`API-001`。
-- 跨文档来源放进 `source-map.md`，不要额外创建 ID lifecycle。
+- 跨文档来源放进 `source-map.md`，只保留对实现和验证有用的路由信息。
 - 临时 `TYPE-NEW-001` 只能短期存在，不能进入 archive。
 - 删除或替换编号时保留迁移说明。
 - 不把标题、文件名或自然语言描述当作稳定标识。
 
-`source-map.md` 和 context pack 的可重建扫描视图只提供上下文入口；不要回到 full ID lifecycle 模型。
+`source-map.md` 和 context pack 的可重建扫描视图只提供上下文入口；长期规范事实仍回写 OpenSpec artifacts 和 baseline specs。
 
 ## 8. Context pack 是读取入口，不是新文档
 
@@ -160,7 +160,7 @@ aisee context pack --change <change> --for ce-code-review --json
 
 创建任务、进入实现、提出审查角色或推荐下一步前，先检查已有 workflow 和 skill：
 
-- 无明确 change 时，先回到需求澄清、change-plan 或当前 change 本身，不再依赖单独的 flow 命令判断阶段。
+- 无明确 change 时，先回到需求澄清、change-plan 或当前 change 本身。
 - 有明确 change 时，优先读取目标 context pack，例如 `aisee context pack --change <change> --for ce-work --json`。
 - `ce-work` context pack 的 `reusable_workflow_candidates` 只是路由提示，不是事实源。
 - `requires_ce_plan=true` 时才按需使用 `ce-plan` 细化执行顺序；结论必须回写当前 schema apply tracks，只有 source-map schema 才回写 `source-map.md`。
@@ -229,10 +229,9 @@ archive 前应满足：
 最佳实践：
 
 - provider 拥有 contract source。
-- consumer 先读 manifest，再按需读 summary 或 section。
-- 用 `max_chars` 控制上下文大小。
-- 局域网访问必须显式开启 `--host 0.0.0.0`。
-- 不用 contract service 暴露源码、密钥、环境变量或全仓库搜索结果。
+- consumer 只读取 provider 明确提供的 OpenSpec artifacts、契约附件或 context pack 摘要。
+- 用人工确认的路径和摘录控制上下文大小。
+- 不暴露源码、密钥、环境变量或全仓库搜索结果。
 
 ## 14. Team knowledge 只提供 guardrails
 

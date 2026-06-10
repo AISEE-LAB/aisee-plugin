@@ -113,7 +113,7 @@ def test_parse_source_map_falls_back_to_metadata_scan(tmp_path: Path) -> None:
     assert "SOURCE_MAP_UNSTRUCTURED" in {item["code"] for item in parsed["issues"]}
 
 
-def test_parse_source_map_keeps_legacy_section_heading_compatibility(tmp_path: Path) -> None:
+def test_parse_source_map_supports_english_section_headings(tmp_path: Path) -> None:
     change = tmp_path / "openspec" / "changes" / "add-auth"
     write(
         change / "source-map.md",
@@ -139,7 +139,7 @@ def test_parse_source_map_keeps_legacy_section_heading_compatibility(tmp_path: P
     assert parsed["verification_evidence"][0]["path"] == "docs/verification/add-auth-test-results.md"
 
 
-def test_parse_source_map_contract_sync_legacy_labels(tmp_path: Path) -> None:
+def test_parse_source_map_contract_sync_common_labels(tmp_path: Path) -> None:
     change = tmp_path / "openspec" / "changes" / "add-auth"
     write(
         change / "source-map.md",
@@ -166,4 +166,3 @@ def test_parse_source_map_contract_sync_legacy_labels(tmp_path: Path) -> None:
     assert values["provider_repo"]["value"] == "backend-api"
     assert values["machine_readable_contract"]["value"] == "contracts/proto/auth.proto"
     assert values["version_ref"]["value"] == "v1.2.3"
-

@@ -11,8 +11,8 @@
 - FLOW / STATE 只有在存在 SRS 或 UI Content 时才引用 `doc-ref#编号`；无前置文档时写 `N/A`，不要为了凑表强造 ref。
 - PAGE / FLOW / STATE 必须来自 UI Content；没有 UI 时写 `N/A`，不要硬造页面。
 - Architecture 相关来源只引用 `ARCH / DEC / CONSTRAINT / RISK` 的文档引用或编号，不复制整段架构说明。
-- `aisee:change-plan` 不分配上游 ID，不临时发明正式 full ID。
-- SPEC / API / DATA / TASK / TEST 是 change-author 阶段产出，seed 中写 `TBD in <artifact>` 或 local ID placeholder。
+- `aisee:change-plan` 不分配上游编号。
+- SPEC / API / DATA / TASK / TEST 是 change-author 阶段产出，seed 中写 `TBD in <artifact>` 或短编号占位符。
 - artifact 适用性要写 yes/no 和原因，不能只写 yes/no。
 - 用户输入 / issue / ticket 只保留 1-5 句摘要、外部引用和承接 artifact；不要复制原始长提示词、聊天记录或任务清单正文。
 - 不要在 seed 中写最终 API endpoint、数据库字段、引脚表、寄存器表或实现任务。

@@ -2,7 +2,7 @@
 
 ## 维护边界
 
-本文描述当前生效的 Aisee CLI 上下文设计。Aisee 不再提供独立的 ID lifecycle、anchor lookup 或跨项目制品读取能力。
+本文描述当前生效的 Aisee CLI 上下文设计。
 
 事实源以以下内容为准：
 
@@ -22,20 +22,13 @@ Aisee CLI 不是第二套规范系统。它只做四件事：
 
 ## 2. 编号模型
 
-编号是 skill/template 的写作约束，不是独立 CLI 能力。
+编号是 skill/template 的写作约束。
 
 正式规则：
 
 - 文档内编号使用 `FR-001`、`PAGE-001`、`ARCH-001`、`SPEC-001`、`TASK-001` 等格式。
 - 无法确定最终编号时，使用 `TYPE-NEW-001` 并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 - 编号只用于减少重复命名、方便人工阅读和让 `source-map.md` / context pack 能做轻量解析。
-
-以下不再是当前模型：
-
-- 旧 ID lifecycle 命令
-- 独立 lookup / trace 命令
-- full ID lifecycle
-- 把编号系统包装成跨项目 traceability 服务
 
 ## 3. 事实源分工
 
@@ -58,7 +51,7 @@ Aisee CLI 不是第二套规范系统。它只做四件事：
 - `guardrails`
 - `evidence`
 
-它依赖 `source-map.md`、当前 change artifacts、review / verification evidence 和 schema metadata。内部扫描只服务本次输出，不作为公开 `index` 命令或持久事实源。
+它依赖 `source-map.md`、当前 change artifacts、review / verification evidence 和 schema metadata。内部扫描只服务本次输出，不是持久事实源。
 
 ## 5. Source Map 规则
 

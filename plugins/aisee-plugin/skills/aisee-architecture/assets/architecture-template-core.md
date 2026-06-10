@@ -11,9 +11,8 @@ date: "{date}"
 scope: "{scope}"
 owner: "{作者或团队}"
 source_refs:
-  - "{SRS / UI Content / repo path / anchor ref}"
+  - "{SRS / UI Content / repo path / source ref}"
 change_refs: []
-anchors: []
 ---
 
 # 技术架构文档：{需求 / 功能 / 产品名}

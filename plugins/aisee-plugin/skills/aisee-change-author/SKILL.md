@@ -87,7 +87,7 @@ final check -> schema / artifact consistency recheck
 - 不要因为某个模板常见就创建 schema 未声明的 artifact。
 - 对生成 `source-map.md` 的 schema，先在 source-map 写 artifact 适用性；Required=no 且有原因时不展开完整模板。
 - 对不生成 `source-map.md` 的 schema，按 schema 模板写对应 artifact，不套 app artifact 假设。
-- 正式 authoring 只使用文档内编号；不要使用旧 full ID、ID lifecycle 或 lookup/trace 流程。
+- 正式 authoring 只使用文档内编号；不要为了满足模板创建无用编号或无用来源引用。
 - 无前置 planning docs 时，在 `source-map.md` 的“上游来源”记录摘要即可；`upstream_refs=[]` 是合法状态，不要为了消除空值补假来源。
 - 无法确定最终编号时，只能写 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 - app schema 的 `tasks.md` 只记录实现顺序、任务状态和验证证据，不承载需求、契约、编号注册、来源追踪或归档判断。

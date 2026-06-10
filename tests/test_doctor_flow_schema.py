@@ -265,8 +265,6 @@ owner: "Aisee"
 source_refs:
   - "ticket://auth"
 change_refs: []
-anchors:
-  - "aisee/docs/requirements/legacy-auth.md#FR-001"
 ---
 
 # Legacy Auth
@@ -306,8 +304,6 @@ source_refs:
   - "ticket://auth"
 change_refs:
   - "README.md"
-anchors:
-  - "aisee/docs/requirements/legacy-auth.md#FR-001"
 ---
 
 # Legacy Auth

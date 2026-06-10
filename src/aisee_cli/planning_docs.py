@@ -36,7 +36,7 @@ PLANNING_DOC_PREFIXES = {
     "docs/reflect/": "reflect",
     "aisee/cache/implementation-bridge/": "implementation-brief",
 }
-REQUIRED_FIELDS = {"title", "doc_type", "status", "date", "scope", "owner", "source_refs", "change_refs", "anchors"}
+REQUIRED_FIELDS = {"title", "doc_type", "status", "date", "scope", "owner", "source_refs", "change_refs"}
 
 
 def inspect_planning_docs(root: Path) -> dict[str, Any]:

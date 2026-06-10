@@ -7,7 +7,6 @@ scope: "{project / module / feature}"
 owner: "{作者或团队}"
 source_refs: []
 change_refs: []
-anchors: []
 ---
 
 # Design Assets Index

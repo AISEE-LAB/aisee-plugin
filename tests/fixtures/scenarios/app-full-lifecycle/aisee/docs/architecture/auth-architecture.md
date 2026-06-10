@@ -10,9 +10,6 @@ source_refs:
   - "aisee/docs/ui-content/auth-ui.md#FLOW-001"
 change_refs:
   - "openspec/changes/add-passwordless-login"
-anchors:
-  - "aisee/docs/architecture/auth-architecture.md#ARCH-001"
-  - "aisee/docs/architecture/auth-architecture.md#DEC-001"
 ---
 
 # Auth Architecture

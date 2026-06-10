@@ -1,6 +1,6 @@
 # Schema Packs
 
-Schema pack 定义 OpenSpec change 内需要生成哪些 artifacts、它们的依赖顺序、模板和 authoring 规则。它不替代 OpenSpec，也不保存项目事实；项目事实仍来自 OpenSpec specs、change artifacts、`source-map.md`、`tasks.md` 和 Aisee registry。
+Schema pack 定义 OpenSpec change 内需要生成哪些 artifacts、它们的依赖顺序、模板和 authoring 规则。它不替代 OpenSpec，也不保存项目事实；项目事实仍来自 OpenSpec specs、change artifacts、`source-map.md` 和 `tasks.md`。
 
 ## 目录
 
@@ -91,7 +91,7 @@ source-map.md + specs/**/*.md
 | Artifact | 写什么 | 不写什么 |
 | --- | --- | --- |
 | `proposal.md` | 目标、非目标、成功标准、读取顺序 | 接口字段、数据库字段、任务步骤 |
-| `source-map.md` | ID 路由、来源、artifact 适用性、候选影响路径、预期证据类型 | 具体实现步骤或最终验证结论 |
+| `source-map.md` | 来源路由、artifact 适用性、候选影响路径、预期证据类型 | 具体实现步骤或最终验证结论 |
 | `specs/**/*.md` | 用户可观察行为和验收场景 | UI 布局、API 字段、表字段、代码路径 |
 | `change-context.md` | 本 change 承接的架构约束、局部决策和风险 | 全局架构重写 |
 | `ui-contract.md` | 页面内容结构、交互状态、权限可见性、前端数据需求 | 完整视觉规范、组件库、配色、像素布局 |
@@ -107,7 +107,7 @@ source-map.md + specs/**/*.md
 LOCAL-ID
 ```
 
-AI 不应临时发明 full ID。工具不可用时只能使用临时 local placeholder：
+无法确定最终编号时使用临时编号占位符：
 
 ```text
 TYPE-NEW-001 [NUMBERING-FINALIZATION-REQUIRED]
@@ -156,7 +156,7 @@ aisee schemas list --json
 aisee schemas check --json --fail-on-blocker
 ```
 
-`aisee schemas install` 已从公开 CLI 命令面移除。需要 schema pack 内容时，通过 marketplace-installed plugin 的 `aisee-schema-pack` 工作流读取并复制插件内 schema，或从外部仓库同步。
+需要 schema pack 内容时，通过 marketplace-installed plugin 的 `aisee-schema-pack` 工作流读取并复制插件内 schema，或从外部仓库同步。
 
 创建 app change：
 

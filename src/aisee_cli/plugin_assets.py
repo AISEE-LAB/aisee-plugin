@@ -73,30 +73,6 @@ def inspect_plugin_assets(root: Path) -> dict[str, Any]:
     }
 
 
-def export_plugin_assets(root: Path, target: str, dest: Path, *, force: bool = False) -> dict[str, Any]:
-    if target not in TARGETS:
-        raise ValueError(f"unsupported plugin target: {target}")
-    issues = [marketplace_issue(
-        "PLUGIN_EXPORT_DEPRECATED",
-        "blocker",
-        "aisee plugin export no longer exports bundled plugin content from the PyPI package; install Aisee through the Codex marketplace instead.",
-    )]
-    return {
-        "status": "blocked",
-        "target": target,
-        "destination": rel(root, dest),
-        "issues": issues,
-        "summary": summarize_issues(issues),
-        "setup_hint": marketplace_setup_hint(),
-        "meta": {
-            "command": f"aisee plugin export --target {target} --dest {dest} --json",
-            "writes": False,
-            "deprecated": True,
-            "force": force,
-        },
-    }
-
-
 def plugin_path(root: Path, target: str) -> dict[str, Any]:
     if target not in TARGETS:
         raise ValueError(f"unsupported plugin target: {target}")

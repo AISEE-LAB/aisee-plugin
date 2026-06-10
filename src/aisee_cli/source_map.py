@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from aisee_cli.anchor_refs import extract_anchor_refs, extract_legacy_full_ids, extract_local_ids
+from aisee_cli.anchor_refs import extract_anchor_refs, extract_local_ids
 
 
 PATH_PATTERN = re.compile(
@@ -56,7 +56,6 @@ def parse_source_map(change_path: Path) -> dict[str, Any]:
         "out_of_scope": out_of_scope,
         "anchor_refs": sorted(extract_anchor_refs(text)),
         "local_ids": sorted(extract_local_ids(text)),
-        "legacy_full_ids": sorted(extract_legacy_full_ids(text)),
         "paths": sorted(set(PATH_PATTERN.findall(text))),
         "issues": issues,
     }
@@ -118,7 +117,6 @@ def normalize_key(key: str) -> str:
         "摘要": "summary",
         "source id": "source_id",
         "文档引用": "ref",
-        "anchor ref": "ref",
         "ref": "ref",
         "外部引用": "ref",
         "external ref": "ref",
@@ -187,8 +185,6 @@ def extract_source_context(tables: dict[str, list[dict[str, str]]]) -> list[dict
                 "来源上下文",
                 "Source Context",
                 "Context Routing",
-                "Anchor Trace",
-                "ID Trace",
             )
         ):
             for row in table:
@@ -197,7 +193,6 @@ def extract_source_context(tables: dict[str, list[dict[str, str]]]) -> list[dict
                     "type": row.get("type") or "",
                     "refs": sorted(extract_anchor_refs(text)),
                     "local_ids": sorted(extract_local_ids(text)),
-                    "legacy_full_ids": sorted(extract_legacy_full_ids(text)),
                     "title": row.get("title") or "",
                     "source": row.get("source") or "",
                     "handling": row.get("handling") or "",
@@ -343,8 +338,6 @@ def build_issues(
     for row in applicability:
         if row["required"] == "no" and not row["reason"]:
             issues.append(source_map_issue("SOURCE_MAP_NA_REASON_MISSING", "risk", f"{row['artifact']} is not required without reason"))
-    if extract_legacy_full_ids(text):
-        issues.append(source_map_issue("SOURCE_MAP_LEGACY_FULL_ID", "risk", "source-map.md still uses legacy full ID references"))
     return issues
 
 

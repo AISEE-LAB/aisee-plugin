@@ -93,7 +93,7 @@ aisee context pack --change <change> --for ce-work --json
 - `facts.parsed`：当前 change artifacts、schema、source-map 和 schema 状态。
 - `facts.derived.read_order`：实现前读取顺序。
 - `facts.derived.scope`：in/out scope 与 follow-up candidates。
-- `facts.derived.traceability`：上游 ID、产出 ID、ID links。
+- `facts.derived.traceability`：上游来源、产出编号和 numbering links。
 - `facts.derived.execution.brief`：给 `ce-work` 的最小执行索引。优先消费它，不要自己重新拼接 full artifact text。
 - `facts.parsed.schema.source_map_required` / `tasks_required` / `archive_tracks`：当前 schema 的实现前置。
 - `facts.derived.code_paths` / `test_paths`：允许读取和修改入口；source-map schema 只来自 `Affected Paths Index`；轻量 schema 来自当前 schema artifacts 中明确引用的执行路径。

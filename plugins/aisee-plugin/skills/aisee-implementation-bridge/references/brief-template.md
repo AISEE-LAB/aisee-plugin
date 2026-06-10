@@ -20,7 +20,6 @@ source_refs:
   - "openspec/changes/<change>"
 change_refs:
   - "openspec/changes/<change>"
-anchors: []
 ---
 
 # Implementation Brief

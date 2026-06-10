@@ -11,9 +11,8 @@ date: "{date}"
 scope: "{scope}"
 owner: "{从 AGENTS.md 或项目上下文提取，或填\"待填写\"}"
 source_refs:
-  - "{repo-relative source path or anchor ref}"
+  - "{repo-relative source path or source ref}"
 change_refs: []
-anchors: []
 ---
 
 # 需求规格说明书
@@ -57,12 +56,12 @@ anchors: []
 
 ## 2. 整体描述
 
-### 2.0 Anchor / Local ID 状态
+### 2.0 编号状态
 
 | 检查项 | 状态 | 证据 / 命令 | 备注 |
 |---|---|---|---|
-| local ID 已稳定 | yes / no | 文档内编号检查 | |
-| 跨文档引用可由 anchor ref 表达 | yes / no / N/A | `docs/...#FR-001` / `srs:...#FR-001` | |
+| 编号已稳定 | yes / no | 文档内编号检查 | |
+| 跨文档来源已记录 | yes / no / N/A | `source_refs` / `source-map.md` | |
 | 存在临时编号 | yes / no | `[NUMBERING-FINALIZATION-REQUIRED]` | |
 
 ### 2.1 产品概述
@@ -103,7 +102,7 @@ anchors: []
 
 ## 3. 功能需求
 
-> 每条需求只使用文档内 local ID。跨文档引用由 `doc-ref#LOCAL-ID` 或 alias anchor 处理；不要再保留 `<!-- aisee:id ... -->` marker。
+> 每条需求只使用文档内编号。跨文档来源由 `source_refs` 或后续 `source-map.md` 处理；不要再保留 `<!-- aisee:id ... -->` marker。
 
 ### 3.1 {能力模块名称}
 

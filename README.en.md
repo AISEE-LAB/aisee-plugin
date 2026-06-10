@@ -88,7 +88,7 @@ Core boundaries:
 
 ```text
 OpenSpec = specification state machine and baseline source of truth
-Aisee = planning, context, schemas, traceability, and workflow guardrails
+Aisee = planning, context, schemas, source routing, and workflow guardrails
 Aisee CLI = JSON context bus, not a second source of truth
 Compound Engineering = optional implementation / review / test consumer
 ```
@@ -206,7 +206,7 @@ aisee doctor --json
 
 When reading plugin content, the CLI checks only the Codex install location by default. For other agent runtimes, set `AISEE_AGENT_RUNTIME=claude|cursor|agents`; set it to `none` to disable installed plugin content discovery.
 
-`aisee plugin export`, `aisee schemas install`, and `aisee knowledge scaffold` have been removed from the public CLI surface. Plugin content, schema packs, and team knowledge templates now come from the Codex marketplace plugin or external repositories; team knowledge onboarding now uses `aisee knowledge init-repo` and `aisee knowledge configure`.
+Plugin content, schema packs, and team knowledge templates come from the Codex marketplace plugin or external repositories; team knowledge onboarding uses `aisee knowledge init-repo` and `aisee knowledge configure`.
 
 The source repository also includes plugin metadata for multiple agent runtimes:
 
@@ -307,7 +307,7 @@ For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline spec
 | `aisee:change-plan` | Plan independent OpenSpec changes and choose schemas. |
 | `aisee-schema-pack` | Provide and maintain OpenSpec schema packs through the marketplace plugin. |
 | `aisee:implementation-bridge` | Produce implementation briefs and context pack summaries for a single change. |
-| `aisee:verify` | Diagnose artifact, task, source-map, ID, and evidence gaps. |
+| `aisee:verify` | Diagnose artifact, task, source-map, numbering, and evidence gaps. |
 | `aisee:archive-guard` | Provide the final recommendation before `openspec archive`. |
 | `aisee:spec-migrate` | Build OpenSpec baseline specs for existing projects. |
 | `aisee:design-spec` | Produce design specifications without duplicating UI content specs. |

@@ -11,9 +11,8 @@ date: "{date}"
 scope: "{scope}"
 owner: "{作者或团队}"
 source_refs:
-  - "{SRS path or anchor ref}"
+  - "{SRS path or source ref}"
 change_refs: []
-anchors: []
 ---
 
 # UI 内容规格：{功能名}

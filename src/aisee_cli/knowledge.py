@@ -392,39 +392,6 @@ def build_knowledge_doctor(root: Path, *, team_path: str | None = None) -> dict[
     }
 
 
-def build_knowledge_scaffold(
-    root: Path,
-    dest: str,
-    *,
-    force: bool = False,
-    update_config: bool = False,
-    packs: list[str] | None = None,
-) -> dict[str, Any]:
-    destination = resolve_user_path(root, Path(dest))
-    issues = [marketplace_issue(
-        "KNOWLEDGE_SCAFFOLD_DEPRECATED",
-        "blocker",
-        "aisee knowledge scaffold no longer copies team knowledge templates from the PyPI package; copy skills/aisee-knowledge-curate/assets/team-knowledge from the marketplace-installed Aisee plugin, or configure an external team knowledge repository.",
-    )]
-    return {
-        "schema_version": KNOWLEDGE_SCHEMA_VERSION,
-        "status": "blocked",
-        "destination": rel(root, destination),
-        "config_update": None,
-        "written": [],
-        "issues": issues,
-        "summary": summarize_issues(issues),
-        "setup_hint": marketplace_setup_hint(),
-        "meta": {
-            "command": f"aisee knowledge scaffold --dest {dest} --json",
-            "writes": False,
-            "deprecated": True,
-            "force": force,
-            "updates_config": update_config,
-        },
-    }
-
-
 def build_knowledge_init_repo(
     root: Path,
     *,

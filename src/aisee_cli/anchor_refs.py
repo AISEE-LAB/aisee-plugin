@@ -8,7 +8,6 @@ from typing import Any
 
 LOCAL_ID_RE = r"[A-Z]+-(?:NEW-)?\d+"
 LOCAL_ID_PATTERN = re.compile(rf"(?<![A-Za-z0-9_:-])(?P<local_id>{LOCAL_ID_RE})\b")
-LEGACY_FULL_ID_PATTERN = re.compile(rf"\b[A-Za-z][A-Za-z0-9_-]*:(?P<local_id>{LOCAL_ID_RE})\b")
 PATH_ANCHOR_PATTERN = re.compile(
     rf"(?P<document>(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.[A-Za-z0-9_.-]+)#(?P<local_id>{LOCAL_ID_RE})"
 )
@@ -26,10 +25,6 @@ def is_local_id(value: str) -> bool:
 
 def extract_local_ids(text: str) -> set[str]:
     return {match.group("local_id") for match in LOCAL_ID_PATTERN.finditer(text)}
-
-
-def extract_legacy_full_ids(text: str) -> set[str]:
-    return {match.group(0) for match in LEGACY_FULL_ID_PATTERN.finditer(text)}
 
 
 def extract_anchor_refs(text: str) -> set[str]:
@@ -64,9 +59,8 @@ def parse_anchor_ref(reference: str) -> dict[str, Any]:
             "canonical_reference": None,
         }
 
-    raise ValueError(f"invalid anchor ref: {reference}")
+    raise ValueError(f"invalid source ref: {reference}")
 
 
 def canonical_anchor(document: str, local_id: str) -> str:
     return f"{document}#{local_id}"
-

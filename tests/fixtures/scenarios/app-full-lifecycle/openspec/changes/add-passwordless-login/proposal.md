@@ -19,4 +19,4 @@ Current users sign in with password credentials. Add passwordless login so exist
 
 ## Success Criteria
 
-- Specs, contracts, tasks, ID trace, implementation paths, and evidence are all connected through `source-map.md`.
+- Specs, contracts, tasks, source routing, implementation paths, and evidence are all connected through `source-map.md`.
