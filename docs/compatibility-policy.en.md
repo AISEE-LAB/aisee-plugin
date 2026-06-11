@@ -73,7 +73,6 @@ Field-level contracts are defined in:
 
 - [references/context-pack-contract.md](../plugins/aisee-plugin/references/context-pack-contract.md)
 - [references/context-pack-targets.md](../plugins/aisee-plugin/references/context-pack-targets.md)
-- [references/context-pack-gaps.md](../plugins/aisee-plugin/references/context-pack-gaps.md)
 
 Rules:
 

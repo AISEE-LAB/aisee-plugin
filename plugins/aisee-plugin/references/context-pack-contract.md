@@ -5,7 +5,6 @@
 相关细则：
 
 - Target-specific 规则：[context-pack-targets.md](context-pack-targets.md)
-- Gap 对象与门禁语义：[context-pack-gaps.md](context-pack-gaps.md)
 - Source Map 解析规则：[source-map-contract.md](source-map-contract.md)
 - 编号规则：[id-policy.md](id-policy.md)
 
@@ -93,11 +92,62 @@ Field rules:
 - `facts.parsed`：只放从 Aisee 补充文件、OpenSpec metadata scan 或 OpenSpec CLI 输出得到的事实。
 - `facts.derived`：只放由 `source-map.md`、文件关系、编号和轻量校验规则推导出的事实。
 - `generated`：默认 `null`。只有显式启用生成摘要时才允许出现 AI 生成内容。
-- `gaps`：缺口和断链，不是自动补齐结果。结构见 [context-pack-gaps.md](context-pack-gaps.md)。
+- `gaps`：缺口和断链，不是自动补齐结果。结构见下文 `Gap Object`。
 - `guardrails`：执行限制和禁止越界项。
 - `evidence`：validate、review、test、verification 的记录入口。
 - `project_memory`：只在显式 `--project-memory` 时出现；包含受控 memory matches，不得写入 `facts.parsed` 或 `facts.derived`。
 - `meta`：命令、时间、工具版本、解析置信度和错误。
+
+## Gap Object
+
+所有 target 使用统一 gap 结构：
+
+```json
+{
+  "code": "SOURCE_MAP_GAP",
+  "severity": "blocker",
+  "message": "tasks reference API-001 but source-map has no code path",
+  "owner_artifact": "source-map.md",
+  "related_refs": ["API-001"],
+  "suggested_fix": "Update source-map.md with code and test paths before ce-work"
+}
+```
+
+Rules:
+
+- `code`：稳定机器可读 code。
+- `severity`：只能是 `blocker`、`risk` 或 `info`。
+- `message`：人类可读说明。
+- `owner_artifact`：应修复或确认的 artifact / 文件。
+- `related_refs`：可为空；需要定位来源或编号时使用 source ref 或短编号。
+- `suggested_fix`：给出最小修复方向，不自动生成内容。
+
+## Gap Severity And Common Codes
+
+- `blocker`：不能进入下一阶段。
+- `risk`：可以继续，但必须记录接受理由或验证要求。
+- `info`：提示，不阻断。
+
+Common codes:
+
+- `MISSING_ARTIFACT`
+- `SOURCE_MAP_GAP`
+- `SOURCE_REF_GAP`
+- `SOURCE_ROUTING_GAP`
+- `TASK_GAP`
+- `CONTRACT_GAP`
+- `SPEC_DRIFT`
+- `VALIDATE_FAILED`
+- `REVIEW_BLOCKER`
+- `TEST_EVIDENCE_MISSING`
+
+Gate semantics:
+
+- `ce-work` 遇到 blocker 不应开始实现。
+- `aisee-verify` 遇到 blocker 不应进入 archive guard。
+- `aisee:archive-guard` 遇到 blocker 不应建议 `openspec archive`。
+- risk 可以继续，但需要 owner、原因、影响和后续处理方式。
+- info 不阻断，但应保留在 JSON 输出中供后续审查。
 
 ## Parsed Facts
 
