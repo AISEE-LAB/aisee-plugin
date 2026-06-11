@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from io import BytesIO
 from pathlib import Path
 import sys
 
@@ -55,8 +56,11 @@ class MainWindow:
         from gui.components import FlowLayout, create_button, create_control_shelf
         from gui.recent_files import load_recent_records, save_recent_record
         from gui.preview_render import (
+            render_canvas_composite_preview_image,
             render_canvas_composite_preview,
+            render_canvas_preview_image,
             render_canvas_preview,
+            render_preview_image,
             render_preview,
             render_region_preview,
             render_region_thumbnail,
@@ -106,8 +110,11 @@ class MainWindow:
         self._build_asset_records = build_asset_records
         self._find_first_object = find_first_object
         self._render_preview = render_preview
+        self._render_preview_image = render_preview_image
         self._render_canvas_preview = render_canvas_preview
+        self._render_canvas_preview_image = render_canvas_preview_image
         self._render_canvas_composite_preview = render_canvas_composite_preview
+        self._render_canvas_composite_preview_image = render_canvas_composite_preview_image
         self._render_thumbnail = render_thumbnail
         self._render_region_thumbnail = render_region_thumbnail
         self._render_region_preview = render_region_preview
@@ -390,9 +397,6 @@ class MainWindow:
         self.refresh_recent_combo()
 
         self.asset_records = self._build_asset_records(self.state)
-        self._ensure_thumbnails()
-        save_state(self.workspace, self.state)
-        self.asset_records = self._build_asset_records(self.state)
         self.asset_panel.set_assets(self.asset_records, self.workspace)
         if self.asset_panel.list_widget.count() and self.asset_panel.list_widget.currentRow() < 0:
             self.asset_panel.list_widget.setCurrentRow(0)
@@ -515,9 +519,10 @@ class MainWindow:
             pixmap_path = self._source_image_path()
             selected = self.asset_panel.current_asset()
             if self.source_view_mode.currentText() == "同位置预览" and selected:
-                canvas_path = self.workspace / "preview-cache" / "left-position-preview.png"
-                pixmap_path = self._render_position_preview(canvas_path)
-            self.source_canvas.set_pixmap(QPixmap(str(pixmap_path)))
+                pixmap = self._render_position_preview_pixmap()
+            else:
+                pixmap = QPixmap(str(pixmap_path))
+            self.source_canvas.set_pixmap(pixmap)
             show_regions = not (
                 self.source_view_mode.currentText() == "同位置预览" and self.preview_hide_boxes.isChecked()
             )
@@ -818,6 +823,24 @@ class MainWindow:
             )
         return self._resolve_preview_path()
 
+    def _current_right_preview_pixmap(self):
+        from PySide6.QtGui import QPixmap
+
+        selected = self.asset_panel.current_asset()
+        if not selected:
+            return QPixmap(str(self._source_image_path()))
+        mode = self.preview_mode.currentText()
+        if mode == "画布定位":
+            return self._render_position_preview_pixmap()
+        if mode == "素材细节":
+            image = self._render_preview_image(
+                self._preview_path_for_asset(selected),
+                mode=self._effective_preview_mode(),
+                background=self.preview_background.currentText(),
+            )
+            return self._pixmap_from_image(image)
+        return QPixmap(str(self._resolve_preview_path()))
+
     def _resolve_preview_path(self) -> Path:
         selected = self.asset_panel.current_asset()
         mode = self.preview_mode.currentText()
@@ -874,6 +897,26 @@ class MainWindow:
             show_boxes=not self.preview_hide_boxes.isChecked(),
         )
 
+    def _render_position_preview_pixmap(self):
+        selected_assets = self._selected_assets()
+        if len(selected_assets) <= 1:
+            selected = selected_assets[0] if selected_assets else self.asset_panel.current_asset()
+            if selected:
+                image = self._render_single_position_preview_image(selected)
+                return self._pixmap_from_image(image)
+        overlays = self._position_preview_overlays()
+        if not overlays:
+            from PySide6.QtGui import QPixmap
+
+            return QPixmap(str(self._source_image_path()))
+        image = self._render_canvas_composite_preview_image(
+            self._source_image_path(),
+            overlays=overlays,
+            background=self.preview_background.currentText(),
+            show_boxes=not self.preview_hide_boxes.isChecked(),
+        )
+        return self._pixmap_from_image(image)
+
     def _render_single_position_preview(self, output: Path, selected) -> Path:
         if selected.collection in {"regions", "objects", "masks"}:
             return self._render_canvas_preview(
@@ -895,6 +938,38 @@ class MainWindow:
             background=self.preview_background.currentText(),
             show_boxes=not self.preview_hide_boxes.isChecked(),
         )
+
+    def _render_single_position_preview_image(self, selected):
+        if selected.collection in {"regions", "objects", "masks"}:
+            return self._render_canvas_preview_image(
+                self._source_image_path(),
+                asset_path=None if selected.collection == "regions" else self._preview_path_for_asset(selected),
+                bbox=self._bbox_for_record(selected),
+                mode="Mask" if selected.collection == "masks" else self._effective_preview_mode(),
+                background=self.preview_background.currentText(),
+                show_box=not self.preview_hide_boxes.isChecked(),
+            )
+        overlay = self._position_overlay_for_record(selected)
+        if not overlay:
+            from PIL import Image
+
+            with Image.open(self._source_image_path()).convert("RGBA") as source:
+                return source.copy()
+        return self._render_canvas_composite_preview_image(
+            self._source_image_path(),
+            overlays=[overlay],
+            background=self.preview_background.currentText(),
+            show_boxes=not self.preview_hide_boxes.isChecked(),
+        )
+
+    def _pixmap_from_image(self, image):
+        from PySide6.QtGui import QPixmap
+
+        buffer = BytesIO()
+        image.save(buffer, format="PNG")
+        pixmap = QPixmap()
+        pixmap.loadFromData(buffer.getvalue(), "PNG")
+        return pixmap
 
     def _position_preview_overlays(self) -> list[dict]:
         selected_assets = self._selected_assets()

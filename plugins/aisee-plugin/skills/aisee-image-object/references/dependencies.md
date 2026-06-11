@@ -1,4 +1,4 @@
-# 依赖检查清单
+# 依赖与全局运行环境
 
 运行：
 
@@ -43,18 +43,23 @@ python aisee-image-object/scripts/image_object_tool.py config-preview
 
 ## 当前策略
 
-- 默认安装核心依赖、PySide6、rembg 和 onnxruntime，保证 GUI 与成熟去背景主链路可用。
+- 默认只检查依赖，不静默安装、升级、下载模型权重或创建虚拟环境。
+- 运行环境优先全局复用：核心 Python 包、GUI、rembg、onnxruntime、IOPaint/SAM2 backend 能全局安装或全局配置时，不在每个项目重复配置。
+- 项目内配置只用于覆盖全局默认，例如项目固定 Python、PyTorch、模型 checkpoint 或设备策略。
+- 默认安装核心依赖、PySide6、rembg 和 onnxruntime 后，GUI 与成熟去背景主链路可用。
 - 背景修补优先使用 LaMa / IOPaint；OpenCV 只作为 fallback，不作为质量主路径。
 - SAM2、LaMa 这类重依赖做 optional backend；只有用户明确要启用点选/框选模型或高质量背景修补时再配置 checkpoint。
 - 依赖检查脚本只检查 Python 包是否可导入，不下载模型权重。
 
-## 一次性安装
+## 一次性安装或复用
 
-如果当前环境缺少依赖，可以使用：
+如果当前全局 Python 环境缺少基础依赖，可以由用户确认后一次性安装：
 
 ```bash
 python -m pip install -r aisee-image-object/assets/requirements-image-object.txt
 ```
+
+如果项目已有 `.venv`、`uv`、`poetry`、`conda` 或锁文件，优先遵守项目工具链，不要擅自切换或全局安装。缺少依赖时先报告检查结果和影响，再给出命令。
 
 注意：`sam2` 会安装或升级 `torch` / `torchvision`。如果项目已有固定 PyTorch 版本，先按项目锁文件处理，再单独安装兼容版本。
 
@@ -72,14 +77,33 @@ python3.11 -m venv .venv-aisee-lama
 .venv-aisee-lama/bin/python -m pip install iopaint
 ```
 
-然后复制模板：
+推荐把 LaMa / IOPaint 路径写到用户级全局配置，避免每个项目重复配置：
+
+```bash
+mkdir -p ~/.config/aisee/image-object
+cp aisee-image-object/assets/config-template.json ~/.config/aisee/image-object/config.json
+```
+
+把 `iopaint_bin` 改成实际路径：
+
+```json
+{
+  "lama_backend": {
+    "enabled": true,
+    "iopaint_bin": "/absolute/path/to/.venv-aisee-lama/bin/iopaint",
+    "device": "cpu"
+  }
+}
+```
+
+如果项目需要覆盖全局配置，再复制模板到项目内：
 
 ```bash
 mkdir -p aisee/config/image-object
 cp aisee-image-object/assets/config-template.json aisee/config/image-object/config.json
 ```
 
-把 `iopaint_bin` 改成实际路径：
+项目配置同样使用以下结构：
 
 ```json
 {
@@ -101,9 +125,11 @@ export AISEE_IMAGE_OBJECT_LAMA_DEVICE="cpu"
 优先级：
 
 1. CLI 参数：`--iopaint-bin`、`--device`
-2. 环境变量：`AISEE_IMAGE_OBJECT_IOPAINT_BIN`、`AISEE_IMAGE_OBJECT_LAMA_DEVICE`
-3. 配置文件：`aisee/config/image-object/config.json`，旧项目兼容读取 `.aisee/image-object/config.json`
-4. 当前 `PATH` 中的 `iopaint`
+2. 配置文件路径环境变量：`AISEE_IMAGE_OBJECT_CONFIG`
+3. backend 环境变量：`AISEE_IMAGE_OBJECT_IOPAINT_BIN`、`AISEE_IMAGE_OBJECT_LAMA_DEVICE`
+4. 项目配置：`aisee/config/image-object/config.json`，旧项目兼容读取 `.aisee/image-object/config.json` 和 `.aisee-image-object.json`
+5. 用户级全局配置：`~/.config/aisee/image-object/config.json`，旧路径兼容读取 `~/.aisee/image-object/config.json`
+6. 当前 `PATH` 中的 `iopaint`
 
 执行：
 

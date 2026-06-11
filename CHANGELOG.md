@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-06-11
+
+### Added
+
+- `aisee:design-assets` 新增素材生成前的 Asset Intent Scan、banner 文本策略、受控局部内容优化 prompt 与对应 eval 覆盖。
+- `aisee:image-object` 新增透明素材 handoff、全局运行环境复用、GUI 预览缓存治理与对应 eval 覆盖。
+
+### Changed
+
+- `aisee:image-object` 主 skill 精简为轻量路由文档，详细 GUI、依赖、workflow 和 handoff 规则下沉到 references。
+- `aisee:design-assets` 明确 Image2 / `gpt-image-2` 为参考图、视觉变体和生成型素材默认目标模型。
+
 ### Added
 
 - `source-map.md` 新增 `intake_sources` 兼容路径，支持无 SRS / UI / Architecture 前置文档时记录精简 intake 来源。

@@ -33,10 +33,21 @@ def render_preview(
     mode: str = "自动",
     background: str = "棋盘格",
 ) -> Path:
-    Image, ImageColor, _ = _load_pillow()
-    path = Path(input_path)
+    image = render_preview_image(input_path, mode=mode, background=background)
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output)
+    return output
+
+
+def render_preview_image(
+    input_path: str | Path,
+    *,
+    mode: str = "自动",
+    background: str = "棋盘格",
+):
+    Image, ImageColor, _ = _load_pillow()
+    path = Path(input_path)
 
     with Image.open(path) as raw:
         if mode == "Alpha":
@@ -51,8 +62,7 @@ def render_preview(
         base.alpha_composite(image)
         image = base
 
-    image.save(output)
-    return output
+    return image
 
 
 def render_canvas_preview(
@@ -66,9 +76,32 @@ def render_canvas_preview(
     mask_tint: tuple[int, int, int, int] = (0, 102, 204, 96),
     show_box: bool = True,
 ) -> Path:
-    Image, ImageColor, ImageDraw = _load_pillow()
+    canvas = render_canvas_preview_image(
+        source_path,
+        asset_path=asset_path,
+        bbox=bbox,
+        mode=mode,
+        background=background,
+        mask_tint=mask_tint,
+        show_box=show_box,
+    )
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(output)
+    return output
+
+
+def render_canvas_preview_image(
+    source_path: str | Path,
+    *,
+    asset_path: str | Path | None = None,
+    bbox: list[int] | None = None,
+    mode: str = "画布定位",
+    background: str = "棋盘格",
+    mask_tint: tuple[int, int, int, int] = (0, 102, 204, 96),
+    show_box: bool = True,
+):
+    Image, ImageColor, ImageDraw = _load_pillow()
 
     with Image.open(source_path).convert("RGBA") as source:
         canvas = source.copy()
@@ -80,8 +113,7 @@ def render_canvas_preview(
                 if show_box:
                     draw = ImageDraw.Draw(canvas)
                     draw.rectangle((x1, y1, x2, y2), outline=(0, 102, 204, 255), width=1)
-            canvas.save(output)
-            return output
+            return canvas
 
         with Image.open(asset_path) as raw_asset:
             asset = raw_asset.convert("RGBA")
@@ -107,8 +139,7 @@ def render_canvas_preview(
             else:
                 canvas = _compose_full_canvas_asset(asset, background, ImageColor)
 
-    canvas.save(output)
-    return output
+    return canvas
 
 
 def render_canvas_composite_preview(
@@ -119,9 +150,26 @@ def render_canvas_composite_preview(
     background: str = "棋盘格",
     show_boxes: bool = True,
 ) -> Path:
-    Image, ImageColor, ImageDraw = _load_pillow()
+    canvas = render_canvas_composite_preview_image(
+        source_path,
+        overlays=overlays,
+        background=background,
+        show_boxes=show_boxes,
+    )
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(output)
+    return output
+
+
+def render_canvas_composite_preview_image(
+    source_path: str | Path,
+    *,
+    overlays: list[dict],
+    background: str = "棋盘格",
+    show_boxes: bool = True,
+):
+    Image, ImageColor, ImageDraw = _load_pillow()
 
     with Image.open(source_path).convert("RGBA") as source:
         canvas = source.copy()
@@ -168,8 +216,7 @@ def render_canvas_composite_preview(
             for x1, y1, x2, y2 in boxes:
                 draw.rectangle((x1, y1, x2, y2), outline=(0, 102, 204, 255), width=2)
 
-    canvas.save(output)
-    return output
+    return canvas
 
 
 def _place_canvas_asset(canvas, source_size, asset, bbox, background, ImageColor):

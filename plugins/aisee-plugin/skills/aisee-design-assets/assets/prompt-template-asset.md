@@ -4,6 +4,9 @@
 任务类型：生成单个可复用设计素材。
 目标模型：Image2 / gpt-image-2
 素材类型：<background | illustration | overlay | layout-layer | transparent>
+generation_decision：<generate | icon-library | css-svg | image-object-handoff | use-existing>
+asset_boundary：<full-banner | banner-background | illustration-subject | decorative-layer | transparent-subject | section-background | other>
+text_policy：<no-text | editable-text-zone | raster-text-confirmed>
 目标平台：<mobile | mini-program | h5 | pc | desktop | multi>
 使用位置：<页面/模块/组件>
 建议尺寸：<WIDTHxHEIGHT>
@@ -14,6 +17,7 @@ style_anchor：<主参考图 / StyleSpec / design-spec path>
 style_lock：<必须保持的颜色、线条、圆角、材质、光照、构图密度、品牌元素>
 allowed_variation：<允许变化的主体、尺寸、裁切、状态、背景或透明范围>
 主体描述：<素材主体>
+文字与安全区：<不生成文字 / 预留可编辑文字区 / 已确认生成 raster text 和文案>
 视觉风格：<色彩、材质、光影、图形语言>
 构图要求：<居中/留白/边距/适合叠加>
 一致性检查：生成后对照 style_anchor 检查色板、线条语言、阴影/光照、材质、构图密度和品牌元素。

@@ -1,16 +1,35 @@
 # aisee:image-object 工作流
 
+## 总体处理思路
+
+所有图片处理都遵循同一条主线：`source` → `scope` → `mask` → `cutout/background` → `export/enhanced` → `source.json`。不要直接在原图上覆盖修改；不要绕过 workspace 输出临时文件；不要把多个对象混成一个无 scope 的结果。
+
+执行前先判断输入来源：
+
+- 已有图片、截图、海报、产品图或参考图中的对象：由本 skill 提取、去背景、修边、导出透明素材。
+- `aisee:design-assets` 生成的纯色/绿幕主体图：由本 skill 继续做去背景、mask/cutout、边缘修正和透明导出。
+- 从零生成新插画、banner、背景或素材 prompt：不属于本 skill，交给 `aisee:design-assets`。
+- 通用 UI 图标：优先图标库，不走本 skill。
+
 ## 基于图片提取素材
 
 通用素材提取流程见 `asset-extraction.md`。当用户从已有图片、截图、海报、参考图或产品图中提取可复用素材时，先建立单图 workspace，再按候选清单逐个生成 region、mask、cutout、export 或 enhanced，不把提取执行交给 `aisee:design-assets`。
 
 ## 去背景到透明素材
 
+适用于已有图片主体，也适用于 `aisee:design-assets` 生成的绿幕/纯色背景主体图。
+
 1. `init` 创建 workspace，复制原图为 `source.png`。
 2. `remove-bg --profile quality` 通过 rembg 调用成熟模型，默认优先 BiRefNet 类模型。
 3. 从 alpha 生成 mask，保存到 `masks/`，cutout 保存到 `cutouts/`。
 4. `export-variant` 根据透明、背景、圆角、padding、裁切模式生成最终素材。
 5. 更新 `source.json`，记录模型、参数、fallback 和产物路径。
+
+质量门禁：
+
+- 透明边缘不能有明显绿边、白边、黑边或背景残留。
+- 半透明对象、毛发、玻璃、阴影和发光边缘需要人工复核或 mask refine。
+- 导出前确认用途：透明 PNG/WebP、固定背景色版本、圆角/padding 版本或多尺寸变体。
 
 ## 已有 mask 修边
 

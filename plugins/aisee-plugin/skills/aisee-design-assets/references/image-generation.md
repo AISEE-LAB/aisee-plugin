@@ -68,6 +68,34 @@ Preserve the original brand identity, layout structure, visual style, color syst
 
 如果任务需要 mask、bbox、对象 cutout、背景修补或从已有图片提取素材，先进入 `aisee:image-object` 建立 workspace；本 skill 只能根据 image-object 的 handoff brief 生成受控编辑提示词或登记最终候选。
 
+## 局部内容优化
+
+局部内容优化是图生图编辑的一种受控候选生成，先由 `references/prompt-optimization.md` 理解用户意图并整理 prompt。
+
+留在本 skill 的场景：
+
+- 丰富 banner 背景、Hero 氛围、插画细节、装饰层、光影或留白安全区。
+- 基于参考图生成更完整的视觉候选，但不要求像素级只改某个对象。
+- 对生成型素材做风格一致的局部完善。
+
+转交 `aisee:image-object` 的场景：
+
+- 用户要求只改具体对象、边缘、背景残留、抠图、透明、mask 范围或背景修补。
+- 需要 bbox、mask、cutout、source/object 对齐或交互式框选。
+- 结果需要回写 image-object workspace 的 `enhanced/`。
+
+CLI 示例：
+
+```bash
+python <skill-dir>/scripts/image_gen.py edit \
+  --model gpt-image-2 \
+  --image aisee/docs/design-assets/references/hero-reference.png \
+  --prompt "<局部内容优化 prompt：写清用户意图、局部范围、保留项、修改项、文本策略和避免项>" \
+  --out aisee/docs/design-assets/edits/hero-reference-local-001.png
+```
+
+没有 mask/bbox 的局部优化只能作为视觉候选；交付时必须标注“松散范围，需人工复核未授权区域是否变化”。
+
 ## API 配置
 
 真实 API 调用必须显式配置 `api_key` 和 `base_url`，不依赖 SDK 默认地址。配置来源：

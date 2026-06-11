@@ -42,6 +42,86 @@
         "design-assets 只提供视觉输入，不替代 UI Content、Design Spec 或 OpenSpec artifacts。"
       ],
       "files": []
+    },
+    {
+      "id": "design-assets-002",
+      "name": "scan-assets-before-generating-banner",
+      "scenario": "asset-intent-scan",
+      "prompt": "这张首页参考图里有一个带大标题、价格标签、CTA 按钮和右侧插画的 hero banner。帮我判断哪些素材需要生成，并准备后续生成提示词。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "下游是 App/Web/小程序界面实现，不是最终投放海报。"
+        ]
+      },
+      "expected_output": "应先做 Asset Intent Scan，区分 banner 背景、插画、装饰层、UI 文案、按钮和图标；默认不把标题、价格、CTA 文案生成进图片，而是预留可编辑文字区。",
+      "expected_outputs": [
+        "输出素材识别或素材决策表。",
+        "明确 generation_decision、asset_boundary 和 text_policy。",
+        "将 banner 文案、按钮和价格标签判定为可编辑 UI/运营文案。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "Asset Intent Scan",
+        "text_policy",
+        "asset_boundary",
+        "editable-text-zone"
+      ],
+      "must_not": [
+        "不得直接把整张 banner 作为带文字位图生成。",
+        "不得把通用按钮、价格标签或 CTA 文案当作图片素材生成。",
+        "不得跳过素材识别直接输出 Image2 prompt。"
+      ],
+      "quality_checks": [
+        "先判断哪些元素需要生成，再写生成提示词。",
+        "Banner 默认只生成背景、插画和装饰层，文字保持可编辑。",
+        "识别图标库、CSS/SVG、既有品牌资产和 image-object handoff 的边界。"
+      ],
+      "fact_source_constraints": [
+        "素材清单和 prompt 是设计资产输入，不替代 UI Content 或前端实现事实。"
+      ],
+      "files": []
+    },
+    {
+      "id": "design-assets-003",
+      "name": "controlled-local-improvement-prompt",
+      "scenario": "local-image-improvement",
+      "prompt": "基于这张已选参考图，把 hero 右侧背景补得更丰富一点，保持布局和文字区不变，不要生成新文案。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户要的是松散范围的视觉增强，不是精确抠图、mask 修边或背景修补。"
+        ]
+      },
+      "expected_output": "应先理解用户意图，整理受控局部内容优化 prompt，明确 scope、preserve、modify、avoid 和 text_policy；可驱动 Image2 生成候选，但应标注没有 mask/bbox 时属于松散范围候选。",
+      "expected_outputs": [
+        "提炼用户意图摘要。",
+        "明确只优化 hero 右侧背景或氛围层。",
+        "保留布局、文字区、品牌和未授权区域。",
+        "说明需要精确 mask 时应交给 image-object。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "用户意图摘要",
+        "局部范围",
+        "必须保持",
+        "text_policy",
+        "Image2"
+      ],
+      "must_not": [
+        "不得要求模型重设计整张图。",
+        "不得新增文字、Logo、水印或 CTA 文案。",
+        "不得把精确对象边缘修复留在 design-assets 中执行。"
+      ],
+      "quality_checks": [
+        "把局部优化和 image-object handoff 分流清楚。",
+        "Prompt 先写保留项，再写修改项和禁止项。",
+        "输出新候选，不覆盖源图。"
+      ],
+      "fact_source_constraints": [
+        "局部优化候选必须记录来源、scope 和风险；不是最终实现事实。"
+      ],
+      "files": []
     }
   ]
 }

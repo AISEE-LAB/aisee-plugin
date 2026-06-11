@@ -13,6 +13,8 @@ DEFAULT_CONFIG_PATHS = (
     "aisee/config/image-object/config.json",
     ".aisee/image-object/config.json",
     ".aisee-image-object.json",
+    "~/.config/aisee/image-object/config.json",
+    "~/.aisee/image-object/config.json",
 )
 
 
@@ -43,7 +45,7 @@ def _resolve_config_path(config_path: str | Path | None = None) -> Path | None:
             raise FileNotFoundError(f"运行配置不存在: {path}")
         return path
     for candidate in DEFAULT_CONFIG_PATHS:
-        path = Path(candidate)
+        path = Path(candidate).expanduser()
         if path.exists():
             return path
     return None

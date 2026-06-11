@@ -137,7 +137,7 @@ def inpaint_background_lama(
         raise RuntimeError(
             "LaMa backend 需要 IOPaint CLI。请在兼容环境安装 `iopaint`，"
             "推荐 Python 3.10/3.11；当前环境若是 Python 3.13，IOPaint 可能因 Pillow 9.5.0 构建失败。"
-            "可通过 --iopaint-bin、AISEE_IMAGE_OBJECT_IOPAINT_BIN 或 aisee/config/image-object/config.json 指定独立环境中的 iopaint。"
+            "可通过 --iopaint-bin、AISEE_IMAGE_OBJECT_IOPAINT_BIN、项目配置或 ~/.config/aisee/image-object/config.json 指定独立环境中的 iopaint。"
         )
     if not Path(executable).exists() and shutil.which(str(executable)) is None:
         raise FileNotFoundError(f"IOPaint CLI 不存在或不可执行: {executable}")

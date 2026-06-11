@@ -42,6 +42,86 @@
         "对象级图片处理结果是素材，不是 OpenSpec 或长期 UI 规范事实源。"
       ],
       "files": []
+    },
+    {
+      "id": "image-object-002",
+      "name": "process-design-assets-green-screen-transparent",
+      "scenario": "transparent-asset-handoff",
+      "prompt": "design-assets 已经用 Image2 生成了一张绿幕背景的角色素材图，帮我处理成透明 PNG，并导出一个带 padding 的 WebP 版本。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "输入是已有图片，不需要重新决定素材生成 prompt。"
+        ]
+      },
+      "expected_output": "应把 design-assets 生成图作为已有输入，进入 image-object 单图 workspace，执行去背景、mask/cutout、边缘复核和导出变体；不能重新生成角色或改写素材 prompt。",
+      "expected_outputs": [
+        "创建或使用单图 workspace。",
+        "执行去背景、mask/cutout 和透明导出。",
+        "说明 padding WebP 变体和 source.json 记录。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "workspace",
+        "mask",
+        "cutout",
+        "透明 PNG",
+        "padding"
+      ],
+      "must_not": [
+        "不得重新生成角色素材。",
+        "不得把任务转回 design-assets 决定 prompt。",
+        "不得跳过 source.json 或 workspace 管理。"
+      ],
+      "quality_checks": [
+        "明确 image-object 只处理已有生成图。",
+        "把边缘残留、绿边或毛边作为复核风险。",
+        "导出变体和原始 cutout 分开保存。"
+      ],
+      "fact_source_constraints": [
+        "image-object 产物路径可登记到 design-assets，但处理事实保留在 image-object workspace。"
+      ],
+      "files": []
+    },
+    {
+      "id": "image-object-003",
+      "name": "reuse-global-runtime-and-avoid-preview-cache-spam",
+      "scenario": "gui-runtime-and-preview-cache",
+      "prompt": "打开一个已有 image-object workspace，里面已经有很多 cutout 和 export。不要每次打开都生成一堆 preview-cache 临时图，同时检查 LaMa 是否可用。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户关心 GUI 运行体验、缓存污染和可选 backend 配置。"
+        ]
+      },
+      "expected_output": "应说明 workspace 加载和合成预览不应批量生成无效临时图，素材多时使用紧凑列表；依赖检查应优先读取全局配置或 PATH，不静默安装或重复创建重依赖环境。",
+      "expected_outputs": [
+        "预览默认内存渲染或按需缩略图。",
+        "素材多时优化列表显示。",
+        "优先复用全局 IOPaint/LaMa 配置。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "preview-cache",
+        "内存",
+        "紧凑列表",
+        "全局配置",
+        "不静默安装"
+      ],
+      "must_not": [
+        "不得建议每次加载 workspace 都批量生成缩略图。",
+        "不得默认安装或升级 LaMa/IOPaint/SAM2。",
+        "不得把 preview-cache 作为大模型 handoff 默认上下文。"
+      ],
+      "quality_checks": [
+        "区分正式产物和 GUI 预览缓存。",
+        "运行环境优先全局复用，项目配置只覆盖。",
+        "大量素材时优先改善显示和滚动性能。"
+      ],
+      "fact_source_constraints": [
+        "preview-cache 不是长期素材事实源；source.json 和正式产物目录才是可追溯事实。"
+      ],
+      "files": []
     }
   ]
 }

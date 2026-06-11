@@ -28,6 +28,9 @@ class AssetPanel:
         self.category_filter = QComboBox()
         self.category_filter.addItems(["全部", "选用", "框选区域", "透明素材", "抹除结果", "导出结果", "优化"])
         header.addWidget(self.category_filter)
+        self.count_label = QLabel("0 个")
+        self.count_label.setProperty("role", "muted")
+        header.addWidget(self.count_label)
         layout.addLayout(header)
 
         class AssetListWidget(QListWidget):
@@ -41,6 +44,8 @@ class AssetPanel:
         self._qt_user_role = Qt.UserRole
         self._all_records = []
         self._workspace = None
+        self._compact_threshold = 80
+        self._compact_mode = False
         self.list_widget.setViewMode(QListWidget.IconMode)
         self.list_widget.setFlow(QListView.LeftToRight)
         self.list_widget.setWrapping(True)
@@ -84,13 +89,15 @@ class AssetPanel:
             or (category == "选用" and record.item.get("selected"))
             or record.label == category
         ]
+        self._set_compact_mode(len(records) > self._compact_threshold)
+        self.count_label.setText(f"{len(records)} / {len(self._all_records)} 个")
         for record in records:
             name = record.item.get("name") or record.item.get("label") or record.item_id
             prefix = "[选用] " if record.item.get("selected") else ""
-            label = f"{prefix}{record.label}\n{name}"
+            label = f"{prefix}{record.label}  {record.item_id}\n{name}" if not self._compact_mode else f"{prefix}{record.label}  {record.item_id}  {name}"
             item = QListWidgetItem(label)
             thumbnail = record.item.get("thumbnail")
-            if thumbnail and self._workspace:
+            if thumbnail and self._workspace and not self._compact_mode:
                 item.setIcon(QIcon(str(__import__("pathlib").Path(self._workspace) / thumbnail)))
             item.setToolTip(record.display)
             item.setData(self._qt_user_role, record)
@@ -100,6 +107,11 @@ class AssetPanel:
     def _update_grid_size(self) -> None:
         from PySide6.QtCore import QSize
 
+        if self._compact_mode:
+            self.list_widget.setIconSize(QSize(0, 0))
+            self.list_widget.setGridSize(QSize(max(160, self.list_widget.viewport().width() - 8), 36))
+            return
+
         width = max(1, self.list_widget.viewport().width())
         min_cell = 138
         columns = max(1, width // min_cell)
@@ -108,6 +120,27 @@ class AssetPanel:
         icon_height = int(icon_width * 0.70)
         self.list_widget.setIconSize(QSize(icon_width, icon_height))
         self.list_widget.setGridSize(QSize(cell_width, icon_height + 50))
+
+    def _set_compact_mode(self, enabled: bool) -> None:
+        from PySide6.QtCore import QSize
+        from PySide6.QtWidgets import QListView, QListWidget
+
+        if self._compact_mode == enabled:
+            return
+        self._compact_mode = enabled
+        if enabled:
+            self.list_widget.setViewMode(QListWidget.ListMode)
+            self.list_widget.setFlow(QListView.TopToBottom)
+            self.list_widget.setWrapping(False)
+            self.list_widget.setSpacing(4)
+            self.list_widget.setIconSize(QSize(0, 0))
+            self.list_widget.setUniformItemSizes(True)
+        else:
+            self.list_widget.setViewMode(QListWidget.IconMode)
+            self.list_widget.setFlow(QListView.LeftToRight)
+            self.list_widget.setWrapping(True)
+            self.list_widget.setSpacing(10)
+            self.list_widget.setUniformItemSizes(True)
 
     def current_asset(self):
         item = self.list_widget.currentItem()

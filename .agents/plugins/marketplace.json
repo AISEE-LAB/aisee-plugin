@@ -1,6 +1,6 @@
 {
   "name": "aisee-plugin",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "interface": {
     "displayName": "Aisee Plugin",
     "description": "Aisee plugin marketplace for OpenSpec, project memory, team knowledge, and Compound Engineering workflows."

@@ -76,7 +76,7 @@ rg --files | rg '(style.*spec.*\.(md|json)|design.*asset.*index.*\.md|asset.*man
 - 视觉质量优先、用户上传参考图/截图、图片转视觉 brief 或 image-first 工作流：读 `references/image-first.md`
 - Image2 图片生成、图生图视觉变体、透明生成型素材、CLI fallback：读 `references/image-generation.md`
 - 提取或生成 StyleSpec 草稿：读 `references/style-spec.md`
-- 规划、生成或复核素材清单：读 `references/asset-manifest.md`
+- 规划、生成或复核素材清单，识别素材边界和 banner 文字策略：读 `references/asset-manifest.md`
 - 生成前提示词优化：必须读 `references/prompt-optimization.md`
 - 需要借鉴中文图片生成 prompt 写法：读 `references/prompt-library.md`
 - 不同端尺寸、清晰度、安全区、图生图保留项：读 `references/output-specs.md`
@@ -97,6 +97,7 @@ rg --files | rg '(style.*spec.*\.(md|json)|design.*asset.*index.*\.md|asset.*man
 7. 需要进入 Figma MCP 或前端开发：生成对应 brief；前端只拿 `dev-visual-brief` 做视觉输入，不让本 skill 写代码。
 8. 要从已有扁平图片中分离对象、生成 mask、交互式框选/点选、导出透明对象、移除对象并补背景或生成图层包：交给 `aisee:image-object`；本 skill 只负责把产物登记到设计资产索引。
 9. 要透明素材：从零生成的独立透明素材留在本 skill，先用 Image2 生成绿幕/纯色背景或按 CLI 原生透明流程处理；从已有图片提取透明对象、修边、抠图、去背景或 mask 的流程交给 `aisee:image-object`。
+10. 要局部内容优化、补细节、增强氛围或完善某个区域：先理解用户意图，明确修改范围、保留项和禁止项；不需要精确 mask 的视觉增强可由本 skill 优化 prompt 后驱动 Image2 生成候选，需要精确区域、对象、抠图、修边或背景修补时先交给 `aisee:image-object` 准备 source/mask/bbox。
 
 ## Phase 2 — 输入门禁
 
@@ -116,7 +117,7 @@ rg --files | rg '(style.*spec.*\.(md|json)|design.*asset.*index.*\.md|asset.*man
 
 ## Phase 3 — 执行
 
-执行前必须做轻量提示词优化：整理结构，补齐平台、用途、尺寸、参考依据、主体、构图、风格、不变项、允许变化和避免项；不添加未确认的业务需求、Logo、文案、人物、字段或数据。
+执行前必须先理解用户意图，再做轻量提示词优化：整理结构，补齐平台、用途、尺寸、参考依据、素材边界、文本策略、主体、构图、风格、不变项、允许变化和避免项；不添加未确认的业务需求、Logo、文案、人物、字段或数据。
 
 CHECKPOINT: 执行图片生成、图生图视觉变体、外部 API 调用、刷新远程提示词来源、覆盖既有图片/索引或写入长期资产前，必须确认目标、输入来源、输出目录、是否覆盖、是否使用外部 API、成本/配额风险和敏感信息处理。未确认时只输出方案、提示词和待确认项，不声称已生成。
 
@@ -131,6 +132,7 @@ CHECKPOINT: 执行图片生成、图生图视觉变体、外部 API 调用、刷
 
 - 普通参考图、视觉变体和生成型素材明确以 Image2 为目标模型：内置 `image_gen` 可用时优先使用内置工具；CLI/API fallback 默认使用 `gpt-image-2`，只有原生透明等模型能力不支持时才使用其它模型。
 - 透明素材先分流：从零生成的独立主体由本 skill 做 Image2 prompt 完善、绿幕/纯色背景生成和去背景，或按 `references/image-generation.md` 的原生透明 fallback；从已有图片提取透明对象、mask、cutout、修边、去背景和导出变体必须交给 `aisee:image-object`，本 skill 只登记最终产物。
+- 局部内容优化先分流：松散的视觉增强、氛围补充、背景丰富度、构图微调可由本 skill 生成受控编辑候选；需要像素级范围、mask、对象边缘、抠图、局部抹除或背景修补时必须交给 `aisee:image-object` 准备 handoff。
 - 项目绑定图片、prompt 摘要、索引和 brief 必须写入目标项目目录。
 - Prompt 只注入当前任务必要约束，不把全部规则一次性塞进图片模型请求；通用 UI 图标只做占位，最终由图标库替换。
 

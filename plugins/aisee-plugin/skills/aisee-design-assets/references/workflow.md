@@ -62,14 +62,16 @@
 
 ## 素材生成
 
-1. 从参考图或 StyleSpec 规划素材清单。
-2. 按背景、图标、插画、装饰层、布局视觉层、生成型透明素材和提取型对象素材分组。
-3. 确认用途、尺寸、透明需求、来源依据和素材来源模式。
-4. 通用图标优先映射图标库；不要用图片模型重画常见操作、导航和状态图标。
-5. 生成型背景、插画、装饰层和生成型透明素材由本 skill 生成。
-6. 从已有图片提取素材、去背景、mask、cutout、背景修补或图层包，转交 `aisee:image-object`。
-7. 保存生成型素材到 `aisee/docs/design-assets/assets/`；提取型素材只登记 `aisee:image-object` 的最终 export/cutout/enhanced 路径。
-8. 更新 `manifests/asset-manifest.md`。
+1. 先做 Asset Intent Scan：识别参考图/页面中哪些元素是生成型素材、UI 文案、图标库、CSS/SVG、既有品牌资产或 image-object 对象。
+2. 明确 `generation_decision`、`asset_boundary` 和 `text_policy`，尤其是 banner、运营位、海报、电商图和透明素材。
+3. 按背景、图标、插画、装饰层、布局视觉层、生成型透明素材和提取型对象素材分组。
+4. 确认用途、尺寸、透明需求、来源依据和素材来源模式。
+5. 通用图标优先映射图标库；不要用图片模型重画常见操作、导航和状态图标。
+6. 生成型背景、插画、装饰层和生成型透明素材由本 skill 生成。
+7. Banner 默认只生成背景/插画/装饰层，不生成标题、价格、按钮文案或角标；只有最终投放图且用户确认文字不可编辑风险时，才允许 raster text。
+8. 从已有图片提取素材、去背景、mask、cutout、背景修补或图层包，转交 `aisee:image-object`。
+9. 保存生成型素材到 `aisee/docs/design-assets/assets/`；提取型素材只登记 `aisee:image-object` 的最终 export/cutout/enhanced 路径。
+10. 更新 `manifests/asset-manifest.md`。
 
 ## 图生图视觉变体
 
@@ -80,3 +82,14 @@
 5. 需要 mask、bbox、cutout、局部抹除、背景修补或素材提取时，转交 `aisee:image-object` 建立 workspace。
 6. 输出新版本，不覆盖原图。
 7. 在索引中记录源图、保留项、修改项和风险。
+
+## 局部内容优化
+
+当用户要求“局部优化”“补充细节”“让某个区域更完整”“增强氛围”“让 banner 更像参考图”时，先理解意图再决定执行路径。
+
+1. 摘要用户意图：要解决空、乱、不统一、不够精致、主体不突出、局部细节不足，还是需要扩展安全区。
+2. 明确 scope：整图、section、banner 背景、插画主体、装饰层、自然语言区域、mask、bbox 或 object id。
+3. 判断是否需要 `aisee:image-object`：只要涉及精确对象、边缘、抠图、透明、局部抹除、背景修补或 mask/bbox，就先交给 image-object。
+4. 对松散视觉增强，由本 skill 按 `assets/prompt-template-edit.md` 生成受控编辑 prompt，并使用 Image2 生成候选。
+5. Prompt 必须写清保留项、修改项、文本策略和避免项；Banner/App/Web 默认不生成文字，只保留可编辑文字区。
+6. 输出到 `aisee/docs/design-assets/edits/`，不覆盖源图；在索引或 manifest 记录源图、scope、prompt 摘要、风险和 consistency_check。

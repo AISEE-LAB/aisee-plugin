@@ -5,6 +5,7 @@ from PIL import Image
 from gui.asset_model import build_asset_records, find_first_object
 from gui.main_window import MainWindow
 from gui.preview_render import render_canvas_composite_preview, render_canvas_preview, render_preview, render_region_preview
+from gui.preview_render import render_canvas_preview_image
 from gui.task_runner import BatchUiBridge
 
 
@@ -66,6 +67,20 @@ def test_render_canvas_preview_places_cutout_at_bbox(tmp_path):
         assert image.getpixel((8, 6)) == (255, 0, 0, 255)
         assert image.getpixel((7, 6)) != (255, 0, 0, 255)
         assert image.getpixel((0, 0)) != (200, 200, 200, 255)
+
+
+def test_render_canvas_preview_image_does_not_write_temp_file(tmp_path):
+    source = tmp_path / "source.png"
+    cutout = tmp_path / "cutout.png"
+    temp_output = tmp_path / "preview-cache" / "left-position-preview.png"
+    Image.new("RGB", (20, 20), (200, 200, 200)).save(source)
+    Image.new("RGBA", (4, 4), (255, 0, 0, 255)).save(cutout)
+
+    image = render_canvas_preview_image(source, asset_path=cutout, bbox=[8, 6, 12, 10])
+
+    assert image.size == (20, 20)
+    assert image.getpixel((8, 6)) == (255, 0, 0, 255)
+    assert not temp_output.exists()
 
 
 def test_render_canvas_preview_overlays_mask(tmp_path):
