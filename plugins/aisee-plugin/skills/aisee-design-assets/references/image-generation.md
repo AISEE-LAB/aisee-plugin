@@ -4,6 +4,8 @@
 
 先检查当前会话工具列表是否存在内置 `image_gen` / `image_gen.imagegen`。这是会话工具检测，不是 shell 检测；不能用 `which image_gen` 或查找本地脚本判断。
 
+参考图、视觉变体和生成型素材默认使用 Image2。内置 `image_gen` 可用时优先走内置工具；CLI/API fallback 默认显式指定 `gpt-image-2`。只有原生透明 PNG 等 Image2 不支持的能力，才使用其它模型并在交付中说明原因。
+
 优先使用内置 `image_gen`：
 
 - 普通参考图、视觉草图、背景、插画和素材探索
@@ -155,6 +157,12 @@ python <skill-dir>/scripts/image_gen.py edit \
 这种调用必须由 `aisee:image-object` 提供 source、mask、bbox、保护约束和目标路径。脚本只保留 Images API 的 `generate`、`edit` 和 `generate-batch` 子命令；多轮意图、版本关系和追溯信息由本 skill 的索引、manifest、brief 或 image-object 的 `source.json` 记录。
 
 ## 透明素材
+
+先分流：
+
+- 从零生成透明素材：属于 `aisee:design-assets`。先完成 prompt 优化和一致性合同，再按下面的绿幕/纯色背景或原生透明 fallback 生成。
+- 从已有图片提取透明素材：属于 `aisee:image-object`。包括抠图、去背景、mask、cutout、修边、alpha、导出透明 PNG/WebP、圆角、padding、图层包和背景修补。本 skill 只登记 image-object 的 export/cutout/enhanced 结果。
+- 基于 image-object 过程文件做局部增强：由 `aisee:image-object` 提供 source、mask、bbox、object/cutout 和保护约束，本 skill 只帮助整理 Image2 受控编辑 prompt，候选图仍回写 image-object workspace。
 
 简单、边缘清晰的素材优先走内置 `image_gen` 绿幕方案，再用本地脚本去背景：
 
