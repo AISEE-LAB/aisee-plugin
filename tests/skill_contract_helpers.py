@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS_ROOT = ROOT / "plugins" / "aisee-plugin" / "skills"
 TAXONOMY_PATH = ROOT / "plugins" / "aisee-plugin" / "references" / "skill-taxonomy.md"
 EXPECTED_TAXONOMY_SECTIONS = {
+    "Project Setup / Adoption",
     "Core Workflow",
     "Optional Extensions",
     "Knowledge Loop",

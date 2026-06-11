@@ -37,7 +37,7 @@ For existing projects, avoid writing new changes immediately. Prefer `aisee:spec
 
 ## Default Path vs On-Demand Extensions
 
-The default new-feature happy path depends only on the core workflow: `aisee:init`, `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, and `aisee:implementation-bridge`.
+`aisee:init` belongs to project setup and governance, not to the default new-feature iteration happy path. The default new-feature happy path depends only on the core iteration workflow: `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, and `aisee:implementation-bridge`.
 
 The following capabilities are conditional, not mandatory on every iteration:
 

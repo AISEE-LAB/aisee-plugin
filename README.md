@@ -101,11 +101,14 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 
 ## Skill 分层
 
-`plugins/aisee-plugin/.codex-plugin/plugin.json` 继续通过 `skills: "./skills/"` 暴露全部公开 skill，但默认 happy path 只包含 **10 个核心主流程 skill**。完整分类合同见 [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md)。
+`plugins/aisee-plugin/.codex-plugin/plugin.json` 继续通过 `skills: "./skills/"` 暴露全部公开 skill，但默认 happy path 只包含 **9 个核心迭代 skill**，另有 1 个项目接入 / 治理 skill。完整分类合同见 [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md)。
 
-核心主流程：
+项目接入 / 治理：
 
 - `aisee:init`
+
+核心迭代主流程：
+
 - `aisee:srs`
 - `aisee:ui-content`
 - `aisee:architecture`

@@ -101,11 +101,14 @@ Compound Engineering = optional implementation / review / test consumer
 
 ## Skill Taxonomy
 
-`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all public skills through `skills: "./skills/"`, but the default happy path contains only **10 core workflow skills**. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
+`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all public skills through `skills: "./skills/"`, but the default happy path contains only **9 core iteration skills**, plus 1 project setup / governance skill. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
 
-Core workflow:
+Project setup / governance:
 
 - `aisee:init`
+
+Core iteration workflow:
+
 - `aisee:srs`
 - `aisee:ui-content`
 - `aisee:architecture`

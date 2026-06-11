@@ -2,11 +2,16 @@
 
 本文定义单一 `aisee-plugin` 内公开 skill 的分层治理合同。Codex manifest 继续暴露 `./skills/`；分层约束通过文档与测试守住，而不是通过拆插件改变安装模型。
 
-## Core Workflow
+## Project Setup / Adoption
 
-默认 happy path 只包含 10 个核心主流程 skill：
+以下 skill 用于项目接入、初始化、配置审计和治理；它不是默认新功能迭代 happy path 的必经节点：
 
 - `aisee:init`
+
+## Core Workflow
+
+默认新功能 happy path 只包含 9 个核心迭代 skill：
+
 - `aisee:srs`
 - `aisee:ui-content`
 - `aisee:architecture`
@@ -48,6 +53,6 @@
 ## Governance Rules
 
 - 所有公开 `plugins/aisee-plugin/skills/*/SKILL.md` 都必须出现在本分类中。
-- `Core Workflow` 的 skill 集合和数量属于 public workflow contract；变更时必须同步 README、workflow、compatibility policy、release notes 和测试。
+- `Project Setup / Adoption` 与 `Core Workflow` 的 skill 集合和数量属于 public workflow contract；变更时必须同步 README、workflow、compatibility policy、release notes 和测试。
 - `Optional Extensions`、`Knowledge Loop`、`Hardware / Experimental` 继续公开暴露，但不得在默认新功能 happy path 中伪装成必经节点。
 - 所有公开 skill 都必须提供 `evals/evals.json`；taxonomy 只能标记覆盖深度优先级，不能豁免 eval 准入。

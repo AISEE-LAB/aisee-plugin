@@ -37,7 +37,7 @@ aisee doctor --json
 
 ## 默认主路径与按需扩展
 
-默认新功能 happy path 只依赖 core workflow：`aisee:init`、`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`。
+`aisee:init` 属于项目接入 / 治理阶段能力，不是默认新功能迭代 happy path 的必经节点。默认新功能 happy path 只依赖核心迭代 workflow：`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`。
 
 以下能力按条件触发，不是每次都要走：
 

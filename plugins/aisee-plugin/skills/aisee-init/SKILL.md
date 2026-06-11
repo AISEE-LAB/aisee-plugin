@@ -1,6 +1,6 @@
 ---
 name: aisee:init
-description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。用于创建或修复 AGENTS.md、openspec/project.md、aisee/memory/、aisee/docs/ 规划目录，并在当前支持的 Codex hook target 下安装项目级 hooks；检查 hook 机制兼容性、OpenSpec 状态机、规划目录与项目技术架构边界。触发词包括 aisee:init、aisee-init、初始化项目配置、优化 AGENTS.md、配置 Codex hooks、OpenSpec 配置审计。
+description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。仅适用于已使用或准备接入 OpenSpec 的项目；用于创建或修复 AGENTS.md、openspec/project.md、aisee/memory/、aisee/docs/ 规划目录，并在当前支持的 Codex hook target 下安装项目级 hooks；检查 hook 机制兼容性、OpenSpec 状态机、规划目录与项目技术架构边界。触发词包括 aisee:init、aisee-init、初始化项目配置、优化 AGENTS.md、配置 Codex hooks、OpenSpec 配置审计。
 ---
 
 # aisee:init
@@ -9,7 +9,18 @@ description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。用于创
 
 ## 目标
 
-把一个项目整理成 OpenSpec 驱动的 Aisee 项目配置：
+把一个项目整理成 OpenSpec 驱动的 Aisee 项目配置。
+
+本 skill 是项目接入 / 治理阶段能力，不是默认新功能迭代 happy path 的必经节点。对于已经接入并正常运行 OpenSpec 工作流的项目，只有在配置缺失、hooks 漂移、memory 缺口、目录迁移或治理审计时才应再次触发。
+
+适用前提：
+
+- 项目已经在使用 OpenSpec；或
+- 用户明确要把当前项目接入 OpenSpec / Aisee。
+
+如果用户明确表示当前项目不使用 OpenSpec，且也不打算接入 OpenSpec，本 skill 不适用；不要生成 OpenSpec 风格的项目 `AGENTS.md`、`openspec/project.md`、hooks 或 `aisee/` 规划布局。
+
+本 skill 负责：
 
 - `AGENTS.md`：当前 Codex target 的项目规则、OpenSpec 工作流、工具调用约束、沙箱和验证要求。
 - `openspec/project.md`：项目事实、技术栈、架构、开发命令；不放 AI 行为规则。
@@ -33,7 +44,12 @@ node -e "const fs=require('fs'); for (const [p,t] of [['openspec/config.yaml','f
 node -e "const {execSync}=require('child_process'); try { execSync('openspec --version',{stdio:'ignore'}); console.log('openspec:ok'); } catch { console.log('openspec:missing'); }"
 ```
 
-如果缺少 `openspec/config.yaml` 或 `openspec/changes/`，停止并让用户先运行：
+如果缺少 `openspec/config.yaml` 或 `openspec/changes/`，先判断用户是否明确要接入 OpenSpec：
+
+- 若用户明确要接入：停止并让用户先运行 `openspec init` 或 `aisee openspec ensure --json`。
+- 若用户未明确要接入，或明确表示当前项目不使用 OpenSpec：停止，并说明 `aisee:init` 不适用；不要生成项目级 `AGENTS.md` 或其它 OpenSpec/Aisee 配置文件。
+
+在允许接入的场景中，提示用户先运行：
 
 ```bash
 openspec init
