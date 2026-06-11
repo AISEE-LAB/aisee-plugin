@@ -20,7 +20,8 @@
 
 1. 优先映射成熟图标库。
 2. 再按 StyleSpec 调整尺寸、线宽、颜色、圆角和填充方式。
-3. 只有品牌符号、业务专属图形、IP 形象或定制插画图标才允许生成新图。
+3. 交付时只说明使用了哪些图标库中的哪些图标，以及必要的尺寸、线宽、颜色和状态映射。
+4. 只有品牌符号、业务专属图形、IP 形象或定制插画图标才允许生成新图。
 
 推荐库：
 
@@ -31,6 +32,29 @@
 - `material-symbols`：适合 Material Design 体系。
 - `remix-icon`：适合移动端、内容产品和泛业务场景。
 - `iconify`：作为跨库索引入口，不作为单一视觉风格来源。
+
+## 可选检索工具
+
+如果环境中已有 `better-icons` CLI/MCP，可用它搜索和获取 Iconify 生态中的图标，避免手写或臆造 SVG。`better-icons` 支持跨 150+ 图标集合搜索、按 `prefix:name` 获取 SVG、批量获取和项目图标文件同步；它是检索与同步工具，不改变“先选择统一图标库，再记录具体图标”的原则。
+
+全局安装的 `better-icons` 启动和重复检索通常比每次 `npx` 快很多。日常实现阶段优先使用已全局安装的 `better-icons`；未安装时，若任务已经进入前端实现并需要跨库图标检索，可以按项目包管理器安装或用一次性命令执行，并记录命令。若只是规划、素材清单或 brief 阶段，不因缺少 `better-icons` 阻塞，先记录推荐图标库和候选语义。
+
+使用顺序：
+
+1. 先扫描项目已有图标文件、组件库和既定图标库。
+2. 已有库能覆盖语义时，只在同库内搜索候选。
+3. 需要跨库比较时优先使用全局 `better-icons search`，或 MCP 的 `search_icons` / `recommend_icons`。
+4. 选中后在 manifest 中记录 `图标库` 和完整图标 ID，例如 `lucide:search`、`tabler:settings`。
+
+示例：
+
+```bash
+better-icons search settings --prefix lucide --limit 10
+npx better-icons search settings --prefix lucide --limit 10
+npx better-icons get lucide:settings --color currentColor --size 24 --json
+```
+
+实现阶段缺少全局命令时可以安装或一次性执行；安装位置优先遵循项目包管理器和用户环境约定。规划阶段不可用时直接按推荐库和项目现有依赖做人工映射。
 
 ## Prompt 中的最小表达
 
@@ -72,9 +96,9 @@ Use simple 24px outline icon placeholders with consistent stroke weight; final i
 图标素材清单建议记录语义，而不是只记录图片文件：
 
 ```markdown
-| 语义 | 推荐图标 | 备选 | 尺寸 | 风格 | 用途 | 状态 |
-|------|----------|------|------|------|------|------|
-| search | lucide:search | tabler:search | 24 | outline | 搜索入口 | usable |
+| 语义 | 图标库 | 推荐图标 | 备选 | 尺寸 | 风格 | 用途 | 状态 |
+|------|--------|----------|------|------|------|------|------|
+| search | lucide | lucide:search | tabler:search | 24 | outline | 搜索入口 | usable |
 ```
 
 ## 尺寸规则

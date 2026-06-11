@@ -1,12 +1,13 @@
 # Implementation Brief Template
 
-当 `aisee:implementation-bridge` 需要为单个 OpenSpec change 输出实现交接内容时，使用本模板。
+当需要把 `aisee context pack --change <change> --for ce-work --json` 保存成人读 handoff 时使用本模板。优先消费 `facts.derived.execution.brief`；缺细节时回读当前 change artifacts，不复制 artifact 正文。
 
 规则：
 
-- 只写摘要、路径、ID、允许路径、批次任务和验证入口，不复制 proposal、specs、contracts、source-map 或 tasks 正文。
-- 大 change 使用 `brief-index-template.md` 生成 `brief-index.md`，再用本模板生成多个 `brief-part-NN.md`。每个 part 仍指向同一个 current change 和 apply tracks。
-- 保存到文件时，优先使用 `aisee/cache/implementation-bridge/<change>/brief-part-NN.md`；这些文件是 generated handoff / cache，不是规范事实源。
+- Brief 是 generated handoff / cache，不是规范事实源。
+- 只写 context pack 已给出的 source refs、scope、paths、tasks、verification 和 risks。
+- 空字段删除或标 `N/A`；不要把模板占位当事实。
+- 大 change 先用 `brief-index-template.md` 分批，再为每批使用本模板。
 
 ```md
 ---
@@ -15,7 +16,6 @@ doc_type: "implementation-brief"
 status: "draft"
 date: "{date}"
 scope: "<change>"
-owner: "{作者或团队}"
 source_refs:
   - "openspec/changes/<change>"
 change_refs:
@@ -24,96 +24,49 @@ change_refs:
 
 # Implementation Brief
 
-## Preflight
+## Context Pack
 
-- Author check:
-- Gaps:
-- Context pack:
-- Blocked:
-
-## Authoritative Source
-
-- Change: `openspec/changes/<change>`
+- Command: `aisee context pack --change <change> --for ce-work --json`
 - Schema:
-- Source-map required:
-- Apply tracks:
-- Specs:
-- Tasks / apply tracks:
-- Source Map:
-- Contracts:
+- Blocked: yes / no
+- Requires ce-plan: yes / no
+- ce-plan reason: N/A
 
-## Change Scope
+## Authoritative Sources
+
+- From `facts.derived.execution.brief.authoritative_sources`:
+
+## Scope And Traceability
 
 - In scope:
 - Out of scope:
-- Upstream IDs:
-- Produced IDs:
-- Batch: part N of M / single
+- Source refs / mode:
+- Produced local IDs:
 
-## Read First
+## Execution Index
 
-1. （待填）
-2. （待填）
-3. （待填）
-
-## Artifact Map
-
-| Artifact | Role in implementation | Required | Notes |
-|---|---|---:|---|
-| specs/**/*.md | Behavior contract | yes / no | 仅当 schema 生成 |
-| source-map.md | ID and code routing | yes / no | 仅当 schema 生成 |
-| tasks.md / apply tracks | Durable execution list | yes / no | 以 schema 为准 |
-| change-context.md / design.md | Architecture / design constraints | yes / no | app change-context Required=no 时写 source-map N/A 原因；design.md 只在 schema 生成时出现 |
-| ui-contract.md | UI implementation contract | yes / no | Required=no 时写 source-map N/A 原因 |
-| service-contract.md | API / service contract | yes / no | Required=no 时写 source-map N/A 原因 |
-| data-model.md | Data contract | yes / no | Required=no 时写 source-map N/A 原因 |
-
-## Execution Rules
-
-- Follow current schema apply tracks; do not create a parallel durable plan.
-- Preserve traceability when touching code or tests; source-map schema 回写 `source-map.md`，轻量 schema 回写对应主 artifact / apply tracks。
-- If implementation facts conflict with specs or contracts, pause and update the current OpenSpec change first.
-
-## Scope Guardrails
-
-- Do not implement:
-- Follow-up candidates:
-- Accepted assumptions:
-
-## Task Execution
-
-- Batch goal:
+- Read first:
+- Allowed code paths:
+- Allowed test paths:
 - Start from:
-- Suggested order:
-- Code paths:
-- Test paths:
-- Implementation path source:
 - Apply tracks to update:
 
-## Verification
+## Rules
 
-- Required commands:
-- Required manual checks:
-- Evidence to record:
+- Follow current schema apply tracks; do not create a parallel durable plan.
+- Preserve traceability: source-map schema updates `source-map.md`; lighter schemas update the relevant artifact / apply tracks.
+- If implementation facts conflict with specs or contracts, stop and update the current OpenSpec change first.
+- UI icons: reuse the project's component library or icon package first. If no suitable icon exists, use globally installed `better-icons` / Iconify first for speed; install or invoke it via the project package manager, `npx -y better-icons`, or `bunx better-icons` when missing. Record the command and final `prefix:name` icon IDs as evidence.
+
+## Verification And Evidence
+
+- Required verification:
 - Evidence destination:
+- Icon evidence if UI icons changed: component library / icon package, `better-icons` command when used, selected `prefix:name`, size, color strategy.
 
-## Review Recommendation
+## Risks And Follow-up
 
-- Tier 2 code review required: yes / no
-- Trigger reason:
-- Existing review evidence:
-- Suggested authorization: `使用审查代理做 Tier 2 code review` / N/A
-- Evidence destination:
-
-## Blockers and Assumptions
-
-- Blockers:
-- Assumptions:
-- Temporary IDs / unresolved source-map entries:
-
-## Recommended Compound Skill
-
-- Recommended: `ce-work`
-- Use `ce-plan` first only if:
-- After implementation: recommended review gate if required, relevant `ce-test-*`, then `aisee:verify`
+- Risks / blockers from `gaps` and `facts.derived.execution.brief.risks`:
+- Follow-up candidates:
+- Review recommendation:
 ```
