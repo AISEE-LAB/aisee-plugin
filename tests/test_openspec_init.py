@@ -18,6 +18,7 @@ def run_aisee(root: Path, *args: str, path_prefix: Path) -> subprocess.Completed
     env["PYTHONPATH"] = str(repo_src)
     env["PATH"] = f"{path_prefix}{os.pathsep}{env['PATH']}"
     env["HOME"] = str(root.parent / "home")
+    env.pop("XDG_CONFIG_HOME", None)
     return subprocess.run(
         [sys.executable, "-m", "aisee_cli.__main__", *args],
         cwd=root,
