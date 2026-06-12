@@ -46,16 +46,18 @@ node -e "const {execSync}=require('child_process'); try { execSync('openspec --v
 
 如果缺少 `openspec/config.yaml` 或 `openspec/changes/`，先判断用户是否明确要接入 OpenSpec：
 
-- 若用户明确要接入：停止并让用户先运行 `openspec init` 或 `aisee openspec ensure --json`。
+- 若用户明确要接入：优先运行 `aisee openspec ensure --json`，并解析 JSON 结果；该命令负责非交互桥接 `openspec init . --tools none --profile core`、`openspec config profile core` 和 `openspec update .`。
 - 若用户未明确要接入，或明确表示当前项目不使用 OpenSpec：停止，并说明 `aisee:init` 不适用；不要生成项目级 `AGENTS.md` 或其它 OpenSpec/Aisee 配置文件。
 
-在允许接入的场景中，提示用户先运行：
+在允许接入但 `aisee openspec ensure --json` 不可用的场景中，停止并提示用户先运行等价 OpenSpec 命令：
 
 ```bash
-openspec init
+openspec init . --tools none --profile core
+openspec config profile core
+openspec update .
 ```
 
-不要手动替代 `openspec init` 创建目录。
+不要直接执行交互式 `openspec init` / `openspec config profile`，不要手动替代 OpenSpec CLI 创建或刷新 `openspec/` 与 instruction files。
 
 ## 模式选择
 

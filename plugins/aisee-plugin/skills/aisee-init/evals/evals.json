@@ -26,7 +26,7 @@
         "允许 openspec/project.md 中技术栈未确认，并明确标注。"
       ],
       "must_ask": [
-        "是否已经执行 OpenSpec 初始化或需要先运行 aisee openspec ensure？",
+        "是否已经执行 OpenSpec 初始化或需要先运行 aisee openspec ensure --json？",
         "项目技术栈事实应写入 openspec/project.md 还是暂标未确认？"
       ],
       "must_include": [

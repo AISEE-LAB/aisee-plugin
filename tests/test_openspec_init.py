@@ -57,6 +57,10 @@ if len(sys.argv) >= 2 and sys.argv[1] == "init":
     print("Initialized OpenSpec")
     raise SystemExit(0)
 
+if sys.argv[1:3] == ["update", "."]:
+    print("Updated OpenSpec instructions")
+    raise SystemExit(0)
+
 print("unexpected openspec call", file=sys.stderr)
 raise SystemExit(2)
 """,
@@ -86,11 +90,14 @@ def test_openspec_ensure_runs_init_and_profile_by_default(tmp_path: Path) -> Non
     assert data["writes"] is True
     assert data["meta"]["profile"] == "core"
     assert data["meta"]["profile_default_executes"] is True
+    assert data["meta"]["update_default_executes"] is True
     assert data["operations"][0]["command"] == "openspec init . --tools none --profile core"
     assert data["operations"][1]["command"] == "openspec config profile core"
+    assert data["operations"][2]["command"] == "openspec update ."
     assert read_calls(project) == [
         ["init", ".", "--tools", "none", "--profile", "core"],
         ["config", "profile", "core"],
+        ["update", "."],
     ]
 
 
@@ -108,7 +115,28 @@ def test_openspec_ensure_skips_init_but_still_runs_profile(tmp_path: Path) -> No
     assert data["status"] == "ok"
     assert data["operations"][0]["status"] == "skipped"
     assert data["operations"][1]["command"] == "openspec config profile core"
-    assert read_calls(project) == [["config", "profile", "core"]]
+    assert data["operations"][2]["command"] == "openspec update ."
+    assert read_calls(project) == [["config", "profile", "core"], ["update", "."]]
+
+
+def test_openspec_ensure_can_skip_update(tmp_path: Path) -> None:
+    bin_dir = tmp_path / "bin"
+    install_fake_openspec(bin_dir)
+    project = tmp_path / "project"
+    project.mkdir()
+
+    result = run_aisee(project, "openspec", "ensure", "--skip-update", "--json", path_prefix=bin_dir)
+    data = json.loads(result.stdout)
+
+    assert result.returncode == 0
+    assert data["status"] == "ok"
+    assert data["meta"]["update_default_executes"] is False
+    assert data["operations"][2]["command"] == "openspec update"
+    assert data["operations"][2]["status"] == "skipped"
+    assert read_calls(project) == [
+        ["init", ".", "--tools", "none", "--profile", "core"],
+        ["config", "profile", "core"],
+    ]
 
 
 def test_openspec_ensure_blocks_unsupported_profile_before_running(tmp_path: Path) -> None:

@@ -53,6 +53,7 @@ def main() -> int:
     openspec_ensure_parser.add_argument("--profile", default="core", help="OpenSpec profile preset; default: core")
     openspec_ensure_parser.add_argument("--tools", default="none", help="OpenSpec AI tools value for init; default: none")
     openspec_ensure_parser.add_argument("--skip-profile", action="store_true", help="do not run openspec config profile")
+    openspec_ensure_parser.add_argument("--skip-update", action="store_true", help="do not run openspec update")
     openspec_ensure_parser.add_argument("--force", action="store_true", help="pass --force to openspec init when initialization is needed")
     openspec_ensure_parser.add_argument("--json", action="store_true", help="output JSON")
     plugin_parser = subparsers.add_parser("plugin")
@@ -197,6 +198,7 @@ def main() -> int:
             profile=args.profile,
             tools=args.tools,
             skip_profile=args.skip_profile,
+            skip_update=args.skip_update,
             force=args.force,
         )
         print_json(result)

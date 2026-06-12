@@ -16,6 +16,7 @@ def run_openspec_init(
     profile: str = "core",
     tools: str = "none",
     skip_profile: bool = False,
+    skip_update: bool = False,
     force: bool = False,
 ) -> dict[str, Any]:
     root = project_root.resolve()
@@ -25,7 +26,7 @@ def run_openspec_init(
     openspec_bin = shutil.which("openspec")
     if not openspec_bin:
         issues.append(issue("OPENSPEC_CLI_NOT_FOUND", "blocker", "OpenSpec CLI was not found in PATH"))
-        return build_response(root, profile, tools, skip_profile, force, operations, issues)
+        return build_response(root, profile, tools, skip_profile, skip_update, force, operations, issues)
 
     if profile != "core" and not skip_profile:
         issues.append(issue(
@@ -33,7 +34,7 @@ def run_openspec_init(
             "blocker",
             "Only the non-interactive OpenSpec profile preset 'core' is supported by default",
         ))
-        return build_response(root, profile, tools, skip_profile, force, operations, issues)
+        return build_response(root, profile, tools, skip_profile, skip_update, force, operations, issues)
 
     initialized = is_openspec_initialized(root)
     if initialized:
@@ -51,7 +52,7 @@ def run_openspec_init(
         operations.append(command_operation("openspec init", init_command, init_result))
         if init_result.returncode != 0:
             issues.append(issue("OPENSPEC_INIT_FAILED", "blocker", "openspec init failed"))
-            return build_response(root, profile, tools, skip_profile, force, operations, issues)
+            return build_response(root, profile, tools, skip_profile, skip_update, force, operations, issues)
 
     if skip_profile:
         operations.append({
@@ -66,8 +67,23 @@ def run_openspec_init(
         operations.append(command_operation("openspec config profile", profile_command, profile_result))
         if profile_result.returncode != 0:
             issues.append(issue("OPENSPEC_PROFILE_FAILED", "blocker", f"openspec config profile {profile} failed"))
+            return build_response(root, profile, tools, skip_profile, skip_update, force, operations, issues)
 
-    return build_response(root, profile, tools, skip_profile, force, operations, issues)
+    if skip_update:
+        operations.append({
+            "kind": "skip",
+            "command": "openspec update",
+            "status": "skipped",
+            "reason": "--skip-update was provided",
+        })
+    else:
+        update_command = [openspec_bin, "update", "."]
+        update_result = run_command(update_command, root)
+        operations.append(command_operation("openspec update", update_command, update_result))
+        if update_result.returncode != 0:
+            issues.append(issue("OPENSPEC_UPDATE_FAILED", "blocker", "openspec update failed"))
+
+    return build_response(root, profile, tools, skip_profile, skip_update, force, operations, issues)
 
 
 def is_openspec_initialized(root: Path) -> bool:
@@ -115,6 +131,7 @@ def build_response(
     profile: str,
     tools: str,
     skip_profile: bool,
+    skip_update: bool,
     force: bool,
     operations: list[dict[str, Any]],
     issues: list[dict[str, str]],
@@ -132,8 +149,10 @@ def build_response(
             "profile": profile,
             "profile_scope": "global",
             "profile_default_executes": not skip_profile,
+            "update_default_executes": not skip_update,
             "tools": tools,
             "force": force,
             "skip_profile": skip_profile,
+            "skip_update": skip_update,
         },
     }

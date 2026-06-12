@@ -255,6 +255,7 @@ aisee openspec ensure --json
 ```text
 openspec init . --tools none --profile core
 openspec config profile core
+openspec update .
 ```
 
 Schema packs 来自 marketplace-installed plugin。`aisee schemas list/check` 只报告项目已安装 schema 状态或开发期源码 schema 状态；不会由 CLI 自动安装 schema。
@@ -404,7 +405,7 @@ CLI 关键规则：
 - `aisee knowledge promote-batch` 只写本地 team knowledge worktree，不自动 commit、push 或创建 PR。
 - OpenSpec artifacts 和 `source-map.md` 是 context pack 的正式输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
-- `aisee openspec ensure` 只桥接 OpenSpec 初始化和 profile 设置，不替代 `aisee:init`。
+- `aisee openspec ensure` 只桥接 OpenSpec 初始化、profile 设置和 instruction files 刷新，不替代 `aisee:init`。
 - `aisee knowledge query` 只返回少量 guardrails；默认只读 pack manifest 和 card frontmatter，`--debug` 才包含命中 card 的正文摘要。
 
 ### 项目记忆

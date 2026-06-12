@@ -255,6 +255,7 @@ This command bridges OpenSpec initialization with conservative defaults:
 ```text
 openspec init . --tools none --profile core
 openspec config profile core
+openspec update .
 ```
 
 Schema packs come from the marketplace-installed plugin. `aisee schemas list/check` only reports project-installed schema state or source-checkout development schema state; it does not install schemas automatically.
@@ -405,7 +406,7 @@ Key CLI rules:
 - `aisee knowledge promote-batch` only writes the local team knowledge worktree; it does not commit, push, or create PRs.
 - OpenSpec artifacts and `source-map.md` are formal inputs for context packs.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
-- `aisee openspec ensure` only bridges OpenSpec initialization and profile setup. It does not replace `aisee:init`.
+- `aisee openspec ensure` only bridges OpenSpec initialization, profile setup, and instruction file refresh. It does not replace `aisee:init`.
 - `aisee knowledge query` returns only a small number of guardrails. By default it reads pack manifests and card frontmatter; `--debug` is required for matched card body excerpts.
 
 ### Project Memory
