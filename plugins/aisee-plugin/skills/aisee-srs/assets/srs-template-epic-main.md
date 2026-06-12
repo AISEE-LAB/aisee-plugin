@@ -3,14 +3,22 @@
 仅在 Epic 模式下使用本模板。主文档不展开 Section 3 的 FR 详情，只作为全局概览和索引。
 
 ```markdown
+---
+title: "需求规格说明书：{系统/功能名称}"
+doc_type: "srs"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{从 AGENTS.md 或项目上下文提取，或填\"待填写\"}"
+source_refs:
+  - "{repo-relative source path or source ref}"
+change_refs: []
+---
+
 # 需求规格说明书（主文档）
 
 **文档编号**：SRS-{YYYY-MM-DD}-{slug}-main
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
-**作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}
-**ID Scope**：{scope}
 
 > 正式写法只使用文档内编号，例如 `FR-001`、`RULE-001`。跨文档引用交给 `doc-ref#编号`；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 

@@ -3,12 +3,22 @@
 用于 `inventory + standard` 场景：老项目迁移或现有系统盘点，只整理已确认 UI 事实，不设计新需求。
 
 ```markdown
+---
+title: "UI 内容规格：{系统 / 模块名}"
+doc_type: "ui-content"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{作者或团队}"
+source_refs:
+  - "{path or description}"
+change_refs: []
+---
+
 # 现有 UI 盘点：{系统 / 模块名}
 
 **文档编号**：UIC-{YYYY-MM-DD}-{slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **来源材料**：{path or description}
 **场景模式**：inventory
 

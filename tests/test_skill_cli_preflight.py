@@ -44,6 +44,80 @@ def test_planning_doc_frontmatter_contract_exists_and_representative_templates_r
         assert "change_refs:" in text
 
 
+def test_planning_doc_output_templates_use_frontmatter_without_duplicate_header_metadata() -> None:
+    expected = {
+        "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-standard.md": [
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            '**作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}',
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-epic-main.md": [
+            'doc_type: "srs"',
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            '**作者**：{从 AGENTS.md 或项目上下文提取，或填"待填写"}',
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-epic-module.md": [
+            'doc_type: "srs"',
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-standard.md": [
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-enhancement.md": [
+            'doc_type: "ui-content"',
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-inventory.md": [
+            'doc_type: "ui-content"',
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-epic-index.md": [
+            'doc_type: "ui-content"',
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-epic-module.md": [
+            'doc_type: "ui-content"',
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-architecture/assets/architecture-template-core.md": [
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+            "**ID Scope**：{scope}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-standard.md": [
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+        ],
+        "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-light.md": [
+            'doc_type: "design-spec"',
+            "**状态**：草稿",
+            "**创建日期**：{date}",
+        ],
+    }
+
+    for relative_path, forbidden_markers in expected.items():
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        for marker in forbidden_markers:
+            if marker.startswith("doc_type:"):
+                assert marker in text
+            else:
+                assert marker not in text
+
+
 def test_cli_outputs_keep_marketplace_recovery_hints() -> None:
     import sys
 

@@ -19,11 +19,8 @@ change_refs: []
 
 **文档编号**：UIC-{YYYY-MM-DD}-{slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **来源 SRS / 需求**：{path or description}
 **场景模式**：new-build
-**ID Scope**：{scope}
 
 > 正式写法只使用文档内编号，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档来源后续由 `source-map.md` 记录；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 

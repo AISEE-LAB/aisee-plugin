@@ -3,14 +3,23 @@
 Epic 模式下，每份模块文档使用本模板。
 
 ```markdown
+---
+title: "需求规格说明书：{系统/功能名称} / {模块名称}"
+doc_type: "srs"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{从 AGENTS.md 或项目上下文提取，或填\"待填写\"}"
+source_refs:
+  - "{repo-relative source path or source ref}"
+change_refs: []
+---
+
 # {模块名称} — 需求详情文档
 
 **所属主文档**：[`./00-main.md`](./00-main.md)
 **文档编号**：SRS-{YYYY-MM-DD}-{slug}-{module-slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
-**ID Scope**：{scope}
 **FR 范围**：{scope}:FR-{XXX} ~ {scope}:FR-{YYY}
 
 ---

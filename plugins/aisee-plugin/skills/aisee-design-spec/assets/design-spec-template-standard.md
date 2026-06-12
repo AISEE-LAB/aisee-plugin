@@ -19,8 +19,6 @@ change_refs: []
 
 **文档编号**：DS-{YYYY-MM-DD}-{slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **来源输入**：{SRS / UI Content / Architecture / Design Assets / 用户输入}
 **设计策略**：adopt / extend / rewrite
 

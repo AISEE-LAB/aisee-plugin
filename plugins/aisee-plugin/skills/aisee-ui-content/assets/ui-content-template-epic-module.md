@@ -3,17 +3,26 @@
 用于 Epic 模式的模块文档，例如 `01-<module>.md`。模块文档必须可独立阅读，并保留页面详情中的局部流程语境。
 
 ```markdown
+---
+title: "UI 内容规格：{功能名} / {模块名称}"
+doc_type: "ui-content"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{作者或团队}"
+source_refs:
+  - "{SRS path or source ref}"
+change_refs: []
+---
+
 # {模块名称} — UI 内容规格
 
 **所属索引**：[`./00-index.md`](./00-index.md)
 **文档编号**：UIC-{YYYY-MM-DD}-{slug}-{module-slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **覆盖 FR**：{FR-xxx ~ FR-yyy}
 **页面范围**：{PAGE-xxx ~ PAGE-yyy}
 **场景模式**：{new-build / enhancement / inventory}
-**ID Scope**：{scope}
 
 ---
 

@@ -19,11 +19,8 @@ change_refs: []
 
 **文档编号**：ARCH-{YYYY-MM-DD}-{slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **来源输入**：{SRS / UI 内容规格 / 设计规范 / 项目目录 / 用户输入}
 **技术域**：{app / web / mini-program / desktop / backend-service / cli-tool / job-async / integration / data / hybrid-software}
-**ID Scope**：{scope}
 
 > 正式写法只使用文档内编号，例如 `ARCH-001`、`DEC-001`、`CONSTRAINT-001`、`RISK-001`。跨文档来源后续由 `change-context.md` 或 `source-map.md` 记录；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 

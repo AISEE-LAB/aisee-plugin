@@ -3,15 +3,24 @@
 用于 `enhancement + standard` 场景：基于现有系统二次开发，只描述新增、变更、下线和未知部分。
 
 ```markdown
+---
+title: "UI 内容规格：{功能名}"
+doc_type: "ui-content"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{作者或团队}"
+source_refs:
+  - "{SRS path or source ref}"
+change_refs: []
+---
+
 # UI 内容增量规格：{功能名}
 
 **文档编号**：UIC-{YYYY-MM-DD}-{slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **来源 SRS / 需求**：{path or description}
 **场景模式**：enhancement
-**ID Scope**：{scope}
 
 > 正式写法只使用文档内编号，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档来源后续由 `source-map.md` 记录；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 

@@ -3,15 +3,24 @@
 用于 Epic 模式的 `00-index.md`。索引只写总览、文档导航、页面总览、流程总览和追踪总表，不展开完整页面详情。
 
 ```markdown
+---
+title: "UI 内容规格：{功能名}"
+doc_type: "ui-content"
+status: "draft"
+date: "{date}"
+scope: "{scope}"
+owner: "{作者或团队}"
+source_refs:
+  - "{SRS path or source ref}"
+change_refs: []
+---
+
 # UI 内容规格索引：{功能名}
 
 **文档编号**：UIC-{YYYY-MM-DD}-{slug}-index
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **来源 SRS / 需求**：{path or description}
 **场景模式**：{new-build / enhancement / inventory}
-**ID Scope**：{scope}
 
 > 正式写法只使用文档内编号，例如 `PAGE-001`、`FLOW-001`、`STATE-001`。跨文档来源后续由 `source-map.md` 记录；无法确定最终编号时使用 `TYPE-NEW-001` 临时占位符，并标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
 

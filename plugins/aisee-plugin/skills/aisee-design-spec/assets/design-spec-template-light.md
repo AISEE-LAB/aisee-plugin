@@ -3,12 +3,22 @@
 用于功能级、局部模块或只需要约束下游设计/实现的小范围设计规范。
 
 ```markdown
+---
+title: "Design Spec：{功能 / 模块名}"
+doc_type: "design-spec"
+status: "draft"
+date: "{date}"
+scope: "{project / module / feature}"
+owner: "{作者或团队}"
+source_refs:
+  - "{SRS / UI Content / Architecture / Design Assets}"
+change_refs: []
+---
+
 # Design Spec：{功能 / 模块名}
 
 **文档编号**：DS-{YYYY-MM-DD}-{slug}
 **版本**：v1.0
-**状态**：草稿
-**创建日期**：{date}
 **来源输入**：{SRS / UI Content / Architecture / Design Assets / 用户输入}
 **设计策略**：adopt / extend / rewrite
 
