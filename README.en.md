@@ -251,12 +251,18 @@ If the project has not initialized OpenSpec yet:
 aisee openspec ensure --json
 ```
 
-This command bridges OpenSpec initialization with conservative defaults:
+This command auto-selects OpenSpec tools from the current agent runtime (`codex` by default in Codex; falls back to `none` when no supported runtime is detected), ensures project-local OpenSpec instructions/skills are installed or refreshed, and aligns the global profile:
 
 ```text
-openspec init . --tools none --profile core
+openspec init . --tools <detected-runtime-or-none> --profile core
 openspec config profile core
 openspec update .
+```
+
+If you only want the OpenSpec directory layout without installing OpenSpec-provided agent skills/instructions, pass:
+
+```bash
+aisee openspec ensure --tools none --json
 ```
 
 Schema packs come from the marketplace-installed plugin. `aisee schemas list/check` only reports project-installed schema state or source-checkout development schema state; it does not install schemas automatically.
@@ -279,7 +285,7 @@ aisee doctor --json
 - [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, source-map/numbering rules, and contract attachment boundaries.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
-- [Release And Version Governance](docs/release.md): single version source, release checks, and tag rules.
+- [CHANGELOG.md](CHANGELOG.md): release history, shipped notes, and user-visible changes for published versions.
 
 ## Typical Workflow
 
@@ -408,7 +414,7 @@ Key CLI rules:
 - `aisee knowledge promote-batch` only writes the local team knowledge worktree; it does not commit, push, or create PRs.
 - OpenSpec artifacts and `source-map.md` are formal inputs for context packs.
 - `bootstrap --plan` is a read-only plan and does not perform broad initialization writes.
-- `aisee openspec ensure` only bridges OpenSpec initialization, profile setup, and instruction file refresh. It does not replace `aisee:init`.
+- `aisee openspec ensure` installs or refreshes project-local OpenSpec instructions/skills and also aligns the global profile. It does not replace `aisee:init`.
 - `aisee knowledge query` returns only a small number of guardrails. By default it reads pack manifests and card frontmatter; `--debug` is required for matched card body excerpts.
 
 ### Project Memory

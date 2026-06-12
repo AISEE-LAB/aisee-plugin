@@ -51,8 +51,15 @@ def main() -> int:
     openspec_subparsers = openspec_parser.add_subparsers(dest="openspec_command")
     openspec_ensure_parser = openspec_subparsers.add_parser("ensure")
     openspec_ensure_parser.add_argument("--profile", default="core", help="OpenSpec profile preset; default: core")
-    openspec_ensure_parser.add_argument("--tools", default="none", help="OpenSpec AI tools value for init; default: none")
-    openspec_ensure_parser.add_argument("--skip-profile", action="store_true", help="do not run openspec config profile")
+    openspec_ensure_parser.add_argument(
+        "--tools",
+        help="OpenSpec AI tools value for init; default: auto-detect current agent runtime, fallback: none",
+    )
+    openspec_ensure_parser.add_argument(
+        "--skip-profile",
+        action="store_true",
+        help="do not run global openspec config profile alignment",
+    )
     openspec_ensure_parser.add_argument("--skip-update", action="store_true", help="do not run openspec update")
     openspec_ensure_parser.add_argument("--force", action="store_true", help="pass --force to openspec init when initialization is needed")
     openspec_ensure_parser.add_argument("--json", action="store_true", help="output JSON")

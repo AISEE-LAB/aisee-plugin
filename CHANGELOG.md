@@ -2,7 +2,14 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
-## [Unreleased]
+## [0.10.0] - 2026-06-12
+
+### Changed
+
+- `aisee openspec ensure --json` 改为默认按当前 agent runtime 自动选择 OpenSpec `--tools`，在 Codex 下会安装或刷新项目目录内的 `.codex/skills`，不再默认走 `--tools none`。
+- `aisee openspec ensure --json` 的初始化检测兼容新版 OpenSpec 目录结构；已有 `openspec/specs` 与 `openspec/changes` 的项目现在也能正确补装项目内 OpenSpec instructions / skills。
+- `aisee openspec ensure --json` 的文档、help 和 workflow 说明统一明确：`openspec config profile` 只负责全局配置对齐，项目目录写入由 `openspec init/update` 完成。
+- 版本治理说明收敛到 `CHANGELOG.md`、`docs/compatibility-policy.md` 与 `CONTRIBUTING.md`；删除 `docs/release.md`，并移除 `Unreleased` 段，避免双重维护和发布后漏改文档。
 
 ## [0.9.1] - 2026-06-11
 

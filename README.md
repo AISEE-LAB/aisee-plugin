@@ -251,12 +251,18 @@ aisee plugin inspect --json
 aisee openspec ensure --json
 ```
 
-该命令使用保守默认值桥接 OpenSpec 初始化：
+该命令会按当前 agent runtime 自动选择 OpenSpec tools（Codex 默认是 `codex`；无法识别时回退到 `none`），确保 OpenSpec 的项目内 instructions / skills 已安装或已刷新，并对齐全局 profile：
 
 ```text
-openspec init . --tools none --profile core
+openspec init . --tools <detected-runtime-or-none> --profile core
 openspec config profile core
 openspec update .
+```
+
+如果只想创建 OpenSpec 目录而不安装 OpenSpec 提供的 agent skills / instructions，可显式传入：
+
+```bash
+aisee openspec ensure --tools none --json
 ```
 
 Schema packs 来自 marketplace-installed plugin。`aisee schemas list/check` 只报告项目已安装 schema 状态或开发期源码 schema 状态；不会由 CLI 自动安装 schema。
@@ -279,7 +285,7 @@ aisee doctor --json
 - [Schema Packs](docs/schema-packs.md)：说明 schema 选择、app schema artifact DAG、source-map/编号规则和契约附件边界。
 - [Aisee / OpenSpec / Compound Engineering 融合方案](docs/architecture/aisee-openspec-compound-integration.md)：高层职责边界和历史决策快照。
 - [OpenSpec 多 Schema 最佳实践](docs/architecture/openspec-multi-schema-best-practices.md)：多 schema 共存、冲突和管理规则。
-- [Release And Version Governance](docs/release.md)：版本号单一事实源、发布检查和 tag 规则。
+- [CHANGELOG.md](CHANGELOG.md)：版本历史、发布说明和已发布版本的用户可见变更。
 
 ## 典型流程
 
@@ -407,7 +413,7 @@ CLI 关键规则：
 - `aisee knowledge promote-batch` 只写本地 team knowledge worktree，不自动 commit、push 或创建 PR。
 - OpenSpec artifacts 和 `source-map.md` 是 context pack 的正式输入。
 - `bootstrap --plan` 是只读计划，不做大而全初始化写入。
-- `aisee openspec ensure` 只桥接 OpenSpec 初始化、profile 设置和 instruction files 刷新，不替代 `aisee:init`。
+- `aisee openspec ensure` 负责项目目录内 OpenSpec instructions / skills 的安装或刷新，并顺带对齐全局 profile；它不替代 `aisee:init`。
 - `aisee knowledge query` 只返回少量 guardrails；默认只读 pack manifest 和 card frontmatter，`--debug` 才包含命中 card 的正文摘要。
 
 ### 项目记忆

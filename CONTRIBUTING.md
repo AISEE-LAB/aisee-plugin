@@ -23,7 +23,14 @@ python -m pytest
 python scripts/check_versions.py
 ```
 
-发布前 smoke test 见 [docs/release.md](docs/release.md)。
+发布前最小 smoke test：
+
+```bash
+python scripts/sync_versions.py
+python scripts/check_versions.py
+pytest -q
+python scripts/smoke_release.py
+```
 
 ## 设计边界
 
@@ -94,7 +101,7 @@ python scripts/sync_versions.py
 python scripts/check_versions.py
 ```
 
-版本规则见 [docs/release.md](docs/release.md)。
+版本规则见 [docs/compatibility-policy.md](docs/compatibility-policy.md)，已发布版本的变更说明统一写入 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 提交规范
 

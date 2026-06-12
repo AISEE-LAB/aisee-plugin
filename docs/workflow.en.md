@@ -28,6 +28,8 @@ codex plugin add aisee-plugin@aisee-plugin
 aisee doctor --json
 ```
 
+Boundary note: `aisee openspec ensure` is the step that writes OpenSpec instructions/skills into the current project directory and also aligns global `openspec config profile`; do not treat `config profile` itself as the project-local installation step.
+
 Use `aisee:init` to audit or create:
 
 - `AGENTS.md`

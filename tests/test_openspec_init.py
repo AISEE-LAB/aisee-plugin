@@ -53,7 +53,7 @@ if sys.argv[1:3] == ["config", "profile"]:
 
 if len(sys.argv) >= 2 and sys.argv[1] == "init":
     (root / "openspec" / "changes" / "archive").mkdir(parents=True, exist_ok=True)
-    (root / "openspec" / "config.yaml").write_text("version: 1\\n", encoding="utf-8")
+    (root / "openspec" / "specs").mkdir(parents=True, exist_ok=True)
     print("Initialized OpenSpec")
     raise SystemExit(0)
 
@@ -91,17 +91,63 @@ def test_openspec_ensure_runs_init_and_profile_by_default(tmp_path: Path) -> Non
     assert data["meta"]["profile"] == "core"
     assert data["meta"]["profile_default_executes"] is True
     assert data["meta"]["update_default_executes"] is True
-    assert data["operations"][0]["command"] == "openspec init . --tools none --profile core"
+    assert data["meta"]["tools"] == "codex"
+    assert data["meta"]["tools_source"] == "runtime-default"
+    assert data["operations"][0]["command"] == "openspec init . --tools codex --profile core"
     assert data["operations"][1]["command"] == "openspec config profile core"
     assert data["operations"][2]["command"] == "openspec update ."
     assert read_calls(project) == [
-        ["init", ".", "--tools", "none", "--profile", "core"],
+        ["init", ".", "--tools", "codex", "--profile", "core"],
         ["config", "profile", "core"],
         ["update", "."],
     ]
 
 
-def test_openspec_ensure_skips_init_but_still_runs_profile(tmp_path: Path) -> None:
+def test_openspec_ensure_replays_init_for_runtime_tools_on_initialized_project(tmp_path: Path) -> None:
+    bin_dir = tmp_path / "bin"
+    install_fake_openspec(bin_dir)
+    project = tmp_path / "project"
+    (project / "openspec" / "changes").mkdir(parents=True)
+    (project / "openspec" / "specs").mkdir(parents=True)
+
+    result = run_aisee(project, "openspec", "ensure", "--json", path_prefix=bin_dir)
+    data = json.loads(result.stdout)
+
+    assert result.returncode == 0
+    assert data["status"] == "ok"
+    assert data["operations"][0]["command"] == "openspec init . --tools codex --profile core"
+    assert data["operations"][1]["command"] == "openspec config profile core"
+    assert data["operations"][2]["command"] == "openspec update ."
+    assert read_calls(project) == [
+        ["init", ".", "--tools", "codex", "--profile", "core"],
+        ["config", "profile", "core"],
+        ["update", "."],
+    ]
+
+
+def test_openspec_ensure_can_skip_update(tmp_path: Path) -> None:
+    bin_dir = tmp_path / "bin"
+    install_fake_openspec(bin_dir)
+    project = tmp_path / "project"
+    project.mkdir()
+
+    result = run_aisee(project, "openspec", "ensure", "--tools", "none", "--skip-update", "--json", path_prefix=bin_dir)
+    data = json.loads(result.stdout)
+
+    assert result.returncode == 0
+    assert data["status"] == "ok"
+    assert data["meta"]["tools"] == "none"
+    assert data["meta"]["tools_source"] == "explicit"
+    assert data["meta"]["update_default_executes"] is False
+    assert data["operations"][2]["command"] == "openspec update"
+    assert data["operations"][2]["status"] == "skipped"
+    assert read_calls(project) == [
+        ["init", ".", "--tools", "none", "--profile", "core"],
+        ["config", "profile", "core"],
+    ]
+
+
+def test_openspec_ensure_accepts_legacy_config_yaml_marker(tmp_path: Path) -> None:
     bin_dir = tmp_path / "bin"
     install_fake_openspec(bin_dir)
     project = tmp_path / "project"
@@ -113,30 +159,28 @@ def test_openspec_ensure_skips_init_but_still_runs_profile(tmp_path: Path) -> No
 
     assert result.returncode == 0
     assert data["status"] == "ok"
-    assert data["operations"][0]["status"] == "skipped"
-    assert data["operations"][1]["command"] == "openspec config profile core"
-    assert data["operations"][2]["command"] == "openspec update ."
-    assert read_calls(project) == [["config", "profile", "core"], ["update", "."]]
+    assert data["operations"][0]["command"] == "openspec init . --tools codex --profile core"
+    assert read_calls(project) == [
+        ["init", ".", "--tools", "codex", "--profile", "core"],
+        ["config", "profile", "core"],
+        ["update", "."],
+    ]
 
 
-def test_openspec_ensure_can_skip_update(tmp_path: Path) -> None:
+def test_openspec_ensure_can_skip_init_on_initialized_project_when_tools_none(tmp_path: Path) -> None:
     bin_dir = tmp_path / "bin"
     install_fake_openspec(bin_dir)
     project = tmp_path / "project"
-    project.mkdir()
+    (project / "openspec" / "changes").mkdir(parents=True)
+    (project / "openspec" / "specs").mkdir(parents=True)
 
-    result = run_aisee(project, "openspec", "ensure", "--skip-update", "--json", path_prefix=bin_dir)
+    result = run_aisee(project, "openspec", "ensure", "--tools", "none", "--json", path_prefix=bin_dir)
     data = json.loads(result.stdout)
 
     assert result.returncode == 0
     assert data["status"] == "ok"
-    assert data["meta"]["update_default_executes"] is False
-    assert data["operations"][2]["command"] == "openspec update"
-    assert data["operations"][2]["status"] == "skipped"
-    assert read_calls(project) == [
-        ["init", ".", "--tools", "none", "--profile", "core"],
-        ["config", "profile", "core"],
-    ]
+    assert data["operations"][0]["status"] == "skipped"
+    assert read_calls(project) == [["config", "profile", "core"], ["update", "."]]
 
 
 def test_openspec_ensure_blocks_unsupported_profile_before_running(tmp_path: Path) -> None:

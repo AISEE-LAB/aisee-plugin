@@ -40,22 +40,24 @@ description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。仅适用
 执行任何初始化、审计或优化前，先确认项目已由 OpenSpec 初始化：
 
 ```bash
-node -e "const fs=require('fs'); for (const [p,t] of [['openspec/config.yaml','file'],['openspec/changes','dir'],['openspec/changes/archive','dir']]) { try { const s=fs.statSync(p); console.log(p + ':' + ((t==='dir'?s.isDirectory():s.isFile())?'ok':'bad')); } catch { console.log(p + ':missing'); } }"
+node -e "const fs=require('fs'); for (const [p,t] of [['openspec/specs','dir'],['openspec/changes','dir'],['openspec/changes/archive','dir']]) { try { const s=fs.statSync(p); console.log(p + ':' + ((t==='dir'?s.isDirectory():s.isFile())?'ok':'bad')); } catch { console.log(p + ':missing'); } }"
 node -e "const {execSync}=require('child_process'); try { execSync('openspec --version',{stdio:'ignore'}); console.log('openspec:ok'); } catch { console.log('openspec:missing'); }"
 ```
 
-如果缺少 `openspec/config.yaml` 或 `openspec/changes/`，先判断用户是否明确要接入 OpenSpec：
+如果缺少 `openspec/specs/` 或 `openspec/changes/`，先判断用户是否明确要接入 OpenSpec：
 
-- 若用户明确要接入：优先运行 `aisee openspec ensure --json`，并解析 JSON 结果；该命令负责非交互桥接 `openspec init . --tools none --profile core`、`openspec config profile core` 和 `openspec update .`。
+- 若用户明确要接入：优先运行 `aisee openspec ensure --json`，并解析 JSON 结果；该命令会按当前 agent runtime 自动选择 OpenSpec tools（Codex 默认是 `codex`；无法识别时回退到 `none`），确保 OpenSpec 的项目内 instructions / skills 已安装或已刷新，并顺带执行全局 `openspec config profile core` 对齐。
 - 若用户未明确要接入，或明确表示当前项目不使用 OpenSpec：停止，并说明 `aisee:init` 不适用；不要生成项目级 `AGENTS.md` 或其它 OpenSpec/Aisee 配置文件。
 
 在允许接入但 `aisee openspec ensure --json` 不可用的场景中，停止并提示用户先运行等价 OpenSpec 命令：
 
 ```bash
-openspec init . --tools none --profile core
+openspec init . --tools codex --profile core
 openspec config profile core
 openspec update .
 ```
+
+如果用户明确只想创建 OpenSpec 目录而不安装 OpenSpec 提供的 agent skills / instructions，再改为 `--tools none`。
 
 不要直接执行交互式 `openspec init` / `openspec config profile`，不要手动替代 OpenSpec CLI 创建或刷新 `openspec/` 与 instruction files。
 

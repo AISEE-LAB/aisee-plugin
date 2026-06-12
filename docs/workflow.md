@@ -28,6 +28,8 @@ codex plugin add aisee-plugin@aisee-plugin
 aisee doctor --json
 ```
 
+这里的边界是：`aisee openspec ensure` 负责把 OpenSpec 的 instructions / skills 写入当前项目目录，并顺带对齐全局 `openspec config profile`；不要把 `config profile` 本身理解成项目目录安装步骤。
+
 推荐同时使用 `aisee:init` 审计或生成：
 
 - `AGENTS.md`
