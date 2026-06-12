@@ -93,7 +93,7 @@ Baseline-aware 模式不得：
 - 待确认假设：{list or "无"}
 - 已识别风险：{list or "无"}
 - 基线感知：启用 / 未启用（如启用，列出主要影响基线）
-- 后续建议：UI Content 需要 / 不需要；Architecture 需要 / 不需要；change-plan 输入是否已充足
+- 后续建议：UI Content 需要 / 不需要；Architecture 需要 / 不需要；仍待确认的关键问题
 - 输出模式：标准模式 / Epic 模式
 
 主流程预览：
@@ -105,7 +105,7 @@ Baseline-aware 模式不得：
 
 ```text
 需求体量较大，将生成 1 份主文档 + {N} 份模块文档。
-主文档：系统概述、跨模块约束、术语表、变更候选清单
+主文档：系统概述、跨模块约束、术语表和全局约束
 模块文档：{模块 1} / {模块 2} / ...
 ```
 
@@ -125,7 +125,7 @@ Baseline-aware 模式不得：
 4. 只读取 `references/scenario-extension-blocks.md` 中与当前场景相关的块。
 5. 为 `FR / NFR / RULE / FLOW / STATE` 预留正式 ID，或在工具不可用时标注临时 ID。
 6. 填写所有已确认需求、假设、Open Questions 和 baseline-aware 字段。
-7. 在交接章节写明给 `aisee:ui-content`、`aisee:architecture` 和 `aisee:change-plan` 的规划提示；不得补实现级设计。
+7. 仅在有价值时追加精简下游建议：是否建议进入 `aisee:ui-content`、`aisee:architecture`，以及仍待确认的关键问题；不得预写 `aisee:change-plan` 结果或实现级设计。
 
 ### Epic 模式
 
@@ -134,7 +134,7 @@ Baseline-aware 模式不得：
 Step 1：生成主文档。
 
 - 读取 `assets/srs-template.md`、`references/writing-rules.md` 和 `assets/srs-template-epic-main.md`。
-- 包含系统概述、全局上下文、非功能需求、约束、假设、Open Questions、模块索引和变更候选索引。
+- 包含系统概述、全局上下文、非功能需求、约束、假设、Open Questions 和模块索引。
 - 详细 FR 放入模块文档；主文档中每个 FR 都链接到对应模块文档。
 - 如果启用 baseline-aware 模式，写明全局基线影响，并在可用时标注每个 FR 的变更类型和影响基线。
 
@@ -144,7 +144,7 @@ Step 2：逐个生成模块文档。
 
 - 读取 `assets/srs-template-epic-module.md`。
 - 只读取该模块需要的场景扩展块。
-- 每份模块文档都必须包含足够的局部上下文，确保能单独传给 `aisee:change-plan`：模块目的、相关用户、业务对象 / 状态、关键规则、非目标、FR 详情、模块假设、Open Questions 和交接提示。
+- 每份模块文档都必须包含足够的局部上下文，确保能单独传给 `aisee:change-plan`：模块目的、相关用户、业务对象 / 状态、关键规则、非目标、FR 详情、模块假设和 Open Questions；下游建议仅在确有价值时精简保留。
 - 如果启用 baseline-aware 模式，每条 FR 都必须包含变更类型和影响基线。
 
 每份模块文档生成后暂停，并询问是否继续。

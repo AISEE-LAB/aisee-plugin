@@ -18,11 +18,11 @@
           "用户只给出初步业务范围，没有完整规则、权限、异常和 MVP 边界。"
         ]
       },
-      "expected_output": "应先做业务需求澄清，确认用户、业务目标、MVP、规则、权限和异常；生成的 SRS 应包含 FR、业务对象与状态、变更候选清单和后续交接提示；不得输出 API path、数据库表字段、前端组件或实现任务。",
+      "expected_output": "应先做业务需求澄清，确认用户、业务目标、MVP、规则、权限和异常；生成的 SRS 应包含 FR、业务对象与状态，以及精简的下游建议（如是否需要 UI Content / Architecture）；不得输出 API path、数据库表字段、前端组件、实现任务或 change-plan 预结果。",
       "expected_outputs": [
         "先澄清优惠券类型、领取/使用/停用规则、权限、异常和 MVP 范围。",
-        "生成 SRS 时包含功能需求、业务对象与状态、验收方向、变更候选清单和后续交接提示。",
-        "把 UI Content、Architecture、change-plan 的后续输入提示分开说明。"
+        "生成 SRS 时包含功能需求、业务对象与状态、验收方向，以及精简的下游建议。",
+        "只简要说明 UI Content、Architecture 是否需要，不预写 change-plan 结果。"
       ],
       "must_ask": [
         "优惠券类型、面额、门槛、有效期、发放数量和停用规则是否有业务限制？",
@@ -32,8 +32,7 @@
       "must_include": [
         "FR 列表",
         "业务对象与状态",
-        "变更候选清单",
-        "后续交接提示"
+        "精简下游建议"
       ],
       "must_not": [
         "不得输出 API path。",
@@ -60,11 +59,11 @@
           "用户明确说明没有页面。"
         ]
       },
-      "expected_output": "应识别为非 UI 型需求，SRS 应覆盖业务对象、等级规则、定时触发、通知、异常和验收方向；Section 8 应标注 UI Content 不需要、Architecture 需要，change-plan 可能需要 job/service contract；不得硬造页面。",
+      "expected_output": "应识别为非 UI 型需求，SRS 应覆盖业务对象、等级规则、定时触发、通知、异常和验收方向；精简下游建议应标注 UI Content 不需要、Architecture 需要，并可提示后续可能涉及 job/service contract；不得硬造页面。",
       "expected_outputs": [
         "识别为后端/定时任务型需求，不生成页面清单。",
         "覆盖会员等级、消费统计窗口、升级/降级规则、定时触发、通知、异常和验收方向。",
-        "交接提示中说明 UI Content 可标为 N/A，Architecture 和后续 service/job contract 需要。"
+        "精简下游建议中说明 UI Content 可标为 N/A，Architecture 需要，并提示后续可能涉及 service/job contract。"
       ],
       "must_ask": [
         "等级规则、升级和降级是否都在本期？",

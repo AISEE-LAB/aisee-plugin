@@ -118,6 +118,27 @@ def test_planning_doc_output_templates_use_frontmatter_without_duplicate_header_
                 assert marker not in text
 
 
+def test_srs_skill_keeps_downstream_hints_minimal() -> None:
+    expected_present = {
+        "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-standard.md": "## 7. 下游建议（可选）",
+        "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-epic-main.md": "## 7. 下游建议（可选）",
+        "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-epic-module.md": "## 7. 本模块下游建议（可选）",
+        "plugins/aisee-plugin/skills/aisee-srs/references/writing-rules.md": "### Section 7：下游建议（可选）",
+    }
+    forbidden_markers = [
+        "变更候选清单",
+        "Change Plan 输入提示",
+        "change-plan 输入是否已充足",
+        "规模估算是粗估",
+    ]
+
+    for relative_path, required_marker in expected_present.items():
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert required_marker in text
+        for marker in forbidden_markers:
+            assert marker not in text
+
+
 def test_cli_outputs_keep_marketplace_recovery_hints() -> None:
     import sys
 

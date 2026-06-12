@@ -70,7 +70,7 @@
 - 仅在 baseline-aware 模式下填写；没有可识别基线时写“未发现可信基线来源”，不要猜。
 - 只记录用户可观察业务行为、角色权限、状态、流程、入口、兼容要求的影响。
 - 不写 API endpoint、数据库表字段、ORM、代码模块、迁移脚本或实现方案。
-- 每条受影响 FR 必须在 FR 正文和 Section 7 中标注“变更类型”和“影响基线”。
+- 每条受影响 FR 必须在 FR 正文中标注“变更类型”和“影响基线”。
 - 影响基线来源优先级：`openspec/specs/` > active change artifacts > `aisee/docs/spec-migration/` > 历史 SRS > 用户明确说明 > 从代码推断（低可信，必须标注）。
 
 ### Section 6：Open Questions
@@ -78,9 +78,9 @@
 - 对话中提及但未解决的事项放这里，不放进 FR 正文。
 - 用户未提及但实现时必须明确的事项也放这里，注明：`(未在需求中提及 — 实施前请确认)`。
 
-### Section 7：变更候选清单
+### Section 7：下游建议（可选）
 
-- 规模估算是粗估，`aisee:change-plan` 会细化。
-- 依赖关系与 FR 正文中的“依赖”字段保持一致。
-- Epic 模式下，主文档 Section 7 中的 FR ID 必须附相对路径链接指向对应模块文档。
-- baseline-aware 模式下，必须包含“变更类型”和“影响基线”列，便于 `aisee:change-plan` 生成 source-map seed。
+- 这一节是可选的；只在确实能帮助后续交接时保留。
+- 只说明是否建议进入 `aisee:ui-content`、`aisee:architecture`，以及实施前仍待确认的关键问题。
+- 不写 change 边界拆分、规模估算、依赖排序、source-map seed 或其它 `aisee:change-plan` 预结果。
+- 不把 UI Content、Architecture 或后续 artifact 的详细内容提前写进本节。

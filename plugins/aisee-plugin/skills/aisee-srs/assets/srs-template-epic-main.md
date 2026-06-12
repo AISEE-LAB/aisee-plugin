@@ -163,44 +163,9 @@ change_refs: []
 
 ---
 
-## 7. 变更候选清单（全局）
+## 7. 下游建议（可选）
 
-> 以下功能需求按优先级和依赖关系排列，可作为 `aisee:change-plan` 的输入。FR ID 链接到对应模块文档。
-
-| 优先级 | 需求 ID | 标题 | 变更类型 | 影响基线 | 所属模块 | 估计规模 | 依赖 |
-|--------|---------|------|----------|----------|----------|----------|------|
-| P0 | [{scope}:FR-001](./01-{module-a}.md#fr-001) | {title} | 新增 / 修改 / 移除 / 兼容 | {baseline ref or 无} | {模块 A} | M | 无 |
-| P0 | [{scope}:FR-002](./01-{module-a}.md#fr-002) | {title} | 修改 | {openspec/specs/...} | {模块 A} | S | {scope}:FR-001 |
-| P1 | [{scope}:FR-003](./02-{module-b}.md#fr-003) | {title} | 新增 | 无 | {模块 B} | L | 无 |
-
----
-
-## 8. 后续交接提示
-
-### 8.1 UI Content 建议
-
-| 模块 / FR | 是否建议生成 UI Content | 原因 | 关注点 |
-|-----------|--------------------------|------|--------|
-| {模块 / FR-xxx} | 是/否 | {多页面 / 多角色 / 多端 / 状态反馈复杂 / 无 UI} | {页面入口、状态、权限、流程等} |
-
-### 8.2 Architecture 建议
-
-| 关注点 | 是否需要补充 | 原因 |
-|--------|--------------|------|
-| 技术栈状态 | 是/否 | {已明确 / 未明确 / 既有项目需扫描} |
-| 既有能力复用 | 是/否 | {鉴权、权限、文件、通知、队列、审计等} |
-| 外部系统 / 异步处理 / 数据迁移 | 是/否 | {原因} |
-
-### 8.3 Change Plan 输入提示
-
-- 建议优先拆分的业务边界：{module / flow / role / state}
-- 不建议拆散的能力：{reason}
-- 需要在 change authoring 前确认的问题：{Q-xxx or 无}
-
-**下一步**：将各模块文档路径传入 `aisee:change-plan`，进行 Change 边界规划：
-
-\`\`\`
-aisee:change-plan aisee/docs/requirements/{slug}/01-{module-a}.md
-aisee:change-plan aisee/docs/requirements/{slug}/02-{module-b}.md
-\`\`\`
+- UI Content：需要 / 不需要；关注模块：{模块 A / 模块 B / N/A}
+- Architecture：需要 / 不需要；关注点：{共享能力复用、权限模型、外部系统、异步处理或 N/A}
+- 进入后续规划前仍需确认：{Q-xxx / 无}
 ```
