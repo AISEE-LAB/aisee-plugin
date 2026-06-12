@@ -258,6 +258,22 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) ->
     assert candidates_by_name["ce-work"]["kind"] == "compound-skill"
     assert candidates_by_name["ce-work"]["status"] == "available"
     assert pack["facts"]["derived"]["implementation_references"]["unmapped_reference_paths"] == []
+    assert pack["facts"]["derived"]["artifact_order"] == [
+        "proposal",
+        "source-map",
+        "specs",
+        "change-context",
+        "service-contract",
+        "tasks",
+    ]
+    assert [item["id"] for item in pack["facts"]["parsed"]["schema"]["artifacts"]] == [
+        "proposal",
+        "source-map",
+        "specs",
+        "change-context",
+        "service-contract",
+        "tasks",
+    ]
     assert pack["generated"] is None
     assert pack["facts"]["parsed"]["source_map"]["parse_level"] == "structured"
     assert pack["facts"]["parsed"]["source_map"]["implementation_paths"]
@@ -481,6 +497,82 @@ def test_quick_fix_pack_does_not_require_source_map(tmp_path: Path) -> None:
     assert pack["facts"]["derived"]["execution"]["allowed_paths"] == [
         "src/auth/login_view.py",
         "tests/auth/test_login_view.py",
+    ]
+
+
+def test_artifact_order_keeps_apply_track_last_among_ready_artifacts(tmp_path: Path) -> None:
+    write(tmp_path / "AGENTS.md", "# Rules\n")
+    write(tmp_path / "openspec" / "config.yaml", "schema: demo\n")
+    write(
+        tmp_path / "openspec" / "schemas" / "demo" / "schema.yaml",
+        """name: demo
+version: 1
+capabilities:
+  - source_map_routing
+  - apply_execution
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    template: proposal.md
+    requires: []
+    requiredness: always
+    capabilities: [primary_brief]
+  - id: source-map
+    generates: source-map.md
+    template: source-map.md
+    requires: [proposal]
+    requiredness: always
+    capabilities: [source_map]
+  - id: specs
+    generates: specs/**/*.md
+    template: spec.md
+    requires: [source-map]
+    requiredness: always
+    capabilities: [behavior_spec]
+  - id: ui-contract
+    generates: ui-contract.md
+    template: ui-contract.md
+    requires: [source-map, specs]
+    requiredness: conditional
+    na_requires_reason: true
+    capabilities: [contract_surface]
+  - id: tasks
+    generates: tasks.md
+    template: tasks.md
+    requires: [source-map, specs]
+    requiredness: always
+    capabilities: [apply_track]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+""",
+    )
+    schema_templates = tmp_path / "openspec" / "schemas" / "demo" / "templates"
+    for template in ("proposal.md", "source-map.md", "spec.md", "ui-contract.md", "tasks.md"):
+        write(schema_templates / template, f"# {template}\n")
+    change = tmp_path / "openspec" / "changes" / "demo-change"
+    write(change / ".openspec.yaml", "schema: demo\n")
+    write(change / "proposal.md", "# Proposal\n")
+    write(change / "source-map.md", "# Source Map\n")
+    write(change / "specs" / "demo.md", "## ADDED Requirements\n")
+    write(change / "ui-contract.md", "# UI Contract\n")
+    write(change / "tasks.md", "# Tasks\n\n- [ ] TASK-001 demo\n")
+
+    pack = build_context_pack(tmp_path, "demo-change", "aisee-verify")
+
+    assert pack["facts"]["derived"]["artifact_order"] == [
+        "proposal",
+        "source-map",
+        "specs",
+        "ui-contract",
+        "tasks",
+    ]
+    assert [item["id"] for item in pack["facts"]["parsed"]["schema"]["artifacts"]] == [
+        "proposal",
+        "source-map",
+        "specs",
+        "ui-contract",
+        "tasks",
     ]
 
 

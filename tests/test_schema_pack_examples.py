@@ -69,8 +69,14 @@ def test_schema_examples_are_repository_plugin_content_not_packaged_assets() -> 
 def test_app_schema_templates_allow_user_input_source_without_fake_srs_ref() -> None:
     source_map_template = (SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "templates" / "source-map.md").read_text(encoding="utf-8")
     proposal_template = (SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "templates" / "proposal.md").read_text(encoding="utf-8")
+    ui_contract_template = (SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "templates" / "ui-contract.md").read_text(encoding="utf-8")
+    service_contract_template = (SCHEMA_PACK_ROOT / "aisee-app-spec-driven" / "templates" / "service-contract.md").read_text(encoding="utf-8")
 
     assert "FR | docs/requirements/...#FR-001 / N/A" in source_map_template
     assert "不要为了消除空值伪造" in source_map_template
     assert "上游来源" in source_map_template
     assert "来源摘要放到 `source-map.md` 的“上游来源”" in proposal_template
+    assert "## 最小来源声明" in ui_contract_template
+    assert "不在本文重复：source-map.md 的完整来源路由" in ui_contract_template
+    assert "## 最小来源声明" in service_contract_template
+    assert "不在本文重复：source-map.md 的完整来源路由" in service_contract_template

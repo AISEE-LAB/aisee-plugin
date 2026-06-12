@@ -2,6 +2,15 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
+## [0.11.1] - 2026-06-12
+
+### Changed
+
+- `aisee context pack --json` 新增稳定的 `facts.derived.artifact_order`，并将 `facts.parsed.schema.artifacts` 调整为按 schema DAG 输出，避免展示层把 `tasks.md` 排到按需 contracts 之前。
+- `aisee-app-spec-driven` 的 author 规则明确 `tasks.md` 作为 app schema 的收口 artifact，默认在 `Required=yes` 的适用 artifacts 之后生成。
+- `ui-contract.md` 与 `service-contract.md` 模板改为“最小来源声明”，不再重复 `source-map.md` 的完整来源路由。
+- `change-context.md` 模板与 schema 说明明确优先复用上游 `DEC / CONSTRAINT / RISK`，减少不必要的局部临时编号。
+
 ## [0.11.0] - 2026-06-12
 
 ### Changed

@@ -215,6 +215,7 @@ Rules:
     "referenced_paths": [],
     "unmapped_reference_paths": []
   },
+  "artifact_order": [],
   "task_state": {
     "total": 0,
     "done": 0,
@@ -229,6 +230,7 @@ Rules:
 Rules:
 
 - `read_order` 只能来自当前 change、schema artifact DAG、`source-map.md`（如适用）和 project rules。
+- `artifact_order` 表示当前 schema artifacts 的稳定 author / 展示顺序；优先遵循 `artifacts[].requires`，同层级默认保持 schema 声明顺序，`apply_track` artifact 置后。
 - `scope.in/out` 来自 proposal、当前 schema artifacts、source-map（如适用）和 apply tracks。
 - `follow_up_candidates` 可记录实现中发现但未纳入当前 change 的问题。
 - 对生成 `source-map.md` 的 schema，`code_paths` 和 `test_paths` 优先来自 `source-map.md` 的 `Affected Paths Index` 结构化声明。

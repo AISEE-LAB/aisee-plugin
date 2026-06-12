@@ -23,7 +23,8 @@ N/A 原因：
 
 ## 本 Change 局部决策
 
-- DEC-NEW-001 [NUMBERING-FINALIZATION-REQUIRED]：
+- 仅当无法直接归属到现有上游 `DEC / CONSTRAINT / RISK` 时，才新增局部编号。
+- DEC-NEW-001 [NUMBERING-FINALIZATION-REQUIRED] / N/A：
   - 决策：
   - 依据：
   - 影响：

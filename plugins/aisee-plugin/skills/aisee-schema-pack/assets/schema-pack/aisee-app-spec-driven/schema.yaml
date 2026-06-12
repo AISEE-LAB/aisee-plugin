@@ -156,6 +156,8 @@ artifacts:
 
     - 承接 Architecture 中与本 change 相关的 ARCH / DEC / CONSTRAINT / RISK
 
+    - 优先复用上游 ARCH / DEC / CONSTRAINT / RISK；只有确实新增本 change 局部事项时才新增局部编号
+
     - 新增局部 DEC / CONSTRAINT / RISK 编号时，按当前文档顺序分配；无法确定最终编号时使用临时编号
 
     - 记录本 change 的局部决策、允许偏差、风险和阻塞项
@@ -193,6 +195,8 @@ artifacts:
     - 前端需要的数据与来源能力
 
     - 当前端数据依赖服务契约时，只记录数据需求、能力引用和后端能力状态，不把 ui-contract.md 当作 API 事实源
+
+    - 开头只保留最小来源声明，不重写 source-map.md 的完整来源路由
 
     - 引用 Design Spec / Design Assets / dev-visual-brief 中对本 change 生效的组件库、token、资产、布局、响应式、可访问性、动效和视觉验收约束
 
@@ -265,6 +269,8 @@ artifacts:
 
     - 业务逻辑、状态流转、校验规则、异步任务和通知必须引用 specs / RULE，不复制需求全文
 
+    - 开头只保留最小来源声明，不重写 source-map.md 的完整来源路由
+
     - 数据读写、事务、一致性和失败处理必须引用 data-model.md
 
     - 可观测性、审计、日志、指标和告警要求必须明确
@@ -295,6 +301,8 @@ artifacts:
     - 确认 specs 覆盖本 change 的 FR / NFR / RULE
 
     - 确认 Required=yes 的 change-context / ui-contract / service-contract / data-model 已完成
+
+    - app schema 中，tasks.md 作为 author 收口 artifact，默认放在 Required=yes 的适用 artifacts 之后
 
     - 确认 Required=no 的按需 artifact 已在 source-map.md 写明 N/A 原因
 

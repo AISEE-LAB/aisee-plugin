@@ -7,14 +7,11 @@ N/A 原因：
 > 如果状态为 N/A，写明原因后即可停止，不需要填写后续表格。
 > 本文只描述页面内容结构、状态、操作、权限可见性、前端数据需求，以及本 change 必须遵循的设计规范引用。不要在这里重新定义或复制完整视觉设计、组件库、配色、排版或像素级布局；这些仍以 Design Spec / Design Assets 为事实源。
 
-## 来源与范围
+## 最小来源声明
 
-| 来源 | 路径 / 来源 ID | 关联上游 Ref / Local ID | 本 change 用途 | 备注 |
-|---|---|---|---|---|
-| UI Content | aisee/docs/ui-content/... | docs/...#PAGE-001 / docs/...#FLOW-001 | 页面内容、字段、操作、状态、权限可见性 | |
-| Design Spec | aisee/docs/design-spec/... | PAT-001 / docs/...#PAGE-001 | 组件库策略、tokens、Design Read、响应式、可访问性、验收规则 | 只引用，不复制全文 |
-| Design Assets / dev-visual-brief | aisee/docs/design-assets/... | docs/...#PAGE-001 | 参考图、素材路径、视觉验收重点 | 只引用路径和适用约束 |
-| Architecture / change-context | change-context.md | CONSTRAINT-001 | 平台、前端边界、性能或技术约束 | |
+- 主要来源：UI Content / specs / change-context / Design Spec / Design Assets / dev-visual-brief / N/A
+- 本文覆盖：本 change 受影响的页面、流程、状态、前端数据需求和必要设计约束
+- 不在本文重复：source-map.md 的完整来源路由、完整视觉规范全文、API 字段事实源、实现步骤
 
 ## UI 变更范围
 

@@ -76,7 +76,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     tasks_required = schema_requires_tasks(schema_info)
     source_map = parse_source_map(change_path) if source_map_required else not_applicable_source_map()
 
-    artifact_entries = build_artifact_entries(change_path, artifact_specs)
+    artifact_entries = order_artifact_entries_for_authoring(build_artifact_entries(change_path, artifact_specs))
     full_parsed_artifacts = parse_artifacts(change_path, artifact_entries)
     source_map_text = read_text(change_path / "source-map.md") if source_map_required else ""
     tasks_text = read_text(change_path / "tasks.md") if tasks_required else ""
@@ -188,6 +188,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                     "referenced_paths": referenced_paths,
                     "unmapped_reference_paths": unmapped_reference_paths,
                 },
+                "artifact_order": [entry["id"] for entry in artifact_entries],
                 "task_state": task_state,
                 "verification_requirements": derive_verification_requirements(tasks_text),
                 "open_questions": extract_tagged_lines(combined_text, ("[ASSUMPTION]", "[SPEC-GAP]", "[SOURCE-MAP-GAP]")),
@@ -533,6 +534,45 @@ def build_artifact_entries(change_path: Path, artifact_specs: list[ArtifactSpec]
             }
         )
     return entries
+
+
+def order_artifact_entries_for_authoring(artifact_entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if not artifact_entries:
+        return []
+
+    original_index = {entry["id"]: index for index, entry in enumerate(artifact_entries)}
+    entries_by_id = {entry["id"]: entry for entry in artifact_entries}
+    indegree = {entry["id"]: 0 for entry in artifact_entries}
+    dependents: dict[str, list[str]] = {entry["id"]: [] for entry in artifact_entries}
+
+    for entry in artifact_entries:
+        for required_id in entry.get("requires", []):
+            if required_id not in entries_by_id:
+                continue
+            indegree[entry["id"]] += 1
+            dependents[required_id].append(entry["id"])
+
+    def sort_key(artifact_id: str) -> tuple[int, int]:
+        entry = entries_by_id[artifact_id]
+        capabilities = entry.get("capabilities", [])
+        is_apply_track = 1 if "apply_track" in capabilities else 0
+        return (is_apply_track, original_index[artifact_id])
+
+    ready = sorted((artifact_id for artifact_id, count in indegree.items() if count == 0), key=sort_key)
+    ordered_ids: list[str] = []
+
+    while ready:
+        artifact_id = ready.pop(0)
+        ordered_ids.append(artifact_id)
+        for dependent_id in dependents[artifact_id]:
+            indegree[dependent_id] -= 1
+            if indegree[dependent_id] == 0:
+                ready.append(dependent_id)
+                ready.sort(key=sort_key)
+
+    if len(ordered_ids) != len(artifact_entries):
+        return artifact_entries
+    return [entries_by_id[artifact_id] for artifact_id in ordered_ids]
 
 
 def parse_artifacts(change_path: Path, artifact_entries: list[dict[str, Any]]) -> dict[str, Any]:

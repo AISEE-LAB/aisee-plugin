@@ -7,15 +7,11 @@ N/A 原因：
 > 如果状态为 N/A，写明原因后即可停止，不需要填写后续表格。
 > 本文覆盖 API、后端服务能力、异步任务、定时任务、CLI/工具命令和外部集成。只写服务契约，不写代码实现步骤，不重复 specs 中的业务需求全文。
 
-## 来源与范围
+## 最小来源声明
 
-| 来源 | 路径 / 来源 ID | 关联上游 Ref / Local ID | 本 change 用途 | 备注 |
-|---|---|---|---|---|
-| Specs | specs/... | SPEC-001 | 用户可观察行为和验收场景 | 只引用，不复制场景全文 |
-| UI Contract | ui-contract.md | PAGE-001 / FLOW-001 | 前端数据需求、操作触发点、状态反馈 | N/A 时写原因 |
-| Data Model | data-model.md | DATA-001 | 数据读写对象、字段约束、迁移影响 | N/A 时写原因 |
-| Change Context | change-context.md | CONSTRAINT-001 / RISK-001 | 平台、权限、性能、集成、风险约束 | |
-| Existing system / source-map | source-map.md / code / docs | API-001 | 既有接口、命令、job 或集成事实 | Existing 只引用来源 |
+- 主要来源：specs / ui-contract / data-model / change-context / source-map / 现有代码或文档 / N/A
+- 本文覆盖：本 change 涉及的 API、后端能力、集成、错误语义、契约归属与同步
+- 不在本文重复：source-map.md 的完整来源路由、specs 场景全文、实现步骤、数据库物理迁移脚本
 
 ## 契约归属与同步
 

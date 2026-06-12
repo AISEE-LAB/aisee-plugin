@@ -80,32 +80,33 @@
 
 ## App Schema v2 顺序
 
-`aisee-app-spec-driven` v2 使用同一个 schema，但分为最小闭环和按需 artifacts。
+`aisee-app-spec-driven` v2 仍然以 `proposal.md`、`source-map.md`、`specs/**/*.md` 和 `tasks.md` 构成最小闭环，但 author 顺序不能把 `tasks.md` 提前到按需 artifacts 之前。
 
-最小闭环：
+author 顺序：
 
 ```text
 proposal.md
 source-map.md
 specs/**/*.md
+change-context.md        # Required=yes 时
+ui-contract.md           # Required=yes 时
+data-model.md            # Required=yes 时
+service-contract.md      # Required=yes 时
 tasks.md
 ```
 
-按需 artifacts：
+规则说明：
 
-```text
-change-context.md
-ui-contract.md
-data-model.md
-service-contract.md
-```
+- “最小闭环”表示最少需要哪些 artifacts，`tasks.md` 仍属于闭环的一部分。
+- “author 顺序”表示实际编写先后；`tasks.md` 必须在 Required=yes 的适用 artifacts 之后收口。
+- 多个按需 artifacts 之间如无更强 DAG 约束，优先保持 schema 声明顺序；`apply_track` artifact 置后。
 
 生成规则：
 
 - `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用来源 ref 或编号，不复制上游全文。
 - `source-map.md`：先建立上游来源、产出编号、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
 - `specs/**/*.md`：只写用户可观察行为和验收场景，覆盖 FR / NFR / RULE / FLOW / STATE。
-- `change-context.md`：只在 Required=yes 时承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture。
+- `change-context.md`：只在 Required=yes 时承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture；优先复用上游编号，只有确实新增局部事项时才新增本地编号。
 - `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
 - `data-model.md`：只在 Required=yes 且涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
 - `service-contract.md`：只在 Required=yes 且涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
