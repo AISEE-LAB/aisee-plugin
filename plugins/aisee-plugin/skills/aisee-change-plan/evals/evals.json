@@ -19,10 +19,11 @@
           "邀请链接过期规则仍是待确认业务规则。"
         ]
       },
-      "expected_output": "输出 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。依赖顺序和并行关系必须使用 Mermaid 语法块表达。所有命令必须使用 /opsx:new \"<change>\" --schema <schema>，不得输出 /opsx:propose。应保留 architecture 中的 RBAC 复用事实和邀请链接规则待确认项，并说明后续通过 aisee:change-author（必要时配合 /opsx:continue）按 schema 补齐 artifacts；不得建议使用旧的 change design skill 作为固定后续步骤。",
+      "expected_output": "输出 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。依赖顺序和并行关系必须使用 Mermaid 语法块表达。摘要中的 change/phase 数量、Mermaid phase 数量、change 详情块数量和 `/opsx:new` 命令数量必须一致。所有命令必须使用 /opsx:new \"<change>\" --schema <schema>，不得输出 /opsx:propose。应保留 architecture 中的 RBAC 复用事实和邀请链接规则待确认项，并说明后续通过 aisee:change-author（必要时配合 /opsx:continue）按 schema 补齐 artifacts；不得建议使用旧的 change design skill 作为固定后续步骤。",
       "expected_outputs": [
         "输出可独立交付的 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。",
         "使用 Mermaid 语法块表达依赖顺序和并行关系。",
+        "保持摘要、Mermaid 图、change 详情块和命令区的 change/phase 数量一致。",
         "使用 /opsx:new \"<change>\" --schema <schema>。",
         "保留 RBAC 复用事实和邀请链接过期规则待确认项。",
         "说明后续通过 aisee:change-author 或 /opsx:continue 补齐 artifacts。"
@@ -35,6 +36,7 @@
         "change 边界",
         "Mermaid 依赖图",
         "依赖顺序",
+        "Metadata gate",
         "source-map seed",
         "/opsx:new 命令"
       ],
@@ -63,10 +65,11 @@
           "已有项目、权限和列表页存在。"
         ]
       },
-      "expected_output": "判断这是单个小 change，不为了流程而规划多个 change。输出一个 change 详情块、单节点 Mermaid 依赖图和单条 /opsx:new 命令，不得输出 /opsx:propose，也不得新增未确认的后端、数据库或 UI 需求。",
+      "expected_output": "判断这是单个小 change，不为了流程而规划多个 change。输出一个 change 详情块、单节点 Mermaid 依赖图和单条 /opsx:new 命令，不得输出 /opsx:propose，也不得新增未确认的后端、数据库或 UI 需求。摘要中的 change 数和命令数必须为 1，phase 数也必须与 Mermaid 图一致。",
       "expected_outputs": [
         "判断为单个小 change。",
         "输出一个 change 详情块、单节点 Mermaid 依赖图和单条 /opsx:new 命令。",
+        "保持摘要、Mermaid 图和命令区的计数一致。",
         "说明不需要为了流程拆成多个 change。"
       ],
       "must_ask": [

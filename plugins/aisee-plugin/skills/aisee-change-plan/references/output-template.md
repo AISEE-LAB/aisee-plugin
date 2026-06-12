@@ -43,6 +43,7 @@ flowchart TD
 - phase 使用 `subgraph "Phase N"` 标记。
 - 并行 change 放在同一个 phase subgraph 中，不额外用表格重复表达。
 - 如果只有单个 change，仍保留 Mermaid 语法块，并只画一个节点。
+- Phase 编号必须连续，从 `Phase 1` 开始，不得跳号。
 
 ## Change 详情模板
 
@@ -153,6 +154,19 @@ Assumption 格式：
 ```text
 [ASSUMPTION] {假设内容} — 影响 {change 列表} — 开始实现前请确认。
 ```
+
+## 输出前自检
+
+生成最终文本前，逐项检查：
+
+- 摘要中的 `{N}` 必须等于 change 详情块数量。
+- 摘要中的 `{M}` 必须等于 Mermaid 图中的 phase 数量。
+- `全部命令` 中的 `/opsx:new` 数量必须等于 change 数量。
+- Mermaid 图中的每个 change 都必须有对应详情块和对应命令。
+- 每个 change 的 `Metadata gate` 都必须同时包含：
+  - `/opsx:new must use: /opsx:new "<change>" --schema <selected-schema>`
+  - `后续 author / implementation 只读取 change metadata 中固化的 schema，不根据 artifacts 猜测或重选`
+- 若正文声明存在 `Phase 2` 及以后阶段，Mermaid 图与 `全部命令` 分段都必须一致出现。
 
 ## 保存输出
 

@@ -108,6 +108,7 @@ SRS 模块名、页面类型、设计材料、架构层、技术层和 schema ar
 4. 用 `change-boundary-algorithm.md` 划分可独立交付边界、依赖和并行关系。
 5. 用 `source-map-rules.md` 生成 source-map seed；不生成 `source-map.md` 的 schema 写 N/A。
 6. 用 `output-template.md` 输出完整 change plan。
+7. 输出前执行一致性自检：摘要中的 change/phase 计数、Mermaid phase 数、change 详情块数、`/opsx:new` 命令数、以及每个 change 的 `Metadata gate` 两条内容必须一致完整。
 
 ## 保护规则
 
