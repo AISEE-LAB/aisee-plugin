@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:knowledge-curate"
+  short_description: "批量审查项目内 reusable knowledge candidates 并生成 card drafts"
+  default_prompt: "使用 $aisee:knowledge-curate 审查项目里的知识候选，去敏、去重并整理为可提交的 team knowledge card drafts。"

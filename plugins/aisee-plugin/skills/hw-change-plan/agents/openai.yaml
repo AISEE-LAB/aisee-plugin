@@ -1,0 +1,4 @@
+interface:
+  display_name: "hw:change-plan"
+  short_description: "把硬件整体输入拆成可独立交付的 OpenSpec changes"
+  default_prompt: "使用 $hw:change-plan 为当前硬件项目规划 OpenSpec change 边界、依赖关系和 /opsx:new 命令。"

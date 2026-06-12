@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:ui-content"
+  short_description: "根据需求生成页面清单、页面内容和交互流程的 UI 内容规格"
+  default_prompt: "使用 $aisee:ui-content 从已确认需求中整理页面、元素、状态、流程和多端差异。"

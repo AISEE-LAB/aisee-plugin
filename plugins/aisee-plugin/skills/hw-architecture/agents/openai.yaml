@@ -1,0 +1,4 @@
+interface:
+  display_name: "hw:architecture"
+  short_description: "生成硬件感知的整体架构设计文档"
+  default_prompt: "使用 $hw:architecture 根据 hw:srs 和工程事实整理整体架构、接口、资源分配和验证约束。"

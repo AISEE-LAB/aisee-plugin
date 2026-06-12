@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:design-spec"
+  short_description: "在 change-plan 前生成项目级或模块级 UI 设计规范"
+  default_prompt: "使用 $aisee:design-spec 根据需求、参考图和代码事实整理设计原则、组件策略和 Design Tokens 规范。"

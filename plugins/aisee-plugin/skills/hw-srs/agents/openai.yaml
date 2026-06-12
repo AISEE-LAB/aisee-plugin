@@ -1,0 +1,4 @@
+interface:
+  display_name: "hw:srs"
+  short_description: "通过结构化对话生成硬件或嵌入式项目 SRS"
+  default_prompt: "使用 $hw:srs 澄清当前硬件或嵌入式需求，并输出供 hw:architecture 和 hw:change-plan 使用的硬件 SRS。"

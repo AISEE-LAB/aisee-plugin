@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:reflect"
+  short_description: "复盘当前会话并沉淀可复用经验到项目内候选资产"
+  default_prompt: "使用 $aisee:reflect 复盘本次协作，提炼 memory 候选、workflow 改进和可复用知识候选。"

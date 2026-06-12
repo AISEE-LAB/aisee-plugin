@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:verify"
+  short_description: "按当前 schema 验证 artifacts、tasks、source-map 与 evidence 一致性"
+  default_prompt: "使用 $aisee:verify 检查当前 OpenSpec change 的 artifacts、任务、验证证据和实现状态是否一致。"

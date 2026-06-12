@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:spec-migrate"
+  short_description: "把现有系统行为反向整理为 OpenSpec baseline specs"
+  default_prompt: "使用 $aisee:spec-migrate 基于代码、文档和测试整理当前系统的 OpenSpec baseline specs。"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:archive-guard"
+  short_description: "在 openspec archive 前做 schema-aware 最终门禁检查"
+  default_prompt: "使用 $aisee:archive-guard 检查当前 change 的 artifacts、validate 结果和 evidence，判断是否适合执行 openspec archive。"

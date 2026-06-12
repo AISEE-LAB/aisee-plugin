@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:change-plan"
+  short_description: "把需求或项目事实映射为可独立交付的 OpenSpec changes"
+  default_prompt: "使用 $aisee:change-plan 为当前需求规划 OpenSpec change 边界、schema、依赖顺序和 /opsx:new 命令。"

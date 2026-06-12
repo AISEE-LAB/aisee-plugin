@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:change-author"
+  short_description: "把已确认 change 转成 schema-aware OpenSpec artifacts 初稿"
+  default_prompt: "使用 $aisee:change-author 按当前 schema 为指定 OpenSpec change 补齐 proposal、tasks、source-map 和相关 artifacts 初稿。"

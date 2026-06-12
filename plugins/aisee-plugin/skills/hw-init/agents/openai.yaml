@@ -1,0 +1,4 @@
+interface:
+  display_name: "hw:init"
+  short_description: "在 OpenSpec change 实现阶段辅助扫描或初始化硬件工程"
+  default_prompt: "使用 $hw:init 只读扫描现有硬件工程，或在受 OpenSpec change 追踪的前提下生成初始化骨架。"

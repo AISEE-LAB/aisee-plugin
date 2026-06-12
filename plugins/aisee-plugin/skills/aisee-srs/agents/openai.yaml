@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:srs"
+  short_description: "通过结构化对话生成软件项目 SRS"
+  default_prompt: "使用 $aisee:srs 澄清当前软件需求，并生成可供 ui-content、architecture 和 change-plan 使用的 SRS。"

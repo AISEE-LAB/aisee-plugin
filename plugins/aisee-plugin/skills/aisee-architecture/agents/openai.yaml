@@ -1,0 +1,4 @@
+interface:
+  display_name: "aisee:architecture"
+  short_description: "在 change-plan 前生成软件项目技术架构文档"
+  default_prompt: "使用 $aisee:architecture 扫描当前项目技术栈、架构约束和边界，并生成可供 change-plan 使用的技术架构文档。"
