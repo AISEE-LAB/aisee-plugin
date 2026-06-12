@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -10,11 +12,25 @@ from typing import Any
 from aisee_cli.assets import selected_agent_runtime
 from aisee_cli.output import issue, summarize_issues
 
+EXPANDED_WORKFLOWS = [
+    "propose",
+    "explore",
+    "new",
+    "continue",
+    "apply",
+    "ff",
+    "sync",
+    "archive",
+    "bulk-archive",
+    "verify",
+    "onboard",
+]
+
 
 def run_openspec_init(
     project_root: Path,
     *,
-    profile: str = "core",
+    profile: str = "expanded",
     tools: str | None = None,
     skip_profile: bool = False,
     skip_update: bool = False,
@@ -24,6 +40,7 @@ def run_openspec_init(
     issues: list[dict[str, str]] = []
     operations: list[dict[str, Any]] = []
     resolved_tools, tools_source = resolve_openspec_tools(tools)
+    openspec_profile = resolve_openspec_profile(profile)
 
     openspec_bin = shutil.which("openspec")
     if not openspec_bin:
@@ -31,6 +48,7 @@ def run_openspec_init(
         return build_response(
             root,
             profile,
+            openspec_profile,
             resolved_tools,
             tools_source,
             skip_profile,
@@ -40,15 +58,16 @@ def run_openspec_init(
             issues,
         )
 
-    if profile != "core" and not skip_profile:
+    if openspec_profile is None:
         issues.append(issue(
             "UNSUPPORTED_OPENSPEC_PROFILE",
             "blocker",
-            "Only the non-interactive OpenSpec profile preset 'core' is supported by default",
+            "Only Aisee presets 'expanded' and 'core' are supported",
         ))
         return build_response(
             root,
             profile,
+            "invalid",
             resolved_tools,
             tools_source,
             skip_profile,
@@ -68,7 +87,24 @@ def run_openspec_init(
             "reason": "OpenSpec project markers already exist",
         })
     else:
-        init_command = [openspec_bin, "init", ".", "--tools", resolved_tools, "--profile", profile]
+        if not skip_profile and openspec_profile == "custom":
+            profile_operation = ensure_profile_alignment(openspec_profile)
+            operations.append(profile_operation)
+            if profile_operation["status"] != "ok":
+                issues.append(issue("OPENSPEC_PROFILE_FAILED", "blocker", f"OpenSpec profile alignment for {profile} failed"))
+                return build_response(
+                    root,
+                    profile,
+                    openspec_profile,
+                    resolved_tools,
+                    tools_source,
+                    skip_profile,
+                    skip_update,
+                    force,
+                    operations,
+                    issues,
+                )
+        init_command = [openspec_bin, "init", ".", "--tools", resolved_tools, "--profile", openspec_profile]
         if force:
             init_command.append("--force")
         init_result = run_command(init_command, root)
@@ -78,6 +114,7 @@ def run_openspec_init(
             return build_response(
                 root,
                 profile,
+                openspec_profile,
                 resolved_tools,
                 tools_source,
                 skip_profile,
@@ -90,19 +127,38 @@ def run_openspec_init(
     if skip_profile:
         operations.append({
             "kind": "skip",
-            "command": "openspec config profile",
+            "command": "openspec profile alignment",
             "status": "skipped",
             "reason": "--skip-profile was provided",
         })
+    elif openspec_profile == "custom":
+        if not should_run_init:
+            profile_operation = ensure_profile_alignment(openspec_profile)
+            operations.append(profile_operation)
+            if profile_operation["status"] != "ok":
+                issues.append(issue("OPENSPEC_PROFILE_FAILED", "blocker", f"OpenSpec profile alignment for {profile} failed"))
+                return build_response(
+                    root,
+                    profile,
+                    openspec_profile,
+                    resolved_tools,
+                    tools_source,
+                    skip_profile,
+                    skip_update,
+                    force,
+                    operations,
+                    issues,
+                )
     else:
         profile_command = [openspec_bin, "config", "profile", profile]
         profile_result = run_command(profile_command, root)
         operations.append(command_operation("openspec config profile", profile_command, profile_result))
         if profile_result.returncode != 0:
-            issues.append(issue("OPENSPEC_PROFILE_FAILED", "blocker", f"openspec config profile {profile} failed"))
+            issues.append(issue("OPENSPEC_PROFILE_FAILED", "blocker", f"OpenSpec profile alignment for {profile} failed"))
             return build_response(
                 root,
                 profile,
+                openspec_profile,
                 resolved_tools,
                 tools_source,
                 skip_profile,
@@ -129,6 +185,7 @@ def run_openspec_init(
     return build_response(
         root,
         profile,
+        openspec_profile,
         resolved_tools,
         tools_source,
         skip_profile,
@@ -154,6 +211,60 @@ def resolve_openspec_tools(requested: str | None) -> tuple[str, str]:
     if runtime in {"codex", "claude", "cursor"}:
         return runtime, "runtime-default"
     return "none", "runtime-default"
+
+
+def resolve_openspec_profile(profile: str) -> str | None:
+    value = profile.strip().lower()
+    if value == "expanded":
+        return "custom"
+    if value == "core":
+        return "core"
+    return None
+
+
+def ensure_profile_alignment(openspec_profile: str) -> dict[str, Any]:
+    if openspec_profile == "core":
+        return {
+            "kind": "run",
+            "command": "openspec config profile core",
+            "label": "openspec config profile",
+            "status": "pending",
+        }
+
+    config_path = openspec_global_config_path()
+    existing = read_json_object(config_path)
+    existing["profile"] = "custom"
+    existing["delivery"] = "both"
+    existing["workflows"] = list(EXPANDED_WORKFLOWS)
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(json.dumps(existing, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "kind": "write",
+        "command": f"write {config_path.as_posix()}",
+        "label": "openspec custom profile alignment",
+        "status": "ok",
+        "path": config_path.as_posix(),
+        "profile": "custom",
+        "delivery": "both",
+        "workflows": list(EXPANDED_WORKFLOWS),
+    }
+
+
+def openspec_global_config_path() -> Path:
+    xdg_config_home = os.environ.get("XDG_CONFIG_HOME")
+    if xdg_config_home:
+        return Path(xdg_config_home).expanduser() / "openspec" / "config.json"
+    return Path.home() / ".config" / "openspec" / "config.json"
+
+
+def read_json_object(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
 
 
 def run_command(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -195,6 +306,7 @@ def trim_output(text: str, *, limit: int = 4000) -> str:
 def build_response(
     root: Path,
     profile: str,
+    openspec_profile: str,
     tools: str,
     tools_source: str,
     skip_profile: bool,
@@ -214,6 +326,7 @@ def build_response(
         "meta": {
             "command": "aisee openspec ensure --json",
             "profile": profile,
+            "openspec_profile": openspec_profile,
             "profile_scope": "global",
             "profile_default_executes": not skip_profile,
             "update_default_executes": not skip_update,

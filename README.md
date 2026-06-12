@@ -251,12 +251,18 @@ aisee plugin inspect --json
 aisee openspec ensure --json
 ```
 
-该命令会按当前 agent runtime 自动选择 OpenSpec tools（Codex 默认是 `codex`；无法识别时回退到 `none`），确保 OpenSpec 的项目内 instructions / skills 已安装或已刷新，并对齐全局 profile：
+该命令会按当前 agent runtime 自动选择 OpenSpec tools（Codex 默认是 `codex`；无法识别时回退到 `none`），并默认启用 Aisee 需要的 expanded workflow，确保 OpenSpec 的项目内 instructions / skills 已安装或已刷新：
 
 ```text
-openspec init . --tools <detected-runtime-or-none> --profile core
-openspec config profile core
+write ~/.config/openspec/config.json   # profile=custom, delivery=both, workflows=expanded set
+openspec init . --tools <detected-runtime-or-none> --profile custom
 openspec update .
+```
+
+如果只想要 OpenSpec 的精简 `core` workflow，可显式传入：
+
+```bash
+aisee openspec ensure --profile core --json
 ```
 
 如果只想创建 OpenSpec 目录而不安装 OpenSpec 提供的 agent skills / instructions，可显式传入：

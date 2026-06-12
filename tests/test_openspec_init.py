@@ -17,6 +17,7 @@ def run_aisee(root: Path, *args: str, path_prefix: Path) -> subprocess.Completed
     repo_src = Path(__file__).resolve().parents[1] / "src"
     env["PYTHONPATH"] = str(repo_src)
     env["PATH"] = f"{path_prefix}{os.pathsep}{env['PATH']}"
+    env["HOME"] = str(root.parent / "home")
     return subprocess.run(
         [sys.executable, "-m", "aisee_cli.__main__", *args],
         cwd=root,
@@ -76,6 +77,10 @@ def read_calls(root: Path) -> list[list[str]]:
     ]
 
 
+def read_global_config(root: Path) -> dict[str, object]:
+    return json.loads((root.parent / "home" / ".config" / "openspec" / "config.json").read_text(encoding="utf-8"))
+
+
 def test_openspec_ensure_runs_init_and_profile_by_default(tmp_path: Path) -> None:
     bin_dir = tmp_path / "bin"
     install_fake_openspec(bin_dir)
@@ -88,18 +93,31 @@ def test_openspec_ensure_runs_init_and_profile_by_default(tmp_path: Path) -> Non
     assert result.returncode == 0
     assert data["status"] == "ok"
     assert data["writes"] is True
-    assert data["meta"]["profile"] == "core"
+    assert data["meta"]["profile"] == "expanded"
+    assert data["meta"]["openspec_profile"] == "custom"
     assert data["meta"]["profile_default_executes"] is True
     assert data["meta"]["update_default_executes"] is True
     assert data["meta"]["tools"] == "codex"
     assert data["meta"]["tools_source"] == "runtime-default"
-    assert data["operations"][0]["command"] == "openspec init . --tools codex --profile core"
-    assert data["operations"][1]["command"] == "openspec config profile core"
+    assert data["operations"][0]["label"] == "openspec custom profile alignment"
+    assert data["operations"][1]["command"] == "openspec init . --tools codex --profile custom"
     assert data["operations"][2]["command"] == "openspec update ."
     assert read_calls(project) == [
-        ["init", ".", "--tools", "codex", "--profile", "core"],
-        ["config", "profile", "core"],
+        ["init", ".", "--tools", "codex", "--profile", "custom"],
         ["update", "."],
+    ]
+    assert read_global_config(project)["workflows"] == [
+        "propose",
+        "explore",
+        "new",
+        "continue",
+        "apply",
+        "ff",
+        "sync",
+        "archive",
+        "bulk-archive",
+        "verify",
+        "onboard",
     ]
 
 
@@ -115,12 +133,11 @@ def test_openspec_ensure_replays_init_for_runtime_tools_on_initialized_project(t
 
     assert result.returncode == 0
     assert data["status"] == "ok"
-    assert data["operations"][0]["command"] == "openspec init . --tools codex --profile core"
-    assert data["operations"][1]["command"] == "openspec config profile core"
+    assert data["operations"][0]["label"] == "openspec custom profile alignment"
+    assert data["operations"][1]["command"] == "openspec init . --tools codex --profile custom"
     assert data["operations"][2]["command"] == "openspec update ."
     assert read_calls(project) == [
-        ["init", ".", "--tools", "codex", "--profile", "core"],
-        ["config", "profile", "core"],
+        ["init", ".", "--tools", "codex", "--profile", "custom"],
         ["update", "."],
     ]
 
@@ -142,8 +159,7 @@ def test_openspec_ensure_can_skip_update(tmp_path: Path) -> None:
     assert data["operations"][2]["command"] == "openspec update"
     assert data["operations"][2]["status"] == "skipped"
     assert read_calls(project) == [
-        ["init", ".", "--tools", "none", "--profile", "core"],
-        ["config", "profile", "core"],
+        ["init", ".", "--tools", "none", "--profile", "custom"],
     ]
 
 
@@ -159,10 +175,9 @@ def test_openspec_ensure_accepts_legacy_config_yaml_marker(tmp_path: Path) -> No
 
     assert result.returncode == 0
     assert data["status"] == "ok"
-    assert data["operations"][0]["command"] == "openspec init . --tools codex --profile core"
+    assert data["operations"][1]["command"] == "openspec init . --tools codex --profile custom"
     assert read_calls(project) == [
-        ["init", ".", "--tools", "codex", "--profile", "core"],
-        ["config", "profile", "core"],
+        ["init", ".", "--tools", "codex", "--profile", "custom"],
         ["update", "."],
     ]
 
@@ -180,7 +195,8 @@ def test_openspec_ensure_can_skip_init_on_initialized_project_when_tools_none(tm
     assert result.returncode == 0
     assert data["status"] == "ok"
     assert data["operations"][0]["status"] == "skipped"
-    assert read_calls(project) == [["config", "profile", "core"], ["update", "."]]
+    assert data["operations"][1]["label"] == "openspec custom profile alignment"
+    assert read_calls(project) == [["update", "."]]
 
 
 def test_openspec_ensure_blocks_unsupported_profile_before_running(tmp_path: Path) -> None:
@@ -196,3 +212,25 @@ def test_openspec_ensure_blocks_unsupported_profile_before_running(tmp_path: Pat
     assert data["status"] == "blocked"
     assert data["issues"][0]["code"] == "UNSUPPORTED_OPENSPEC_PROFILE"
     assert not (project / "openspec-calls.jsonl").exists()
+
+
+def test_openspec_ensure_core_profile_keeps_minimal_workflow(tmp_path: Path) -> None:
+    bin_dir = tmp_path / "bin"
+    install_fake_openspec(bin_dir)
+    project = tmp_path / "project"
+    project.mkdir()
+
+    result = run_aisee(project, "openspec", "ensure", "--profile", "core", "--json", path_prefix=bin_dir)
+    data = json.loads(result.stdout)
+
+    assert result.returncode == 0
+    assert data["status"] == "ok"
+    assert data["meta"]["profile"] == "core"
+    assert data["meta"]["openspec_profile"] == "core"
+    assert data["operations"][0]["command"] == "openspec init . --tools codex --profile core"
+    assert data["operations"][1]["command"] == "openspec config profile core"
+    assert read_calls(project) == [
+        ["init", ".", "--tools", "codex", "--profile", "core"],
+        ["config", "profile", "core"],
+        ["update", "."],
+    ]

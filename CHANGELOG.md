@@ -2,6 +2,14 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
+## [0.11.0] - 2026-06-12
+
+### Changed
+
+- `aisee openspec ensure --json` 默认从 OpenSpec `core` workflow 切换为 Aisee 所需的 expanded workflow，会为 Codex 项目安装或刷新完整的 11 个 OpenSpec skills/commands，而不再只生成 `propose/explore/apply/sync/archive` 这 5 个精简项。
+- `aisee openspec ensure --json` 现在会在默认路径下直接写入 OpenSpec 全局 custom workflow 配置，再执行 `openspec init/update`，从而补齐 `/opsx:new`、`/opsx:continue`、`/opsx:verify`、`/opsx:bulk-archive` 和 `/opsx:onboard`。
+- `aisee openspec ensure --profile core --json` 保留为显式回退入口；README、help 和 `aisee:init` 文案同步说明 expanded/core 两条路径。
+
 ## [0.10.0] - 2026-06-12
 
 ### Changed

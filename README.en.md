@@ -251,12 +251,18 @@ If the project has not initialized OpenSpec yet:
 aisee openspec ensure --json
 ```
 
-This command auto-selects OpenSpec tools from the current agent runtime (`codex` by default in Codex; falls back to `none` when no supported runtime is detected), ensures project-local OpenSpec instructions/skills are installed or refreshed, and aligns the global profile:
+This command auto-selects OpenSpec tools from the current agent runtime (`codex` by default in Codex; falls back to `none` when no supported runtime is detected), enables the expanded workflow that Aisee expects by default, and ensures project-local OpenSpec instructions/skills are installed or refreshed:
 
 ```text
-openspec init . --tools <detected-runtime-or-none> --profile core
-openspec config profile core
+write ~/.config/openspec/config.json   # profile=custom, delivery=both, workflows=expanded set
+openspec init . --tools <detected-runtime-or-none> --profile custom
 openspec update .
+```
+
+If you want the lean OpenSpec `core` workflow instead, pass:
+
+```bash
+aisee openspec ensure --profile core --json
 ```
 
 If you only want the OpenSpec directory layout without installing OpenSpec-provided agent skills/instructions, pass:
