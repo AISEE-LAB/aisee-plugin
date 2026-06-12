@@ -17,6 +17,8 @@
 
 适用于新项目或准备接入 OpenSpec 的已有项目。
 
+如果刚进入项目且不确定从哪个 Aisee workflow 开始，先使用 `aisee:orient` 判断项目状态、用户意图和下一步路由。
+
 ```bash
 aisee doctor --json
 aisee bootstrap --plan --json
@@ -37,7 +39,7 @@ aisee doctor --json
 
 ## 默认主路径与按需扩展
 
-`aisee:init` 属于项目接入 / 治理阶段能力，不是默认新功能迭代 happy path 的必经节点。默认新功能 happy path 只依赖核心迭代 workflow：`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`。
+`aisee:orient` 和 `aisee:init` 属于项目入口定位 / 接入 / 治理阶段能力，不是默认新功能迭代 happy path 的必经节点。默认新功能 happy path 只依赖核心迭代 workflow：`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`。
 
 以下能力按条件触发，不是每次都要走：
 
@@ -258,6 +260,7 @@ aisee:reflect
 | 小修复 | `quick-fix` schema -> change-author -> implementation-bridge -> implementation / review / test -> archive |
 | 技术调研 | `quick-research` schema -> findings/recommendation -> validate -> archive |
 | 文档站变更 | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive |
+| 不确定从哪开始 | `aisee:orient` -> 推荐下一步 skill / workflow |
 | 已有项目接入 | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> 新 change |
 
 ## 何时停止

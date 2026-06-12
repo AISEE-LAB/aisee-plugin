@@ -101,10 +101,11 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 
 ## Skill 分层
 
-`plugins/aisee-plugin/.codex-plugin/plugin.json` 继续通过 `skills: "./skills/"` 暴露全部公开 skill，但默认 happy path 只包含 **9 个核心迭代 skill**，另有 1 个项目接入 / 治理 skill。完整分类合同见 [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md)。
+`plugins/aisee-plugin/.codex-plugin/plugin.json` 继续通过 `skills: "./skills/"` 暴露全部公开 skill，但默认 happy path 只包含 **9 个核心迭代 skill**，另有项目入口定位与接入 / 治理 skill。完整分类合同见 [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md)。
 
 项目接入 / 治理：
 
+- `aisee:orient`
 - `aisee:init`
 
 核心迭代主流程：
@@ -311,6 +312,7 @@ quick-fix / quick-research / 其它轻量 schema
 
 | Skill | 作用 |
 | --- | --- |
+| `aisee:orient` | 判断当前项目阶段和用户意图，路由到合适的 Aisee skill / workflow。 |
 | `aisee:init` | 初始化或审计 `AGENTS.md`、`openspec/project.md`、Aisee docs、memory 和 Codex hooks。 |
 | `aisee:srs` | 澄清软件需求并生成规划级 SRS。 |
 | `aisee:ui-content` | 生成页面、元素、状态、流程、权限和平台差异等 UI 内容规格。 |

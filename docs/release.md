@@ -34,6 +34,10 @@ Aisee 使用 SemVer：
 
 公开契约分层和破坏性变更判断见 [Compatibility Policy](compatibility-policy.md)。
 
+## Next 合同提示
+
+新增 `aisee:orient` 公开 skill，作为进入任意项目后的 Aisee workflow 入口定位器。它只读取项目状态并路由到后续 skill / CLI / workflow，不写 OpenSpec baseline、change artifacts、业务代码或 hooks；默认新功能 happy path 仍保持 9 个核心迭代 skill。
+
 ## 0.9.0 合同提示
 
 `0.9.0` 新增公开 project memory CLI 面：

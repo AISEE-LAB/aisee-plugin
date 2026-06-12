@@ -59,7 +59,7 @@ def test_skill_taxonomy_contract_covers_all_public_skills() -> None:
     taxonomy = read_taxonomy()
 
     assert set(taxonomy) == EXPECTED_TAXONOMY_SECTIONS
-    assert taxonomy["Project Setup / Adoption"] == ["aisee:init"]
+    assert taxonomy["Project Setup / Adoption"] == ["aisee:orient", "aisee:init"]
     assert len(taxonomy["Core Workflow"]) == 9
     assert set(taxonomy["Core Workflow"]) == {
         "aisee:srs",
@@ -83,6 +83,7 @@ def test_readme_highlights_core_workflow_taxonomy() -> None:
     assert "## Skill 分层" in readme
     assert "9 个核心迭代 skill" in readme
     assert "`aisee:init`" in readme
+    assert "`aisee:orient`" in readme
     for skill in read_taxonomy()["Core Workflow"]:
         assert f"`{skill}`" in readme
 

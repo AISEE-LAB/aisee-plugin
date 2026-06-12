@@ -4,8 +4,9 @@
 
 ## Project Setup / Adoption
 
-以下 skill 用于项目接入、初始化、配置审计和治理；它不是默认新功能迭代 happy path 的必经节点：
+以下 skill 用于项目入口定位、接入、初始化、配置审计和治理；它们不是默认新功能迭代 happy path 的必经节点：
 
+- `aisee:orient`
 - `aisee:init`
 
 ## Core Workflow

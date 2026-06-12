@@ -88,7 +88,7 @@
 以下属于公开契约：
 
 - GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
-- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 core / optional / knowledge / hardware 分层，以及 core 10 skill 集合；
+- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 setup / core / optional / knowledge / hardware 分层，以及 core 9 skill 集合；
 - `aisee plugin inspect --json` 在 PyPI / pipx 安装中返回稳定状态和 setup hint；
 - PyPI / pipx 通道只承诺 CLI 能力；skills、references、schema packs、team knowledge templates 和 plugin metadata 通过 marketplace plugin 或外部仓库分发。
 

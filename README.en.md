@@ -101,10 +101,11 @@ Compound Engineering = optional implementation / review / test consumer
 
 ## Skill Taxonomy
 
-`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all public skills through `skills: "./skills/"`, but the default happy path contains only **9 core iteration skills**, plus 1 project setup / governance skill. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
+`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all public skills through `skills: "./skills/"`, but the default happy path contains only **9 core iteration skills**, plus project orientation and setup / governance skills. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
 
 Project setup / governance:
 
+- `aisee:orient`
 - `aisee:init`
 
 Core iteration workflow:
@@ -311,6 +312,7 @@ For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline spec
 
 | Skill | Purpose |
 | --- | --- |
+| `aisee:orient` | Determine the current project stage and user intent, then route to the right Aisee skill or workflow. |
 | `aisee:init` | Initialize or audit `AGENTS.md`, `openspec/project.md`, Aisee docs, memory, and Codex hooks. |
 | `aisee:srs` | Clarify software requirements and produce planning-level SRS documents. |
 | `aisee:ui-content` | Produce UI content specs for pages, elements, states, flows, permissions, and platform differences. |

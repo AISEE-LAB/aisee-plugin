@@ -88,7 +88,7 @@ Rules:
 The following are public contracts:
 
 - `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
-- the core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 10 workflow skills;
+- the setup / core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 9 workflow skills;
 - `aisee plugin inspect --json` returns stable status and setup hints in PyPI / pipx installs;
 - the PyPI / pipx channel only promises CLI capabilities; skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
 

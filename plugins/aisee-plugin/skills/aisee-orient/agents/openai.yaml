@@ -1,0 +1,7 @@
+interface:
+  display_name: "aisee:orient"
+  short_description: "判断项目阶段并路由到合适的 Aisee workflow"
+  default_prompt: "使用 $aisee:orient 检查当前项目状态，并告诉我下一步应该使用哪个 Aisee skill 或 workflow。"
+
+policy:
+  allow_implicit_invocation: true

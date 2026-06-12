@@ -1,0 +1,134 @@
+{
+  "schema_version": "aisee.skill-eval.v1",
+  "skill_name": "aisee:orient",
+  "harness": {
+    "type": "skill-eval",
+    "owner": "aisee",
+    "fact_source_policy": "eval cases are test inputs, not runtime facts"
+  },
+  "evals": [
+    {
+      "id": "orient-001",
+      "name": "new-project-without-openspec",
+      "scenario": "project-entry",
+      "prompt": "我刚进入一个新项目，不知道该先用哪个 Aisee skill。项目还没有 openspec/config.yaml。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "项目缺少 OpenSpec 初始化。",
+          "用户希望接入 Aisee/OpenSpec。"
+        ]
+      },
+      "expected_output": "输出 Aisee Orient 报告，判断 OpenSpec 未初始化，推荐先运行 aisee openspec ensure --json，成功后进入 aisee:init。不得直接建议 aisee:srs、aisee:change-plan 或手写 openspec/config.yaml。",
+      "expected_outputs": [
+        "判断 OpenSpec 未初始化。",
+        "推荐 aisee openspec ensure --json。",
+        "推荐成功后进入 aisee:init。",
+        "说明不手写 OpenSpec 内部文件。"
+      ],
+      "must_ask": [
+        "是否确认当前项目要接入 Aisee/OpenSpec？"
+      ],
+      "must_include": [
+        "Aisee Orient 报告",
+        "aisee openspec ensure --json",
+        "aisee:init"
+      ],
+      "must_not": [
+        "不得直接进入 aisee:srs。",
+        "不得直接进入 aisee:change-plan。",
+        "不得手写 openspec/config.yaml。"
+      ],
+      "quality_checks": [
+        "首选下一步清晰且带原因。",
+        "把接入和具体业务产物生成分开。"
+      ],
+      "fact_source_constraints": [
+        "OpenSpec 基础结构必须由 OpenSpec/Aisee CLI 初始化，不由 orient 手写。"
+      ],
+      "files": []
+    },
+    {
+      "id": "orient-002",
+      "name": "existing-project-needs-baseline",
+      "scenario": "existing-project",
+      "prompt": "这个老项目已经有 openspec/config.yaml 和 AGENTS.md，但 openspec/specs 为空。我想把项目纳入 Aisee 管理，下一步用什么？",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "OpenSpec 和 Aisee 基础配置已存在。",
+          "baseline specs 缺失。"
+        ]
+      },
+      "expected_output": "判断项目已完成基础接入但缺少 baseline specs，推荐 aisee:spec-migrate 先整理当前系统行为基线，并说明 migration 只写当前行为，不写未来需求或 change artifacts。",
+      "expected_outputs": [
+        "判断基础接入已存在。",
+        "判断 baseline specs 缺失。",
+        "推荐 aisee:spec-migrate。",
+        "说明只迁移当前行为。"
+      ],
+      "must_ask": [
+        "迁移范围是全项目还是指定模块？"
+      ],
+      "must_include": [
+        "aisee:spec-migrate",
+        "baseline specs",
+        "当前系统行为"
+      ],
+      "must_not": [
+        "不得推荐直接写新 change。",
+        "不得把未来需求写入 baseline。",
+        "不得替代 aisee:spec-migrate 直接生成完整 specs。"
+      ],
+      "quality_checks": [
+        "明确区分 baseline migration 和新需求开发。",
+        "指出需要证据来源和迁移范围。"
+      ],
+      "fact_source_constraints": [
+        "openspec/specs/ 是 baseline 事实源，迁移草稿不是最终事实源。"
+      ],
+      "files": []
+    },
+    {
+      "id": "orient-003",
+      "name": "active-change-ready-for-implementation",
+      "scenario": "active-change",
+      "prompt": "项目里已有 active change，proposal、tasks、source-map 和 contracts 都基本齐了。我现在想开始实现，应该走哪个 skill？",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "已有 active change。",
+          "change artifacts 基本完整。",
+          "用户目标是开始实现。"
+        ]
+      },
+      "expected_output": "判断不需要重新走 SRS 或 change-plan，推荐 aisee:implementation-bridge 生成实现交接 brief 和 context pack；如果 artifacts 是否完整未验证，可先提示运行 openspec validate 或 aisee:verify。",
+      "expected_outputs": [
+        "识别用户目标是继续 active change 实现。",
+        "推荐 aisee:implementation-bridge。",
+        "可选提示 openspec validate 或 aisee:verify。"
+      ],
+      "must_ask": [
+        "目标 active change 名称是什么？"
+      ],
+      "must_include": [
+        "aisee:implementation-bridge",
+        "active change",
+        "context pack"
+      ],
+      "must_not": [
+        "不得重新建议 aisee:srs 作为首选。",
+        "不得重新建议 aisee:change-plan 作为首选。",
+        "不得直接实现代码。"
+      ],
+      "quality_checks": [
+        "根据用户意图选择最靠近实现的路由。",
+        "保留验证前置检查。"
+      ],
+      "fact_source_constraints": [
+        "active change artifacts 仍以 OpenSpec 文件和 validate 结果为准。"
+      ],
+      "files": []
+    }
+  ]
+}

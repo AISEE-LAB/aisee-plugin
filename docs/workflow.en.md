@@ -17,6 +17,8 @@ This document describes the recommended software development workflow for Aisee 
 
 Use this for new projects or existing projects that are adopting OpenSpec.
 
+If you have just entered a project and do not know which Aisee workflow should start, use `aisee:orient` first to identify project state, user intent, and the next route.
+
 ```bash
 aisee doctor --json
 aisee bootstrap --plan --json
@@ -37,7 +39,7 @@ For existing projects, avoid writing new changes immediately. Prefer `aisee:spec
 
 ## Default Path vs On-Demand Extensions
 
-`aisee:init` belongs to project setup and governance, not to the default new-feature iteration happy path. The default new-feature happy path depends only on the core iteration workflow: `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, and `aisee:implementation-bridge`.
+`aisee:orient` and `aisee:init` belong to project orientation, setup, and governance, not to the default new-feature iteration happy path. The default new-feature happy path depends only on the core iteration workflow: `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, and `aisee:implementation-bridge`.
 
 The following capabilities are conditional, not mandatory on every iteration:
 
@@ -265,6 +267,7 @@ Boundaries:
 | Small fix | `quick-fix` schema -> change-author -> implementation-bridge -> implementation / review / test -> archive |
 | Technical research | `quick-research` schema -> findings/recommendation -> validate -> archive-guard |
 | Documentation site change | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive-guard |
+| Unsure where to start | `aisee:orient` -> recommended next skill / workflow |
 | Existing project adoption | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> new change |
 
 ## When To Stop
