@@ -1,6 +1,6 @@
 # aisee:architecture — 问题库
 
-Phase 2 使用。只问会影响技术架构和 change-plan 输入提示的问题。
+Phase 2 使用。只问会影响技术架构和后续技术提示的问题。
 
 ---
 

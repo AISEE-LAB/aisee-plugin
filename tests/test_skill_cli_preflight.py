@@ -139,6 +139,25 @@ def test_srs_skill_keeps_downstream_hints_minimal() -> None:
             assert marker not in text
 
 
+def test_architecture_skill_keeps_change_plan_hints_fact_based() -> None:
+    expected_present = {
+        "plugins/aisee-plugin/skills/aisee-architecture/assets/architecture-template-core.md": "## 14. 给 aisee:change-plan 的架构提示",
+        "plugins/aisee-plugin/skills/aisee-architecture/references/workflow.md": "## Phase 3 — 生成给 change-plan 的技术提示",
+    }
+    forbidden_markers = [
+        "### 14.3 可并行边界提示",
+        "### 14.4 不应横切的能力",
+        "可并行边界：哪些模块从技术上相互独立",
+        "不应横切的能力：例如不要把同一状态机拆散",
+    ]
+
+    for relative_path, required_marker in expected_present.items():
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert required_marker in text
+        for marker in forbidden_markers:
+            assert marker not in text
+
+
 def test_cli_outputs_keep_marketplace_recovery_hints() -> None:
     import sys
 

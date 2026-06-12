@@ -61,7 +61,7 @@
           "导出能力是否已有不确定。"
         ]
       },
-      "expected_output": "输出技术栈状态、来源可信度、架构概览、已确认/待确认架构决策、现有架构边界、可复用认证/RBAC/审计能力、优惠券数据模型耦合点、导出能力的 [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] 或 Open Question，以及给 aisee:change-plan 的架构提示。不得输出具体 change 边界规划结果。",
+      "expected_output": "输出技术栈状态、来源可信度、架构概览、已确认/待确认架构决策、现有架构边界、可复用认证/RBAC/审计能力、优惠券数据模型耦合点、导出能力的 [STACK-CONTEXT-MISSING] / [STACK-DECISION-REQUIRED] 或 Open Question，以及给 aisee:change-plan 的技术提示。不得输出具体 change 边界规划结果。",
       "expected_outputs": [
         "输出技术栈状态和来源可信度。",
         "识别可复用认证、RBAC 和审计日志能力。",
