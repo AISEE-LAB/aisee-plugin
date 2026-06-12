@@ -3,12 +3,23 @@
 用于生成 `aisee/docs/spec-migration/<YYYY-MM-DD>-<slug>/00-index.md`。
 
 ```markdown
+---
+title: "OpenSpec Baseline Migration：{project/module}"
+doc_type: "spec-migration"
+status: "draft"
+date: "{date}"
+scope: "{project/module/path}"
+owner: "{作者或团队}"
+source_refs:
+  - "{repo-relative source path or source ref}"
+change_refs: []
+---
+
 # OpenSpec Baseline Migration：{project/module}
 
 **文档编号**：SM-{YYYY-MM-DD}-{slug}
-**状态**：草稿 / 已写入 baseline / 待确认
-**范围**：{project/module/path}
-**创建日期**：{date}
+**版本**：v1.0
+**迁移范围**：{project/module/path}
 
 ---
 

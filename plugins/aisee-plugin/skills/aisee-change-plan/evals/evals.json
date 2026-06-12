@@ -19,9 +19,10 @@
           "邀请链接过期规则仍是待确认业务规则。"
         ]
       },
-      "expected_output": "输出 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。所有命令必须使用 /opsx:new \"<change>\" --schema <schema>，不得输出 /opsx:propose。应保留 architecture 中的 RBAC 复用事实和邀请链接规则待确认项，并说明后续通过 aisee:change-author（必要时配合 /opsx:continue）按 schema 补齐 artifacts；不得建议使用旧的 change design skill 作为固定后续步骤。",
+      "expected_output": "输出 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。依赖顺序和并行关系必须使用 Mermaid 语法块表达。所有命令必须使用 /opsx:new \"<change>\" --schema <schema>，不得输出 /opsx:propose。应保留 architecture 中的 RBAC 复用事实和邀请链接规则待确认项，并说明后续通过 aisee:change-author（必要时配合 /opsx:continue）按 schema 补齐 artifacts；不得建议使用旧的 change design skill 作为固定后续步骤。",
       "expected_outputs": [
         "输出可独立交付的 change 边界、依赖、复杂度、In Scope/Out of Scope 和执行顺序。",
+        "使用 Mermaid 语法块表达依赖顺序和并行关系。",
         "使用 /opsx:new \"<change>\" --schema <schema>。",
         "保留 RBAC 复用事实和邀请链接过期规则待确认项。",
         "说明后续通过 aisee:change-author 或 /opsx:continue 补齐 artifacts。"
@@ -32,6 +33,7 @@
       ],
       "must_include": [
         "change 边界",
+        "Mermaid 依赖图",
         "依赖顺序",
         "source-map seed",
         "/opsx:new 命令"
@@ -61,10 +63,10 @@
           "已有项目、权限和列表页存在。"
         ]
       },
-      "expected_output": "判断这是单个小 change，不为了流程而规划多个 change。输出一个 change 详情块和单条 /opsx:new 命令，不得输出 /opsx:propose，也不得新增未确认的后端、数据库或 UI 需求。",
+      "expected_output": "判断这是单个小 change，不为了流程而规划多个 change。输出一个 change 详情块、单节点 Mermaid 依赖图和单条 /opsx:new 命令，不得输出 /opsx:propose，也不得新增未确认的后端、数据库或 UI 需求。",
       "expected_outputs": [
         "判断为单个小 change。",
-        "输出一个 change 详情块和单条 /opsx:new 命令。",
+        "输出一个 change 详情块、单节点 Mermaid 依赖图和单条 /opsx:new 命令。",
         "说明不需要为了流程拆成多个 change。"
       ],
       "must_ask": [
@@ -72,6 +74,7 @@
       ],
       "must_include": [
         "单 change 判断",
+        "Mermaid 依赖图",
         "Out of Scope",
         "/opsx:new 命令"
       ],
@@ -100,11 +103,11 @@
           "输入章节混合了非需求内容。"
         ]
       },
-      "expected_output": "不得把背景、UI 页面、API 设计、数据库设计、测试计划或上线计划规划成同名 change。应围绕退款处理、退款报表、退款状态查看等可独立交付能力规划 change，并在整体理由中说明输入章节被拒绝或合并为边界提示。每个 change 必须包含 FR 引用、Out of Scope 和 source-map seed。",
+      "expected_output": "不得把背景、UI 页面、API 设计、数据库设计、测试计划或上线计划规划成同名 change。应围绕退款处理、退款报表、退款状态查看等可独立交付能力规划 change，并在整体理由中说明输入章节被拒绝或合并为边界提示。每个 change 必须包含 FR 引用、Out of Scope、source-map seed 和 Mermaid 依赖图。",
       "expected_outputs": [
         "拒绝把背景、UI 页面、API 设计、数据库设计、测试计划或上线计划作为 change 边界。",
         "围绕退款处理、退款报表、退款状态查看规划 change。",
-        "每个 change 包含 FR 引用、Out of Scope 和 source-map seed。"
+        "每个 change 包含 FR 引用、Out of Scope、source-map seed 和 Mermaid 依赖图。"
       ],
       "must_ask": [
         "退款处理、报表和状态查看是否需要同批交付？",
@@ -112,6 +115,7 @@
       ],
       "must_include": [
         "FR 引用",
+        "Mermaid 依赖图",
         "Out of Scope",
         "source-map seed",
         "拒绝源章节直接作为边界的说明"
@@ -140,7 +144,7 @@
           "库存一致性策略影响 change 边界和实现路径。"
         ]
       },
-      "expected_output": "必须保留 [ARCHITECTURE-DECISION-REQUIRED]，不得替用户选择库存一致性方案。若该决策影响独立交付边界，应输出需要先补 Architecture 决策的 blocker 或将其作为首个风险验证/决策 change，而不是直接规划具体实现边界。",
+      "expected_output": "必须保留 [ARCHITECTURE-DECISION-REQUIRED]，不得替用户选择库存一致性方案。若该决策影响独立交付边界，应输出需要先补 Architecture 决策的 blocker 或将其作为首个风险验证/决策 change，而不是直接规划具体实现边界。依赖关系如需展示，必须使用 Mermaid 语法块。",
       "expected_outputs": [
         "保留 [ARCHITECTURE-DECISION-REQUIRED]。",
         "把库存一致性策略作为 blocker 或首个风险验证/决策 change。",
@@ -152,6 +156,7 @@
       ],
       "must_include": [
         "[ARCHITECTURE-DECISION-REQUIRED]",
+        "Mermaid 依赖图",
         "blocker 或决策 change",
         "受影响 FR"
       ],
@@ -179,7 +184,7 @@
           "硬件/嵌入式体系暂未完整纳入软件主线，但 schema pack 已有 device schema。"
         ]
       },
-      "expected_output": "应选择或建议 aisee-device-spec-driven，输出设备类 source-map seed，包含 HW/FW/RT/VER 或 TBD in 对应 contract。不得输出 Web/API/DB 字段或把 I2C/UART/RTOS 等技术资源直接作为 change 边界；板级引脚和传感器型号未确认应作为 blocker 或 Open Question。",
+      "expected_output": "应选择或建议 aisee-device-spec-driven，输出设备类 source-map seed，包含 HW/FW/RT/VER 或 TBD in 对应 contract。依赖顺序和并行关系如需展示，必须使用 Mermaid 语法块。不得输出 Web/API/DB 字段或把 I2C/UART/RTOS 等技术资源直接作为 change 边界；板级引脚和传感器型号未确认应作为 blocker 或 Open Question。",
       "expected_outputs": [
         "选择或建议 aisee-device-spec-driven。",
         "输出设备类 source-map seed，包含 HW/FW/RT/VER 或 TBD in 对应 contract。",

@@ -12,6 +12,7 @@
 - Design Spec
 - Design Assets 索引 / brief
 - Implementation Brief
+- Spec Migration 索引 / 草案
 - Reflect
 
 不适用于：
@@ -28,7 +29,7 @@
 
 ```yaml
 title: "文档标题"
-doc_type: "srs | ui-content | architecture | design-spec | design-assets | implementation-brief | reflect"
+doc_type: "srs | ui-content | architecture | design-spec | design-assets | implementation-brief | spec-migration | reflect"
 status: "draft | active | superseded | archived"
 date: "YYYY-MM-DD"
 scope: "项目 / 模块 / 功能 / change"

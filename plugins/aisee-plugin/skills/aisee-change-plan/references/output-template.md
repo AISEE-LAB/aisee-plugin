@@ -5,7 +5,7 @@
 ## 输出顺序
 
 1. 摘要
-2. 依赖图
+2. Mermaid 依赖图
 3. Change 详情
 4. 全部命令
 5. 整体理由
@@ -18,24 +18,31 @@ N 个 changes · M 个 phases · 预计总计 X 周 · Y 个可并行
 
 任何估计为 XL（>14 天）的 change 都要标记风险。
 
-## 依赖图
+## Mermaid 依赖图
 
-简单依赖链使用 ASCII：
+依赖顺序和并行关系统一使用 Mermaid 语法块表达：
 
-```text
-Phase 1（顺序执行）:
-  [change-name-1] -> [change-name-2]
+```mermaid
+flowchart TD
+  subgraph "Phase 1"
+    change_1["change-name-1"]
+  end
 
-Phase 2（Phase 1 后可并行）:
-  [change-name-3]
-  [change-name-4]
+  subgraph "Phase 2"
+    change_2["change-name-2"]
+    change_3["change-name-3"]
+  end
+
+  change_1 --> change_2
+  change_1 --> change_3
 ```
 
-复杂依赖追加表格：
+规则：
 
-| Change | 依赖 | 可并行 |
-|---|---|---|
-| change-name-3 | change-name-2 | change-name-4 |
+- 节点标签使用 change 名称。
+- phase 使用 `subgraph "Phase N"` 标记。
+- 并行 change 放在同一个 phase subgraph 中，不额外用表格重复表达。
+- 如果只有单个 change，仍保留 Mermaid 语法块，并只画一个节点。
 
 ## Change 详情模板
 

@@ -317,6 +317,36 @@ change_refs:
     assert any(item["code"] == "PLANNING_DOC_STALE_ACTIVE" for item in data["issues"])
 
 
+def test_doctor_recognizes_spec_migration_docs_as_planning_docs(tmp_path: Path) -> None:
+    create_open_project(tmp_path)
+    write(
+        tmp_path / "aisee" / "docs" / "spec-migration" / "2026-06-12-auth" / "00-index.md",
+        """---
+title: "OpenSpec Baseline Migration：Auth"
+doc_type: "spec-migration"
+status: "draft"
+date: "2026-06-12"
+scope: "auth"
+owner: "Aisee"
+source_refs:
+  - "README.md"
+change_refs: []
+---
+
+# OpenSpec Baseline Migration：Auth
+""",
+    )
+
+    data = run_json(tmp_path, "doctor", "--json")
+
+    assert any(item["path"].endswith("aisee/docs/spec-migration/2026-06-12-auth/00-index.md") for item in data["aisee"]["planning_docs"]["items"])
+    assert not any(
+        item["code"] == "PLANNING_DOC_TYPE_INVALID"
+        and item["path"].endswith("aisee/docs/spec-migration/2026-06-12-auth/00-index.md")
+        for item in data["issues"]
+    )
+
+
 def test_bootstrap_plan_is_read_only(tmp_path: Path) -> None:
     data = run_json(tmp_path, "bootstrap", "--plan", "--json")
 

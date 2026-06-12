@@ -18,6 +18,7 @@ VALID_DOC_TYPES = {
     "design-spec",
     "design-assets",
     "implementation-brief",
+    "spec-migration",
     "reflect",
 }
 VALID_STATUSES = {"draft", "active", "superseded", "archived"}
@@ -32,6 +33,8 @@ PLANNING_DOC_PREFIXES = {
     "docs/design-spec/": "design-spec",
     "aisee/docs/design-assets/": "design-assets",
     "docs/design-assets/": "design-assets",
+    "aisee/docs/spec-migration/": "spec-migration",
+    "docs/spec-migration/": "spec-migration",
     "aisee/docs/reflect/": "reflect",
     "docs/reflect/": "reflect",
     "aisee/cache/implementation-bridge/": "implementation-brief",

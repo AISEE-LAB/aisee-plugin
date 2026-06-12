@@ -35,6 +35,7 @@ def test_planning_doc_frontmatter_contract_exists_and_representative_templates_r
         "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-standard.md": 'doc_type: "design-spec"',
         "plugins/aisee-plugin/skills/aisee-design-assets/assets/design-assets-index-template.md": 'doc_type: "design-assets"',
         "plugins/aisee-plugin/skills/aisee-implementation-bridge/references/brief-template.md": 'doc_type: "implementation-brief"',
+        "plugins/aisee-plugin/skills/aisee-spec-migrate/assets/migration-index-template.md": 'doc_type: "spec-migration"',
         "plugins/aisee-plugin/skills/aisee-reflect/references/output-templates.md": 'doc_type: "reflect"',
     }
     for relative_path, marker in expected.items():
@@ -156,6 +157,16 @@ def test_architecture_skill_keeps_change_plan_hints_fact_based() -> None:
         assert required_marker in text
         for marker in forbidden_markers:
             assert marker not in text
+
+
+def test_spec_migrate_template_uses_frontmatter_without_duplicate_header_metadata() -> None:
+    text = (ROOT / "plugins/aisee-plugin/skills/aisee-spec-migrate/assets/migration-index-template.md").read_text(encoding="utf-8")
+
+    assert 'doc_type: "spec-migration"' in text
+    assert "source_refs:" in text
+    assert "change_refs:" in text
+    assert "**状态**：" not in text
+    assert "**创建日期**：" not in text
 
 
 def test_cli_outputs_keep_marketplace_recovery_hints() -> None:

@@ -50,7 +50,7 @@ Out of Scope:
 
 - 如需共享 contract、事件类型、数据模型、设备协议或配置约定，优先规划一个 S 级前置 change。
 - 对每个并行 change 复查可独立交付。
-- 在依赖图中明确标记并行组。
+- 在 Mermaid 依赖图中用同一 phase 的 `subgraph` 明确标记并行组。
 
 ## 4. 粒度与数量
 
