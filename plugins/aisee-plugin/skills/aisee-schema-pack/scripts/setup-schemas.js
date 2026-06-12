@@ -112,7 +112,9 @@ function copySchema(sourceDir, targetDir, force) {
     removeDirRecursive(targetDir);
   }
   ensureDir(path.dirname(targetDir));
-  copyDirRecursive(sourceDir, targetDir);
+  copyDirRecursive(sourceDir, targetDir, {
+    shouldSkipDir: (sourcePath, relativePath) => relativePath === 'examples'
+  });
   return 'installed';
 }
 
@@ -129,13 +131,16 @@ function removeDirRecursive(dir) {
   fs.rmdirSync(dir);
 }
 
-function copyDirRecursive(sourceDir, targetDir) {
+function copyDirRecursive(sourceDir, targetDir, options = {}) {
+  const { shouldSkipDir = () => false } = options;
   ensureDir(targetDir);
   for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
     const sourcePath = path.join(sourceDir, entry.name);
     const targetPath = path.join(targetDir, entry.name);
+    const relativePath = path.relative(sourceDir, sourcePath);
     if (entry.isDirectory()) {
-      copyDirRecursive(sourcePath, targetPath);
+      if (shouldSkipDir(sourcePath, relativePath)) continue;
+      copyDirRecursive(sourcePath, targetPath, options);
     } else if (entry.isFile()) {
       fs.copyFileSync(sourcePath, targetPath);
     }
