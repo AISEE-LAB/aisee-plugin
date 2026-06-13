@@ -155,6 +155,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 - **Schema-aware change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
 - **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
 - **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
+- **轻量 schema 兼容**：`aisee context pack` 与 `aisee:implementation-bridge` 可直接消费 OpenSpec 官方 `spec-driven` 及其它轻量 schema；不会因为缺少 Aisee 专属增强字段而拒绝生成 bridge 上下文。
 - **项目记忆**：`aisee memory` 受控检索和写入当前仓库长期 guidance，不替代 OpenSpec 事实源。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
 - **轻量上下文路由**：`aisee context pack` 在 `source-map.md` 存在时解析来源、编号、候选路径和 evidence 入口。

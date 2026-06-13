@@ -345,10 +345,17 @@ def parse_schema(schema_path: Path) -> dict[str, Any]:
     issues: list[dict[str, str]] = []
     raw_capabilities = data.get("capabilities")
     capabilities = parse_capabilities(raw_capabilities)
-    if raw_capabilities is None:
-        issues.append(schema_issue("SCHEMA_CAPABILITIES_MISSING", "blocker", "schema.yaml must define top-level capabilities"))
-    elif not isinstance(raw_capabilities, list) or any(not isinstance(item, str) or not item.strip() for item in raw_capabilities):
-        issues.append(schema_issue("SCHEMA_CAPABILITIES_INVALID", "blocker", "schema capabilities must be a non-empty string list"))
+    if raw_capabilities is not None and (
+        not isinstance(raw_capabilities, list)
+        or any(not isinstance(item, str) or not item.strip() for item in raw_capabilities)
+    ):
+        issues.append(
+            schema_issue(
+                "SCHEMA_CAPABILITIES_INVALID",
+                "risk",
+                "schema capabilities should be a non-empty string list when declared",
+            )
+        )
 
     artifacts: list[ArtifactSpec] = []
     raw_artifacts = data.get("artifacts")
@@ -367,7 +374,7 @@ def parse_schema(schema_path: Path) -> dict[str, Any]:
     apply_tracks = normalize_track_value(apply.get("tracks"))
     archive_tracks = parse_tracks(archive.get("tracks"))
     if apply_tracks is None and "apply_execution" in capabilities:
-        issues.append(schema_issue("SCHEMA_APPLY_TRACKS_MISSING", "blocker", "schema capability apply_execution requires apply.tracks"))
+        issues.append(schema_issue("SCHEMA_APPLY_TRACKS_MISSING", "risk", "schema capability apply_execution requires apply.tracks"))
     if "archive_authority" in capabilities and not archive_tracks:
         issues.append(schema_issue("SCHEMA_ARCHIVE_TRACKS_MISSING", "risk", "schema capability archive_authority should declare archive.tracks"))
 
@@ -434,40 +441,35 @@ def normalize_track_value(value: Any) -> str | None:
 def validate_artifact_schema(data: dict[str, Any]) -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
     artifact_id = str(data.get("id") or "")
-    requiredness = str(data.get("requiredness") or "")
+    raw_requiredness = data.get("requiredness")
+    requiredness = str(raw_requiredness or "always")
     capabilities = data.get("capabilities")
     if not artifact_id:
         issues.append(schema_issue("SCHEMA_ARTIFACT_ID_MISSING", "blocker", "schema artifact is missing id"))
-    if requiredness not in REQUIREDNESS_VALUES:
+    if raw_requiredness is not None and requiredness not in REQUIREDNESS_VALUES:
         issues.append(
             schema_issue(
                 "SCHEMA_ARTIFACT_REQUIREDNESS_INVALID",
-                "blocker",
+                "risk",
                 f"artifact {artifact_id or '<unknown>'} must declare requiredness as one of: always, conditional, never",
             )
         )
-    if capabilities is None:
-        issues.append(
-            schema_issue(
-                "SCHEMA_ARTIFACT_CAPABILITIES_MISSING",
-                "blocker",
-                f"artifact {artifact_id or '<unknown>'} must declare capabilities",
-            )
-        )
-    elif not isinstance(capabilities, list) or any(not isinstance(item, str) or not item.strip() for item in capabilities):
+    if capabilities is not None and (
+        not isinstance(capabilities, list) or any(not isinstance(item, str) or not item.strip() for item in capabilities)
+    ):
         issues.append(
             schema_issue(
                 "SCHEMA_ARTIFACT_CAPABILITIES_INVALID",
-                "blocker",
+                "risk",
                 f"artifact {artifact_id or '<unknown>'} capabilities must be a string list",
             )
         )
     na_requires_reason = data.get("na_requires_reason")
-    if requiredness == "conditional" and not isinstance(na_requires_reason, bool):
+    if raw_requiredness is not None and requiredness == "conditional" and not isinstance(na_requires_reason, bool):
         issues.append(
             schema_issue(
                 "SCHEMA_ARTIFACT_NA_POLICY_MISSING",
-                "blocker",
+                "risk",
                 f"artifact {artifact_id or '<unknown>'} must declare na_requires_reason for conditional requiredness",
             )
         )
@@ -496,7 +498,16 @@ def artifact_has_capability(artifact: ArtifactSpec | dict[str, Any], capability:
 
 
 def schema_generates_source_map(schema_info: dict[str, Any]) -> bool:
-    return schema_has_capability(schema_info, "source_map_routing")
+    if schema_has_capability(schema_info, "source_map_routing"):
+        return True
+    return any(
+        isinstance(spec, ArtifactSpec)
+        and (
+            spec.artifact_id == "source-map"
+            or spec.generates == "source-map.md"
+        )
+        for spec in schema_info.get("artifacts", [])
+    )
 
 
 def schema_requires_tasks(schema_info: dict[str, Any]) -> bool:

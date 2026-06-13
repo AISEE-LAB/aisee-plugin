@@ -2,6 +2,14 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
+## [0.11.3] - 2026-06-13
+
+### Changed
+
+- `aisee context pack` 与 `aisee:implementation-bridge` 兼容 OpenSpec 官方 `spec-driven` 和其它轻量 schema，不再因为缺少 Aisee 专属 `capabilities`、artifact `requiredness` 或 artifact `capabilities` 字段而误报 blocker。
+- `aisee context pack --for ce-work --json` 在无 `source-map.md` 的轻量 schema 下继续从当前 schema artifacts 提取实现路径；仅在真实 schema / artifact / 路径信息缺口上保留阻塞。
+- `aisee:implementation-bridge` 与 README 文案同步明确轻量 schema 兼容边界，避免把 Aisee 增强字段误当成 OpenSpec schema 的准入条件。
+
 ## [0.11.2] - 2026-06-13
 
 ### Changed

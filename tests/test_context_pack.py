@@ -235,6 +235,64 @@ archive:
     )
 
 
+def create_minimal_spec_driven_project(root: Path) -> None:
+    write(root / "AGENTS.md", "# Rules\n")
+    write(root / "openspec" / "config.yaml", "schema: spec-driven\n")
+    write(
+        root / "openspec" / "schemas" / "spec-driven" / "schema.yaml",
+        """name: spec-driven
+version: 1
+description: "官方轻量 schema 示例"
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    template: templates/proposal.md
+    requires: []
+  - id: specs
+    generates: specs/**/*.md
+    template: templates/spec.md
+    requires: [proposal]
+  - id: tasks
+    generates: tasks.md
+    template: templates/tasks.md
+    requires: [specs]
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+""",
+    )
+    schema_templates = root / "openspec" / "schemas" / "spec-driven" / "templates"
+    for template in ("proposal.md", "spec.md", "tasks.md"):
+        write(schema_templates / template, f"# {template}\n")
+
+    change = root / "openspec" / "changes" / "establish-database-migration-workflow"
+    write(change / ".openspec.yaml", "schema: spec-driven\n")
+    write(
+        change / "proposal.md",
+        """# Proposal
+
+为数据库迁移建立稳定工作流，范围包含 src/db/migrations.py 与 tests/db/test_migrations.py。
+""",
+    )
+    write(
+        change / "specs" / "migration.md",
+        """## ADDED Requirements
+
+### Requirement: SPEC-001 Migration workflow
+
+系统 MUST support repeatable database migrations.
+""",
+    )
+    write(
+        change / "tasks.md",
+        """# Tasks
+
+- [ ] TASK-001 在 src/db/migrations.py 中实现迁移执行入口。
+- [ ] TEST-001 在 tests/db/test_migrations.py 中补充迁移验证。
+""",
+    )
+
+
 def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) -> None:
     create_project(tmp_path)
     monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-work")))
@@ -498,6 +556,25 @@ def test_quick_fix_pack_does_not_require_source_map(tmp_path: Path) -> None:
         "src/auth/login_view.py",
         "tests/auth/test_login_view.py",
     ]
+
+
+def test_minimal_spec_driven_schema_is_compatible_with_ce_work_pack(tmp_path: Path) -> None:
+    create_minimal_spec_driven_project(tmp_path)
+
+    pack = build_context_pack(tmp_path, "establish-database-migration-workflow", "ce-work")
+
+    assert pack["change"]["schema"] == "spec-driven"
+    assert pack["facts"]["parsed"]["schema"]["issues"] == []
+    assert pack["facts"]["parsed"]["schema"]["source_map_required"] is False
+    assert pack["facts"]["parsed"]["schema"]["tasks_required"] is True
+    assert pack["facts"]["derived"]["implementation_references"]["source"] == "schema-artifacts"
+    assert pack["facts"]["derived"]["code_paths"] == ["src/db/migrations.py"]
+    assert pack["facts"]["derived"]["test_paths"] == ["tests/db/test_migrations.py"]
+    assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
+    gap_codes = {gap["code"] for gap in pack["gaps"]}
+    assert "SCHEMA_CAPABILITIES_MISSING" not in gap_codes
+    assert "SCHEMA_ARTIFACT_REQUIREDNESS_INVALID" not in gap_codes
+    assert "SCHEMA_ARTIFACT_CAPABILITIES_MISSING" not in gap_codes
 
 
 def test_artifact_order_keeps_apply_track_last_among_ready_artifacts(tmp_path: Path) -> None:
