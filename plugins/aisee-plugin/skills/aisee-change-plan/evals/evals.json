@@ -25,6 +25,7 @@
         "使用 Mermaid 语法块表达依赖顺序和并行关系。",
         "保持摘要、Mermaid 图、change 详情块和命令区的 change/phase 数量一致。",
         "使用 /opsx:new \"<change>\" --schema <schema>。",
+        "给出 schema 裁决，说明为什么选中该 schema、为什么不选至少一个替代 schema。",
         "保留 RBAC 复用事实和邀请链接过期规则待确认项。",
         "说明后续通过 aisee:change-author 或 /opsx:continue 补齐 artifacts。"
       ],
@@ -36,6 +37,7 @@
         "change 边界",
         "Mermaid 依赖图",
         "依赖顺序",
+        "Schema decision",
         "Metadata gate",
         "source-map seed",
         "/opsx:new 命令"
@@ -47,6 +49,7 @@
       ],
       "quality_checks": [
         "change 边界来自可独立交付能力，不来自文档标题。",
+        "schema 选择理由与替代 schema 拒绝理由都可追溯到输入事实。",
         "待确认规则不被主观补全为实现决策。"
       ],
       "fact_source_constraints": [
@@ -70,6 +73,7 @@
         "判断为单个小 change。",
         "输出一个 change 详情块、单节点 Mermaid 依赖图和单条 /opsx:new 命令。",
         "保持摘要、Mermaid 图和命令区的计数一致。",
+        "给出 schema 裁决，并明确为什么不需要升级成 aisee-app-spec-driven。",
         "说明不需要为了流程拆成多个 change。"
       ],
       "must_ask": [
@@ -77,6 +81,7 @@
       ],
       "must_include": [
         "单 change 判断",
+        "Schema decision",
         "Mermaid 依赖图",
         "Out of Scope",
         "/opsx:new 命令"
@@ -88,6 +93,7 @@
       ],
       "quality_checks": [
         "保持小需求小处理。",
+        "schema 选择必须解释为什么没有 API / DB / 完整 UI 契约足迹。",
         "清楚标注复用现有列表页和权限。"
       ],
       "fact_source_constraints": [
@@ -110,6 +116,7 @@
       "expected_outputs": [
         "拒绝把背景、UI 页面、API 设计、数据库设计、测试计划或上线计划作为 change 边界。",
         "围绕退款处理、退款报表、退款状态查看规划 change。",
+        "给出每个 change 的 schema 裁决和至少一个替代 schema 的拒绝理由。",
         "每个 change 包含 FR 引用、Out of Scope、source-map seed 和 Mermaid 依赖图。"
       ],
       "must_ask": [
@@ -118,6 +125,7 @@
       ],
       "must_include": [
         "FR 引用",
+        "Schema decision",
         "Mermaid 依赖图",
         "Out of Scope",
         "source-map seed",
@@ -151,6 +159,7 @@
       "expected_outputs": [
         "保留 [ARCHITECTURE-DECISION-REQUIRED]。",
         "把库存一致性策略作为 blocker 或首个风险验证/决策 change。",
+        "如果 schema 选择仍有决定性歧义，应输出 schema blocker，而不是硬选 schema。",
         "避免直接规划依赖未知一致性方案的实现 change。"
       ],
       "must_ask": [
@@ -159,6 +168,7 @@
       ],
       "must_include": [
         "[ARCHITECTURE-DECISION-REQUIRED]",
+        "Schema decision",
         "Mermaid 依赖图",
         "blocker 或决策 change",
         "受影响 FR"
@@ -169,6 +179,7 @@
       ],
       "quality_checks": [
         "架构 blocker 不被降级为普通风险。",
+        "schema 选择不会借由未确认架构决策被偷渡成既定事实。",
         "规划结果可防止后续 change-author 建立在错误前提上。"
       ],
       "fact_source_constraints": [
@@ -191,6 +202,7 @@
       "expected_outputs": [
         "选择或建议 aisee-device-spec-driven。",
         "输出设备类 source-map seed，包含 HW/FW/RT/VER 或 TBD in 对应 contract。",
+        "给出为什么不选择 aisee-app-spec-driven 或 quick-fix 的理由。",
         "把板级引脚和传感器型号未确认标为 blocker 或 Open Question。"
       ],
       "must_ask": [
@@ -199,6 +211,7 @@
       ],
       "must_include": [
         "aisee-device-spec-driven",
+        "Schema decision",
         "HW/FW/RT/VER",
         "blocker 或 Open Question"
       ],
@@ -213,6 +226,123 @@
       ],
       "fact_source_constraints": [
         "device source-map seed 不是正式硬件设计。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-plan-006",
+      "name": "dont-downgrade-contractful-change-to-quick-fix",
+      "scenario": "misleading-small-change",
+      "prompt": "用户说这是个小修复：登录失败提示文案顺便优化一下。但真实需求还包括：连续失败 5 次后锁定账号 15 分钟、返回剩余锁定时间、记录管理员可查询的审计日志。请规划 change-plan。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "用户的“小修复”说法与真实范围不一致。",
+          "锁定策略和审计查询属于正式产品能力。"
+        ]
+      },
+      "expected_output": "不得因为用户说是小修复就选择 quick-fix。应识别到这项需求涉及新的认证策略、服务语义和审计能力，优先选择 aisee-app-spec-driven，并在 schema 决策中明确拒绝 quick-fix。依赖顺序和执行命令如需输出，仍必须使用 Mermaid 和 /opsx:new。",
+      "expected_outputs": [
+        "识别用户表述与真实契约足迹不一致。",
+        "选择 aisee-app-spec-driven，而不是 quick-fix。",
+        "在 Schema decision 中明确拒绝 quick-fix 的原因。"
+      ],
+      "must_ask": [
+        "账号锁定策略和管理员审计查询是否都属于本次交付范围？"
+      ],
+      "must_include": [
+        "aisee-app-spec-driven",
+        "Schema decision",
+        "拒绝 quick-fix 的理由",
+        "/opsx:new 命令"
+      ],
+      "must_not": [
+        "不得因为“小修复”措辞直接选择 quick-fix。",
+        "不得省略认证或审计契约影响。"
+      ],
+      "quality_checks": [
+        "schema 选择基于真实契约足迹，而不是用户的缩小措辞。",
+        "锁定策略与审计能力被视为正式实现契约。"
+      ],
+      "fact_source_constraints": [
+        "change-plan 只能根据给定需求判断契约足迹，不生成额外认证规则。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-plan-007",
+      "name": "keep-feasibility-work-in-quick-research",
+      "scenario": "research-vs-implementation",
+      "prompt": "我们想评估是否接入某第三方 OCR 服务，用来识别报销票据。当前目标只是比较 3 家供应商、验证识别准确率和费用模型，并给出 go/no-go 建议。请规划 change-plan。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "当前阶段只做可行性研究，不承诺生产实现。"
+        ]
+      },
+      "expected_output": "应选择 quick-research，而不是 aisee-app-spec-driven。输出的问题、发现和建议导向的 schema 决策，不得把供应商接入、上线改造或正式 API 实现写成当前 change 的生产任务。",
+      "expected_outputs": [
+        "选择 quick-research。",
+        "在 Schema decision 中说明为什么不进入 app 实现 schema。",
+        "保持结论是研究 / go-no-go，而不是生产任务。"
+      ],
+      "must_ask": [
+        "这次是否只产出供应商评估和建议，不进入生产接入？"
+      ],
+      "must_include": [
+        "quick-research",
+        "Schema decision",
+        "go/no-go",
+        "拒绝 aisee-app-spec-driven 的理由"
+      ],
+      "must_not": [
+        "不得输出生产实现任务。",
+        "不得承诺正式接入第三方 OCR 服务。"
+      ],
+      "quality_checks": [
+        "schema 选择不会把调研结论升级成实现任务。",
+        "替代 schema 的拒绝理由与当前目标一致。"
+      ],
+      "fact_source_constraints": [
+        "评估目标来自输入事实；change-plan 不补造上线范围。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-plan-008",
+      "name": "block-on-unresolved-schema-ambiguity",
+      "scenario": "schema-selection-blocker",
+      "prompt": "帮我规划“修复文件上传不稳定”这个需求。现有信息只有：有时用户上传失败；可能是前端重试逻辑、后端鉴权、对象存储权限、CI 打包配置或病毒扫描超时导致。没有稳定复现，也没有确认是只修问题还是要顺便重做上传链路。请直接给我 schema 和 change-plan。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "当前证据不足以稳定判断是 quick-fix、infra-change、security-audit 还是 aisee-app-spec-driven。"
+        ]
+      },
+      "expected_output": "不得硬选 schema。应提出最多 1 个决定性问题，或直接输出 [SCHEMA-SELECTION-BLOCKED]，列出仍在竞争的 schema 及原因，并明确在 schema 未定前不能输出 /opsx:new 命令或进入 change-author。",
+      "expected_outputs": [
+        "输出 [SCHEMA-SELECTION-BLOCKED] 或一个决定性澄清问题。",
+        "列出仍在竞争的 schema 及其 plausible 理由。",
+        "在 schema 未定前不输出 /opsx:new 命令。"
+      ],
+      "must_ask": [
+        "这次目标是先定位根因并回答 go/no-go，还是已经确认要做生产修复/重构？"
+      ],
+      "must_include": [
+        "[SCHEMA-SELECTION-BLOCKED]",
+        "Candidate schemas still in contention",
+        "Decisive question"
+      ],
+      "must_not": [
+        "不得硬选 quick-fix、infra-change、security-audit 或 aisee-app-spec-driven。",
+        "不得在 blocker 状态下输出 /opsx:new 命令。"
+      ],
+      "quality_checks": [
+        "低置信度 schema 选择被阻断，而不是被包装成确定结论。",
+        "blocker 明确说明误选 schema 会导致的错误后续流程。"
+      ],
+      "fact_source_constraints": [
+        "在根因和目标未确认前，不得把任何一个候选 schema 升级为既定事实。"
       ],
       "files": []
     }

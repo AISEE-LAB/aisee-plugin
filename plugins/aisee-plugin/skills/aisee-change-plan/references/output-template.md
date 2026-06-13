@@ -10,6 +10,8 @@
 4. 全部命令
 5. 整体理由
 
+如果任何 change 的 schema 选择仍处于低置信度竞争状态，不输出正常 change plan，改为输出 `Schema Selection Blocker` 报告并停止在 planning。
+
 ## 摘要
 
 ```text
@@ -59,8 +61,21 @@ Complexity:   S | M | L
 Description:
   用一句话说明该 change 交付什么。
 
+Schema decision:
+  - Selected schema: <selected-schema>
+  - Alternative schemas considered:
+      - <schema-a> — reject because ...
+      - <schema-b> — reject because ... / No credible alternative
+  - Confidence: high | medium
+  - Decisive signals:
+      - 交付意图: ...
+      - 契约足迹: ...
+      - 上游追踪: ...
+      - 风险/不确定性: ...
+
 Schema rationale:
   - 为什么选择该 schema。
+  - 为什么不是上面的替代 schema。
   - 如果不是 aisee-app-spec-driven，说明为什么不需要 SRS / UI Content / Architecture 追踪。
   - Required upstream docs: SRS / UI Content / Design Spec / Design Assets / Architecture / Issue / PR / none
 
@@ -129,6 +144,30 @@ Command:
 ─────────────────────────────────────────────────
 ```
 
+## Schema Selection Blocker 模板
+
+当 schema 仍有决定性歧义时，输出以下阻断报告，替代正常 change plan：
+
+```text
+[SCHEMA-SELECTION-BLOCKED]
+Change: <candidate-change-name-or-scope>
+Why blocked:
+  - 说明为什么当前事实不足以稳定选择 schema。
+Candidate schemas still in contention:
+  - <schema-a> — why plausible
+  - <schema-b> — why plausible
+Decisive question:
+  - 只问 1 个能改变 schema 选择的问题；若用户未答，停止，不输出 /opsx:new
+Impact:
+  - 说明如果误选 schema，会导致哪些错误 artifact 或错误流程
+```
+
+规则：
+
+- 出现 `[SCHEMA-SELECTION-BLOCKED]` 时，不输出 `全部命令`。
+- 出现 `[SCHEMA-SELECTION-BLOCKED]` 时，不提示进入 `aisee:change-author`。
+- 不要一边声明 blocked，一边继续给可执行 `/opsx:new` 命令。
+
 ## 全部命令
 
 ```bash
@@ -163,6 +202,11 @@ Assumption 格式：
 - 摘要中的 `{M}` 必须等于 Mermaid 图中的 phase 数量。
 - `全部命令` 中的 `/opsx:new` 数量必须等于 change 数量。
 - Mermaid 图中的每个 change 都必须有对应详情块和对应命令。
+- 每个 change 都必须有 `Schema decision`，且至少写出 1 个被拒绝的替代 schema；若没有可信替代，明确写 `No credible alternative`。
+- `Schema decision` 中的 `Confidence` 只允许 `high` 或 `medium`；若只能给 `low`，必须改为 `[SCHEMA-SELECTION-BLOCKED]`。
+- 选择 `quick-fix` 时，不得同时要求完整 app/device source-map 字段或 Required=yes 的 app 契约 artifacts。
+- 选择 `quick-research` 时，不得输出生产实现任务、上线步骤或生产代码承诺。
+- 选择 `aisee-device-spec-driven` 时，不得输出以 Web/API/DB 为主体的 source-map seed。
 - 每个 change 的 `Metadata gate` 都必须同时包含：
   - `/opsx:new must use: /opsx:new "<change>" --schema <selected-schema>`
   - `后续 author / implementation 只读取 change metadata 中固化的 schema，不根据 artifacts 猜测或重选`
