@@ -11,32 +11,33 @@
       "id": "implementation-bridge-001",
       "name": "handoff-authored-change-to-ce-work",
       "scenario": "implementation-handoff",
-      "prompt": "change 已 authored，context pack 无 blocker。帮我给 ce-work 生成一个最小 Implementation Brief，告诉它该读什么、能改哪些路径、是否需要 ce-plan。",
+      "prompt": "change 已 authored，context pack 无 blocker。帮我判断能否进入 ce-work，并只给出最小 JSON 判定结果：该读什么、能改哪些路径、是否需要 ce-plan。",
       "context": {
         "files": [],
         "assumptions": [
           "当前 change 已存在 context pack。"
         ]
       },
-      "expected_output": "应优先消费 context pack 和 gaps，生成一次性实现交接摘要；明确 allowed paths、verification、review recommendation 和 ce-plan 是否需要；不得创建平行长期任务清单或直接写代码。",
+      "expected_output": "应优先消费 context pack 和 gaps，默认只输出一次性的 JSON 判定结果与下一步路由；明确 allowed paths、verification、review recommendation 和 ce-plan 是否需要；不得创建平行长期任务清单、默认展开 Brief 正文或直接写代码。",
       "expected_outputs": [
         "先读当前 change 的机器可读上下文。",
-        "输出 Implementation Brief 关键栏位。",
+        "输出 JSON 判定关键字段。",
         "当 requires_ce_plan=false 时直接推荐 ce-work。"
       ],
       "must_ask": [],
       "must_include": [
-        "read first",
+        "requires_ce_plan",
         "allowed paths",
         "verification",
         "review recommendation"
       ],
       "must_not": [
         "不得创建平行长期任务清单。",
+        "不得默认输出完整 Implementation Brief。",
         "不得替代 ce-work、ce-code-review 或 aisee:verify。"
       ],
       "quality_checks": [
-        "Brief 只做交接索引，不复制全部 artifacts 正文。",
+        "默认输出应保持为 JSON 判定，不展开整段人读摘要。",
         "scope 和写回位置必须来自当前 change。"
       ],
       "fact_source_constraints": [

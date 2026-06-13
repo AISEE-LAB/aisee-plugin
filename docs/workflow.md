@@ -155,7 +155,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，也不应复制进长期 artifacts。
 
-然后使用 `aisee:implementation-bridge` 输出 Implementation Brief。Brief 只做执行索引：
+然后使用 `aisee:implementation-bridge` 输出默认的 JSON 判定结果。它应只返回执行路由和 guardrails；只有在明确需要人读交接时，才生成 Implementation Brief。Brief 只做执行索引：
 
 - 当前 change 和 schema。
 - 必读 artifacts。

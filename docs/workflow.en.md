@@ -155,7 +155,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 Knowledge matches are reminders only. They do not change the current change's specification source and should not be copied into durable artifacts.
 
-Then use `aisee:implementation-bridge` to produce an Implementation Brief. The brief is an execution index:
+Then use `aisee:implementation-bridge` to return the default JSON decision result. It should return routing and guardrails only; generate an Implementation Brief only when a human-readable handoff is explicitly needed. The brief is an execution index:
 
 - current change and schema;
 - read-first artifacts;

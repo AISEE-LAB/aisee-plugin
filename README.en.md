@@ -33,7 +33,7 @@
 
 **Aisee** stands for **AI-Enhanced Software Engineering**.
 
-Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, OpenSpec changes, project memory, team knowledge guardrails, implementation briefs, verification checks, and archive guardrails.
+Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, OpenSpec changes, project memory, team knowledge guardrails, implementation-stage JSON decisions with optional handoff briefs, verification checks, and archive guardrails.
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, project memory, team knowledge, JSON context tooling, and engineering handoff rules around OpenSpec.
 
@@ -42,7 +42,7 @@ It is especially relevant for maintainers who want Codex and other coding agents
 - durable requirements and specifications instead of transient chat context;
 - machine-readable context packs and schema packs for implementation, review, and verification;
 - OpenSpec change planning that turns vague intent into reviewable deliverables;
-- implementation briefs that help maintainers and contributors hand off PR-ready work;
+- machine-readable implementation-stage decisions with optional handoff briefs that help maintainers and contributors hand off PR-ready work;
 - verification evidence and archive gates that close the loop before AI-assisted changes are treated as complete.
 
 ## OpenSpec Boundary
@@ -58,7 +58,7 @@ Codex can write, review, and fix code, but the results are less reliable when a 
 Aisee supplies that workflow layer:
 
 - it turns intent into durable OpenSpec changes, planning docs, and reusable project memory;
-- it helps maintainers prepare implementation briefs that are easier to review and hand off;
+- it helps maintainers first reduce implementation entry into reusable JSON decisions, and only turn them into human-readable handoff briefs when needed;
 - it lets Codex read against the same context boundaries across implementation, review, verification, and archive;
 - it gives open-source projects clearer engineering constraints for AI-assisted contribution flows.
 
@@ -352,7 +352,7 @@ For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline spec
 | `aisee:architecture` | Capture software architecture context, technical constraints, reusable capabilities, and artifact hints. |
 | `aisee:change-plan` | Plan independent OpenSpec changes and choose schemas. |
 | `aisee-schema-pack` | Provide and maintain OpenSpec schema packs through the marketplace plugin. |
-| `aisee:implementation-bridge` | Produce implementation briefs and context pack summaries for a single change. |
+| `aisee:implementation-bridge` | Return implementation-stage JSON decisions for a single change by default, and generate handoff briefs only when explicitly needed. |
 | `aisee:verify` | Diagnose artifact, task, source-map, numbering, and evidence gaps. |
 | `aisee:archive-guard` | Provide the final recommendation before `openspec archive`. |
 | `aisee:spec-migrate` | Build OpenSpec baseline specs for existing projects. |

@@ -1,6 +1,6 @@
 ---
 name: aisee:implementation-bridge
-description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Compound Engineering 执行的最小工程上下文。用于进入 ce-work 前读取 context pack 和当前 change artifacts，输出一次性的 Implementation Brief / context pack 摘要，明确当前 schema、事实源、读取顺序、schema/domain artifacts、apply tracks、source-map 适用性、禁止越界项、验证要求和 ce-plan 是否需要。它不创建平行任务清单，不默认落地新文档，不替代 ce-work，不修补缺失 artifacts。
+description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Compound Engineering 执行的最小工程上下文。用于进入 ce-work 前读取 context pack 和当前 change artifacts，默认只输出 JSON 判定结果与下一步路由结论；仅在用户明确要求人读交接或保存 handoff 时才生成 Implementation Brief。它不创建平行任务清单，不默认落地新文档，不替代 ce-work，不修补缺失 artifacts。
 ---
 
 # aisee:implementation-bridge
@@ -26,7 +26,8 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 - 读取单个 OpenSpec change。
 - 读取 `aisee context pack --change <change> --for ce-work --json` 和当前 change artifacts。
 - 这些读取都是只读状态检查，由 skill 自动执行；不要求用户手工跑常规命令。
-- 输出给 `ce-work` 的一次性 Implementation Brief / context pack 摘要。
+- 默认输出给 `ce-work` 的 JSON 判定结果与下一步路由结论。
+- 仅在用户明确要求人读交接、保存 handoff 或分批执行索引时，生成人类可读的 Implementation Brief。
 - 明确事实源、读取顺序、执行规则、禁止越界项和验证要求。
 - 判断是否需要先用 `ce-plan` 细化，并要求有效结论回写当前 schema 的 apply tracks；只有 schema 生成 `source-map.md` 时才回写 source-map。
 - 识别实现后是否建议 Tier 2 code review，并把审查代理授权提示写入 Brief。
@@ -53,13 +54,25 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 - 如果实现需要的文件没有被当前 change 或 context pack 指到，先把它作为 `[IMPLEMENTATION-PATH-GAP]`；schema 生成 `source-map.md` 时回写 source-map，否则回写当前 schema 的 apply tracks 或主 artifact。
 - 未被当前 change 纳入范围的问题，只能进入 Brief 的 `Blockers and Assumptions`、`Follow-up candidates` 或验证风险；不得直接变成当前 change 的实现任务。
 
-## 产物形态
+## 默认产物
 
-Implementation Brief 是实现阶段的交接输出，不是新的规范事实源：
+默认只输出 JSON 判定结果，不默认展开人读摘要。结果应优先来自 `aisee context pack --change <change> --for ce-work --json`，至少覆盖：
 
-- 默认作为当前会话输出，或由 `aisee context pack --change <change> --for ce-work --json` 返回给执行方。
-- 不默认写入 `openspec/changes/<change>/implementation-brief.md` 或其他长期文档。
-- 如果用户明确要求保存，或当前 change 内容过大需要分批交接，优先写入 `aisee/cache/implementation-bridge/<change>/brief-part-NN.md`；如用户指定写入 change 目录，只能标注为 generated handoff / cache，且正文必须指向当前 schema artifacts 和 apply tracks；不得承载这些 artifact 中没有的新事实。
+- 当前 change / schema / status。
+- 是否存在 blocker 或关键风险。
+- `requires_ce_plan` 与 `ce_plan_reason`。
+- `allowed_paths`、`code_paths`、`test_paths`。
+- `apply_tracks` / 回写位置。
+- 推荐下一步：`ce-work`、`ce-plan`、`aisee:change-author` 或停止。
+
+默认不写入 `openspec/changes/<change>/implementation-brief.md` 或其他长期文档，也不默认在会话里展开 `Implementation Brief` 各章节。
+
+## Brief 产物形态
+
+Implementation Brief 是按需的人读交接输出，不是新的规范事实源：
+
+- 只有用户明确要求“生成 Brief / 交接摘要 / 保存 handoff”，或当前 change 内容过大需要分批交接时，才生成。
+- 如果用户明确要求保存，优先写入 `aisee/cache/implementation-bridge/<change>/brief-part-NN.md`；如用户指定写入 change 目录，只能标注为 generated handoff / cache，且正文必须指向当前 schema artifacts 和 apply tracks；不得承载这些 artifact 中没有的新事实。
 - 分批交接时必须先生成 `brief-index.md`，再生成 `brief-part-NN.md`；index 使用 `references/brief-index-template.md`，part 使用 `references/brief-template.md`。
 - 发现 Brief 与 OpenSpec artifacts 不一致时，以 OpenSpec artifacts 为准，并回写对应 artifact，而不是修补 Brief。
 
@@ -121,7 +134,16 @@ aisee context pack --change <change> --for ce-work --json
 7. 当前 schema 的 apply tracks，通常是 `tasks.md`
 8. context pack 明确给出的相关代码路径、测试路径、路由、API、模型和配置
 
-## Implementation Brief 输出必须包含
+## 默认 JSON 判定结果应包含
+
+- 当前 change / schema / status。
+- blocker / risk / gap 判定。
+- `requires_ce_plan`、`ce_plan_reason`、`reusable_workflow_candidates`。
+- `allowed_paths`、`code_paths`、`test_paths`、`unmapped_reference_paths`。
+- `apply_tracks`、completion gate、建议回写位置。
+- 推荐下一步及停止条件。
+
+## 当明确要求生成人读 Brief 时，输出必须包含
 
 ```md
 # Implementation Brief
