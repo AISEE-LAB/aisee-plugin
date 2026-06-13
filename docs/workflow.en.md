@@ -172,7 +172,7 @@ Implementation can be handled by a coding agent or human developer. Regardless o
 
 - Implement only the current change scope.
 - If specs, contracts, and code disagree, update the current OpenSpec change before continuing.
-- Update `tasks.md` or the current schema apply tracks after implementation.
+- Do not defer this until verify or archive; before `ce-work` reports the current batch complete, update `tasks.md` or the current schema apply tracks first.
 - Record test, manual verification, preview, monitoring, or review results as evidence.
 
 When a change touches public CLI behavior, HTTP endpoints, API/service contracts, schemas, parsers, path reads, security, or privacy, Tier 2 code review is recommended.

@@ -2,6 +2,14 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
+## [0.11.2] - 2026-06-13
+
+### Changed
+
+- `aisee:implementation-bridge`、Implementation Brief 模板、workflow 和 README 明确收口门禁：`ce-work` 完成当前批次前，必须先回写 `tasks.md` 或当前 schema 的 apply tracks。
+- `aisee context pack --for ce-work --json` 新增 `facts.derived.execution.completion_gate`，显式暴露 apply tracks、完成证据和 `writeback-required` 状态，避免执行层把“代码已改”误判为“work 已完成”。
+- `aisee context pack --for ce-work --json` 与 `--for aisee-verify --json` 在发现已有 review/test/manual evidence、但 apply tracks 仍无任何已完成项时，会报出 `APPLY_TRACKS_WRITEBACK_REQUIRED` blocker，阻止遗漏 `tasks.md` 回写。
+
 ## [0.11.1] - 2026-06-12
 
 ### Changed

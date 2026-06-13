@@ -50,11 +50,13 @@ change_refs:
 - Allowed test paths:
 - Start from:
 - Apply tracks to update:
+- Before marking work complete:
 
 ## Rules
 
 - Follow current schema apply tracks; do not create a parallel durable plan.
 - Preserve traceability: source-map schema updates `source-map.md`; lighter schemas update the relevant artifact / apply tracks.
+- Do not report the current batch as complete before apply tracks are updated. For `tasks.md` schemas, update checkbox state, verification tasks, and evidence entry first.
 - If implementation facts conflict with specs or contracts, stop and update the current OpenSpec change first.
 - UI icons: reuse the project's component library or icon package first. If no suitable icon exists, use globally installed `better-icons` / Iconify first for speed; install or invoke it via the project package manager, `npx -y better-icons`, or `bunx better-icons` when missing. Record the command and final `prefix:name` icon IDs as evidence.
 

@@ -181,7 +181,10 @@ Brief 只做执行索引，不复制 OpenSpec artifact 正文：
 - 不创建新的长期计划文件；需要临时推理时，结论必须回写当前 schema 的 apply tracks 或追踪 artifact。
 - 不扩大 change 范围；超出范围的发现记录为 follow-up 或新 change 候选。
 - 完成实现后必须更新当前 schema 的 apply tracks 和验证证据；没有 apply tracks 的 schema 只记录必要 evidence。
+- `ce-work` 只有在本轮实现涉及的 apply tracks 已同步回写后，才能声明当前批次完成；app/device/quick-fix 默认先更新 `tasks.md` checkbox、验证任务和 evidence 入口，再离开 `ce-work`。
 - UI 实现涉及图标时，先复用项目已使用的组件库、图标包或设计系统图标；没有合适图标时允许使用 `better-icons` / Iconify 检索。优先使用全局安装的 `better-icons` 以减少冷启动；缺少时执行阶段应按项目包管理器安装或用 `npx -y better-icons` / `bunx better-icons` 完成一次性检索，并在 evidence 中记录命令、图标库和完整图标 ID。不要为了常见 UI 图标手写 SVG。
+
+CHECKPOINT: `ce-work` 完成前，必须先回写当前 schema 的 apply tracks。对默认以 `tasks.md` 追踪的 schema，至少要同步当前批次已完成 / 未完成状态、验证任务和 evidence 入口；如果代码已改但 apply tracks 仍未更新，不得把该批次报告为完成。
 
 ## 实现后审查建议
 

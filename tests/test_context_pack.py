@@ -602,6 +602,67 @@ def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:
     assert pack["facts"]["derived"]["drift_candidates"] == []
 
 
+def test_context_pack_flags_completion_evidence_without_apply_track_writeback(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(
+        tmp_path / "docs" / "verification" / "add-auth-test.md",
+        """# Test Evidence
+
+status: passed
+""",
+    )
+
+    ce_work_pack = build_context_pack(tmp_path, "add-auth", "ce-work")
+    verify_pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
+
+    assert "APPLY_TRACKS_WRITEBACK_REQUIRED" in {gap["code"] for gap in ce_work_pack["gaps"]}
+    completion_gate = ce_work_pack["facts"]["derived"]["execution"]["completion_gate"]
+    assert completion_gate["apply_tracks"] == "tasks.md"
+    assert completion_gate["status"] == "writeback-required"
+    assert completion_gate["completion_evidence_paths"] == ["docs/verification/add-auth-test.md"]
+
+    assert "APPLY_TRACKS_WRITEBACK_REQUIRED" in {gap["code"] for gap in verify_pack["gaps"]}
+    review_checks = verify_pack["facts"]["derived"]["checks"]["review_and_tests"]
+    assert review_checks == [
+        {
+            "apply_tracks": "tasks.md",
+            "completion_evidence_count": 1,
+            "completion_evidence_paths": ["docs/verification/add-auth-test.md"],
+            "task_done_count": 0,
+            "writeback_consistent": False,
+        }
+    ]
+
+
+def test_context_pack_does_not_flag_writeback_gap_after_task_sync(tmp_path: Path) -> None:
+    create_project(tmp_path)
+    write(
+        tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md",
+        """# Tasks
+
+- [x] TASK-001 Provider implementation: implement src/auth/session.py.
+- [ ] TASK-001 Consumer integration: update frontend caller.
+- [ ] TEST-001 Contract test: verify tests/auth/test_session.py.
+- [ ] TEST-001 Backward compatibility check: confirm login contract compatibility.
+""",
+    )
+    write(
+        tmp_path / "docs" / "verification" / "add-auth-test.md",
+        """# Test Evidence
+
+status: passed
+""",
+    )
+
+    ce_work_pack = build_context_pack(tmp_path, "add-auth", "ce-work")
+    verify_pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
+
+    assert "APPLY_TRACKS_WRITEBACK_REQUIRED" not in {gap["code"] for gap in ce_work_pack["gaps"]}
+    assert ce_work_pack["facts"]["derived"]["execution"]["completion_gate"]["status"] == "ready"
+    assert "APPLY_TRACKS_WRITEBACK_REQUIRED" not in {gap["code"] for gap in verify_pack["gaps"]}
+    assert verify_pack["facts"]["derived"]["checks"]["review_and_tests"][0]["writeback_consistent"] is True
+
+
 def test_context_pack_reports_missing_source_refs(tmp_path: Path) -> None:
     create_project(tmp_path)
     write(tmp_path / "openspec" / "changes" / "add-auth" / "source-map.md", "docs/requirements/missing.md#FR-999 is covered.\n")

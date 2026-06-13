@@ -107,6 +107,8 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
     traceability_mode = derive_traceability_mode(upstream_refs, produced_local_ids)
     parsed_artifacts = slim_artifacts(full_parsed_artifacts) if target == "ce-work" else full_parsed_artifacts
 
+    evidence = build_evidence(root, change)
+
     gaps = build_gaps(
         change_path=change_path,
         artifact_entries=artifact_entries,
@@ -123,6 +125,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         schema_resolution=schema_resolution,
         schema_paths=schema_paths,
         produced_local_ids=produced_local_ids,
+        evidence=evidence,
     )
 
     read_order = build_read_order(root, change_path, artifact_entries, read_paths)
@@ -197,7 +200,7 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
         "generated": None,
         "gaps": gaps,
         "guardrails": build_guardrails(target, source_map_required, tasks_required),
-        "evidence": build_evidence(root, change),
+        "evidence": evidence,
         "meta": {
             "command": f"aisee context pack --change {change} --for {target} --json",
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -221,6 +224,11 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
                 ce_plan_refinement_reason=ce_plan_refinement_reason,
                 gaps=gaps,
             ),
+            "completion_gate": build_completion_gate(
+                apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
+                task_state=task_state,
+                evidence=evidence,
+            ),
         }
         pack["facts"]["derived"]["execution"]["brief"] = build_execution_brief(
             root=root,
@@ -232,6 +240,9 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             start_from=pack["facts"]["derived"]["execution"]["start_from"],
             verification_requirements=pack["facts"]["derived"]["verification_requirements"],
             gaps=gaps,
+            task_state=task_state,
+            evidence=evidence,
+            apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
         )
     elif target == "aisee-verify":
         pack["facts"]["derived"]["checks"] = {
@@ -244,7 +255,11 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "tasks": summarize_task_checks(task_state),
             "contracts": summarize_contract_checks(artifact_entries, source_map, source_map.get("contract_sync")),
             "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
-            "review_and_tests": [],
+            "review_and_tests": summarize_review_and_test_checks(
+                evidence=evidence,
+                task_state=task_state,
+                apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
+            ),
         }
         pack["facts"]["derived"]["drift_candidates"] = []
     elif target == "ce-doc-review":
@@ -771,6 +786,7 @@ def build_gaps(
     schema_resolution: dict[str, Any],
     schema_paths: SchemaPaths,
     produced_local_ids: list[str],
+    evidence: dict[str, Any],
 ) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if not change_path.exists():
@@ -914,6 +930,13 @@ def build_gaps(
                     unmapped_reference_paths,
                 )
             )
+    apply_track_stale_gap = build_apply_track_writeback_gap(
+        schema_info=schema_info,
+        task_state=task_state,
+        evidence=evidence,
+    )
+    if apply_track_stale_gap is not None:
+        gaps.append(apply_track_stale_gap)
     gaps.extend(contract_sync_gaps(schema_info, artifact_entries, source_map, tasks_text))
     return gaps
 
@@ -1144,6 +1167,9 @@ def build_execution_brief(
     start_from: list[str],
     verification_requirements: list[str],
     gaps: list[dict[str, Any]],
+    task_state: dict[str, Any],
+    evidence: dict[str, Any],
+    apply_tracks: str | None,
 ) -> dict[str, Any]:
     authoritative_sources = [
         rel(root, change_path / relative_path)
@@ -1170,6 +1196,11 @@ def build_execution_brief(
         "allowed_paths": allowed_paths,
         "task_start": start_from,
         "verification": verification_requirements,
+        "completion_gate": build_completion_gate(
+            apply_tracks=apply_tracks,
+            task_state=task_state,
+            evidence=evidence,
+        ),
         "risks": risk_items,
     }
 
@@ -1199,6 +1230,31 @@ def build_guardrails(target: str, source_map_required: bool, tasks_required: boo
     return common
 
 
+def build_completion_gate(
+    *,
+    apply_tracks: str | None,
+    task_state: dict[str, Any],
+    evidence: dict[str, Any],
+) -> dict[str, Any]:
+    completion_evidence = collect_completion_evidence_paths(evidence)
+    return {
+        "apply_tracks": apply_tracks,
+        "must_write_back_before_complete": bool(apply_tracks),
+        "task_state": {
+            "total": task_state["total"],
+            "done": task_state["done"],
+            "open": task_state["open"],
+            "blocked": task_state["blocked"],
+        },
+        "completion_evidence_paths": completion_evidence,
+        "status": (
+            "writeback-required"
+            if apply_tracks and completion_evidence and task_state["done"] == 0 and task_state["total"] > 0
+            else "ready"
+        ),
+    }
+
+
 def build_evidence(root: Path, change: str) -> dict[str, Any]:
     review_dir = root / "docs" / "reviews"
     review_files: list[str] = []
@@ -1224,6 +1280,28 @@ def build_evidence(root: Path, change: str) -> dict[str, Any]:
         "quick_fix": classified["quick_fix"],
         "details": build_evidence_details(root, ce_review_files, aisee_review_lens, verification_files, classified),
     }
+
+
+def collect_completion_evidence_paths(evidence: dict[str, Any]) -> list[str]:
+    paths: list[str] = []
+    for key in ("ce_doc_review", "ce_code_review", "aisee_review_lens", "tests", "manual_verification"):
+        value = evidence.get(key)
+        if isinstance(value, list):
+            paths.extend(path for path in value if isinstance(path, str))
+    domain = evidence.get("details", {}).get("domain", {})
+    if isinstance(domain, dict):
+        for categories in domain.values():
+            if not isinstance(categories, dict):
+                continue
+            for entries in categories.values():
+                if not isinstance(entries, list):
+                    continue
+                for entry in entries:
+                    if isinstance(entry, dict):
+                        path = entry.get("path")
+                        if isinstance(path, str) and path:
+                            paths.append(path)
+    return dedupe(paths)
 
 
 def classify_evidence(review_files: list[str], verification_files: list[str]) -> dict[str, dict[str, list[str]]]:
@@ -1530,6 +1608,43 @@ def summarize_implementation_checks(code_paths: list[str], test_paths: list[str]
         "code_path_count": len(code_paths),
         "test_path_count": len(test_paths),
     }]
+
+
+def summarize_review_and_test_checks(
+    *,
+    evidence: dict[str, Any],
+    task_state: dict[str, Any],
+    apply_tracks: str | None,
+) -> list[dict[str, Any]]:
+    completion_evidence = collect_completion_evidence_paths(evidence)
+    return [{
+        "apply_tracks": apply_tracks,
+        "completion_evidence_count": len(completion_evidence),
+        "completion_evidence_paths": completion_evidence,
+        "task_done_count": task_state["done"],
+        "writeback_consistent": not (apply_tracks and completion_evidence and task_state["done"] == 0 and task_state["total"] > 0),
+    }]
+
+
+def build_apply_track_writeback_gap(
+    *,
+    schema_info: dict[str, Any],
+    task_state: dict[str, Any],
+    evidence: dict[str, Any],
+) -> dict[str, Any] | None:
+    apply_tracks = schema_info.get("apply_tracks")
+    if not isinstance(apply_tracks, str) or not apply_tracks.strip():
+        return None
+    completion_evidence = collect_completion_evidence_paths(evidence)
+    if not completion_evidence or task_state["total"] == 0 or task_state["done"] > 0:
+        return None
+    return gap(
+        "APPLY_TRACKS_WRITEBACK_REQUIRED",
+        "blocker",
+        "implementation or verification evidence exists, but apply tracks still show no completed tasks; update apply tracks before reporting work complete",
+        apply_tracks,
+        completion_evidence,
+    )
 
 
 def extract_paths(text: str) -> set[str]:

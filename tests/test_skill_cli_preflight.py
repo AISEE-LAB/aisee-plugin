@@ -223,6 +223,13 @@ def test_core_skills_document_auto_cli_consumption_and_lean_projection() -> None
         assert marker in (ROOT / relative_path).read_text(encoding="utf-8")
 
 
+def test_implementation_bridge_requires_apply_track_writeback_before_work_completion() -> None:
+    skill = (ROOT / "plugins/aisee-plugin/skills/aisee-implementation-bridge/SKILL.md").read_text(encoding="utf-8")
+
+    assert "CHECKPOINT: `ce-work` 完成前，必须先回写当前 schema 的 apply tracks。" in skill
+    assert "如果代码已改但 apply tracks 仍未更新，不得把该批次报告为完成。" in skill
+
+
 def test_change_plan_rules_and_templates_support_source_context_without_fake_refs() -> None:
     expected_markers = {
         "plugins/aisee-plugin/skills/aisee-change-plan/references/source-map-rules.md": "上游来源",

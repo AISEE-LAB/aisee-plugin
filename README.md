@@ -323,7 +323,7 @@ aisee doctor --json
 4. aisee:change-author
 5. openspec validate <change>
 6. aisee:implementation-bridge
-7. implementation / review / test
+7. implementation / review / test（完成当前批次前先回写 `tasks.md` / apply tracks）
 8. openspec archive <change>
 
 对小范围、边界明确、低风险工作，也可以直接走：
@@ -332,7 +332,7 @@ aisee doctor --json
 quick-fix / quick-research / 其它轻量 schema
   -> change-author
   -> implementation-bridge
-  -> implementation / review / test
+  -> implementation / review / test（完成当前批次前先回写 `tasks.md` / apply tracks）
   -> archive
 ```
 ```

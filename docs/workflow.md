@@ -172,7 +172,7 @@ Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，
 
 - 只实现当前 change 范围。
 - 如果发现 spec/contract/code 不一致，先回写当前 OpenSpec change，再继续实现。
-- 完成后更新 `tasks.md` 或当前 schema 的 apply tracks。
+- 不要等到 verify 或 archive 前再补写；`ce-work` 完成当前批次前，就应先更新 `tasks.md` 或当前 schema 的 apply tracks。
 - 测试、人工验证、预览、监控或 review 结果必须作为 evidence 记录。
 
 当 change 触及公开 CLI、HTTP endpoint、API/service contract、schema、parser、路径读取、安全或隐私表面时，建议执行 Tier 2 code review。

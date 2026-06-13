@@ -323,7 +323,7 @@ aisee doctor --json
 4. aisee:change-author
 5. openspec validate <change>
 6. aisee:implementation-bridge
-7. implementation / review / test
+7. implementation / review / test (write back `tasks.md` / apply tracks before marking the batch complete)
 8. openspec archive <change>
 
 For small, bounded, low-risk work, an abbreviated path is also valid:
