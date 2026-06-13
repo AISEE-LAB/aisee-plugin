@@ -29,17 +29,38 @@
 
 # Aisee Plugin
 
+> Aisee Plugin is a Codex-oriented OpenSpec workflow layer for spec-driven AI software engineering.
+
 **Aisee** stands for **AI-Enhanced Software Engineering**.
 
 Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, OpenSpec changes, project memory, team knowledge guardrails, implementation briefs, verification checks, and archive guardrails.
 
 Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, project memory, team knowledge, JSON context tooling, and engineering handoff rules around OpenSpec.
 
+It is especially relevant for maintainers who want Codex and other coding agents to work more reliably in open-source repositories:
+
+- durable requirements and specifications instead of transient chat context;
+- machine-readable context packs and schema packs for implementation, review, and verification;
+- OpenSpec change planning that turns vague intent into reviewable deliverables;
+- implementation briefs that help maintainers and contributors hand off PR-ready work;
+- verification evidence and archive gates that close the loop before AI-assisted changes are treated as complete.
+
 ## OpenSpec Boundary
 
 Aisee does not replace OpenSpec and does not maintain a second schema state machine. Aisee reads the current schema declaration only when handling OpenSpec changes, context packs, or schema pack checks; project memory and team knowledge remain guidance / guardrails.
 
 When Aisee handles OpenSpec artifacts, it acts only as a parser / checker / projector. `openspec validate` and `openspec archive` remain OpenSpec responsibilities.
+
+## Why This Matters for Codex
+
+Codex can write, review, and fix code, but the results are less reliable when a repository lacks explicit requirements, stable project context, review rules, and verification criteria.
+
+Aisee supplies that workflow layer:
+
+- it turns intent into durable OpenSpec changes, planning docs, and reusable project memory;
+- it helps maintainers prepare implementation briefs that are easier to review and hand off;
+- it lets Codex read against the same context boundaries across implementation, review, verification, and archive;
+- it gives open-source projects clearer engineering constraints for AI-assisted contribution flows.
 
 ## Why Aisee?
 
@@ -578,6 +599,9 @@ python scripts/smoke_release.py --with-pipx
 
 ### Later
 
+- Add stronger Codex PR review and implementation-brief examples for maintainer workflows.
+- Add a sample OpenSpec change so new repositories can see a concrete Aisee deliverable.
+- Expand verify/archive gate examples to lower the trial cost for OSS maintainers.
 - Improve project memory conflict hints, stale-entry policy, and low-context injection rules.
 - Tighten team knowledge remote sync, promote workflows, lifecycle management, and optional MCP wrapping.
 

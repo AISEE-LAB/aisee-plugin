@@ -29,17 +29,38 @@
 
 # Aisee Plugin
 
+> Aisee Plugin is a Codex-oriented OpenSpec workflow layer for spec-driven AI software engineering.
+
 **Aisee** 是 **AI-Enhanced Software Engineering** 的缩写。
 
 Aisee Plugin 是一个面向 OpenSpec 工作流的 AI 软件工程插件。它帮助团队把模糊想法整理成可审查的需求、UI 内容规格、技术架构上下文、OpenSpec changes、项目记忆、团队知识 guardrails、实现交接 brief、验证检查和归档门禁。
 
 Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、project memory、team knowledge、JSON context tooling 和工程交接规则。
 
+它尤其适合希望让 Codex 和其他 coding agent 在开源仓库中更稳定协作的维护者：
+
+- 用可持久复用的需求与规范，替代只存在于聊天记录里的临时上下文；
+- 用机器可读的 context pack 和 schema pack，为实现、审查和验证提供稳定输入；
+- 用 OpenSpec change planning 把模糊意图拆成可审查、可交付的变更；
+- 用 implementation brief 帮助 maintainer 和 contributor 做 PR / review-ready 交接；
+- 用 verification evidence 和 archive gates 收口 AI 辅助开发后的验收与归档流程。
+
 ## OpenSpec Boundary
 
 Aisee 不替代 OpenSpec，也不维护第二套 schema 状态机。只有在处理 OpenSpec change、context pack 或 schema pack 检查时，Aisee 才读取当前 schema 声明；project memory 和 team knowledge 始终只是 guidance / guardrails。
 
 当 Aisee 处理 OpenSpec artifacts 时，它只做 parser / checker / projector；`openspec validate` / `openspec archive` 仍由 OpenSpec 负责。
+
+## 为什么这对 Codex 很重要？
+
+Codex 能写代码、审代码、修 bug，但在仓库没有显式需求、稳定上下文、审查规则和验证标准时，结果容易依赖短期 prompt 历史。
+
+Aisee 把这些材料前置为可复用的工作流层：
+
+- 让需求和工程约束以 OpenSpec change、planning docs 和 project memory 的形式持久存在；
+- 帮助维护者把实现意图整理成更容易 review 的 implementation brief；
+- 让 Codex 在实现、review、verify 和 archive 之间读取同一套上下文边界；
+- 为开源仓库提供更明确的 AI 协作约束，降低 maintainer 反复补充背景的成本。
 
 ## 为什么需要 Aisee？
 
@@ -577,6 +598,9 @@ python scripts/smoke_release.py --with-pipx
 
 ### 后续
 
+- 补充更贴近 maintainer 场景的 Codex PR review / implementation brief 示例。
+- 增加 sample OpenSpec change，帮助新仓库快速理解 Aisee 的交付形态。
+- 扩展示例化的 verify / archive gate 文档，降低 OSS 维护者的试用门槛。
 - 完善 project memory 的冲突提示、过期策略和低上下文注入规则。
 - 收敛 team knowledge 的远程同步、promote workflow、生命周期管理和可选 MCP 包装。
 
