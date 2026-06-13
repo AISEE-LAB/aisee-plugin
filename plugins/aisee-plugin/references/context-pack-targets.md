@@ -47,10 +47,10 @@ Rules:
 - 如果当前 schema apply tracks 太粗、路径缺失或 contract 冲突，`requires_ce_plan` 可以为 `true`，但 `ce-plan` 结论必须回写当前 schema apply tracks；仅 source-map schema 需要回写 `source-map.md`。
 - `reusable_workflow_candidates` 是路由提示，不是事实源；item 必须包含 `name`、`kind`、`status`、`reason`。
 - `kind` 只能表达能力来源，例如 `aisee-skill` 或 `compound-skill`；不能表达事实源。
-- `status` 使用 `required`、`recommended`、`available`、`missing`：Aisee 修补 gate 用 `required/recommended`，CE skill 可用性用 `available/missing`。
-- 有 blocker gap 时，候选只应要求回到 `aisee:change-author` 修补 artifacts 或 source routing，不应继续推荐 `ce-plan` 或 `ce-work`。
-- 无 blocker 且 `requires_ce_plan=true` 时，候选包含 `aisee:implementation-bridge` 和 `ce-plan`，并用 `ce_plan_reason` 说明为什么只做执行细化。
-- 无 blocker 且 `requires_ce_plan=false` 时，候选包含 `aisee:implementation-bridge` 和 `ce-work`。
+- `status` 默认使用 `recommended`、`available`、`missing`；`ce-work` pack 的候选是路由提示，不自动承担修补 gate。
+- blocker / risk gap 继续保留在 `gaps` 和 execution brief `risks` 中，但默认只作为 advisory，不自动改写候选。
+- `requires_ce_plan=true` 时，候选包含 `aisee:implementation-bridge` 和 `ce-plan`，并用 `ce_plan_reason` 说明为什么只做执行细化。
+- `requires_ce_plan=false` 时，候选包含 `aisee:implementation-bridge` 和 `ce-work`。
 - 不包含完整 SRS / UI Content / Architecture 正文，只包含当前 change 追踪到的 ID、路径和必要摘录。
 - 未纳入当前 change 的问题可以放入 `follow_up_candidates`，不能进入 `suggested_order`。
 

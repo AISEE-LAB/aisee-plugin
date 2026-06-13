@@ -518,7 +518,7 @@ def test_ce_work_pack_reports_missing_ce_plan_as_limitation(tmp_path: Path, monk
     assert candidates["aisee:implementation-bridge"]["status"] == "recommended"
 
 
-def test_ce_work_pack_routes_blockers_to_change_author_not_ce_plan(tmp_path: Path, monkeypatch) -> None:
+def test_ce_work_pack_keeps_execution_routing_even_when_blockers_exist(tmp_path: Path, monkeypatch) -> None:
     create_project(tmp_path)
     monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-plan", "ce-work")))
     (tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md").unlink()
@@ -526,17 +526,13 @@ def test_ce_work_pack_routes_blockers_to_change_author_not_ce_plan(tmp_path: Pat
     pack = build_context_pack(tmp_path, "add-auth", "ce-work")
 
     execution = pack["facts"]["derived"]["execution"]
-    candidates = execution["reusable_workflow_candidates"]
+    candidates = {candidate["name"]: candidate for candidate in execution["reusable_workflow_candidates"]}
     assert execution["requires_ce_plan"] is True
     assert {gap["code"] for gap in pack["gaps"]} >= {"MISSING_ARTIFACT", "TASK_GAP"}
-    assert candidates == [
-        {
-            "name": "aisee:change-author",
-            "kind": "aisee-skill",
-            "status": "required",
-            "reason": "fix blocking artifact or traceability gaps before execution: MISSING_ARTIFACT, TASK_GAP",
-        }
-    ]
+    assert candidates["aisee:implementation-bridge"]["status"] == "recommended"
+    assert candidates["ce-plan"]["status"] == "available"
+    assert "tasks.md has no executable tasks" in candidates["ce-plan"]["reason"]
+    assert "advisory" in candidates["ce-plan"]["reason"]
 
 
 def test_quick_fix_pack_does_not_require_source_map(tmp_path: Path) -> None:

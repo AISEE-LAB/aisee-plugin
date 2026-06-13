@@ -1484,8 +1484,6 @@ def first_matching(paths: list[str], terms: tuple[str, ...]) -> str | None:
 
 
 def should_require_ce_plan(task_state: dict[str, Any], code_paths: list[str], test_paths: list[str], gaps: list[dict[str, Any]]) -> bool:
-    if any(item["severity"] == "blocker" for item in gaps):
-        return True
     if task_state["total"] == 0:
         return True
     if any(item["code"] in {"SOURCE_MAP_UNSTRUCTURED", "SOURCE_MAP_GAP", "SOURCE_MAP_UNMAPPED_PATH"} for item in gaps):
@@ -1500,9 +1498,6 @@ def ce_plan_reason(
     gaps: list[dict[str, Any]],
     source_map_required: bool,
 ) -> str:
-    blocker_codes = [item["code"] for item in gaps if item["severity"] == "blocker"]
-    if blocker_codes:
-        return f"blocked by {', '.join(blocker_codes)}"
     if task_state["total"] == 0:
         return "tasks.md has no executable tasks"
     if not code_paths and not test_paths:
@@ -1520,23 +1515,18 @@ def build_reusable_workflow_candidates(
 ) -> list[dict[str, str]]:
     compound = check_compound_plugin()
     compound_skills = compound.get("skills", {})
-    blocker_codes = [str(item.get("code") or "UNKNOWN") for item in gaps if item.get("severity") == "blocker"]
-    if blocker_codes:
-        return [
-            {
-                "name": "aisee:change-author",
-                "kind": "aisee-skill",
-                "status": "required",
-                "reason": f"fix blocking artifact or traceability gaps before execution: {', '.join(blocker_codes)}",
-            }
-        ]
+    has_advisory_gaps = any(item.get("severity") in {"blocker", "risk"} for item in gaps)
 
     candidates = [
         {
             "name": "aisee:implementation-bridge",
             "kind": "aisee-skill",
             "status": "recommended",
-                "reason": "review context pack gaps, scope guardrails, and review recommendation before CE execution",
+            "reason": (
+                "review context pack gaps, scope guardrails, and review recommendation before CE execution"
+                if has_advisory_gaps
+                else "review context pack summary, scope guardrails, and review recommendation before CE execution"
+            ),
         }
     ]
 
@@ -1545,14 +1535,22 @@ def build_reusable_workflow_candidates(
             "name": "ce-plan",
             "kind": "compound-skill",
             "status": "available" if compound_skills.get("ce-plan") else "missing",
-            "reason": ce_plan_refinement_reason or "tasks or implementation references need refinement before ce-work",
+            "reason": (
+                f"{ce_plan_refinement_reason}; review blocker/risk gaps as advisory before execution"
+                if ce_plan_refinement_reason and has_advisory_gaps
+                else ce_plan_refinement_reason or "tasks or implementation references need refinement before ce-work"
+            ),
         })
     else:
         candidates.append({
             "name": "ce-work",
             "kind": "compound-skill",
             "status": "available" if compound_skills.get("ce-work") else "missing",
-            "reason": "current change has executable tasks and accepted implementation path references",
+            "reason": (
+                "current change has executable tasks and accepted implementation path references; review blocker/risk gaps as advisory before execution"
+                if has_advisory_gaps
+                else "current change has executable tasks and accepted implementation path references"
+            ),
         })
     return candidates
 

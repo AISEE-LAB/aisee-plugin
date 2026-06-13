@@ -163,6 +163,7 @@ aisee context pack --change <change> --for ce-code-review --json
 - 无明确 change 时，先回到需求澄清、change-plan 或当前 change 本身。
 - 有明确 change 时，优先读取目标 context pack，例如 `aisee context pack --change <change> --for ce-work --json`。
 - `ce-work` context pack 的 `reusable_workflow_candidates` 只是路由提示，不是事实源。
+- `ce-work` context pack 的 blocker / risk / gap 默认也是 advisory projection；不要把它自动当成 OpenSpec 或人工审批的替代裁决。
 - `requires_ce_plan=true` 时才按需使用 `ce-plan` 细化执行顺序；结论必须回写当前 schema apply tracks，只有 source-map schema 才回写 `source-map.md`。
 - `requires_ce_plan=false` 且 paths/tasks 清楚时，优先 `aisee:implementation-bridge -> ce-work`。
 - 不创建与 CE 重叠的执行、代码审查或测试 agent。
