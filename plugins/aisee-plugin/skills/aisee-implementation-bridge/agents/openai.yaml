@@ -1,4 +1,4 @@
 interface:
   display_name: "aisee:implementation-bridge"
   short_description: "把已 authored 的 OpenSpec change 转成交给 CE 的最小工程上下文"
-  default_prompt: "使用 $aisee:implementation-bridge 读取当前 change 的 context pack 和 artifacts，默认只输出进入 ce-work 前的最小 JSON 判定结果与下一步路由结论；仅在用户明确要求 Brief / handoff 时才生成人读摘要。"
+  default_prompt: "使用 $aisee:implementation-bridge 读取当前 change artifacts；如果已 ready，则默认直接交给 ce-work；只有在异常或用户明确要求 Brief / handoff 时才输出简短结果或人读摘要。"

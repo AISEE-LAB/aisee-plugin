@@ -69,10 +69,10 @@ aisee knowledge query --phase implementation --surface cli --query "public CLI J
 aisee knowledge query --from-change <change> --for ce-work --json
 ```
 
-给执行上下文注入少量 guardrails：
+当实现、审查或验证需要少量 guardrails 时，直接查询：
 
 ```bash
-aisee context pack --change <change> --for ce-work --knowledge --json
+aisee knowledge query --from-change <change> --for ce-work --json
 ```
 
 读取结果时看：

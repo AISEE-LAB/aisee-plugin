@@ -11,33 +11,33 @@
       "id": "implementation-bridge-001",
       "name": "handoff-authored-change-to-ce-work",
       "scenario": "implementation-handoff",
-      "prompt": "change 已 authored。帮我判断能否进入 ce-work，并只给出最小 JSON 判定结果：该先读什么、完成后要回写什么。",
+      "prompt": "change 已 authored。帮我判断能否进入 ce-work；如果 ready 就直接进入，不要默认展示 JSON。",
       "context": {
         "files": [],
         "assumptions": [
-          "当前 change 已存在 context pack。"
+          "当前 change 已存在可读取的 artifacts。"
         ]
       },
-      "expected_output": "应默认直接读取当前 change artifacts，并输出一次性的 JSON 读取策略与完成提醒；明确 read first、apply tracks、verification / evidence 入口和 review recommendation；不得创建平行长期任务清单、默认展开 Brief 正文或直接写代码。",
+      "expected_output": "应默认直接读取当前 change artifacts；ready 时直接进入 ce-work；只有异常或明确要求 handoff 时才输出简短结果或 Brief。必须保留 apply tracks / evidence 完成提醒，不得创建平行长期任务清单或直接写代码。",
       "expected_outputs": [
         "先读当前 change 的事实源。",
-        "输出 JSON 判定关键字段。",
+        "ready 时直接进入 ce-work。",
         "明确完成后先回写 tasks.md 或 apply tracks。"
       ],
       "must_ask": [],
       "must_include": [
-        "read first",
+        "ce-work",
         "apply tracks",
-        "verification",
-        "review recommendation"
+        "verification"
       ],
       "must_not": [
+        "不得默认输出 JSON。",
         "不得创建平行长期任务清单。",
         "不得默认输出完整 Implementation Brief。",
         "不得替代 ce-work、ce-code-review 或 aisee:verify。"
       ],
       "quality_checks": [
-        "默认输出应保持为 JSON 判定，不展开整段人读摘要。",
+        "默认 happy path 不展示 JSON。",
         "scope 和写回位置必须来自当前 change。"
       ],
       "fact_source_constraints": [

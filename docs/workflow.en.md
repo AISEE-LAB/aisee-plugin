@@ -141,7 +141,6 @@ If the project has long-lived local guidance such as commit preferences, test co
 
 ```bash
 aisee memory search --query "<current implementation task>" --json
-aisee context pack --change <change> --for ce-work --project-memory --json
 ```
 
 Project memory matches are guidance only. They do not change the current change's specification source and should not be copied into OpenSpec artifacts.
@@ -150,12 +149,11 @@ If the project has configured team knowledge, read a small number of guardrails 
 
 ```bash
 aisee knowledge query --from-change <change> --for ce-work --json
-aisee context pack --change <change> --for ce-work --knowledge --json
 ```
 
 Knowledge matches are reminders only. They do not change the current change's specification source and should not be copied into durable artifacts.
 
-Then use `aisee:implementation-bridge` to return the default JSON decision result. It should tell `ce-work` what to read first and what must be written back after implementation; generate an Implementation Brief only when a human-readable handoff is explicitly needed. The brief is an execution index:
+Then use `aisee:implementation-bridge` to hand the current change directly to `ce-work`. It should tell `ce-work` what to read first and what must be written back after implementation; generate an Implementation Brief only when a human-readable handoff is explicitly needed. The brief is an execution index:
 
 - current change and schema;
 - read-first artifacts;
@@ -278,7 +276,7 @@ Do not continue into implementation when:
 - the current change cannot map to a verifiable outcome;
 - schema artifacts are missing or contradictory;
 - a Required=yes contract is missing;
-- implementation paths are not referenced by the current change or context pack;
+- implementation paths are not referenced by the current change, `tasks.md`, or `source-map.md` when applicable;
 - OpenSpec validate fails without a clear fix path.
 
 Return to the relevant artifact instead of guessing during implementation.

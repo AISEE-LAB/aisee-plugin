@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import json
-import os
-import subprocess
-import sys
 from pathlib import Path
 
 from aisee_cli.context_pack import build_context_pack
@@ -689,34 +685,3 @@ def test_context_pack_reports_missing_source_refs(tmp_path: Path) -> None:
     assert "SOURCE_REF_RESOLUTION_MISSING" in gap_codes
     source_reference_index = pack["facts"]["parsed"]["source_reference_index"]
     assert "docs/requirements/missing.md#FR-999" in source_reference_index["missing_references"]
-
-
-def test_cli_context_pack_outputs_json(tmp_path: Path) -> None:
-    create_project(tmp_path)
-    env = os.environ.copy()
-    repo_src = Path(__file__).resolve().parents[1] / "src"
-    env["PYTHONPATH"] = str(repo_src)
-
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "aisee_cli.__main__",
-            "context",
-            "pack",
-            "--change",
-            "add-auth",
-            "--for",
-            "ce-work",
-            "--json",
-        ],
-        cwd=tmp_path,
-        env=env,
-        check=True,
-        stdout=subprocess.PIPE,
-        text=True,
-    )
-
-    data = json.loads(result.stdout)
-    assert data["target"] == "ce-work"
-    assert data["change"]["id"] == "add-auth"

@@ -42,7 +42,6 @@ def test_project_local_commands_remain_on_top_level_help(tmp_path: Path) -> None
         "doctor",
         "bootstrap",
         "openspec",
-        "context",
         "knowledge",
         "memory",
     ):

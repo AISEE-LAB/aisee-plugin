@@ -60,8 +60,8 @@ openspec validate <change>
 如果用户明确要求附带项目记忆或团队知识，可以额外读取：
 
 ```bash
-aisee context pack --change <change> --for aisee-verify --project-memory --json
-aisee context pack --change <change> --for aisee-verify --knowledge --json
+aisee memory search --query "<当前验证任务>" --json
+aisee knowledge query --from-change <change> --for aisee-verify --json
 ```
 
 这些注入只作为 guidance，不改变 verify 的事实源顺序。

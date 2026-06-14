@@ -82,12 +82,12 @@ aisee memory update-index --json
 
 `index.md` 是入口摘要；`aisee/cache/memory-index.json` 可删除、可重建，不是事实源。
 
-## 6. Context Pack
+## 6. Implementation Guidance
 
-实现上下文默认不包含项目记忆；需要时显式启用：
+实现阶段如需带项目记忆，直接按当前任务检索：
 
 ```bash
-aisee context pack --change <change> --for ce-work --project-memory --json
+aisee memory search --query "<当前任务>" --json
 ```
 
-结果放在独立 `project_memory` 字段，不混入 `facts.parsed` 或 OpenSpec facts。
+项目记忆仍然只是 guidance，不混入 OpenSpec facts。

@@ -8,7 +8,7 @@ During `0.x`, Aisee can still evolve quickly, but public contract changes must b
 
 | Layer | Meaning | Examples | Change Requirement |
 | --- | --- | --- | --- |
-| Public Contract | Interfaces users or automation can depend on | CLI commands, JSON output semantics, schema artifact DAGs, context pack fields, plugin manifest / marketplace listing | Must be tested; breaking changes require versioning and changelog notes |
+| Public Contract | Interfaces users or automation can depend on | CLI commands, JSON output semantics, schema artifact DAGs, plugin manifest / marketplace listing | Must be tested; breaking changes require versioning and changelog notes |
 | Experimental Contract | Usable but not yet stable capabilities | team knowledge remote install, promote-batch, optional MCP, hardware workflow integration | Must be marked experimental; can change, but must not appear stable |
 | Internal Detail | Implementation details that can change freely | parser helpers, cache contents, temporary indexes, scoring weights, fixture layout | No compatibility promise; must not become a user source of truth |
 
@@ -67,22 +67,14 @@ Breaking changes:
 - making as-needed artifacts mandatory by default;
 - creating a parallel source of truth beside OpenSpec baseline specs.
 
-### Context Pack
+### Memory And Knowledge Retrieval
 
-Field-level contracts are defined in:
+The following are public contracts:
 
-- [references/context-pack-contract.md](../plugins/aisee-plugin/references/context-pack-contract.md)
-- [references/context-pack-targets.md](../plugins/aisee-plugin/references/context-pack-targets.md)
-
-Rules:
-
-- `facts.parsed` represents facts parsed from files;
-- `facts.derived` represents CLI-derived views;
-- `knowledge.matches` is optional guardrail output and must not pollute `facts.parsed` or `facts.derived`;
-- `project_memory.matches` appears only with explicit `--project-memory` and must not pollute `facts.parsed` or `facts.derived`;
-- `--for <target>` only scopes optional injection retrieval and no longer promises target-specific execution / verify / review projections;
-- context packs may grow, but default output must stay bounded;
-- new targets must document consumer, read order, and missing-field behavior.
+- the existence and field semantics of `aisee memory inspect/list/search/add/update-index --json`;
+- the existence and field semantics of `aisee knowledge inspect/doctor/check/query/index/install/update/promote-batch --json`;
+- `knowledge.matches` and project-memory matches must not pollute OpenSpec facts;
+- project memory and team knowledge remain guidance, not sources of truth.
 
 ### Plugin Content
 
@@ -113,7 +105,7 @@ See [Plugin Marketplace](plugin-marketplace.en.md) for details.
 
 The following are public contracts:
 
-- the planning-doc frontmatter contract and the read-only diagnostics exposed through `aisee doctor --json` and `aisee context pack --json`;
+- the planning-doc frontmatter contract and the read-only diagnostics exposed through `aisee doctor --json`;
 - the basic semantics of planning-doc fields such as `status`, `doc_type`, `source_refs`, and `change_refs`;
 - `resolve_project_root` preferring the nearest Aisee/OpenSpec project marker before falling back to the Git top-level;
 - release smoke checks for the PyPI / pipx CLI, marketplace setup hints, the public command surface, and root-resolver fixtures.
@@ -129,7 +121,7 @@ The following are public contracts:
 - `inspect/search/list` are read-only by default, while `add/update-index` must mark writes through `meta.writes`;
 - default retrieval returns bounded metadata only, not full bodies;
 - `aisee/cache/memory-index.json` is a deletable rebuildable cache, not a source of truth;
-- `aisee context pack --project-memory` emits matches only in a separate `project_memory` field.
+- project memory and team knowledge matches must not pollute OpenSpec facts.
 
 Breaking changes include removing commands, injecting full memory bodies by default, mixing memory into OpenSpec facts, or allowing hooks to write memory automatically.
 
@@ -186,7 +178,6 @@ Changes touching Public Contracts must consider:
 - whether README / workflow / best practices / release docs need updates;
 - whether the skill taxonomy reference needs updates;
 - whether schema pack docs need updates;
-- whether context pack references need updates;
 - whether CLI contract tests need updates;
 - whether `python scripts/check_versions.py` was run;
 - whether related tests and `python scripts/smoke_release.py` were run.

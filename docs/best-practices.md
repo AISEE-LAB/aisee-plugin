@@ -127,7 +127,7 @@ data-model.md
 
 ## 7. 编号稳定，内容可演进
 
-文档内编号用来减少重复命名，并让 source-map 和 context pack 能做轻量解析。
+文档内编号用来减少重复命名，并让 source-map 和当前 change 的可重建扫描视图能做轻量解析。
 
 推荐：
 
@@ -137,21 +137,21 @@ data-model.md
 - 删除或替换编号时保留迁移说明。
 - 不把标题、文件名或自然语言描述当作稳定标识。
 
-`source-map.md` 和 context pack 的可重建扫描视图只提供上下文入口；长期规范事实仍回写 OpenSpec artifacts 和 baseline specs。
+`source-map.md` 和当前 change 的可重建扫描视图只提供上下文入口；长期规范事实仍回写 OpenSpec artifacts 和 baseline specs。
 
-## 8. Context pack 是读取入口，不是新文档
+## 8. 记忆与知识读取是可选 guidance，不是新文档
 
-`aisee context pack` 适合在显式需要时给 AI 注入小而准的项目记忆或团队知识：
+需要额外 guidance 时，直接读取少量项目记忆或团队知识：
 
 ```bash
-aisee context pack --change <change> --for ce-work --project-memory --json
-aisee context pack --change <change> --for ce-work --knowledge --json
+aisee memory search --query "<task>" --json
+aisee knowledge query --from-change <change> --for ce-work --json
 ```
 
 使用规则：
 
-- 只消费当前目标需要的字段。
-- 不把 context pack 输出复制进长期文档。
+- 只消费当前任务需要的命中项。
+- 不把 memory / knowledge 输出复制进长期文档。
 - 发现缺口时回写当前 change artifact 或 apply tracks。
 - 不绕过当前 change 去全仓库搜索后扩大范围。
 
@@ -161,7 +161,7 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 - 无明确 change 时，先回到需求澄清、change-plan 或当前 change 本身。
 - 有明确 change 时，默认直接读取当前 change artifacts、schema、`tasks.md`、`source-map.md`（若适用）和 evidence 入口。
-- 只有明确需要项目记忆或团队知识时，才额外读取 `aisee context pack --change <change> --for ce-work --project-memory --json` 或 `--knowledge --json`。
+- 只有明确需要项目记忆或团队知识时，才额外读取 `aisee memory search --query "<task>" --json` 或 `aisee knowledge query --from-change <change> --for ce-work --json`。
 - `aisee:implementation-bridge` 只负责提示 `ce-work` 先读什么，以及完成后如何回写 `tasks.md` / apply tracks 和 evidence。
 - 不创建与 CE 重叠的执行、代码审查或测试 agent。
 
@@ -221,13 +221,13 @@ archive 前应满足：
 前后端分离时，推荐 contract provider 暴露只读上下文：
 
 ```bash
-直接读取当前项目内的 OpenSpec artifacts 或 `aisee context pack` 输出
+直接读取当前项目内的 OpenSpec artifacts、契约附件或人工确认的摘录
 ```
 
 最佳实践：
 
 - provider 拥有 contract source。
-- consumer 只读取 provider 明确提供的 OpenSpec artifacts、契约附件或 context pack 摘要。
+- consumer 只读取 provider 明确提供的 OpenSpec artifacts、契约附件或人工确认的摘录。
 - 用人工确认的路径和摘录控制上下文大小。
 - 不暴露源码、密钥、环境变量或全仓库搜索结果。
 
@@ -279,7 +279,7 @@ Aisee 应解决 OpenSpec 不负责的部分：
 - 前置澄清；
 - schema-aware 规划；
 - 文档内编号约束和 source-map 路由；
-- AI context pack；
+- 当前 change 的可重建扫描视图；
 - 实现交接；
 - verify / archive guard。
 

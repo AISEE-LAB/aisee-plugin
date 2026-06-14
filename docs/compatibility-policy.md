@@ -8,7 +8,7 @@
 
 | 层级 | 含义 | 示例 | 变更要求 |
 | --- | --- | --- | --- |
-| Public Contract | 用户或自动化会依赖的公开接口 | CLI 命令、JSON 输出语义、schema artifact DAG、context pack 字段、plugin manifest / marketplace listing | 必须测试；破坏性变更必须升级版本并写入 changelog |
+| Public Contract | 用户或自动化会依赖的公开接口 | CLI 命令、JSON 输出语义、schema artifact DAG、plugin manifest / marketplace listing | 必须测试；破坏性变更必须升级版本并写入 changelog |
 | Experimental Contract | 可试用但未承诺稳定的能力 | team knowledge 远程安装、promote-batch、可选 MCP、硬件主工作流整合 | 必须标注 experimental；允许调整，但要避免伪装成稳定能力 |
 | Internal Detail | 可随实现变化的内部细节 | parser helper、缓存文件内容、临时索引、内部评分权重、测试 fixture 结构 | 不承诺兼容；不得作为用户事实源 |
 
@@ -67,22 +67,14 @@
 - 将按需 artifact 改成默认强制；
 - 让 Aisee schema 与 OpenSpec baseline 事实源产生平行事实源。
 
-### Context Pack
+### Memory And Knowledge Retrieval
 
-字段级契约以以下文件为准：
+以下属于公开契约：
 
-- [references/context-pack-contract.md](../plugins/aisee-plugin/references/context-pack-contract.md)
-- [references/context-pack-targets.md](../plugins/aisee-plugin/references/context-pack-targets.md)
-
-规则：
-
-- `facts.parsed` 表示从文件解析出的事实；
-- `facts.derived` 表示 CLI 派生视图；
-- `knowledge.matches` 是可选 guardrails，不得污染 `facts.parsed` 或 `facts.derived`；
-- `project_memory.matches` 只在显式 `--project-memory` 时出现，不得污染 `facts.parsed` 或 `facts.derived`；
-- `--for <target>` 只限定可选注入层的检索边界，不再承诺 execution / verify / review 的 target-specific 投影；
-- context pack 可以变大，但默认输出必须保持可控；
-- 新 target 必须说明消费方、读取顺序和缺失字段处理方式。
+- `aisee memory inspect/list/search/add/update-index --json` 的命令存在性与字段语义；
+- `aisee knowledge inspect/doctor/check/query/index/install/update/promote-batch --json` 的命令存在性与字段语义；
+- `knowledge.matches` 与项目记忆命中结果不得污染 OpenSpec facts；
+- project memory 和 team knowledge 都是 guidance，不是事实源。
 
 ### Plugin Content
 
@@ -113,7 +105,7 @@
 
 以下属于公开契约：
 
-- 普通 planning docs 的 frontmatter 合同和 `aisee doctor --json` / `aisee context pack --json` 的只读 diagnostics；
+- 普通 planning docs 的 frontmatter 合同和 `aisee doctor --json` 的只读 diagnostics；
 - `status`、`doc_type`、`source_refs`、`change_refs` 等 planning doc 索引字段的基本语义；
 - `resolve_project_root` 以最近的 Aisee/OpenSpec project marker 优先，再 fallback 到 Git 顶层的语义；
 - release smoke 对 PyPI / pipx CLI、marketplace setup hint、公开命令面和 root resolver fixture 的检查重点。
@@ -129,7 +121,7 @@
 - `inspect/search/list` 默认只读，`add/update-index` 必须通过 `meta.writes` 标记写入；
 - 默认检索只返回 bounded metadata，不返回完整正文；
 - `aisee/cache/memory-index.json` 是可删除、可重建 cache，不是事实源；
-- `aisee context pack --project-memory` 只把 matches 放入独立 `project_memory` 字段。
+- project memory 与 team knowledge 的命中结果不得污染 OpenSpec facts。
 
 破坏性变更包括删除命令、默认注入完整正文、把 memory 混入 OpenSpec facts、或让 hooks 自动写 memory。
 
@@ -186,7 +178,6 @@ Experimental 能力可以变化，但文档必须清楚说明：
 - 是否更新 README / workflow / best practices / release 文档；
 - 是否更新 skill taxonomy reference；
 - 是否更新 schema pack 文档；
-- 是否更新 context pack reference；
 - 是否新增或调整 CLI contract tests；
 - 是否运行 `python scripts/check_versions.py`；
 - 是否运行相关测试和 `python scripts/smoke_release.py`。

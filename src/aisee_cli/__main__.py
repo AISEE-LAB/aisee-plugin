@@ -7,7 +7,6 @@ from pathlib import Path
 
 from aisee_cli import __version__
 from aisee_cli.bootstrap import build_bootstrap_plan
-from aisee_cli.context_pack import build_context_pack
 from aisee_cli.doctor import build_doctor
 from aisee_cli.knowledge import (
     build_knowledge_check,
@@ -25,7 +24,6 @@ from aisee_cli.memory import (
     build_memory_add,
     build_memory_inspect,
     build_memory_list,
-    build_memory_query_for_context_pack,
     build_memory_search,
     build_memory_update_index,
 )
@@ -87,15 +85,6 @@ def main() -> int:
     schemas_format_parser.add_argument("--check", action="store_true", help="report formatting drift without writing")
     schemas_format_parser.add_argument("--write", action="store_true", help="rewrite schema.yaml files into canonical format")
     schemas_format_parser.add_argument("--json", action="store_true", help="output JSON")
-    context_parser = subparsers.add_parser("context")
-    context_parser.add_argument("--json", action="store_true", help="output JSON")
-    context_subparsers = context_parser.add_subparsers(dest="context_command")
-    pack_parser = context_subparsers.add_parser("pack")
-    pack_parser.add_argument("--change", required=True, help="OpenSpec change name")
-    pack_parser.add_argument("--for", dest="target", required=True, help="consumer target for optional memory/knowledge injection")
-    pack_parser.add_argument("--knowledge", action="store_true", help="include knowledge guardrail matches")
-    pack_parser.add_argument("--project-memory", action="store_true", help="include bounded project memory matches")
-    pack_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_parser = subparsers.add_parser("knowledge")
     knowledge_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_subparsers = knowledge_parser.add_subparsers(dest="knowledge_command")
@@ -255,25 +244,6 @@ def main() -> int:
         print_json(error_response("Use one of: list, check, format.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
-    if args.command == "context" and args.context_command is None:
-        print_json(error_response("Use one of: pack.", "MISSING_SUBCOMMAND"), stderr=True)
-        return 2
-
-    if args.command == "context" and args.context_command == "pack":
-        try:
-            root = resolve_project_root(Path.cwd())
-            pack = build_context_pack(root, args.change, args.target)
-            if args.knowledge:
-                knowledge = build_knowledge_query(root, from_change=args.change, target=args.target)
-                pack["knowledge"] = compact_knowledge_for_context_pack(knowledge)
-            if args.project_memory:
-                pack["project_memory"] = build_memory_query_for_context_pack(root, change=args.change, target=args.target)
-        except ValueError as error:
-            print_json(error_response(str(error)), stderr=True)
-            return 2
-        print_json(pack)
-        return 0
-
     if args.command == "knowledge" and args.knowledge_command is None:
         print_json(error_response("Use one of: inspect, check, init-repo, configure, doctor, install, update, promote-batch, query, index.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
@@ -389,24 +359,5 @@ def main() -> int:
 
     print_json(error_response("Use a supported Aisee command.", "MISSING_COMMAND"), stderr=True)
     return 2
-
-
-def compact_knowledge_for_context_pack(knowledge: dict) -> dict:
-    payload = knowledge.get("knowledge", {})
-    meta = knowledge.get("meta", {})
-    return {
-        "status": knowledge.get("status"),
-        "enabled": payload.get("enabled"),
-        "source": payload.get("source"),
-        "matches": payload.get("matches", []),
-        "summary": knowledge.get("summary", {}),
-        "issues": knowledge.get("issues", []),
-        "meta": {
-            "cache_is_fact_source": meta.get("cache_is_fact_source", False),
-            "full_card_body_read": meta.get("full_card_body_read", False),
-        },
-    }
-
-
 if __name__ == "__main__":
     raise SystemExit(main())

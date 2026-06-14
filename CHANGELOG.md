@@ -2,6 +2,14 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
+## [0.13.0] - 2026-06-14
+
+### Changed
+
+- 删除 `aisee context pack` 的公开 CLI 命令面；项目记忆与团队知识改为通过 `aisee memory search` 与 `aisee knowledge query` 直接提供 change-scoped guidance。
+- `aisee:implementation-bridge` 默认不再向用户展示 JSON 判定结果；ready 时直接交给 `ce-work`，只在异常或明确要求 handoff 时输出简短结果或 Brief。
+- README、workflow、best-practices、team knowledge 与 compatibility policy 同步移除 `context pack` 作为公开产品能力的默认叙事，统一收口到 “OpenSpec facts + memory/knowledge queries + bridge handoff rules”。
+
 ## [0.12.0] - 2026-06-14
 
 ### Changed

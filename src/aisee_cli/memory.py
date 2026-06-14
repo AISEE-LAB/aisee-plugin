@@ -204,29 +204,6 @@ def build_memory_update_index(root: Path) -> dict[str, Any]:
         issues,
         "aisee memory update-index --json",
     )
-
-
-def build_memory_query_for_context_pack(root: Path, *, change: str, target: str, query: str | None = None) -> dict[str, Any]:
-    search = build_memory_search(
-        root,
-        query=query or f"{change} {target}",
-        limit=DEFAULT_LIMIT,
-        include_body=False,
-    )
-    payload = search.get("memory", {})
-    return {
-        "status": search.get("status"),
-        "matches": payload.get("matches", []),
-        "conflicts": payload.get("conflicts", []),
-        "summary": search.get("summary", {}),
-        "issues": search.get("issues", []),
-        "meta": {
-            "cache_is_fact_source": search.get("meta", {}).get("cache_is_fact_source", False),
-            "full_body_read": search.get("meta", {}).get("full_body_read", False),
-        },
-    }
-
-
 def load_memory_entries(root: Path, *, include_body: bool = False) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     issues: list[dict[str, str]] = []
     base = active_memory_dir(root)

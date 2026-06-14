@@ -1,6 +1,6 @@
 ---
 name: aisee:implementation-bridge
-description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Compound Engineering 执行的最小工程上下文。用于进入 ce-work 前读取当前 change artifacts，并在需要时附带项目记忆或团队知识注入；默认只输出 JSON 读取策略与完成提醒；仅在用户明确要求人读交接或保存 handoff 时才生成 Implementation Brief。它不创建平行任务清单，不默认落地新文档，不替代 ce-work，不修补缺失 artifacts。
+description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Compound Engineering 执行的最小工程交接。正常情况下直接进入 ce-work；只有在异常或明确要求 handoff 时才输出简短结果或人读 brief。它不创建平行任务清单，不默认落地新文档，不替代 ce-work，不修补缺失 artifacts。
 ---
 
 # aisee:implementation-bridge
@@ -14,8 +14,8 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 执行前必须优先复用当前 change 的事实源，而不是重新发明执行路由：
 
 - 默认直接读取当前 change artifacts、schema、`tasks.md`、`source-map.md`（若当前 schema 生成）和 `AGENTS.md`。
-- 只有用户明确要求“带项目记忆 / 带团队知识”时，才额外读取 `aisee context pack --change <change> --for ce-work --project-memory --json` 或 `--knowledge --json`。
-- bridge 只输出给 `ce-work` 的读取策略、apply tracks 回写提醒和 evidence 入口；不搬运 artifact 正文，不代替 `ce-work` 读代码。
+- 如需项目记忆或团队知识，显式使用 `aisee memory search` 或 `aisee knowledge query --from-change <change> --for ce-work --json`。
+- bridge 默认不把读取策略包装成公开 JSON 输出，也不搬运 artifact 正文，不代替 `ce-work` 读代码。
 - 如果 CE skill 缺失，只说明限制和本地 guardrails，不创建 Aisee 替代 CE 的执行、代码审查或测试 agent。
 - `design-spec`、`design-assets`、`reflect`、`knowledge-curate`、`hw:*` 等扩展能力只有在当前 change 明确引用，或用户显式要求附带注入时才读取；不要自动塞进默认实现交接路径。
 
@@ -24,7 +24,7 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 - 读取单个 OpenSpec change。
 - 读取当前 change artifacts、schema、tasks、source-map（若适用）和 evidence 入口。
 - 这些读取都是只读状态检查，由 skill 自动执行；不要求用户手工跑常规命令。
-- 默认输出给 `ce-work` 的最小读取策略与完成提醒。
+- 当前 change 已 ready 时，默认直接进入 `ce-work`。
 - 仅在用户明确要求人读交接、保存 handoff 或分批执行索引时，生成人类可读的 Implementation Brief。
 - 明确事实源、读取顺序、执行规则、禁止越界项和验证要求。
 - 明确 `ce-work` 完成后必须先回写 `tasks.md` 或当前 schema 的 apply tracks，再记录验证证据。
@@ -53,14 +53,13 @@ description: 将单个已确认且已 authored 的 OpenSpec change 转成给 Com
 
 ## 默认产物
 
-默认只输出 JSON 判定结果，不默认展开人读摘要。结果至少覆盖：
+默认不输出公开 JSON 判定结果，也不默认展开人读摘要。只有在异常、debug 或明确要求 handoff 时，结果才需要覆盖：
 
 - 当前 change / schema / status。
 - 是否存在 blocker 或关键风险；这些判定默认保留在 JSON 里作为 advisory，不自动转成停机。
 - `read_first`：`ce-work` 开始前必须先读的 artifacts / supporting files。
 - `apply_tracks` / 回写位置。
 - `evidence_entrypoints`：验证、review、manual evidence 的读取与回写入口。
-- `apply_tracks` / 回写位置。
 - `completion_gate`：完成当前批次前，必须先回写 `tasks.md` 或当前 schema apply tracks。
 - 推荐下一步：直接进入 `ce-work`，必要时补充 artifact 修订 follow-up。
 
@@ -109,8 +108,8 @@ CHECKPOINT: 推荐进入 `ce-work` 前，必须确认当前 change artifacts 可
 如果用户明确要求附带项目记忆或团队知识，再额外读取：
 
 ```bash
-aisee context pack --change <change> --for ce-work --project-memory --json
-aisee context pack --change <change> --for ce-work --knowledge --json
+aisee memory search --query "<当前实现任务>" --json
+aisee knowledge query --from-change <change> --for ce-work --json
 ```
 
 处理规则：

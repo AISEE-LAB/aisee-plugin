@@ -127,7 +127,7 @@ Do not rewrite full requirements, page flows, API details, or data models in sou
 
 ## 7. Numbers Are Stable; Content Evolves
 
-Document-local numbers reduce duplicate naming and let source-map and context packs perform lightweight parsing.
+Document-local numbers reduce duplicate naming and let source-map and the current change's rebuildable scan view perform lightweight parsing.
 
 Recommended:
 
@@ -137,21 +137,21 @@ Recommended:
 - When replacing or removing numbers, keep migration notes.
 - Do not treat headings, filenames, or natural-language descriptions as stable identifiers.
 
-Use `source-map.md` and context pack's rebuildable scan view as context entries; durable specification facts still belong in OpenSpec artifacts and baseline specs.
+Use `source-map.md` and the current change's rebuildable scan view as context entries; durable specification facts still belong in OpenSpec artifacts and baseline specs.
 
-## 8. Context Pack Is A Read Entry, Not A New Document
+## 8. Memory And Knowledge Reads Are Optional Guidance, Not New Documents
 
-`aisee context pack` is useful when you explicitly want to inject a small amount of project memory or team knowledge:
+When you need extra guidance, read a small amount of project memory or team knowledge directly:
 
 ```bash
-aisee context pack --change <change> --for ce-work --project-memory --json
-aisee context pack --change <change> --for ce-work --knowledge --json
+aisee memory search --query "<task>" --json
+aisee knowledge query --from-change <change> --for ce-work --json
 ```
 
 Rules:
 
-- Consume only the fields needed by the current target.
-- Do not copy context pack output into durable documents.
+- Consume only the matches needed by the current task.
+- Do not copy memory or knowledge output into durable documents.
 - When gaps are found, write back to the current change artifact or apply tracks.
 - Do not bypass the current change and search the whole repository to expand scope.
 
@@ -161,7 +161,7 @@ Before creating tasks, entering implementation, proposing reviewer lenses, or re
 
 - When there is no explicit change, return to requirements clarification, change-plan, or the current change itself rather than relying on a dedicated flow command.
 - When there is an explicit change, read the current change artifacts, schema, `tasks.md`, `source-map.md` when applicable, and evidence entrypoints directly.
-- Only read `aisee context pack --change <change> --for ce-work --project-memory --json` or `--knowledge --json` when you explicitly need that optional guidance.
+- Only read `aisee memory search --query "<task>" --json` or `aisee knowledge query --from-change <change> --for ce-work --json` when you explicitly need that optional guidance.
 - `aisee:implementation-bridge` should tell `ce-work` what to read first and how to write back `tasks.md` / apply tracks and evidence after implementation.
 - Do not create execution, code-review, or test agents that overlap with CE responsibilities.
 
@@ -221,13 +221,13 @@ When `aisee:archive-guard` says archive is not recommended, fix blockers first.
 For frontend/backend split work, the contract provider can expose read-only context:
 
 ```bash
-Read the current project's OpenSpec artifacts directly or use `aisee context pack`
+Read the current project's OpenSpec artifacts, contract attachments, or human-confirmed excerpts directly
 ```
 
 Best practices:
 
 - The provider owns the contract source.
-- The consumer only reads explicitly shared OpenSpec artifacts, contract attachments, or context pack summaries.
+- The consumer only reads explicitly shared OpenSpec artifacts, contract attachments, or human-confirmed excerpts.
 - Use human-confirmed paths and excerpts to keep context bounded.
 - Do not expose source code, secrets, environment variables, or full-repository search results.
 
@@ -279,7 +279,7 @@ Aisee should solve what OpenSpec does not:
 - upfront clarification;
 - schema-aware planning;
 - document-local numbering constraints and source-map routing;
-- AI context packs;
+- the current change's rebuildable scan view;
 - implementation handoff;
 - verify / archive guard.
 

@@ -25,7 +25,7 @@ The current version supports:
 - syncing a configured Git checkout with `aisee knowledge install/update --json`;
 - retrieving a small number of guardrails with `aisee knowledge query ... --json`;
 - building project or team lexical caches with `aisee knowledge index --json` and `--team-path`;
-- injecting bounded matches into implementation context with `aisee context pack --knowledge`;
+- exposing bounded matches to implementation through `aisee knowledge query --from-change <change> --for ce-work --json`;
 - creating project-local reusable knowledge candidates with `aisee:reflect`;
 - batch-reviewing candidates and producing card drafts with `aisee:knowledge-curate`;
 - writing reviewed drafts into a team knowledge worktree with `aisee knowledge promote-batch --curation <path> --team-path <path> --pack <id> --json`.
@@ -89,10 +89,10 @@ Query from the active change:
 aisee knowledge query --from-change <change> --for ce-work --json
 ```
 
-Explicitly enable matches in context packs:
+Query matches explicitly for the current change:
 
 ```bash
-aisee context pack --change <change> --for ce-work --knowledge --json
+aisee knowledge query --from-change <change> --for ce-work --json
 ```
 
 Refresh the local checkout:
