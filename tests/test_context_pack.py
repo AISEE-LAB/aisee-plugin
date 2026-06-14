@@ -293,7 +293,7 @@ apply:
     )
 
 
-def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) -> None:
+def test_context_pack_contains_change_metadata_and_path_references(tmp_path: Path, monkeypatch) -> None:
     create_project(tmp_path)
     monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-work")))
 
@@ -304,17 +304,6 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) ->
     assert "src/auth/session.py" in pack["facts"]["derived"]["code_paths"]
     assert "tests/auth/test_session.py" in pack["facts"]["derived"]["test_paths"]
     assert pack["facts"]["derived"]["task_state"]["total"] == 4
-    assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
-    assert pack["facts"]["derived"]["execution"]["allowed_paths"] == [
-        "src/auth/session.py",
-        "tests/auth/test_session.py",
-    ]
-    candidates = pack["facts"]["derived"]["execution"]["reusable_workflow_candidates"]
-    assert all(set(candidate) == {"name", "kind", "status", "reason"} for candidate in candidates)
-    candidates_by_name = {candidate["name"]: candidate for candidate in candidates}
-    assert candidates_by_name["aisee:implementation-bridge"]["status"] == "recommended"
-    assert candidates_by_name["ce-work"]["kind"] == "compound-skill"
-    assert candidates_by_name["ce-work"]["status"] == "available"
     assert pack["facts"]["derived"]["implementation_references"]["unmapped_reference_paths"] == []
     assert pack["facts"]["derived"]["artifact_order"] == [
         "proposal",
@@ -336,14 +325,10 @@ def test_ce_work_pack_contains_execution_context(tmp_path: Path, monkeypatch) ->
     assert pack["facts"]["parsed"]["source_map"]["parse_level"] == "structured"
     assert pack["facts"]["parsed"]["source_map"]["implementation_paths"]
     assert "text" not in pack["facts"]["parsed"]["artifacts"]["proposal"]
-    brief = pack["facts"]["derived"]["execution"]["brief"]
-    assert brief["source_refs"]["mode"] == "source-ref"
-    assert brief["allowed_paths"] == ["src/auth/session.py", "tests/auth/test_session.py"]
-    assert brief["produced_local_ids"] == ["SPEC-001", "TASK-001", "TEST-001"]
-    assert any(path.endswith("proposal.md") for path in brief["authoritative_sources"])
+    assert "execution" not in pack["facts"]["derived"]
 
 
-def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None:
+def test_context_pack_reports_unmapped_task_paths_without_execution_projection(tmp_path: Path) -> None:
     create_project(tmp_path)
     write(
         tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md",
@@ -357,12 +342,9 @@ def test_ce_work_pack_does_not_allow_unmapped_task_paths(tmp_path: Path) -> None
 
     pack = build_context_pack(tmp_path, "add-auth", "ce-work")
 
-    execution = pack["facts"]["derived"]["execution"]
     references = pack["facts"]["derived"]["implementation_references"]
-    assert "src/auth/side_effect.py" not in execution["allowed_paths"]
     assert references["unmapped_reference_paths"] == ["src/auth/side_effect.py"]
     assert "SOURCE_MAP_UNMAPPED_PATH" in {gap["code"] for gap in pack["gaps"]}
-
 
 def test_context_pack_accepts_intake_only_traceability_path(tmp_path: Path) -> None:
     create_project(tmp_path)
@@ -501,7 +483,7 @@ def test_context_pack_blocks_when_schema_hint_conflicts_with_metadata(tmp_path: 
     assert "SCHEMA_MISMATCH" in {gap["code"] for gap in pack["gaps"]}
 
 
-def test_ce_work_pack_reports_missing_ce_plan_as_limitation(tmp_path: Path, monkeypatch) -> None:
+def test_context_pack_omits_execution_routing_even_when_paths_are_unclear(tmp_path: Path, monkeypatch) -> None:
     create_project(tmp_path)
     monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(tmp_path / "missing-compound"))
     write(
@@ -511,28 +493,19 @@ def test_ce_work_pack_reports_missing_ce_plan_as_limitation(tmp_path: Path, monk
 
     pack = build_context_pack(tmp_path, "add-auth", "ce-work")
 
-    execution = pack["facts"]["derived"]["execution"]
-    candidates = {candidate["name"]: candidate for candidate in execution["reusable_workflow_candidates"]}
-    assert execution["requires_ce_plan"] is True
-    assert candidates["ce-plan"]["status"] == "missing"
-    assert candidates["aisee:implementation-bridge"]["status"] == "recommended"
+    assert "execution" not in pack["facts"]["derived"]
+    assert {gap["code"] for gap in pack["gaps"]} >= {"SOURCE_MAP_UNSTRUCTURED", "SOURCE_MAP_UNMAPPED_PATH"}
 
 
-def test_ce_work_pack_keeps_execution_routing_even_when_blockers_exist(tmp_path: Path, monkeypatch) -> None:
+def test_context_pack_keeps_blocker_gaps_without_execution_projection(tmp_path: Path, monkeypatch) -> None:
     create_project(tmp_path)
     monkeypatch.setenv("AISEE_COMPOUND_SKILLS_DIR", str(install_compound_skills(tmp_path, "ce-plan", "ce-work")))
     (tmp_path / "openspec" / "changes" / "add-auth" / "tasks.md").unlink()
 
     pack = build_context_pack(tmp_path, "add-auth", "ce-work")
 
-    execution = pack["facts"]["derived"]["execution"]
-    candidates = {candidate["name"]: candidate for candidate in execution["reusable_workflow_candidates"]}
-    assert execution["requires_ce_plan"] is True
     assert {gap["code"] for gap in pack["gaps"]} >= {"MISSING_ARTIFACT", "TASK_GAP"}
-    assert candidates["aisee:implementation-bridge"]["status"] == "recommended"
-    assert candidates["ce-plan"]["status"] == "available"
-    assert "tasks.md has no executable tasks" in candidates["ce-plan"]["reason"]
-    assert "advisory" in candidates["ce-plan"]["reason"]
+    assert "execution" not in pack["facts"]["derived"]
 
 
 def test_quick_fix_pack_does_not_require_source_map(tmp_path: Path) -> None:
@@ -547,11 +520,7 @@ def test_quick_fix_pack_does_not_require_source_map(tmp_path: Path) -> None:
     assert pack["facts"]["derived"]["implementation_references"]["source"] == "schema-artifacts"
     assert pack["facts"]["derived"]["code_paths"] == ["src/auth/login_view.py"]
     assert pack["facts"]["derived"]["test_paths"] == ["tests/auth/test_login_view.py"]
-    assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
-    assert pack["facts"]["derived"]["execution"]["allowed_paths"] == [
-        "src/auth/login_view.py",
-        "tests/auth/test_login_view.py",
-    ]
+    assert "execution" not in pack["facts"]["derived"]
 
 
 def test_minimal_spec_driven_schema_is_compatible_with_ce_work_pack(tmp_path: Path) -> None:
@@ -566,7 +535,7 @@ def test_minimal_spec_driven_schema_is_compatible_with_ce_work_pack(tmp_path: Pa
     assert pack["facts"]["derived"]["implementation_references"]["source"] == "schema-artifacts"
     assert pack["facts"]["derived"]["code_paths"] == ["src/db/migrations.py"]
     assert pack["facts"]["derived"]["test_paths"] == ["tests/db/test_migrations.py"]
-    assert pack["facts"]["derived"]["execution"]["requires_ce_plan"] is False
+    assert "execution" not in pack["facts"]["derived"]
     gap_codes = {gap["code"] for gap in pack["gaps"]}
     assert "SCHEMA_CAPABILITIES_MISSING" not in gap_codes
     assert "SCHEMA_ARTIFACT_REQUIREDNESS_INVALID" not in gap_codes
@@ -649,30 +618,16 @@ apply:
     ]
 
 
-def test_verify_pack_contains_check_groups(tmp_path: Path) -> None:
+def test_verify_pack_keeps_schema_and_contract_metadata_without_check_groups(tmp_path: Path) -> None:
     create_project(tmp_path)
 
     pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
 
-    checks = pack["facts"]["derived"]["checks"]
-    assert "schema_artifacts" in checks
-    assert "traceability" in checks
-    assert "review_and_tests" in checks
     contract_sync = pack["facts"]["parsed"]["source_map"]["contract_sync"]
     assert contract_sync["values"]["provider_repo"]["value"] == "backend-api"
     assert contract_sync["machine_readable_contracts"] == ["contracts/openapi.yaml"]
-    contract_checks = checks["contracts"]
-    assert {
-        "artifact": "contract-sync",
-        "status": "present",
-        "owner": "backend",
-        "canonical_source": "contracts/openapi.yaml",
-        "provider_repo": "backend-api",
-        "consumer_repo": "frontend-app",
-        "sync_mode": "local-http",
-        "machine_readable_contracts": ["contracts/openapi.yaml"],
-    } in contract_checks
-    assert pack["facts"]["derived"]["drift_candidates"] == []
+    assert "checks" not in pack["facts"]["derived"]
+    assert "drift_candidates" not in pack["facts"]["derived"]
 
 
 def test_context_pack_flags_completion_evidence_without_apply_track_writeback(tmp_path: Path) -> None:
@@ -689,22 +644,10 @@ status: passed
     verify_pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
 
     assert "APPLY_TRACKS_WRITEBACK_REQUIRED" in {gap["code"] for gap in ce_work_pack["gaps"]}
-    completion_gate = ce_work_pack["facts"]["derived"]["execution"]["completion_gate"]
-    assert completion_gate["apply_tracks"] == "tasks.md"
-    assert completion_gate["status"] == "writeback-required"
-    assert completion_gate["completion_evidence_paths"] == ["docs/verification/add-auth-test.md"]
-
     assert "APPLY_TRACKS_WRITEBACK_REQUIRED" in {gap["code"] for gap in verify_pack["gaps"]}
-    review_checks = verify_pack["facts"]["derived"]["checks"]["review_and_tests"]
-    assert review_checks == [
-        {
-            "apply_tracks": "tasks.md",
-            "completion_evidence_count": 1,
-            "completion_evidence_paths": ["docs/verification/add-auth-test.md"],
-            "task_done_count": 0,
-            "writeback_consistent": False,
-        }
-    ]
+    assert ce_work_pack["facts"]["parsed"]["schema"]["apply_tracks"] == "tasks.md"
+    assert verify_pack["facts"]["parsed"]["schema"]["apply_tracks"] == "tasks.md"
+    assert ce_work_pack["evidence"]["tests"] == ["docs/verification/add-auth-test.md"]
 
 
 def test_context_pack_does_not_flag_writeback_gap_after_task_sync(tmp_path: Path) -> None:
@@ -731,9 +674,9 @@ status: passed
     verify_pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
 
     assert "APPLY_TRACKS_WRITEBACK_REQUIRED" not in {gap["code"] for gap in ce_work_pack["gaps"]}
-    assert ce_work_pack["facts"]["derived"]["execution"]["completion_gate"]["status"] == "ready"
+    assert ce_work_pack["facts"]["parsed"]["schema"]["apply_tracks"] == "tasks.md"
     assert "APPLY_TRACKS_WRITEBACK_REQUIRED" not in {gap["code"] for gap in verify_pack["gaps"]}
-    assert verify_pack["facts"]["derived"]["checks"]["review_and_tests"][0]["writeback_consistent"] is True
+    assert verify_pack["facts"]["parsed"]["schema"]["apply_tracks"] == "tasks.md"
 
 
 def test_context_pack_reports_missing_source_refs(tmp_path: Path) -> None:

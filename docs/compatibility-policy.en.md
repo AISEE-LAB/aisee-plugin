@@ -80,6 +80,7 @@ Rules:
 - `facts.derived` represents CLI-derived views;
 - `knowledge.matches` is optional guardrail output and must not pollute `facts.parsed` or `facts.derived`;
 - `project_memory.matches` appears only with explicit `--project-memory` and must not pollute `facts.parsed` or `facts.derived`;
+- `--for <target>` only scopes optional injection retrieval and no longer promises target-specific execution / verify / review projections;
 - context packs may grow, but default output must stay bounded;
 - new targets must document consumer, read order, and missing-field behavior.
 

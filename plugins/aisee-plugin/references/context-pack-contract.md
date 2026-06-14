@@ -8,7 +8,7 @@
 - Source Map 解析规则：[source-map-contract.md](source-map-contract.md)
 - 编号规则：[id-policy.md](id-policy.md)
 
-`aisee context pack` 是 OpenSpec context companion。它默认调用时衔接 OpenSpec change、Aisee 补充信息和 CE evidence，不维护第二份内容事实源，也不替代 OpenSpec parser。
+`aisee context pack` 是 OpenSpec context companion。它默认调用时衔接当前 change 的 metadata scan 与可选的 memory / knowledge 注入，不维护第二份内容事实源，也不替代 OpenSpec parser。
 
 ## Fact Sources
 
@@ -22,6 +22,7 @@
 
 - `parsed`：从 Aisee 自有补充文件、OpenSpec metadata scan 和可用 OpenSpec CLI 输出解析。
 - `derived`：根据 source-map、文件关系、编号和轻量校验规则推导。
+- 可选独立注入：`project_memory`、`knowledge`。
 
 AI 生成摘要必须显式启用，并在 JSON 中标记为 `generated`。
 
@@ -55,7 +56,7 @@ aisee context pack --change <change> --for ce-doc-review --json
 aisee context pack --change <change> --for ce-code-review --json
 ```
 
-`--change` 是必需入口。context pack 不应从全项目自由搜索后推导范围。
+`--change` 是必需入口。context pack 不应从全项目自由搜索后推导范围。`--for <target>` 仅用于限定可选注入层的检索边界，不再要求生成 target-specific 的 execution / verify / review 投影。
 
 ## Top-level Envelope
 
@@ -92,7 +93,7 @@ Field rules:
 - `facts.parsed`：只放从 Aisee 补充文件、OpenSpec metadata scan 或 OpenSpec CLI 输出得到的事实。
 - `facts.derived`：只放由 `source-map.md`、文件关系、编号和轻量校验规则推导出的事实。
 - `generated`：默认 `null`。只有显式启用生成摘要时才允许出现 AI 生成内容。
-- `gaps`：缺口和断链，不是自动补齐结果。结构见下文 `Gap Object`。
+- `gaps`：缺口和断链，不是自动补齐结果，也不是路由裁决结果。结构见下文 `Gap Object`。
 - `guardrails`：执行限制和禁止越界项。
 - `evidence`：validate、review、test、verification 的记录入口。
 - `project_memory`：只在显式 `--project-memory` 时出现；包含受控 memory matches，不得写入 `facts.parsed` 或 `facts.derived`。
@@ -141,13 +142,7 @@ Common codes:
 - `REVIEW_BLOCKER`
 - `TEST_EVIDENCE_MISSING`
 
-Gate semantics:
-
-- `ce-work` 遇到 blocker 不应开始实现。
-- `aisee-verify` 遇到 blocker 不应进入 archive guard。
-- `aisee:archive-guard` 遇到 blocker 不应建议 `openspec archive`。
-- risk 可以继续，但需要 owner、原因、影响和后续处理方式。
-- info 不阻断，但应保留在 JSON 输出中供后续审查。
+`context pack` 自己不再消费这些 severity 去生成下一步路由。后续如何处理 blocker / risk / info，由 `implementation-bridge`、`aisee:verify`、`aisee:archive-guard` 或人工判断决定。
 
 ## Parsed Facts
 

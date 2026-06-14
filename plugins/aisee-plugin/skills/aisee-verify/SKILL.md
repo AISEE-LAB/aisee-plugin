@@ -1,6 +1,6 @@
 ---
 name: aisee:verify
-description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、source-map、编号、review/test evidence、OpenSpec validate 和实现状态是否一致。用于实现前后读取 context pack 和当前 artifacts，输出 schema-aware 问题清单与修复建议；不把 app schema 的 source-map/contracts 要求套到 quick-fix、quick-research、docsite、infra、security 或其它轻量 schema。
+description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、source-map、编号、review/test evidence、OpenSpec validate 和实现状态是否一致。用于实现前后直接读取当前 change artifacts 与 evidence，输出 schema-aware 问题清单与修复建议；不把 app schema 的 source-map/contracts 要求套到 quick-fix、quick-research、docsite、infra、security 或其它轻量 schema。
 ---
 
 # aisee:verify
@@ -26,9 +26,8 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 ## 职责
 
 - 识别当前 change 使用的 schema，并只检查该 schema 声明的 artifacts、requires、apply tracks 和验证证据。
-- 自动读取只读 CLI JSON：`context pack --for aisee-verify`。用户不承担常规手工运行 CLI 的路径。
 - 运行或建议运行 `openspec validate <change>`。
-- 运行 `aisee context pack --change <change> --for aisee-verify --json`，并结合当前 artifacts/evidence 诊断一致性。
+- 直接读取当前 change artifacts、schema、tasks、source-map（若适用）以及 review/test/manual evidence，并诊断一致性。
 - 对需要 `source-map.md` 的 schema，检查编号、source-map、artifact applicability、代码路径、测试路径和 evidence 是否闭合。
 - 对不生成 `source-map.md` 的 schema，只检查 schema artifacts、tasks、OpenSpec validate、review/test/manual evidence 和当前 change 明确引用的路径。
 - 消费已有 `ce-doc-review`、`ce-code-review`、`ce-test-*`、人工验证记录和监控/预览证据。
@@ -49,7 +48,7 @@ description: 按当前 OpenSpec change 的 schema 验证 artifacts、tasks、sou
 必须以当前 change 为入口。按顺序运行：
 
 ```bash
-aisee context pack --change <change> --for aisee-verify --json
+openspec/changes/<change>/
 ```
 
 同时建议运行：
@@ -58,11 +57,18 @@ aisee context pack --change <change> --for aisee-verify --json
 openspec validate <change>
 ```
 
-如果 CLI 不可用，只读取当前 change 目录、当前 schema、schema 声明的 artifacts、已有 review/test/manual evidence，以及当前 artifacts 明确引用的路径。只有 schema 生成 `source-map.md` 时才读取 source-map。
+如果用户明确要求附带项目记忆或团队知识，可以额外读取：
+
+```bash
+aisee context pack --change <change> --for aisee-verify --project-memory --json
+aisee context pack --change <change> --for aisee-verify --knowledge --json
+```
+
+这些注入只作为 guidance，不改变 verify 的事实源顺序。
 
 ## Schema 上下文
 
-先从 context pack、change metadata 或 schema 文件确认：
+先从 change metadata 或 schema 文件确认：
 
 - `schema_name`：当前 schema 名称。
 - `schema_artifacts`：schema 声明的 artifact id 与生成文件。
@@ -70,13 +76,11 @@ openspec validate <change>
 - `apply_tracks`：schema apply 阶段跟踪的文件，通常是 `tasks.md`。
 - `required_contracts`：仅 app/device 等 source-map schema 中 Required=yes 的按需 artifacts。
 
-若当前 schema 不生成 `source-map.md`，`source_map_required=false` 应由 CLI/context pack 直接体现；不要手工补伪 source-map。
+若当前 schema 不生成 `source-map.md`，`source_map_required=false` 应直接从当前 schema 判断；不要手工补伪 source-map。
 
 ## 输入处理规则
 
 - `SCHEMA_METADATA_MISSING` / `SCHEMA_MISMATCH` / `SCHEMA_NOT_INSTALLED` / `SCHEMA_NOT_FOUND`：直接输出 BLOCKER，不接受 default schema fallback。
-- `context pack.facts.derived.checks` 是结构化检查入口。verify 报告不是新事实源。
-- `context pack.evidence.details` 可用于读取 validate/test/review 的轻量解析结果；路径数组仍是 evidence 原始入口。
 - `openspec validate` 未运行时输出 RISK；运行失败且无接受理由时输出 BLOCKER。
 - 已有 CE review/test 结果只作为 evidence；verify 不替代它们。
 - 未关闭的 P0 必须输出 BLOCKER；未关闭的 P1 至少输出 RISK。accepted risk 可视为已处理，但 archive-guard 仍需判断是否可接受。
@@ -153,7 +157,6 @@ pass / fail / pass-with-risk
 - Gaps:
 - Change inspect:
 - Verify check:
-- Context pack:
 - OpenSpec validate:
 
 ## Findings

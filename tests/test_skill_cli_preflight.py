@@ -215,7 +215,7 @@ def test_readme_highlights_core_workflow_taxonomy() -> None:
 
 def test_core_skills_document_auto_cli_consumption_and_lean_projection() -> None:
     expectations = {
-        "plugins/aisee-plugin/skills/aisee-implementation-bridge/SKILL.md": "只消费 `--for ce-work` 的 lean projection",
+        "plugins/aisee-plugin/skills/aisee-implementation-bridge/SKILL.md": "默认直接读取当前 change artifacts、schema、`tasks.md`、`source-map.md`（若当前 schema 生成）和 `AGENTS.md`。",
         "plugins/aisee-plugin/skills/aisee-verify/SKILL.md": "OpenSpec artifact 合法性以 `openspec validate` 和当前 schema 为准",
         "plugins/aisee-plugin/skills/aisee-archive-guard/SKILL.md": "OpenSpec artifact 合法性和 baseline merge 仍以 `openspec validate` / `openspec archive` 为准",
     }

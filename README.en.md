@@ -154,10 +154,10 @@ On-demand extensions:
 - **Architecture context**: `aisee:architecture` records technical facts, constraints, reusable capabilities, global engineering conventions, and artifact hints.
 - **Schema-aware change planning**: `aisee:change-plan` maps confirmed inputs into independently deliverable OpenSpec changes.
 - **OpenSpec schema pack**: includes app, device, docsite, infra, security, quick-fix, quick-research, and collaboration schemas.
-- **Context packs**: `aisee context pack` generates JSON context for implementation, verification, and review.
+- **Context packs**: `aisee context pack` provides optional project memory and team knowledge injection for the current change without replacing OpenSpec facts.
 - **Project memory**: `aisee memory` retrieves and writes current-repository long-lived guidance without replacing OpenSpec facts.
 - **Team knowledge guardrails**: `aisee knowledge` retrieves a small number of reviewed engineering lessons through pack/card protocols without turning the knowledge repository into a second specification source.
-- **Lightweight context routing**: `aisee context pack` parses sources, local numbers, candidate paths, and evidence entries when `source-map.md` exists.
+- **Controlled memory injection**: `aisee context pack` injects `project_memory` or `knowledge` only when explicitly requested and does not own implementation-stage routing.
 - **Verification and archive guardrails**: `aisee:verify` and `aisee:archive-guard` diagnose gaps and risks before archive.
 - **Harness design**: CLI contract tests and normalized skill eval cases keep the workflow stable.
 
@@ -411,10 +411,10 @@ aisee openspec ensure --json
 aisee plugin inspect --json
 aisee schemas list --json
 aisee schemas check --json
-aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --project-memory --json
 aisee context pack --change <change> --for ce-work --knowledge --json
-aisee context pack --change <change> --for aisee-verify --json
+aisee context pack --change <change> --for aisee-verify --project-memory --json
+aisee context pack --change <change> --for aisee-verify --knowledge --json
 aisee memory inspect --json
 aisee memory list --json
 aisee memory search --query "<task>" --json

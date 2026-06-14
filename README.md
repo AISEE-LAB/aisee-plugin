@@ -154,11 +154,11 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 - **技术架构上下文**：`aisee:architecture` 记录技术事实、约束、可复用能力、全局工程约定和 artifact hints。
 - **Schema-aware change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
 - **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
-- **Context packs**：`aisee context pack` 为实现、验证和 review 生成 JSON 上下文。
+- **Context packs**：`aisee context pack` 为当前 change 提供可选的项目记忆与团队知识注入，不替代 OpenSpec facts。
 - **轻量 schema 兼容**：`aisee context pack` 与 `aisee:implementation-bridge` 可直接消费 OpenSpec 官方 `spec-driven` 及其它轻量 schema；不会因为缺少 Aisee 专属增强字段而拒绝生成 bridge 上下文。
 - **项目记忆**：`aisee memory` 受控检索和写入当前仓库长期 guidance，不替代 OpenSpec 事实源。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
-- **轻量上下文路由**：`aisee context pack` 在 `source-map.md` 存在时解析来源、编号、候选路径和 evidence 入口。
+- **受控记忆注入**：`aisee context pack` 只在显式启用时注入 `project_memory` 或 `knowledge`，不承担实现阶段执行路由。
 - **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
 - **Harness 设计**：通过 CLI contract tests 和规范化 skill eval cases 保持工作流稳定。
 
@@ -411,10 +411,10 @@ aisee openspec ensure --json
 aisee plugin inspect --json
 aisee schemas list --json
 aisee schemas check --json
-aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --project-memory --json
 aisee context pack --change <change> --for ce-work --knowledge --json
-aisee context pack --change <change> --for aisee-verify --json
+aisee context pack --change <change> --for aisee-verify --project-memory --json
+aisee context pack --change <change> --for aisee-verify --knowledge --json
 aisee memory inspect --json
 aisee memory list --json
 aisee memory search --query "<task>" --json

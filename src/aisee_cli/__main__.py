@@ -92,7 +92,7 @@ def main() -> int:
     context_subparsers = context_parser.add_subparsers(dest="context_command")
     pack_parser = context_subparsers.add_parser("pack")
     pack_parser.add_argument("--change", required=True, help="OpenSpec change name")
-    pack_parser.add_argument("--for", dest="target", required=True, help="context target")
+    pack_parser.add_argument("--for", dest="target", required=True, help="consumer target for optional memory/knowledge injection")
     pack_parser.add_argument("--knowledge", action="store_true", help="include knowledge guardrail matches")
     pack_parser.add_argument("--project-memory", action="store_true", help="include bounded project memory matches")
     pack_parser.add_argument("--json", action="store_true", help="output JSON")

@@ -44,7 +44,7 @@ change_refs:
 
 ## Batch Table
 
-| Batch | Goal | Depends on | Read first | Allowed paths | Verification / review gate | Apply tracks update |
+| Batch | Goal | Depends on | Read first | Supporting files / evidence gate | Verification / review gate | Apply tracks update |
 |---|---|---|---|---|---|---|
 | 01 |  | none |  |  |  |  |
 | 02 |  | 01 |  |  |  |  |

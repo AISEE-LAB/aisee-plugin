@@ -130,8 +130,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
 
     read_order = build_read_order(root, change_path, artifact_entries, read_paths)
     status = "missing" if not change_path.exists() else ("authored" if task_state["total"] else "draft")
-    requires_ce_plan = target == "ce-work" and should_require_ce_plan(task_state, code_paths, test_paths, gaps)
-
     pack: dict[str, Any] = {
         "schema_version": CONTEXT_SCHEMA_VERSION,
         "target": target,
@@ -208,79 +206,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "mode": "parsed-and-derived",
         },
     }
-
-    if target == "ce-work":
-        ce_plan_refinement_reason = ce_plan_reason(task_state, code_paths, test_paths, gaps, source_map_required) if requires_ce_plan else None
-        pack["facts"]["derived"]["execution"] = {
-            "start_from": task_state["open_items"][:1],
-            "suggested_order": task_state["open_items"],
-            "allowed_paths": sorted(set(code_paths + test_paths)),
-            "unmapped_reference_paths": unmapped_reference_paths,
-            "forbidden_scope": pack["facts"]["derived"]["scope"]["out"],
-            "requires_ce_plan": requires_ce_plan,
-            "ce_plan_reason": ce_plan_refinement_reason,
-            "reusable_workflow_candidates": build_reusable_workflow_candidates(
-                requires_ce_plan=requires_ce_plan,
-                ce_plan_refinement_reason=ce_plan_refinement_reason,
-                gaps=gaps,
-            ),
-            "completion_gate": build_completion_gate(
-                apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
-                task_state=task_state,
-                evidence=evidence,
-            ),
-        }
-        pack["facts"]["derived"]["execution"]["brief"] = build_execution_brief(
-            root=root,
-            change_path=change_path,
-            read_order=read_order,
-            scope=pack["facts"]["derived"]["scope"],
-            traceability=pack["facts"]["derived"]["traceability"],
-            allowed_paths=pack["facts"]["derived"]["execution"]["allowed_paths"],
-            start_from=pack["facts"]["derived"]["execution"]["start_from"],
-            verification_requirements=pack["facts"]["derived"]["verification_requirements"],
-            gaps=gaps,
-            task_state=task_state,
-            evidence=evidence,
-            apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
-        )
-    elif target == "aisee-verify":
-        pack["facts"]["derived"]["checks"] = {
-            "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(
-                upstream_refs,
-                produced_local_ids,
-                mode=traceability_mode,
-            ),
-            "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries, source_map, source_map.get("contract_sync")),
-            "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
-            "review_and_tests": summarize_review_and_test_checks(
-                evidence=evidence,
-                task_state=task_state,
-                apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
-            ),
-        }
-        pack["facts"]["derived"]["drift_candidates"] = []
-    elif target == "ce-doc-review":
-        pack["facts"]["derived"]["review"] = {
-            "focus": ["schema_artifacts", "traceability", "tasks", "contracts", "open_questions"],
-            "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(
-                upstream_refs,
-                produced_local_ids,
-                mode=traceability_mode,
-            ),
-            "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries, source_map, source_map.get("contract_sync")),
-        }
-    elif target == "ce-code-review":
-        pack["facts"]["derived"]["review"] = {
-            "focus": ["implementation", "tests", "source-map" if source_map_required else "schema-artifacts", "task_state"],
-            "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
-            "tasks": summarize_task_checks(task_state),
-            "evidence": pack["evidence"],
-        }
 
     return pack
 
