@@ -137,11 +137,7 @@ Required=no 的 artifact 不能留空原因。生成 `source-map.md` 的 schema 
 
 ## 编号检查
 
-优先使用当前 change、schema 模板和已存在 artifact 中的编号信息。需要机器视图时使用：
-
-```bash
-aisee context pack --change <change> --for aisee-verify --json
-```
+优先使用当前 change、schema 模板和已存在 artifact 中的编号信息。需要机器视图时，直接读取当前 change 的 schema、artifacts 和 `source-map.md`（若当前 schema 生成）。
 
 只在当前 change 内生成实际需要的文档内编号。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时写新的编号，并把跨文档来源回写到 `source-map.md`。
 

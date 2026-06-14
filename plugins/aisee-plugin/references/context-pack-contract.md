@@ -49,9 +49,10 @@ Aisee CLI 对 OpenSpec artifacts 只做 metadata scan：
 ## Command
 
 ```bash
-aisee context pack --change <change> --for ce-work --json
 aisee context pack --change <change> --for ce-work --project-memory --json
-aisee context pack --change <change> --for aisee-verify --json
+aisee context pack --change <change> --for ce-work --knowledge --json
+aisee context pack --change <change> --for aisee-verify --project-memory --json
+aisee context pack --change <change> --for aisee-verify --knowledge --json
 aisee context pack --change <change> --for ce-doc-review --json
 aisee context pack --change <change> --for ce-code-review --json
 ```
