@@ -134,7 +134,7 @@ data-model.md            # as needed
 Before implementation, confirm the change is authored.
 
 ```bash
-aisee context pack --change <change> --for ce-work --json
+openspec/changes/<change>/
 ```
 
 If the project has long-lived local guidance such as commit preferences, test commands, architecture decision summaries, or stack constraints, retrieve project memory explicitly:
@@ -155,13 +155,12 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 Knowledge matches are reminders only. They do not change the current change's specification source and should not be copied into durable artifacts.
 
-Then use `aisee:implementation-bridge` to return the default JSON decision result. It should return routing and guardrails only; generate an Implementation Brief only when a human-readable handoff is explicitly needed. The brief is an execution index:
+Then use `aisee:implementation-bridge` to return the default JSON decision result. It should tell `ce-work` what to read first and what must be written back after implementation; generate an Implementation Brief only when a human-readable handoff is explicitly needed. The brief is an execution index:
 
 - current change and schema;
 - read-first artifacts;
-- allowed code and test paths;
 - apply tracks writeback location;
-- verification commands and evidence location;
+- verification and evidence entrypoints;
 - whether Tier 2 code review is recommended.
 
 If a change is large, do not go back to change-plan just to split it again. Create `brief-index.md` and multiple `brief-part-NN.md` files inside the same current change handoff flow.
@@ -193,10 +192,9 @@ After implementation, run:
 
 ```bash
 openspec validate <change>
-aisee context pack --change <change> --for aisee-verify --json
 ```
 
-Then use `aisee:verify` or a manual review pass to check:
+Then read the current change artifacts, schema, `tasks.md`, `source-map.md` when applicable, and evidence directly, and use `aisee:verify` or a manual review pass to check:
 
 - whether schema artifacts exist;
 - whether Required=yes contracts are closed;

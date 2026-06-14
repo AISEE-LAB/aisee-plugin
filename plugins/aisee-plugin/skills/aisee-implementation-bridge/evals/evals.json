@@ -11,23 +11,23 @@
       "id": "implementation-bridge-001",
       "name": "handoff-authored-change-to-ce-work",
       "scenario": "implementation-handoff",
-      "prompt": "change 已 authored，context pack 无 blocker。帮我判断能否进入 ce-work，并只给出最小 JSON 判定结果：该读什么、能改哪些路径、是否需要 ce-plan。",
+      "prompt": "change 已 authored。帮我判断能否进入 ce-work，并只给出最小 JSON 判定结果：该先读什么、完成后要回写什么。",
       "context": {
         "files": [],
         "assumptions": [
           "当前 change 已存在 context pack。"
         ]
       },
-      "expected_output": "应优先消费 context pack 和 gaps，默认只输出一次性的 JSON 判定结果与下一步路由；明确 allowed paths、verification、review recommendation 和 ce-plan 是否需要；不得创建平行长期任务清单、默认展开 Brief 正文或直接写代码。",
+      "expected_output": "应默认直接读取当前 change artifacts，并输出一次性的 JSON 读取策略与完成提醒；明确 read first、apply tracks、verification / evidence 入口和 review recommendation；不得创建平行长期任务清单、默认展开 Brief 正文或直接写代码。",
       "expected_outputs": [
-        "先读当前 change 的机器可读上下文。",
+        "先读当前 change 的事实源。",
         "输出 JSON 判定关键字段。",
-        "当 requires_ce_plan=false 时直接推荐 ce-work。"
+        "明确完成后先回写 tasks.md 或 apply tracks。"
       ],
       "must_ask": [],
       "must_include": [
-        "requires_ce_plan",
-        "allowed paths",
+        "read first",
+        "apply tracks",
         "verification",
         "review recommendation"
       ],

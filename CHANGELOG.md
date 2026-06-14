@@ -2,6 +2,15 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
+## [0.12.0] - 2026-06-14
+
+### Changed
+
+- `aisee context pack` 收缩为 current change 的 metadata scan + 可选 `project_memory` / `knowledge` 注入 companion，不再默认生成 `ce-work` / `aisee-verify` / review 的 target-specific execution projection。
+- `aisee:implementation-bridge` 改为默认直接读取当前 change artifacts，并只向 `ce-work` 输出“先读什么、完成后回写什么”的读取策略与 apply tracks / evidence 提醒；仅在显式需要时附带 memory / knowledge 注入。
+- `aisee:verify` 与 `aisee:archive-guard` 改为默认直接读取当前 change artifacts、schema 和 evidence，不再把 `context pack --for aisee-verify` 当作主路径。
+- README、workflow、best-practices、context pack contracts 与 CLI help 同步更新为 “OpenSpec facts + optional memory/knowledge companion” 语义。
+
 ## [0.11.3] - 2026-06-13
 
 ### Changed

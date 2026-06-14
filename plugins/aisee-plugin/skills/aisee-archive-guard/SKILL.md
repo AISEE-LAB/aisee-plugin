@@ -1,6 +1,6 @@
 ---
 name: aisee:archive-guard
-description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当前 change 的 context pack、openspec validate、aisee:verify、tasks、review/test/manual evidence，判断是否建议执行 openspec archive。它只按当前 schema 的 artifacts、apply tracks、source-map/contracts 适用性和 domain evidence 做放行判断，不重新做深度验证、不重新跑测试、不替代 openspec archive。
+description: OpenSpec archive 前的 schema-aware 最终门禁。用于读取当前 change artifacts、openspec validate、aisee:verify、tasks、review/test/manual evidence，判断是否建议执行 openspec archive。它只按当前 schema 的 artifacts、apply tracks、source-map/contracts 适用性和 domain evidence 做放行判断，不重新做深度验证、不重新跑测试、不替代 openspec archive。
 ---
 
 # aisee:archive-guard
@@ -24,9 +24,7 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 ## 职责
 
 - 识别当前 change schema，并按 schema 判断归档必需 artifacts、tasks、apply tracks、source-map、contracts 和验证证据。
-- 自动读取只读 CLI JSON：`context pack --for aisee-verify`；这些检查不要求用户手工执行常规命令。
 - 读取已有 validate、verify、review、test、manual verification、preview、monitoring 或设备验证结果。
-- 运行或读取 `aisee context pack --change <change> --for aisee-verify --json`。
 - 检查 `aisee:verify` 的 Review Recommendation 是否已有审查证据、本地重点自审证据或正式 accepted risk。
 - 判断是否建议执行 `openspec archive <change>`。
 - 输出 `可以 archive` / `有风险但可接受` / `暂不建议 archive`，并列出阻断项、接受风险和归档后基线影响。
@@ -45,7 +43,6 @@ Archive 前可以消费 Aisee 只读 reviewer 结论，但不得把它们当作 
 按顺序读取或运行：
 
 ```bash
-aisee context pack --change <change> --for aisee-verify --json
 openspec validate <change>
 ```
 
@@ -68,7 +65,7 @@ openspec archive <change>
 - `required_contracts`：仅 source-map schema 中 Required=yes 的按需 artifacts。
 - `domain_evidence`：当前 schema 特有的归档证据，如 docsite 构建/链接、infra 回滚/变更后验证、security review/test、device 验证记录。
 
-如果当前 schema 不生成 `source-map.md`，`source_map_required=false` 应由 CLI/context pack 直接体现；不要要求补伪 source-map。
+如果当前 schema 不生成 `source-map.md`，`source_map_required=false` 应直接从当前 schema 判断；不要要求补伪 source-map。
 
 ## 归档前检查
 
@@ -126,7 +123,6 @@ openspec archive <change>
 - Gaps:
 - Verify check:
 - Archive check:
-- Context pack:
 - OpenSpec validate:
 - Aisee verify report:
 - Review / test / manual evidence:

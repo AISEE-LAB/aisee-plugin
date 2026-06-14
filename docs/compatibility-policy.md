@@ -80,6 +80,7 @@
 - `facts.derived` 表示 CLI 派生视图；
 - `knowledge.matches` 是可选 guardrails，不得污染 `facts.parsed` 或 `facts.derived`；
 - `project_memory.matches` 只在显式 `--project-memory` 时出现，不得污染 `facts.parsed` 或 `facts.derived`；
+- `--for <target>` 只限定可选注入层的检索边界，不再承诺 execution / verify / review 的 target-specific 投影；
 - context pack 可以变大，但默认输出必须保持可控；
 - 新 target 必须说明消费方、读取顺序和缺失字段处理方式。
 

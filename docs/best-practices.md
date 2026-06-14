@@ -141,12 +141,11 @@ data-model.md
 
 ## 8. Context pack 是读取入口，不是新文档
 
-`aisee context pack` 适合给 AI 提供小而准的上下文：
+`aisee context pack` 适合在显式需要时给 AI 注入小而准的项目记忆或团队知识：
 
 ```bash
-aisee context pack --change <change> --for ce-work --json
-aisee context pack --change <change> --for aisee-verify --json
-aisee context pack --change <change> --for ce-code-review --json
+aisee context pack --change <change> --for ce-work --project-memory --json
+aisee context pack --change <change> --for ce-work --knowledge --json
 ```
 
 使用规则：
@@ -161,10 +160,9 @@ aisee context pack --change <change> --for ce-code-review --json
 创建任务、进入实现、提出审查角色或推荐下一步前，先检查已有 workflow 和 skill：
 
 - 无明确 change 时，先回到需求澄清、change-plan 或当前 change 本身。
-- 有明确 change 时，优先读取目标 context pack，例如 `aisee context pack --change <change> --for ce-work --json`。
-- `ce-work` context pack 的 `reusable_workflow_candidates` 只是路由提示，不是事实源。
-- `requires_ce_plan=true` 时才按需使用 `ce-plan` 细化执行顺序；结论必须回写当前 schema apply tracks，只有 source-map schema 才回写 `source-map.md`。
-- `requires_ce_plan=false` 且 paths/tasks 清楚时，优先 `aisee:implementation-bridge -> ce-work`。
+- 有明确 change 时，默认直接读取当前 change artifacts、schema、`tasks.md`、`source-map.md`（若适用）和 evidence 入口。
+- 只有明确需要项目记忆或团队知识时，才额外读取 `aisee context pack --change <change> --for ce-work --project-memory --json` 或 `--knowledge --json`。
+- `aisee:implementation-bridge` 只负责提示 `ce-work` 先读什么，以及完成后如何回写 `tasks.md` / apply tracks 和 evidence。
 - 不创建与 CE 重叠的执行、代码审查或测试 agent。
 
 接口、UI、硬件、固件、安全和验证差异应作为 schema-aware check lenses。需要 Aisee reviewer 时，只使用 `aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer` 这三个只读一致性审查 role。

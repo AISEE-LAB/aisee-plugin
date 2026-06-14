@@ -130,8 +130,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
 
     read_order = build_read_order(root, change_path, artifact_entries, read_paths)
     status = "missing" if not change_path.exists() else ("authored" if task_state["total"] else "draft")
-    requires_ce_plan = target == "ce-work" and should_require_ce_plan(task_state, code_paths, test_paths, gaps)
-
     pack: dict[str, Any] = {
         "schema_version": CONTEXT_SCHEMA_VERSION,
         "target": target,
@@ -208,79 +206,6 @@ def build_context_pack(project_root: Path, change: str, target: str) -> dict[str
             "mode": "parsed-and-derived",
         },
     }
-
-    if target == "ce-work":
-        ce_plan_refinement_reason = ce_plan_reason(task_state, code_paths, test_paths, gaps, source_map_required) if requires_ce_plan else None
-        pack["facts"]["derived"]["execution"] = {
-            "start_from": task_state["open_items"][:1],
-            "suggested_order": task_state["open_items"],
-            "allowed_paths": sorted(set(code_paths + test_paths)),
-            "unmapped_reference_paths": unmapped_reference_paths,
-            "forbidden_scope": pack["facts"]["derived"]["scope"]["out"],
-            "requires_ce_plan": requires_ce_plan,
-            "ce_plan_reason": ce_plan_refinement_reason,
-            "reusable_workflow_candidates": build_reusable_workflow_candidates(
-                requires_ce_plan=requires_ce_plan,
-                ce_plan_refinement_reason=ce_plan_refinement_reason,
-                gaps=gaps,
-            ),
-            "completion_gate": build_completion_gate(
-                apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
-                task_state=task_state,
-                evidence=evidence,
-            ),
-        }
-        pack["facts"]["derived"]["execution"]["brief"] = build_execution_brief(
-            root=root,
-            change_path=change_path,
-            read_order=read_order,
-            scope=pack["facts"]["derived"]["scope"],
-            traceability=pack["facts"]["derived"]["traceability"],
-            allowed_paths=pack["facts"]["derived"]["execution"]["allowed_paths"],
-            start_from=pack["facts"]["derived"]["execution"]["start_from"],
-            verification_requirements=pack["facts"]["derived"]["verification_requirements"],
-            gaps=gaps,
-            task_state=task_state,
-            evidence=evidence,
-            apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
-        )
-    elif target == "aisee-verify":
-        pack["facts"]["derived"]["checks"] = {
-            "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(
-                upstream_refs,
-                produced_local_ids,
-                mode=traceability_mode,
-            ),
-            "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries, source_map, source_map.get("contract_sync")),
-            "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
-            "review_and_tests": summarize_review_and_test_checks(
-                evidence=evidence,
-                task_state=task_state,
-                apply_tracks=pack["facts"]["parsed"]["schema"]["apply_tracks"],
-            ),
-        }
-        pack["facts"]["derived"]["drift_candidates"] = []
-    elif target == "ce-doc-review":
-        pack["facts"]["derived"]["review"] = {
-            "focus": ["schema_artifacts", "traceability", "tasks", "contracts", "open_questions"],
-            "schema_artifacts": summarize_artifact_checks(artifact_entries),
-            "traceability": summarize_trace_checks(
-                upstream_refs,
-                produced_local_ids,
-                mode=traceability_mode,
-            ),
-            "tasks": summarize_task_checks(task_state),
-            "contracts": summarize_contract_checks(artifact_entries, source_map, source_map.get("contract_sync")),
-        }
-    elif target == "ce-code-review":
-        pack["facts"]["derived"]["review"] = {
-            "focus": ["implementation", "tests", "source-map" if source_map_required else "schema-artifacts", "task_state"],
-            "implementation": summarize_implementation_checks(code_paths, test_paths, source_map_required),
-            "tasks": summarize_task_checks(task_state),
-            "evidence": pack["evidence"],
-        }
 
     return pack
 
@@ -1484,8 +1409,6 @@ def first_matching(paths: list[str], terms: tuple[str, ...]) -> str | None:
 
 
 def should_require_ce_plan(task_state: dict[str, Any], code_paths: list[str], test_paths: list[str], gaps: list[dict[str, Any]]) -> bool:
-    if any(item["severity"] == "blocker" for item in gaps):
-        return True
     if task_state["total"] == 0:
         return True
     if any(item["code"] in {"SOURCE_MAP_UNSTRUCTURED", "SOURCE_MAP_GAP", "SOURCE_MAP_UNMAPPED_PATH"} for item in gaps):
@@ -1500,9 +1423,6 @@ def ce_plan_reason(
     gaps: list[dict[str, Any]],
     source_map_required: bool,
 ) -> str:
-    blocker_codes = [item["code"] for item in gaps if item["severity"] == "blocker"]
-    if blocker_codes:
-        return f"blocked by {', '.join(blocker_codes)}"
     if task_state["total"] == 0:
         return "tasks.md has no executable tasks"
     if not code_paths and not test_paths:
@@ -1520,23 +1440,18 @@ def build_reusable_workflow_candidates(
 ) -> list[dict[str, str]]:
     compound = check_compound_plugin()
     compound_skills = compound.get("skills", {})
-    blocker_codes = [str(item.get("code") or "UNKNOWN") for item in gaps if item.get("severity") == "blocker"]
-    if blocker_codes:
-        return [
-            {
-                "name": "aisee:change-author",
-                "kind": "aisee-skill",
-                "status": "required",
-                "reason": f"fix blocking artifact or traceability gaps before execution: {', '.join(blocker_codes)}",
-            }
-        ]
+    has_advisory_gaps = any(item.get("severity") in {"blocker", "risk"} for item in gaps)
 
     candidates = [
         {
             "name": "aisee:implementation-bridge",
             "kind": "aisee-skill",
             "status": "recommended",
-                "reason": "review context pack gaps, scope guardrails, and review recommendation before CE execution",
+            "reason": (
+                "review context pack gaps, scope guardrails, and review recommendation before CE execution"
+                if has_advisory_gaps
+                else "review context pack summary, scope guardrails, and review recommendation before CE execution"
+            ),
         }
     ]
 
@@ -1545,14 +1460,22 @@ def build_reusable_workflow_candidates(
             "name": "ce-plan",
             "kind": "compound-skill",
             "status": "available" if compound_skills.get("ce-plan") else "missing",
-            "reason": ce_plan_refinement_reason or "tasks or implementation references need refinement before ce-work",
+            "reason": (
+                f"{ce_plan_refinement_reason}; review blocker/risk gaps as advisory before execution"
+                if ce_plan_refinement_reason and has_advisory_gaps
+                else ce_plan_refinement_reason or "tasks or implementation references need refinement before ce-work"
+            ),
         })
     else:
         candidates.append({
             "name": "ce-work",
             "kind": "compound-skill",
             "status": "available" if compound_skills.get("ce-work") else "missing",
-            "reason": "current change has executable tasks and accepted implementation path references",
+            "reason": (
+                "current change has executable tasks and accepted implementation path references; review blocker/risk gaps as advisory before execution"
+                if has_advisory_gaps
+                else "current change has executable tasks and accepted implementation path references"
+            ),
         })
     return candidates
 

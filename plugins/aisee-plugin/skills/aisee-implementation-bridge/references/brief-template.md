@@ -1,11 +1,11 @@
 # Implementation Brief Template
 
-当需要把 `aisee context pack --change <change> --for ce-work --json` 保存成人读 handoff 时使用本模板。优先消费 `facts.derived.execution.brief`；缺细节时回读当前 change artifacts，不复制 artifact 正文。
+当需要把 `aisee:implementation-bridge` 的读取策略保存成人读 handoff 时使用本模板。它只索引当前 change 下“先读什么、完成后回写什么”；缺细节时回读当前 change artifacts，不复制 artifact 正文。
 
 规则：
 
 - Brief 是 generated handoff / cache，不是规范事实源。
-- 只写 context pack 已给出的 source refs、scope、paths、tasks、verification 和 risks。
+- 只写当前 change 已给出的读取顺序、apply tracks、verification / evidence 入口和 risks。
 - 空字段删除或标 `N/A`；不要把模板占位当事实。
 - 大 change 先用 `brief-index-template.md` 分批，再为每批使用本模板。
 
@@ -24,31 +24,26 @@ change_refs:
 
 # Implementation Brief
 
-## Context Pack
+## Preflight
 
-- Command: `aisee context pack --change <change> --for ce-work --json`
 - Schema:
 - Blocked: yes / no
-- Requires ce-plan: yes / no
-- ce-plan reason: N/A
+- Optional memory / knowledge injection: yes / no
 
 ## Authoritative Sources
 
-- From `facts.derived.execution.brief.authoritative_sources`:
+- Current change artifacts and supporting files:
 
 ## Scope And Traceability
 
 - In scope:
 - Out of scope:
-- Source refs / mode:
-- Produced local IDs:
+- Source refs / mode, when present:
+- Produced local IDs, when present:
 
 ## Execution Index
 
 - Read first:
-- Allowed code paths:
-- Allowed test paths:
-- Start from:
 - Apply tracks to update:
 - Before marking work complete:
 
@@ -68,7 +63,7 @@ change_refs:
 
 ## Risks And Follow-up
 
-- Risks / blockers from `gaps` and `facts.derived.execution.brief.risks`:
+- Risks / blockers from current change gaps and evidence:
 - Follow-up candidates:
 - Review recommendation:
 ```

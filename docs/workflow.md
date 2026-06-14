@@ -134,7 +134,7 @@ data-model.md            # 按需
 进入实现前，先确认 change 已 authored。
 
 ```bash
-aisee context pack --change <change> --for ce-work --json
+openspec/changes/<change>/
 ```
 
 如果项目有长期本地 guidance，例如提交偏好、测试命令、架构决策摘要或技术栈约束，可以显式检索项目记忆：
@@ -155,13 +155,12 @@ aisee context pack --change <change> --for ce-work --knowledge --json
 
 Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，也不应复制进长期 artifacts。
 
-然后使用 `aisee:implementation-bridge` 输出默认的 JSON 判定结果。它应只返回执行路由和 guardrails；只有在明确需要人读交接时，才生成 Implementation Brief。Brief 只做执行索引：
+然后使用 `aisee:implementation-bridge` 输出默认的 JSON 判定结果。它应只返回 `ce-work` 需要先读什么、完成后回写什么；只有在明确需要人读交接时，才生成 Implementation Brief。Brief 只做执行索引：
 
 - 当前 change 和 schema。
 - 必读 artifacts。
-- 允许修改的代码路径和测试路径。
 - apply tracks 回写位置。
-- 验证命令和 evidence 位置。
+- 验证和 evidence 入口位置。
 - 是否建议 Tier 2 code review。
 
 如果 change 很大，不回到 change-plan 重新拆分。可以在当前 change 内生成 `brief-index.md` 和多个 `brief-part-NN.md` 分批执行。
@@ -193,10 +192,9 @@ Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，
 
 ```bash
 openspec validate <change>
-aisee context pack --change <change> --for aisee-verify --json
 ```
 
-再使用 `aisee:verify` 或人工审查输出一致性报告，重点检查：
+再直接读取当前 change artifacts、schema、`tasks.md`、`source-map.md`（若适用）和 evidence，使用 `aisee:verify` 或人工审查输出一致性报告，重点检查：
 
 - schema artifacts 是否存在。
 - Required=yes contracts 是否闭合。

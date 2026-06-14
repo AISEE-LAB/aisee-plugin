@@ -141,12 +141,11 @@ Use `source-map.md` and context pack's rebuildable scan view as context entries;
 
 ## 8. Context Pack Is A Read Entry, Not A New Document
 
-`aisee context pack` gives AI a small and targeted context:
+`aisee context pack` is useful when you explicitly want to inject a small amount of project memory or team knowledge:
 
 ```bash
-aisee context pack --change <change> --for ce-work --json
-aisee context pack --change <change> --for aisee-verify --json
-aisee context pack --change <change> --for ce-code-review --json
+aisee context pack --change <change> --for ce-work --project-memory --json
+aisee context pack --change <change> --for ce-work --knowledge --json
 ```
 
 Rules:
@@ -161,10 +160,9 @@ Rules:
 Before creating tasks, entering implementation, proposing reviewer lenses, or recommending a next step, check existing workflows and skills first:
 
 - When there is no explicit change, return to requirements clarification, change-plan, or the current change itself rather than relying on a dedicated flow command.
-- When there is an explicit change, read the target context pack first, such as `aisee context pack --change <change> --for ce-work --json`.
-- `reusable_workflow_candidates` in the `ce-work` context pack is a routing hint only, not a source of truth.
-- Use `ce-plan` only when `requires_ce_plan=true`; its conclusions must be written back to the current schema apply tracks, and only source-map schemas write back to `source-map.md`.
-- When `requires_ce_plan=false` and paths/tasks are clear, prefer `aisee:implementation-bridge -> ce-work`.
+- When there is an explicit change, read the current change artifacts, schema, `tasks.md`, `source-map.md` when applicable, and evidence entrypoints directly.
+- Only read `aisee context pack --change <change> --for ce-work --project-memory --json` or `--knowledge --json` when you explicitly need that optional guidance.
+- `aisee:implementation-bridge` should tell `ce-work` what to read first and how to write back `tasks.md` / apply tracks and evidence after implementation.
 - Do not create execution, code-review, or test agents that overlap with CE responsibilities.
 
 Interface, UI, hardware, firmware, security, and verification differences should remain schema-aware check lenses. When Aisee reviewers are needed, use only the read-only consistency roles `aisee-change-architect`, `aisee-spec-reviewer`, and `aisee-implementation-reviewer`.
