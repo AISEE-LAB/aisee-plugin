@@ -184,14 +184,27 @@ def test_skill_taxonomy_contract_covers_all_public_skills() -> None:
     taxonomy = read_taxonomy()
 
     assert set(taxonomy) == EXPECTED_TAXONOMY_SECTIONS
-    assert taxonomy["Project Setup / Adoption"] == ["aisee:orient", "aisee:init"]
-    assert len(taxonomy["Core Workflow"]) == 9
-    assert set(taxonomy["Core Workflow"]) == {
+    assert taxonomy["Project Setup / Adoption"] == ["aisee:init"]
+    assert taxonomy["OpenSpec Core"] == [
+        "aisee:spec-migrate",
         "aisee:srs",
-        "aisee:ui-content",
-        "aisee:architecture",
         "aisee:change-plan",
         "aisee:change-author",
+    ]
+    assert taxonomy["Memory And Knowledge"] == [
+        "aisee:reflect",
+        "aisee:memory",
+        "aisee:knowledge",
+        "aisee:knowledge-curate",
+    ]
+    assert set(taxonomy["Legacy / Transitional"]) == {
+        "aisee:orient",
+        "aisee:ui-content",
+        "aisee:architecture",
+        "aisee:design-spec",
+        "aisee:design-assets",
+        "aisee:svg-assets",
+        "aisee:image-object",
         "aisee-schema-pack",
         "aisee:implementation-bridge",
         "aisee:verify",
@@ -206,10 +219,10 @@ def test_readme_highlights_core_workflow_taxonomy() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "## Skill 分层" in readme
-    assert "9 个核心迭代 skill" in readme
+    assert "OpenSpec companion 主推能力" in readme
     assert "`aisee:init`" in readme
-    assert "`aisee:orient`" in readme
-    for skill in read_taxonomy()["Core Workflow"]:
+    assert "`aisee:spec-migrate`" in readme
+    for skill in read_taxonomy()["OpenSpec Core"]:
         assert f"`{skill}`" in readme
 
 

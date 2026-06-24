@@ -8,7 +8,7 @@
 
 | 层级 | 含义 | 示例 | 变更要求 |
 | --- | --- | --- | --- |
-| Public Contract | 用户或自动化会依赖的公开接口 | CLI 命令、JSON 输出语义、schema artifact DAG、plugin manifest / marketplace listing | 必须测试；破坏性变更必须升级版本并写入 changelog |
+| Public Contract | 用户或自动化会依赖的公开接口 | CLI 命令、JSON 输出语义、retained skill surface、plugin manifest / marketplace listing | 必须测试；破坏性变更必须升级版本并写入 changelog |
 | Experimental Contract | 可试用但未承诺稳定的能力 | team knowledge 远程安装、promote-batch、可选 MCP、硬件主工作流整合 | 必须标注 experimental；允许调整，但要避免伪装成稳定能力 |
 | Internal Detail | 可随实现变化的内部细节 | parser helper、缓存文件内容、临时索引、内部评分权重、测试 fixture 结构 | 不承诺兼容；不得作为用户事实源 |
 
@@ -40,32 +40,21 @@
 - 改变退出码或 JSON 错误结构，使现有自动化无法判断失败；
 - 默认读取过大上下文或泄露源码、密钥、环境变量。
 
-### Schema Packs
+### Skill Surface And OpenSpec Companion Positioning
 
 以下属于公开契约：
 
-- `schema.yaml` 名称和版本；
-- artifact `id`、`generates`、`template`、`requires`；
-- apply/archive tracks；
-- 模板文件名和 artifact 适用性规则；
-- `aisee-app-spec-driven` 的按需 contract 策略；
-- `aisee-device-spec-driven` 作为硬件/嵌入式专用扩展的定位。
-
-允许的向后兼容变更：
-
-- 新增可选 artifact；
-- 放宽模板要求；
-- 增加说明性字段；
-- 增加 N/A 规则；
-- 新增 schema。
+- 当前主推能力的名称和定位：`aisee:init`、`aisee:spec-migrate`、`aisee:srs`、`aisee:change-plan`、`aisee:change-author`、`aisee:memory`、`aisee:knowledge`、`aisee:knowledge-curate`；
+- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 setup / OpenSpec core / memory and knowledge / legacy-transitional / hardware 分层；
+- existing-project baseline migration 继续由 `aisee:spec-migrate` 承担，而不是混入新需求默认 happy path；
+- `aisee openspec ensure` 继续作为 OpenSpec 基础接入入口。
 
 破坏性变更：
 
-- 删除 artifact；
-- 重命名 artifact 或模板文件；
-- 改变 artifact DAG 导致既有 changes 无法验证；
-- 将按需 artifact 改成默认强制；
-- 让 Aisee schema 与 OpenSpec baseline 事实源产生平行事实源。
+- 删除主推保留能力而不更新文档、taxonomy、测试和 release notes；
+- 继续把 legacy / transitional skill 伪装成当前主推路径；
+- 让 Aisee 产品面继续默认绑定 `aisee-app-spec-driven` 或其它 repo 自带 schema；
+- 让 Aisee 与 OpenSpec baseline 事实源产生平行事实源。
 
 ### Memory And Knowledge Retrieval
 
@@ -80,12 +69,12 @@
 
 以下属于公开契约：
 
-- GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 和 schema pack 目录保持可被 Codex marketplace plugin 加载；
-- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 setup / core / optional / knowledge / hardware 分层，以及 core 9 skill 集合；
+- GitHub 仓库中的 `plugins/aisee-plugin/.codex-plugin/plugin.json`、`plugins/aisee-plugin/skills/`、`plugins/aisee-plugin/references/` 保持可被 Codex marketplace plugin 加载；
+- `plugins/aisee-plugin/references/skill-taxonomy.md` 中 setup / OpenSpec core / memory and knowledge / legacy-transitional / hardware 分层；
 - `aisee plugin inspect --json` 在 PyPI / pipx 安装中返回稳定状态和 setup hint；
-- PyPI / pipx 通道只承诺 CLI 能力；skills、references、schema packs、team knowledge templates 和 plugin metadata 通过 marketplace plugin 或外部仓库分发。
+- PyPI / pipx 通道只承诺 CLI 能力；skills、references、team knowledge templates 和 plugin metadata 通过 marketplace plugin 或外部仓库分发。
 
-破坏性变更包括重命名插件、移除 Codex manifest、破坏 marketplace plugin root 布局，或改变 core workflow skill 集合。
+破坏性变更包括重命名插件、移除 Codex manifest、破坏 marketplace plugin root 布局，或改变当前保留 skill 集合而不更新公开约束。
 
 ### Plugin Marketplace
 

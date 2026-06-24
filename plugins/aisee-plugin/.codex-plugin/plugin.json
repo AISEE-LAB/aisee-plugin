@@ -1,7 +1,7 @@
 {
   "name": "aisee-plugin",
   "version": "0.13.0",
-  "description": "AI-Enhanced Software Engineering plugin for OpenSpec and Compound Engineering workflows.",
+  "description": "OpenSpec companion plugin focused on baseline migration, change authoring, and memory/knowledge guidance.",
   "author": {
     "name": "Fengliang"
   },
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Aisee",
-    "shortDescription": "AI-Enhanced Software Engineering for OpenSpec-driven development.",
-    "longDescription": "Aisee helps teams run OpenSpec-driven development with structured requirements, schema-aware change authoring, project memory, team knowledge guardrails, context packs, and Compound Engineering handoffs.",
+    "shortDescription": "OpenSpec companion for change authoring and engineering memory.",
+    "longDescription": "Aisee helps teams adopt OpenSpec, migrate existing-project baselines, clarify change intent, author detailed changes, and retrieve project memory and team knowledge guardrails.",
     "developerName": "Fengliang",
     "category": "Coding",
     "capabilities": [
@@ -28,8 +28,8 @@
     ],
     "defaultPrompt": [
       "aisee:init 审计 AGENTS.md、OpenSpec 项目配置和 Codex hooks",
-      "aisee:change-plan 规划当前需求的 OpenSpec changes",
-      "aisee:srs 帮我整理这个需求"
+      "aisee:spec-migrate 为已有项目整理 baseline specs",
+      "aisee:change-author 细化当前 OpenSpec change 内容"
     ]
   }
 }

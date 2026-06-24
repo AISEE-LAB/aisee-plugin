@@ -29,25 +29,24 @@
 
 # Aisee Plugin
 
-> Aisee Plugin is a Codex-oriented OpenSpec workflow layer for spec-driven AI software engineering.
+> Aisee Plugin is a Codex-oriented OpenSpec companion for baseline migration, change authoring, and engineering memory.
 
 **Aisee** 是 **AI-Enhanced Software Engineering** 的缩写。
 
-Aisee Plugin 是一个面向 OpenSpec 工作流的 AI 软件工程插件。它帮助团队把模糊想法整理成可审查的需求、UI 内容规格、技术架构上下文、OpenSpec changes、项目记忆、团队知识 guardrails、实现交接、验证检查和归档门禁。
+Aisee Plugin 是一个面向 OpenSpec 的 AI 软件工程 companion。它帮助团队接入 OpenSpec、为已有项目建立 baseline specs、把模糊意图整理成更清晰的 change 输入，并在实现前后提供项目记忆和团队知识 guardrails。
 
-Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、project memory、team knowledge、JSON context tooling 和工程交接规则。
+Aisee **不替代 OpenSpec**。OpenSpec 仍然是规范状态机和 baseline 事实源。Aisee 在 OpenSpec 周围补充结构化 skills、project memory、team knowledge 和少量只读上下文工具。
 
 它尤其适合希望让 Codex 和其他 coding agent 在开源仓库中更稳定协作的维护者：
 
 - 用可持久复用的需求与规范，替代只存在于聊天记录里的临时上下文；
-- 用 OpenSpec artifacts、schema pack、项目记忆和团队知识 guardrails，为实现、审查和验证提供稳定输入；
-- 用 OpenSpec change planning 把模糊意图拆成可审查、可交付的变更；
-- 用明确的实现交接和回写规则，帮助 maintainer 和 contributor 做 PR / review-ready 交接；
-- 用 verification evidence 和 archive gates 收口 AI 辅助开发后的验收与归档流程。
+- 用 OpenSpec baseline、active changes、项目记忆和团队知识 guardrails，为实现前后的判断提供稳定输入；
+- 用 baseline 迁移、意图澄清和 change authoring，帮助 maintainer 和 contributor 更快进入可审查的 OpenSpec 变更；
+- 用更轻的产品面降低维护成本，避免让 Aisee 变成第二套 workflow authority。
 
 ## OpenSpec Boundary
 
-Aisee 不替代 OpenSpec，也不维护第二套 schema 状态机。只有在处理 OpenSpec change 或 schema pack 检查时，Aisee 才读取当前 schema 声明；project memory 和 team knowledge 始终只是 guidance / guardrails。
+Aisee 不替代 OpenSpec，也不维护第二套 schema 状态机。Aisee 处理 OpenSpec 时只做接入、baseline 迁移、意图澄清、detailed authoring 和少量只读上下文辅助；project memory 和 team knowledge 始终只是 guidance / guardrails。
 
 当 Aisee 处理 OpenSpec artifacts 时，它只做 parser / checker / projector；`openspec validate` / `openspec archive` 仍由 OpenSpec 负责。
 
@@ -55,11 +54,11 @@ Aisee 不替代 OpenSpec，也不维护第二套 schema 状态机。只有在处
 
 Codex 能写代码、审代码、修 bug，但在仓库没有显式需求、稳定上下文、审查规则和验证标准时，结果容易依赖短期 prompt 历史。
 
-Aisee 把这些材料前置为可复用的工作流层：
+Aisee 把这些材料前置为可复用的 companion 能力：
 
-- 让需求和工程约束以 OpenSpec change、planning docs 和 project memory 的形式持久存在；
-- 帮助维护者把实现入口先收敛为可执行的交接规则，并在必要时再整理成人读 handoff；
-- 让 Codex 在实现、review、verify 和 archive 之间读取同一套上下文边界；
+- 让 baseline、change、project memory 和 team knowledge 的边界显式存在；
+- 帮助维护者先固化已有系统行为，再进入新 change；
+- 让 Codex 在 change authoring 和实现阶段读取同一套最小上下文边界；
 - 为开源仓库提供更明确的 AI 协作约束，降低 maintainer 反复补充背景的成本。
 
 ## 为什么需要 Aisee？
@@ -68,23 +67,21 @@ AI coding assistant 很有用，但当需求、UI 说明、技术约束和实现
 
 Aisee 的目标是让这些上下文显式化：
 
-- 在实现前澄清业务需求；
-- 分离需求、UI 内容、技术架构和 change planning；
-- 创建和补齐 OpenSpec changes，并按当前 schema 读取必要 artifacts；
+- 在实现前澄清业务需求或补齐已有系统 baseline；
+- 把已有项目接入、baseline 迁移、change planning 和 change authoring 明确分层；
+- 创建和补齐 OpenSpec changes，并优先围绕项目当前 schema 或官方 `spec-driven` 工作；
 - 保持 OpenSpec 作为唯一持久规范事实源；
 - 用 skill/template 约束文档内编号，减少临时发明和重复命名；
 - 检查 artifacts、tasks、source-map、测试和 review evidence 是否闭环。
 
-## 敏捷开发模型
+## 产品定位
 
-Aisee 当前采用面向版本 / 迭代的敏捷模型：
+Aisee 当前主推四类能力：
 
-- SRS、UI Content、Design Spec、Architecture 都是 **planning docs**，用于当前版本 / 迭代的输入；
-- 普通 planning docs 使用统一 YAML frontmatter 合同做身份、状态和来源索引，但不会提升为 OpenSpec baseline 事实源；
-- `aisee:change-plan` 把一次迭代拆成 **one or more** 可独立交付的 OpenSpec changes；
-- 当前 change 的 proposal、source-map、specs、contracts、tasks 才是实现前的正式细化承诺；
-- `openspec archive` 后，baseline specs 接管当前事实；
-- 小范围、边界明确、低风险工作可以跳过重前置文档，直接进入合适的轻量 schema。
+- OpenSpec 基础接入：`aisee openspec ensure`、`aisee:init`
+- 已有项目 baseline 迁移：`aisee:spec-migrate`
+- 意图理解与 change 输入：`aisee:srs`、`aisee:change-plan`、`aisee:change-author`
+- 工程 guidance：`aisee:memory`、`aisee:knowledge`、`aisee:knowledge-curate`
 
 ## 工作流定位
 
@@ -92,10 +89,10 @@ Aisee 当前采用面向版本 / 迭代的敏捷模型：
 用户意图
   ↓
 Aisee skills
-  生成 planning docs，澄清需求、UI 内容、架构和 change 边界
+  接入 OpenSpec、迁移 baseline、澄清需求、规划和细化 change
   ↓
-aisee:change-plan
-  一次迭代 -> one or more OpenSpec changes
+spec-migrate / srs / change-plan / change-author
+  为 baseline 或新 change 提供输入
   ↓
 OpenSpec
   管理 active changes、baseline specs、validate、apply 和 archive
@@ -104,61 +101,66 @@ Aisee CLI
   读取 OpenSpec/Aisee metadata，并提供项目记忆、团队知识与辅助检查能力
   ↓
 Compound Engineering 或其它 coding agent
-  实现、审查、测试并产出 evidence
-  ↓
-Aisee verify / archive guard
-  检查当前 change 是否可以进入归档
+  消费 OpenSpec artifacts 与 memory/knowledge guidance
 ```
 
 核心边界：
 
 ```text
 OpenSpec = 规范状态机和 baseline 事实源
-Aisee = 规划、上下文、schema、追踪和工作流 guardrails
-Aisee CLI = JSON context bus，不是第二份事实源
+Aisee = OpenSpec companion、memory/knowledge guidance 与少量上下文辅助
+Aisee CLI = 接入、检索与只读工具，不是第二份事实源
 Compound Engineering = 可选的执行 / 审查 / 测试消费方
 ```
 
 ## Skill 分层
 
-`plugins/aisee-plugin/.codex-plugin/plugin.json` 继续通过 `skills: "./skills/"` 暴露全部公开 skill，但默认 happy path 只包含 **9 个核心迭代 skill**，另有项目入口定位与接入 / 治理 skill。完整分类合同见 [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md)。
+`plugins/aisee-plugin/.codex-plugin/plugin.json` 继续通过 `skills: "./skills/"` 暴露全部公开 skill，但当前主推路径只围绕 OpenSpec companion 核心与 memory/knowledge 展开。完整分类合同见 [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md)。
 
 项目接入 / 治理：
 
-- `aisee:orient`
 - `aisee:init`
 
-核心迭代主流程：
+OpenSpec companion 主推能力：
 
+- `aisee:spec-migrate`
 - `aisee:srs`
-- `aisee:ui-content`
-- `aisee:architecture`
 - `aisee:change-plan`
 - `aisee:change-author`
+
+memory / knowledge：
+
+- `aisee:reflect`
+- `aisee:memory`
+- `aisee:knowledge`
+- `aisee:knowledge-curate`
+
+legacy / transitional：
+
+- `aisee:orient`
+- `aisee:ui-content`
+- `aisee:architecture`
+- `aisee:design-spec`
+- `aisee:design-assets`
+- `aisee:svg-assets`
+- `aisee:image-object`
 - `aisee-schema-pack`
 - `aisee:implementation-bridge`
 - `aisee:verify`
 - `aisee:archive-guard`
-
-按需扩展：
-
-- 可选扩展：`aisee:design-spec`、`aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object`、`aisee:spec-migrate`（已有项目 / brownfield baseline）
-- 知识循环：`aisee:reflect`、`aisee:memory`、`aisee:knowledge`、`aisee:knowledge-curate`
-- 硬件 / 实验域：`hw:srs`、`hw:architecture`、`hw:init`、`hw:change-plan`
+- `hw:*`
 
 ## 功能特性
 
-- **结构化需求澄清**：`aisee:srs` 通过对话澄清业务需求，并生成规划级 SRS。
-- **UI 内容规格**：`aisee:ui-content` 将已确认需求转换为页面内容、状态、流程、权限可见性和平台差异，不写视觉设计。
-- **技术架构上下文**：`aisee:architecture` 记录技术事实、约束、可复用能力、全局工程约定和 artifact hints。
-- **Schema-aware change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
-- **OpenSpec schema pack**：提供 app、device、docsite、infra、security、quick-fix、quick-research、collaboration 等 schema。
+- **已有项目 baseline 迁移**：`aisee:spec-migrate` 反向整理现有系统当前行为，帮助已有项目先建立 OpenSpec baseline specs。
+- **结构化需求澄清**：`aisee:srs` 通过对话澄清业务需求，并生成 change planning 所需需求输入。
+- **OpenSpec change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
+- **Detailed change authoring**：`aisee:change-author` 细化 OpenSpec change 内容，强化 proposal、specs、design、tasks 的可实现性。
 - **轻量 schema 兼容**：`aisee:implementation-bridge` 可直接消费 OpenSpec 官方 `spec-driven` 及其它轻量 schema；不会因为缺少 Aisee 专属增强字段而拒绝生成 bridge 上下文。
 - **项目记忆**：`aisee memory` 受控检索和写入当前仓库长期 guidance，不替代 OpenSpec 事实源。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
-- **受控记忆与知识检索**：`aisee memory` 与 `aisee knowledge` 直接提供项目记忆和团队 guardrails 查询，不承担实现阶段执行路由。
-- **验证与归档门禁**：`aisee:verify` 和 `aisee:archive-guard` 在 archive 前诊断缺口和风险。
-- **Harness 设计**：通过 CLI contract tests 和规范化 skill eval cases 保持工作流稳定。
+- **受控记忆与知识检索**：`aisee memory` 与 `aisee knowledge` 直接提供项目记忆和团队 guardrails 查询，不升级为 workflow authority。
+- **过渡中的 legacy 能力**：UI/architecture/schema-pack/verify 等旧能力仍公开存在，但不再属于当前主推路径。
 
 ## 环境要求
 
@@ -302,13 +304,13 @@ aisee doctor --json
 ## 文档
 
 - [文档站](https://aisee.wiki)：Aisee 使用指南、工作流和发布说明入口。
-- [Aisee Workflow](docs/workflow.md)：端到端说明如何从初始化、需求澄清、change authoring、实现交接、验证到 archive。
-- [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、schema、contract、复用优先、review 和 archive 约定。
-- [Compatibility Policy](docs/compatibility-policy.md)：说明 CLI JSON、schema pack、plugin content 和实验性能力的兼容边界。
+- [Aisee Workflow](docs/workflow.md)：说明当前主推的 OpenSpec companion 路径，以及 existing-project baseline 迁移入口。
+- [Aisee Best Practices](docs/best-practices.md)：使用 Aisee 与 OpenSpec 时的事实源、保留能力、复用优先和 memory/knowledge 约定。
+- [Compatibility Policy](docs/compatibility-policy.md)：说明 CLI JSON、保留 skill 面和 plugin content 的兼容边界。
 - [Plugin Marketplace](docs/plugin-marketplace.md)：说明插件 manifest、marketplace listing、PyPI/pipx 和 Codex 安装路径的分工。
 - [Team Knowledge Guardrails](docs/team-knowledge.md)：说明团队共享知识的实验性状态、使用方式和稳定前缺口。
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md)：说明 team knowledge 的 guardrail retrieval 定位、card/pack 边界、CLI 初始化和读取模型。
-- [Schema Packs](docs/schema-packs.md)：说明 schema 选择、app schema artifact DAG、source-map/编号规则和契约附件边界。
+- [Schema Packs](docs/schema-packs.md)：记录历史 schema pack 设计；当前产品面不再主推 repo 自带 schema。
 - [Aisee / OpenSpec / Compound Engineering 融合方案](docs/architecture/aisee-openspec-compound-integration.md)：高层职责边界和历史决策快照。
 - [OpenSpec 多 Schema 最佳实践](docs/architecture/openspec-multi-schema-best-practices.md)：多 schema 共存、冲突和管理规则。
 - [CHANGELOG.md](CHANGELOG.md)：版本历史、发布说明和已发布版本的用户可见变更。
@@ -316,21 +318,20 @@ aisee doctor --json
 ## 典型流程
 
 ```text
-1. aisee:srs / aisee:ui-content / aisee:architecture（按需）
-2. aisee:change-plan
-3. /opsx:new "<change>" --schema <schema>
-4. aisee:change-author
-5. openspec validate <change>
-6. aisee:implementation-bridge
-7. implementation / review / test（完成当前批次前先回写 `tasks.md` / apply tracks）
-8. openspec archive <change>
+1. 已有项目 / 二开：`aisee:init` -> `aisee:spec-migrate`（按需）
+2. 新需求：`aisee:srs`（按需）
+3. `aisee:change-plan`
+4. `/opsx:new "<change>" --schema <project-schema-or-spec-driven>`
+5. `aisee:change-author`
+6. `openspec validate <change>`
+7. implementation / review / test
+8. `openspec archive <change>`
 
 对小范围、边界明确、低风险工作，也可以直接走：
 
 ```text
 quick-fix / quick-research / 其它轻量 schema
   -> change-author
-  -> implementation-bridge
   -> implementation / review / test（完成当前批次前先回写 `tasks.md` / apply tracks）
   -> archive
 ```
@@ -344,61 +345,16 @@ quick-fix / quick-research / 其它轻量 schema
 
 | Skill | 作用 |
 | --- | --- |
-| `aisee:orient` | 判断当前项目阶段和用户意图，路由到合适的 Aisee skill / workflow。 |
 | `aisee:init` | 初始化或审计 `AGENTS.md`、`openspec/project.md`、Aisee docs、memory 和 Codex hooks。 |
-| `aisee:srs` | 澄清软件需求并生成规划级 SRS。 |
-| `aisee:ui-content` | 生成页面、元素、状态、流程、权限和平台差异等 UI 内容规格。 |
-| `aisee:architecture` | 捕获软件架构上下文、技术约束、可复用能力和 artifact hints。 |
-| `aisee:change-plan` | 规划独立 OpenSpec changes 并选择 schema。 |
-| `aisee-schema-pack` | 通过 marketplace plugin 提供并维护 OpenSpec schema packs。 |
-| `aisee:implementation-bridge` | 默认返回单个 change 的实现阶段 JSON 判定；仅在明确需要时生成实现交接 brief。 |
 | `aisee:spec-migrate` | 为已有项目或二开场景整理 OpenSpec baseline specs。 |
-| `aisee:design-spec` | 生成设计规范，不重复 UI 内容规格。 |
-| `aisee:design-assets` | 生成或提取视觉参考和设计素材。 |
-| `aisee:svg-assets` | 生成、矢量化、优化和校验 SVG assets。 |
-| `aisee:image-object` | 对象级图片分割、mask、去背景和导出工作流。 |
-| `aisee:reflect` | 沉淀可复用项目经验和工作流改进。 |
+| `aisee:srs` | 澄清软件需求并生成 change planning 所需需求输入。 |
+| `aisee:change-plan` | 规划独立 OpenSpec changes，并为 `/opsx:new` 提供范围和 schema 建议。 |
+| `aisee:change-author` | 细化当前 OpenSpec change 内容，强化 proposal/specs/design/tasks 的可实现性。 |
 | `aisee:memory` | 引导项目记忆 CLI 的 inspect/search/add/update-index 使用。 |
 | `aisee:knowledge` | 引导团队知识 CLI 的初始化、配置、同步、检索和 promote 流程。 |
 | `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
-
-硬件相关 skills 已保留，但仍在整合到 Aisee 主工作流中：
-
-```text
-hw-init
-hw-srs
-hw-architecture
-hw-change-plan
-```
-
-## Schema Packs
-
-Schema pack 源位置：
-
-```text
-plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/
-```
-
-当前包含：
-
-| Schema | 适用场景 |
-| --- | --- |
-| `aisee-app-spec-driven` | App / 软件变更，包含 source-map、contracts、specs 和 tasks。 |
-| `aisee-device-spec-driven` | 设备、固件、runtime、生产和验证相关变更。 |
-| `aisee-docsite-driven` | 文档站变更。 |
-| `infra-change` | 基础设施变更。 |
-| `security-audit` | 安全审计工作流。 |
-| `quick-fix` | 小型、边界清晰的修复。 |
-| `quick-research` | 技术调研和建议。 |
-| `opsx-collab-pr-loop` | 协作和 PR loop 工作流。 |
-
-检查项目 schema 状态：
-
-```bash
-aisee schemas list --json
-aisee schemas check --json --fail-on-blocker
-aisee schemas format --check --json
-```
+| `aisee:reflect` | 沉淀可复用项目经验和 memory / knowledge 候选。 |
+| `legacy / transitional skills` | `aisee:orient`、`aisee:ui-content`、`aisee:architecture`、`aisee-schema-pack`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard` 及各类 design/hardware skills 仍公开存在，但不再属于当前主推路径。 |
 
 ## CLI Reference
 
@@ -407,8 +363,6 @@ aisee doctor --json
 aisee bootstrap --plan --json
 aisee openspec ensure --json
 aisee plugin inspect --json
-aisee schemas list --json
-aisee schemas check --json
 aisee memory inspect --json
 aisee memory list --json
 aisee memory search --query "<task>" --json

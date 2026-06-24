@@ -5,7 +5,7 @@
 ## 核心原则
 
 - OpenSpec 是规范状态机和 baseline 事实源。
-- Aisee 负责需求澄清、上下文整理、knowledge/memory 增强和 Compound 交接。
+- Aisee 当前主推 OpenSpec 接入、baseline 迁移、意图澄清、change authoring 和 knowledge/memory 增强。
 - Aisee CLI 输出 JSON context view，不创建第二份规范事实源。
 - 实现、review、test 可以由 Compound Engineering 或其他 coding agent 承接。
 - `openspec archive <change>` 是已验证 change 合入 baseline 的最终动作。
@@ -16,8 +16,6 @@
 ## 0. 项目初始化
 
 适用于新项目或准备接入 OpenSpec 的已有项目。
-
-如果刚进入项目且不确定从哪个 Aisee workflow 开始，先使用 `aisee:orient` 判断项目状态、用户意图和下一步路由。
 
 ```bash
 aisee doctor --json
@@ -41,16 +39,14 @@ aisee doctor --json
 
 ## 默认主路径与按需扩展
 
-`aisee:orient` 和 `aisee:init` 属于项目入口定位 / 接入 / 治理阶段能力，不是默认新功能迭代 happy path 的必经节点。默认新功能 happy path 只依赖核心迭代 workflow：`aisee:srs`、`aisee:ui-content`、`aisee:architecture`、`aisee:change-plan`、`aisee:change-author`、`aisee-schema-pack`、`aisee:implementation-bridge`。
+`aisee:init` 属于项目入口接入 / 治理能力，不是默认新功能迭代 happy path 的必经节点。当前主推的新需求 / 新 change 路径只围绕 `aisee:srs`、`aisee:change-plan`、`aisee:change-author` 展开；已有项目接入或二开前补 baseline 时，再按需进入 `aisee:spec-migrate`。
 
 以下能力按条件触发，不是每次都要走：
 
-- `aisee:design-spec` / `aisee:design-assets`：只有存在视觉规范、参考图或素材需求时才进入。
-- `aisee:svg-assets` / `aisee:image-object`：只有素材生产或图片处理工作时才进入。
 - `aisee:spec-migrate`：只用于已有项目 / brownfield 场景建立 baseline spec，不是每次迭代必经步骤。
 - `aisee:memory`：只用于项目记忆的受控检索、写入和索引维护。
 - `aisee:reflect` / `aisee:knowledge-curate`：只用于复盘、项目记忆候选和团队知识沉淀。
-- `hw:*`：仅用于硬件、嵌入式或实验域，不影响 app 默认流程。
+- 其它 legacy / transitional skills：当前仍公开存在，但不属于当前主推产品路径。
 
 ## 1. 前置澄清
 
@@ -60,20 +56,18 @@ aisee doctor --json
 
 ```text
 aisee:srs
-  -> aisee:ui-content（有 UI 时）
-  -> aisee:architecture
+  -> aisee:change-plan
+  -> /opsx:new
+  -> aisee:change-author
 ```
-
-如果有视觉规范、参考图或素材需求，再按需进入 `aisee:design-spec` / `aisee:design-assets`；它们不是默认新功能主路径的必经节点。
 
 产出定位：
 
 | 产物 | 作用 | 注意 |
 | --- | --- | --- |
 | SRS | 澄清业务目标、范围、功能需求、非功能需求和验收标准 | 不写实现任务 |
-| UI Content | 描述页面内容、状态、操作、权限可见性和前端数据需求 | 不写组件库、配色、排版 |
-| Design Spec / Assets | 描述或生成视觉规范、参考图、素材和风格输入 | 不重复页面内容 |
-| Architecture | 记录技术事实、架构边界、平台约束、共享约定和风险 | 不替代 change artifact |
+| Change Plan | 把已确认输入映射为一个或多个 OpenSpec changes | 不直接写 change artifact 正文 |
+| Change Author | 细化当前 change 的 `proposal`、`specs`、`design`、`tasks` 等内容 | 不写实现代码 |
 
 这些前置文档是当前版本 / 迭代的 planning docs，是 change planning 的输入，不是 OpenSpec baseline。
 
@@ -86,7 +80,7 @@ aisee:change-plan
   -> change list
   -> dependency order
   -> schema recommendation
-  -> source-map seed
+  -> /opsx:new 输入
 ```
 
 拆分原则：
@@ -95,7 +89,7 @@ aisee:change-plan
 - 不把输入材料章节、技术层、页面类型、schema artifact 当成 change。
 - 大 change 可以有依赖顺序，但不要让单个 change 承担整套产品。
 - 低风险小修复可以使用 `quick-fix`，不强制走 app schema。
-- 小范围、边界明确、低风险工作可以跳过 SRS / UI / Architecture 等重前置文档，直接进入合适的轻量 schema。
+- 小范围、边界明确、低风险工作可以跳过重前置文档，直接进入合适的轻量 schema。
 - 前后端共享接口、事件、数据模型或 SDK 时，优先规划一个前置 contract change。
 
 ## 3. Change 创建与 Authoring
@@ -105,19 +99,9 @@ aisee:change-plan
 典型命令：
 
 ```bash
-/opsx:new "<change>" --schema aisee-app-spec-driven
+/opsx:new "<change>" --schema <project-schema-or-spec-driven>
 openspec validate <change>
 ```
-
-app schema 的常见 artifacts：
-
-```text
-proposal.md
-source-map.md
-specs/**/*.md
-tasks.md
-change-context.md        # 按需
-ui-contract.md           # 按需
 service-contract.md      # 按需
 data-model.md            # 按需
 ```

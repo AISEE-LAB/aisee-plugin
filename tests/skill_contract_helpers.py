@@ -10,9 +10,9 @@ SKILLS_ROOT = ROOT / "plugins" / "aisee-plugin" / "skills"
 TAXONOMY_PATH = ROOT / "plugins" / "aisee-plugin" / "references" / "skill-taxonomy.md"
 EXPECTED_TAXONOMY_SECTIONS = {
     "Project Setup / Adoption",
-    "Core Workflow",
-    "Optional Extensions",
-    "Knowledge Loop",
+    "OpenSpec Core",
+    "Memory And Knowledge",
+    "Legacy / Transitional",
     "Hardware / Experimental",
 }
 

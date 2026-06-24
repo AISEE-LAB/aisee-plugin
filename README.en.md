@@ -29,25 +29,24 @@
 
 # Aisee Plugin
 
-> Aisee Plugin is a Codex-oriented OpenSpec workflow layer for spec-driven AI software engineering.
+> Aisee Plugin is a Codex-oriented OpenSpec companion for baseline migration, change authoring, and engineering memory.
 
 **Aisee** stands for **AI-Enhanced Software Engineering**.
 
-Aisee Plugin is an AI software engineering plugin for OpenSpec workflows. It helps teams turn ambiguous ideas into reviewable requirements, UI content specifications, architecture context, OpenSpec changes, project memory, team knowledge guardrails, implementation handoffs, verification checks, and archive guardrails.
+Aisee Plugin is an AI software engineering companion for OpenSpec. It helps teams adopt OpenSpec, establish baselines for existing projects, turn vague intent into better change inputs, and retrieve project memory and team knowledge guardrails around implementation work.
 
-Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, project memory, team knowledge, JSON context tooling, and engineering handoff rules around OpenSpec.
+Aisee **does not replace OpenSpec**. OpenSpec remains the specification state machine and baseline source of truth. Aisee adds structured skills, project memory, team knowledge, and a small set of read-only helper tools around OpenSpec.
 
 It is especially relevant for maintainers who want Codex and other coding agents to work more reliably in open-source repositories:
 
 - durable requirements and specifications instead of transient chat context;
-- OpenSpec artifacts, schema packs, project memory, and team knowledge guardrails for implementation, review, and verification;
-- OpenSpec change planning that turns vague intent into reviewable deliverables;
-- explicit implementation handoffs and writeback rules that help maintainers and contributors hand off PR-ready work;
-- verification evidence and archive gates that close the loop before AI-assisted changes are treated as complete.
+- OpenSpec baselines, active changes, project memory, and team knowledge guardrails as stable inputs around implementation;
+- baseline migration, intent clarification, and change authoring that turn vague intent into reviewable OpenSpec work;
+- a smaller product surface that avoids turning Aisee into a second workflow authority.
 
 ## OpenSpec Boundary
 
-Aisee does not replace OpenSpec and does not maintain a second schema state machine. Aisee reads the current schema declaration only when handling OpenSpec changes or schema pack checks; project memory and team knowledge remain guidance / guardrails.
+Aisee does not replace OpenSpec and does not maintain a second schema state machine. Aisee focuses on OpenSpec setup, baseline migration, intent clarification, detailed change authoring, and a small amount of read-only context help; project memory and team knowledge remain guidance / guardrails.
 
 When Aisee handles OpenSpec artifacts, it acts only as a parser / checker / projector. `openspec validate` and `openspec archive` remain OpenSpec responsibilities.
 
@@ -55,11 +54,11 @@ When Aisee handles OpenSpec artifacts, it acts only as a parser / checker / proj
 
 Codex can write, review, and fix code, but the results are less reliable when a repository lacks explicit requirements, stable project context, review rules, and verification criteria.
 
-Aisee supplies that workflow layer:
+Aisee supplies that companion layer:
 
-- it turns intent into durable OpenSpec changes, planning docs, and reusable project memory;
-- it helps maintainers reduce implementation entry into clear handoff rules, and only turn them into human-readable briefs when needed;
-- it lets Codex read against the same context boundaries across implementation, review, verification, and archive;
+- it makes baseline, change, project memory, and team knowledge boundaries explicit;
+- it helps maintainers establish current behavior before starting new changes in existing systems;
+- it lets Codex read against the same minimal context boundaries during change authoring and implementation;
 - it gives open-source projects clearer engineering constraints for AI-assisted contribution flows.
 
 ## Why Aisee?
@@ -68,24 +67,22 @@ AI coding assistants are useful, but projects drift when requirements, UI decisi
 
 Aisee makes that context explicit:
 
-- clarify business requirements before implementation;
-- separate requirements, UI content, architecture context, and change planning;
-- create and complete OpenSpec changes while reading required artifacts from the current schema;
+- clarify business requirements or establish an existing-system baseline before implementation;
+- separate setup, baseline migration, change planning, and detailed change authoring;
+- create and complete OpenSpec changes while working from the current project schema or official `spec-driven`;
 - keep OpenSpec as the only persistent specification source of truth;
 - expose durable project memory and team knowledge guardrails without replacing OpenSpec facts;
 - constrain document-local numbering through skills/templates to reduce invented or duplicated labels;
 - check whether artifacts, tasks, source maps, tests, and review evidence are closed before archive.
 
-## Agile Delivery Model
+## Product Positioning
 
-Aisee now follows a version / iteration-oriented agile model:
+Aisee currently centers four capability groups:
 
-- SRS, UI Content, Design Spec, and Architecture are **planning docs** for the current version or iteration;
-- regular planning docs use a shared YAML frontmatter contract for identity, status, and source indexing without becoming OpenSpec baseline facts;
-- `aisee:change-plan` splits one iteration into **one or more** independently deliverable OpenSpec changes;
-- the current change's proposal, source-map, specs, contracts, and tasks are the formal implementation-time commitments;
-- after `openspec archive`, baseline specs take over as the current source of truth;
-- small, bounded, low-risk work can skip heavy upfront docs and enter an appropriate lightweight schema directly.
+- OpenSpec setup: `aisee openspec ensure`, `aisee:init`
+- Existing-project baseline migration: `aisee:spec-migrate`
+- Intent understanding and change input: `aisee:srs`, `aisee:change-plan`, `aisee:change-author`
+- Engineering guidance: `aisee:memory`, `aisee:knowledge`, `aisee:knowledge-curate`
 
 ## Workflow Positioning
 
@@ -93,10 +90,10 @@ Aisee now follows a version / iteration-oriented agile model:
 User intent
   ↓
 Aisee skills
-  Produce planning docs and clarify requirements, UI content, architecture, and change boundaries
+  Set up OpenSpec, migrate baselines, clarify intent, and author better changes
   ↓
-aisee:change-plan
-  One iteration -> one or more OpenSpec changes
+spec-migrate / srs / change-plan / change-author
+  Produce baseline or new-change inputs
   ↓
 OpenSpec
   Manage active changes, baseline specs, validate, apply, and archive
@@ -105,60 +102,65 @@ Aisee CLI
   Read OpenSpec/Aisee metadata and provide project memory, team knowledge, and helper checks
   ↓
 Compound Engineering or another coding agent
-  Implement, review, test, and produce evidence
-  ↓
-Aisee verify / archive guard
-  Check whether the current change is ready to archive
+  Consumes OpenSpec artifacts with memory/knowledge guidance
 ```
 
 Core boundaries:
 
 ```text
 OpenSpec = specification state machine and baseline source of truth
-Aisee = planning, context, schemas, source routing, and workflow guardrails
-Aisee CLI = JSON context bus, not a second source of truth
+Aisee = OpenSpec companion, memory/knowledge guidance, and a small amount of context help
+Aisee CLI = setup, retrieval, and read-only helper tooling, not a second source of truth
 Compound Engineering = optional implementation / review / test consumer
 ```
 
 ## Skill Taxonomy
 
-`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all public skills through `skills: "./skills/"`, but the default happy path contains only **9 core iteration skills**, plus project orientation and setup / governance skills. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
+`plugins/aisee-plugin/.codex-plugin/plugin.json` still exposes all public skills through `skills: "./skills/"`, but the current recommended path focuses on the OpenSpec companion core and memory/knowledge. The full contract lives in [Skill Taxonomy](plugins/aisee-plugin/references/skill-taxonomy.md).
 
 Project setup / governance:
 
-- `aisee:orient`
 - `aisee:init`
 
-Core iteration workflow:
+OpenSpec companion core:
 
+- `aisee:spec-migrate`
 - `aisee:srs`
-- `aisee:ui-content`
-- `aisee:architecture`
 - `aisee:change-plan`
 - `aisee:change-author`
+
+Memory / knowledge:
+
+- `aisee:reflect`
+- `aisee:memory`
+- `aisee:knowledge`
+- `aisee:knowledge-curate`
+
+Legacy / transitional:
+
+- `aisee:orient`
+- `aisee:ui-content`
+- `aisee:architecture`
+- `aisee:design-spec`
+- `aisee:design-assets`
+- `aisee:svg-assets`
+- `aisee:image-object`
 - `aisee-schema-pack`
 - `aisee:implementation-bridge`
 - `aisee:verify`
 - `aisee:archive-guard`
-
-On-demand extensions:
-
-- Optional extensions: `aisee:design-spec`, `aisee:design-assets`, `aisee:svg-assets`, `aisee:image-object`, `aisee:spec-migrate` (existing-project / brownfield baseline)
-- Knowledge loop: `aisee:reflect`, `aisee:memory`, `aisee:knowledge`, `aisee:knowledge-curate`
-- Hardware / experimental: `hw:srs`, `hw:architecture`, `hw:init`, `hw:change-plan`
+- `hw:*`
 
 ## Features
 
-- **Structured requirement clarification**: `aisee:srs` clarifies business needs through dialogue and produces planning-level SRS documents.
-- **UI content specification**: `aisee:ui-content` turns confirmed requirements into pages, content, states, flows, permission visibility, and platform differences without writing visual design rules.
-- **Architecture context**: `aisee:architecture` records technical facts, constraints, reusable capabilities, global engineering conventions, and artifact hints.
-- **Schema-aware change planning**: `aisee:change-plan` maps confirmed inputs into independently deliverable OpenSpec changes.
-- **OpenSpec schema pack**: includes app, device, docsite, infra, security, quick-fix, quick-research, and collaboration schemas.
+- **Existing-project baseline migration**: `aisee:spec-migrate` derives current system behavior into OpenSpec baseline specs before brownfield enhancement work starts.
+- **Structured requirement clarification**: `aisee:srs` clarifies business needs through dialogue and produces the inputs needed for change planning.
+- **OpenSpec change planning**: `aisee:change-plan` maps confirmed inputs into independently deliverable OpenSpec changes.
+- **Detailed change authoring**: `aisee:change-author` strengthens OpenSpec change content so proposal, specs, design, and tasks are more actionable.
 - **Project memory**: `aisee memory` retrieves and writes current-repository long-lived guidance without replacing OpenSpec facts.
 - **Team knowledge guardrails**: `aisee knowledge` retrieves a small number of reviewed engineering lessons through pack/card protocols without turning the knowledge repository into a second specification source.
-- **Controlled memory and knowledge retrieval**: `aisee memory` and `aisee knowledge` provide direct retrieval entrypoints without owning implementation-stage routing.
-- **Verification and archive guardrails**: `aisee:verify` and `aisee:archive-guard` diagnose gaps and risks before archive.
-- **Harness design**: CLI contract tests and normalized skill eval cases keep the workflow stable.
+- **Controlled memory and knowledge retrieval**: `aisee memory` and `aisee knowledge` provide direct retrieval entrypoints without becoming workflow authority.
+- **Legacy capabilities still exposed**: UI/architecture/schema-pack/verify remain public today, but they are no longer the recommended product path.
 
 ## Requirements
 
@@ -302,13 +304,13 @@ aisee doctor --json
 ## Documentation
 
 - [Documentation site](https://aisee.wiki): Aisee guides, workflows, and release notes.
-- [Aisee Workflow](docs/workflow.en.md): end-to-end guidance from setup, requirement clarification, change authoring, implementation handoff, verification, and archive.
-- [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, schemas, contracts, reuse-first routing, review, and archive when using Aisee with OpenSpec.
-- [Compatibility Policy](docs/compatibility-policy.en.md): compatibility boundaries for CLI JSON, schema packs, plugin content, and experimental capabilities.
+- [Aisee Workflow](docs/workflow.en.md): the currently recommended OpenSpec companion path and the existing-project baseline entrypoint.
+- [Aisee Best Practices](docs/best-practices.en.md): conventions for sources of truth, retained capabilities, reuse-first routing, and memory/knowledge use with OpenSpec.
+- [Compatibility Policy](docs/compatibility-policy.en.md): compatibility boundaries for CLI JSON, the retained skill surface, and plugin content.
 - [Plugin Marketplace](docs/plugin-marketplace.en.md): responsibilities of plugin manifests, marketplace listings, PyPI/pipx, and the Codex install path.
 - [Team Knowledge Guardrails](docs/team-knowledge.en.md): experimental status, usage, and gaps before stability for shared team knowledge.
 - [Aisee Team Knowledge Architecture](docs/architecture/aisee-team-knowledge.md): team knowledge guardrail retrieval, card/pack boundaries, CLI onboarding, and read model.
-- [Schema Packs](docs/schema-packs.md): schema selection, app schema artifact DAG, source-map/numbering rules, and contract attachment boundaries.
+- [Schema Packs](docs/schema-packs.md): historical schema-pack design notes; the current product surface no longer promotes repo-bundled schemas.
 - [Aisee / OpenSpec / Compound Engineering Integration](docs/architecture/aisee-openspec-compound-integration.md): high-level responsibility boundaries and historical decisions.
 - [OpenSpec Multi-Schema Best Practices](docs/architecture/openspec-multi-schema-best-practices.md): multi-schema coexistence, conflict handling, and management rules.
 - [CHANGELOG.md](CHANGELOG.md): release history, shipped notes, and user-visible changes for published versions.
@@ -316,21 +318,20 @@ aisee doctor --json
 ## Typical Workflow
 
 ```text
-1. aisee:srs / aisee:ui-content / aisee:architecture, as needed
-2. aisee:change-plan
-3. /opsx:new "<change>" --schema <schema>
-4. aisee:change-author
-5. openspec validate <change>
-6. aisee:implementation-bridge
-7. implementation / review / test (write back `tasks.md` / apply tracks before marking the batch complete)
-8. openspec archive <change>
+1. Existing project / brownfield work: `aisee:init` -> `aisee:spec-migrate` (as needed)
+2. New demand: `aisee:srs` (as needed)
+3. `aisee:change-plan`
+4. `/opsx:new "<change>" --schema <project-schema-or-spec-driven>`
+5. `aisee:change-author`
+6. `openspec validate <change>`
+7. implementation / review / test
+8. `openspec archive <change>`
 
 For small, bounded, low-risk work, an abbreviated path is also valid:
 
 ```text
 quick-fix / quick-research / another lightweight schema
   -> change-author
-  -> implementation-bridge
   -> implementation / review / test
   -> archive
 ```
@@ -344,62 +345,16 @@ For existing projects or brownfield enhancement work, use `aisee:spec-migrate` t
 
 | Skill | Purpose |
 | --- | --- |
-| `aisee:orient` | Determine the current project stage and user intent, then route to the right Aisee skill or workflow. |
 | `aisee:init` | Initialize or audit `AGENTS.md`, `openspec/project.md`, Aisee docs, memory, and Codex hooks. |
-| `aisee:srs` | Clarify software requirements and produce planning-level SRS documents. |
-| `aisee:ui-content` | Produce UI content specs for pages, elements, states, flows, permissions, and platform differences. |
-| `aisee:architecture` | Capture software architecture context, technical constraints, reusable capabilities, and artifact hints. |
-| `aisee:change-plan` | Plan independent OpenSpec changes and choose schemas. |
-| `aisee-schema-pack` | Provide and maintain OpenSpec schema packs through the marketplace plugin. |
-| `aisee:implementation-bridge` | Return implementation-stage JSON decisions for a single change by default, and generate handoff briefs only when explicitly needed. |
-| `aisee:verify` | Diagnose artifact, task, source-map, numbering, and evidence gaps. |
-| `aisee:archive-guard` | Provide the final recommendation before `openspec archive`. |
 | `aisee:spec-migrate` | Build OpenSpec baseline specs for existing projects or brownfield enhancement work. |
-| `aisee:design-spec` | Produce design specifications without duplicating UI content specs. |
-| `aisee:design-assets` | Generate or extract visual references and design assets. |
-| `aisee:svg-assets` | Generate, vectorize, optimize, and validate SVG assets. |
-| `aisee:image-object` | Handle object-level image segmentation, masks, background removal, and exports. |
-| `aisee:reflect` | Capture reusable project lessons and workflow improvements. |
+| `aisee:srs` | Clarify software requirements and produce the inputs needed for change planning. |
+| `aisee:change-plan` | Plan independent OpenSpec changes and prepare `/opsx:new` inputs. |
+| `aisee:change-author` | Strengthen the current OpenSpec change so proposal/specs/design/tasks are more actionable. |
 | `aisee:memory` | Guide project memory CLI inspect/search/add/update-index usage. |
 | `aisee:knowledge` | Guide team knowledge CLI initialization, configuration, sync, retrieval, and promote workflows. |
 | `aisee:knowledge-curate` | Batch-review project-local reusable knowledge candidates and produce card drafts for human submission to team knowledge. |
-
-Hardware-related skills are retained but still being integrated into the main Aisee workflow:
-
-```text
-hw-init
-hw-srs
-hw-architecture
-hw-change-plan
-```
-
-## Schema Packs
-
-Schema pack source:
-
-```text
-plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/
-```
-
-Current schemas:
-
-| Schema | Use Case |
-| --- | --- |
-| `aisee-app-spec-driven` | App and software changes with source-map, contracts, specs, and tasks. |
-| `aisee-device-spec-driven` | Device, firmware, runtime, production, and verification changes. |
-| `aisee-docsite-driven` | Documentation site changes. |
-| `infra-change` | Infrastructure changes. |
-| `security-audit` | Security audit workflow. |
-| `quick-fix` | Small, clear fixes. |
-| `quick-research` | Technical research and recommendations. |
-| `opsx-collab-pr-loop` | Collaboration and PR loop workflow. |
-
-Check project schema state:
-
-```bash
-aisee schemas list --json
-aisee schemas check --json --fail-on-blocker
-```
+| `aisee:reflect` | Capture reusable project lessons and memory/knowledge candidates. |
+| `legacy / transitional skills` | `aisee:orient`, `aisee:ui-content`, `aisee:architecture`, `aisee-schema-pack`, `aisee:implementation-bridge`, `aisee:verify`, `aisee:archive-guard`, and the design/hardware skills remain public for now, but they are no longer the recommended product path. |
 
 ## CLI Reference
 
@@ -408,8 +363,6 @@ aisee doctor --json
 aisee bootstrap --plan --json
 aisee openspec ensure --json
 aisee plugin inspect --json
-aisee schemas list --json
-aisee schemas check --json
 aisee memory inspect --json
 aisee memory list --json
 aisee memory search --query "<task>" --json

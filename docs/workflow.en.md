@@ -5,7 +5,7 @@ This document describes the recommended software development workflow for Aisee 
 ## Core Principles
 
 - OpenSpec is the specification state machine and baseline source of truth.
-- Aisee handles requirement clarification, context shaping, memory/knowledge enhancement, schema-aware handoff, and guardrails.
+- Aisee currently emphasizes OpenSpec setup, baseline migration, intent clarification, change authoring, and memory/knowledge enhancement.
 - Aisee CLI emits JSON context views. It does not create a second specification source.
 - Implementation, review, and test work can be handled by Compound Engineering or another coding agent.
 - `openspec archive <change>` is the final operation that merges a verified change into the baseline.
@@ -16,8 +16,6 @@ This document describes the recommended software development workflow for Aisee 
 ## 0. Project Setup
 
 Use this for new projects or existing projects that are adopting OpenSpec.
-
-If you have just entered a project and do not know which Aisee workflow should start, use `aisee:orient` first to identify project state, user intent, and the next route.
 
 ```bash
 aisee doctor --json
@@ -41,16 +39,15 @@ For existing projects, or when doing brownfield enhancement work, avoid writing 
 
 ## Default Path vs On-Demand Extensions
 
-`aisee:orient` and `aisee:init` belong to project orientation, setup, and governance, not to the default new-feature iteration happy path. The default new-feature happy path depends only on the core iteration workflow: `aisee:srs`, `aisee:ui-content`, `aisee:architecture`, `aisee:change-plan`, `aisee:change-author`, `aisee-schema-pack`, and `aisee:implementation-bridge`.
+`aisee:init` belongs to project setup and governance, not to the default new-feature happy path. The current recommended path for new work centers on `aisee:srs`, `aisee:change-plan`, and `aisee:change-author`; use `aisee:spec-migrate` only when an existing project needs a baseline first.
 
 The following capabilities are conditional, not mandatory on every iteration:
 
 - `aisee:design-spec` / `aisee:design-assets`: only when visual rules, references, or asset planning are needed.
-- `aisee:svg-assets` / `aisee:image-object`: only for asset production or image-object workflows.
 - `aisee:spec-migrate`: only when onboarding an existing project or establishing a brownfield baseline, not for every iteration.
 - `aisee:memory`: only for controlled project memory retrieval, writes, and index maintenance.
 - `aisee:reflect` / `aisee:knowledge-curate`: only for retrospectives, project memory candidates, and team knowledge curation.
-- `hw:*`: only for hardware, embedded, or experimental domains; they do not affect the default app workflow.
+- Other legacy / transitional skills remain publicly exposed today, but they are not part of the currently recommended product path.
 
 ## 1. Upfront Clarification
 
@@ -60,20 +57,18 @@ Recommended order:
 
 ```text
 aisee:srs
-  -> aisee:ui-content, when UI exists
-  -> aisee:architecture
+  -> aisee:change-plan
+  -> /opsx:new
+  -> aisee:change-author
 ```
-
-If visual rules, reference imagery, or asset planning are needed, enter `aisee:design-spec` / `aisee:design-assets` as an on-demand branch. They are not mandatory in the default happy path.
 
 Artifact roles:
 
 | Artifact | Purpose | Notes |
 | --- | --- | --- |
 | SRS | Clarifies business goals, scope, functional requirements, non-functional requirements, and acceptance criteria | Does not write implementation tasks |
-| UI Content | Describes pages, content, states, actions, permission visibility, and frontend data needs | Does not write component library, color, typography, or layout rules |
-| Design Spec / Assets | Describes or generates visual rules, references, assets, and style inputs | Does not duplicate page content |
-| Architecture | Records technical facts, architecture boundaries, platform constraints, shared conventions, and risks | Does not replace change artifacts |
+| Change Plan | Maps confirmed inputs into one or more OpenSpec changes | Does not write change artifact bodies directly |
+| Change Author | Strengthens the current change's `proposal`, `specs`, `design`, and `tasks` | Does not write implementation code |
 
 These documents are planning docs for the current version or iteration. They are planning inputs, not OpenSpec baseline facts.
 
@@ -86,7 +81,7 @@ aisee:change-plan
   -> change list
   -> dependency order
   -> schema recommendation
-  -> source-map seed
+  -> /opsx:new input
 ```
 
 Splitting rules:
@@ -95,7 +90,7 @@ Splitting rules:
 - Do not treat source document sections, technical layers, page types, schema artifacts, or task phases as changes.
 - Large work may have dependency ordering, but a single change should not carry the whole product.
 - Low-risk fixes can use `quick-fix` instead of the app schema.
-- Small, bounded, low-risk work can skip heavy upfront docs such as SRS, UI Content, or Architecture and enter an appropriate lightweight schema directly.
+- Small, bounded, low-risk work can skip heavy upfront docs and enter an appropriate lightweight schema directly.
 - When frontend and backend share APIs, events, data models, or SDKs, prefer a prerequisite contract change.
 
 ## 3. Change Creation And Authoring
@@ -105,19 +100,9 @@ After creating a change, use `aisee:change-author` to complete artifacts accordi
 Typical commands:
 
 ```bash
-/opsx:new "<change>" --schema aisee-app-spec-driven
+/opsx:new "<change>" --schema <project-schema-or-spec-driven>
 openspec validate <change>
 ```
-
-Common app schema artifacts:
-
-```text
-proposal.md
-source-map.md
-specs/**/*.md
-tasks.md
-change-context.md        # as needed
-ui-contract.md           # as needed
 service-contract.md      # as needed
 data-model.md            # as needed
 ```

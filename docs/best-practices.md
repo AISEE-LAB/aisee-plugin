@@ -21,18 +21,18 @@ Aisee 文档、CLI JSON、Implementation Brief、review report 和聊天总结�
 
 需要长期保留的结论必须回写到当前 OpenSpec change、baseline specs、schema apply tracks 或 source-map 等正式事实源。
 
-## 1.1 默认走 Core Workflow，扩展能力按需触发
+## 1.1 默认走 OpenSpec companion 核心，扩展能力按需触发
 
-默认新功能 happy path 只应先走 core workflow。`design-*`、`svg-assets`、`image-object`、`spec-migrate`、`reflect`、`knowledge-curate` 和 `hw:*` 都是按需扩展，不要把它们平铺成每次迭代都必须经过的固定步骤。
+默认新功能 happy path 只应先走 `aisee:srs`、`aisee:change-plan`、`aisee:change-author` 这条 OpenSpec companion 核心路径。`spec-migrate` 是已有项目 / brownfield baseline 工具；`design-*`、`svg-assets`、`image-object`、`reflect`、`knowledge-curate` 和 `hw:*` 都是按需扩展，不要把它们平铺成每次迭代都必须经过的固定步骤。
 
 ## 2. 不要让前置文档替代 change artifacts
 
-SRS、UI Content、Design Spec、Architecture 的作用是帮助规划当前版本 / 迭代的 changes。
+SRS 和其它规划材料的作用是帮助规划当前版本 / 迭代的 changes。
 
 推荐：
 
 ```text
-SRS / UI Content / Architecture
+SRS
   -> aisee:change-plan
   -> OpenSpec change artifacts
 ```
@@ -41,8 +41,6 @@ SRS / UI Content / Architecture
 
 ```text
 SRS 写完后直接实现
-UI Content 充当 ui-contract
-Architecture 充当 change-context
 聊天记录充当 tasks
 ```
 
