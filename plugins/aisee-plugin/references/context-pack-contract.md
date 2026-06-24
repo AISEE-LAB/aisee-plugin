@@ -70,7 +70,7 @@ aisee context pack --change <change> --for ce-code-review --json
   "change": {
     "id": "add-auth-login",
     "path": "openspec/changes/add-auth-login",
-    "schema": "aisee-app-spec-driven",
+    "schema": "custom-software-schema",
     "status": "authored"
   },
   "facts": {
@@ -143,7 +143,7 @@ Common codes:
 - `REVIEW_BLOCKER`
 - `TEST_EVIDENCE_MISSING`
 
-`context pack` 自己不再消费这些 severity 去生成下一步路由。后续如何处理 blocker / risk / info，由 `implementation-bridge`、`aisee:verify`、`aisee:archive-guard` 或人工判断决定。
+`context pack` 自己不再消费这些 severity 去生成下一步路由。后续如何处理 blocker / risk / info，由执行方、人工审查或外部流程判断。
 
 ## Parsed Facts
 
@@ -156,7 +156,7 @@ Common codes:
     "legacy_fallback": "CLAUDE.md"
   },
   "schema": {
-    "name": "aisee-app-spec-driven",
+    "name": "custom-software-schema",
     "version": 2,
     "capabilities": ["source_map_traceability", "apply_execution", "contract_helper"],
     "artifacts": [],

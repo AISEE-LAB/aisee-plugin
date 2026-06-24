@@ -210,7 +210,7 @@ aisee doctor --json
 
 ## 插件使用
 
-PyPI / pipx 只安装 `aisee` CLI。Aisee skills、references、schema packs、team knowledge templates 和 plugin metadata 通过 GitHub-backed Codex marketplace 分发。
+PyPI / pipx 只安装 `aisee` CLI。Aisee skills、references、team knowledge templates 和 plugin metadata 通过 GitHub-backed Codex marketplace 分发。
 
 在 Codex 中添加 marketplace 并安装插件：
 
@@ -228,7 +228,7 @@ aisee doctor --json
 
 CLI 读取插件内容时默认只检查 Codex 安装位置。需要对接其它 agent runtime 时，可设置 `AISEE_AGENT_RUNTIME=claude|cursor|agents`；设置为 `none` 可关闭已安装插件内容发现。
 
-插件内容、schema pack 和 team knowledge 模板通过 Codex marketplace 插件或外部仓库获取；team knowledge onboarding 使用 `aisee knowledge init-repo` 和 `aisee knowledge configure`。
+插件内容和 team knowledge 模板通过 Codex marketplace 插件或外部仓库获取；team knowledge onboarding 使用 `aisee knowledge init-repo` 和 `aisee knowledge configure`。
 
 源码仓库也包含多个 agent runtime 的插件元数据：
 

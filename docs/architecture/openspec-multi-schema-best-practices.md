@@ -1,5 +1,7 @@
 # OpenSpec 多 Schema 共存：结论与最佳实践
 
+> 历史参考。本文主要服务仍然维护 private custom schema 的项目；它不代表当前 Aisee 主推产品路径。
+
 > **结论先行**：一个 OpenSpec 项目可以同时存在多个 Schema，这是官方设计的核心能力，并非边缘情况。Schema 之间在设计上是隔离的，**不会产生 Schema 级别的冲突**——但存在两个需要主动管理的潜在冲突点。
 
 ---

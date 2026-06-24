@@ -1,5 +1,7 @@
 # Aisee CLI、上下文索引与编号规则
 
+> 历史架构说明。本文包含旧的 CLI / schema-pack / context 设计背景；当前现行产品面以 README、workflow 和 compatibility policy 为准。
+
 ## 维护边界
 
 本文描述当前生效的 Aisee CLI 上下文设计。

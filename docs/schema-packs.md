@@ -1,5 +1,7 @@
 # Schema Packs
 
+> 历史参考。当前 Aisee 产品面不再主推 repo-bundled schema packs，也不再提供公开 `aisee schemas` 命令面。本文保留为旧项目、自定义 schema 或历史设计说明。
+
 Schema pack 定义 OpenSpec change 内需要生成哪些 artifacts、它们的依赖顺序、模板和 authoring 规则。它不替代 OpenSpec，也不保存项目事实；项目事实仍来自 OpenSpec specs、change artifacts、`source-map.md` 和 `tasks.md`。
 
 ## 目录
@@ -16,7 +18,7 @@ plugins/aisee-plugin/skills/aisee-schema-pack/assets/schema-pack/
 openspec/schemas/<schema-name>/
 ```
 
-Schema pack 内容通过 GitHub-backed Codex marketplace plugin 分发；PyPI / pipx 安装只提供 CLI，不自动安装 schema：
+历史上，schema pack 内容通过 GitHub-backed Codex marketplace plugin 分发；当前产品面中，自定义 schema 直接以项目内 `openspec/schemas/` 与 OpenSpec CLI 为准：
 
 ```text
 codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main

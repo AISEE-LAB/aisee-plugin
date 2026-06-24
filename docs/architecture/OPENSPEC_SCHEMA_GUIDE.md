@@ -1,4 +1,6 @@
 # OpenSpec 自定义 Schema 指南
+
+> 历史参考。本文主要服务仍然维护 private custom schema 的团队；当前 Aisee 产品面不再主推 repo-bundled app/device schema。
 ## 团队工作流定制与管理
 
 > 本文档覆盖：Schema 原理、文件结构、创建方式、模板编写、团队管理规范。

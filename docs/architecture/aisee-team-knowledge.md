@@ -116,7 +116,7 @@ Semantic matching 只能作用于硬过滤后的候选集。它不能绕过 pack
 
 `aisee knowledge promote-batch --curation <path> --team-path <path> --pack <id> --json` 只负责把已审查 draft 写入本地 team knowledge worktree，并可幂等更新 pack。它不自动创建分支、commit、push、merge 或 PR。写入前会校验 `.aisee-team-knowledge` marker、`knowledge/packs` 和 `knowledge/cards` 是否存在。
 
-`aisee:archive-guard`、`aisee:verify` 或 `aisee:reflect` 可以提示候选信号，但不得自动写入项目候选或 team knowledge。
+人工审查流程或 `aisee:reflect` 可以提示候选信号，但不得自动写入项目候选或 team knowledge。
 
 ## 与 Compound 的边界
 

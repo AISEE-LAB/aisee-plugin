@@ -1,5 +1,7 @@
 # Aisee、OpenSpec 与 Compound Engineering 集成
 
+> 历史架构说明。本文中的部分 workflow、schema-pack 和 bridge 边界已不再代表当前主推产品路径，现行规则以 README、workflow 和 compatibility policy 为准。
+
 ## 维护边界
 
 本文记录当前生效的高层职责边界和主流程。

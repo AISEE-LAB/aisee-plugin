@@ -211,7 +211,7 @@ You can also run the repository-local entrypoint without installing:
 
 ## Plugin Usage
 
-PyPI / pipx installs only the `aisee` CLI. Aisee skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the GitHub-backed Codex marketplace.
+PyPI / pipx installs only the `aisee` CLI. Aisee skills, references, team knowledge templates, and plugin metadata are distributed through the GitHub-backed Codex marketplace.
 
 Add the marketplace and install the plugin in Codex:
 
@@ -229,7 +229,7 @@ aisee doctor --json
 
 When reading plugin content, the CLI checks only the Codex install location by default. For other agent runtimes, set `AISEE_AGENT_RUNTIME=claude|cursor|agents`; set it to `none` to disable installed plugin content discovery.
 
-Plugin content, schema packs, and team knowledge templates come from the Codex marketplace plugin or external repositories; team knowledge onboarding uses `aisee knowledge init-repo` and `aisee knowledge configure`.
+Plugin content and team knowledge templates come from the Codex marketplace plugin or external repositories; team knowledge onboarding uses `aisee knowledge init-repo` and `aisee knowledge configure`.
 
 The source repository also includes plugin metadata for multiple agent runtimes:
 

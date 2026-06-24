@@ -69,12 +69,12 @@ The following are public contracts:
 
 The following are public contracts:
 
-- `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, `plugins/aisee-plugin/references/`, and schema pack directories in the GitHub repository remain loadable by the Codex marketplace plugin;
-- the setup / core / optional / knowledge / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`, including the core set of 9 workflow skills;
+- `plugins/aisee-plugin/.codex-plugin/plugin.json`, `plugins/aisee-plugin/skills/`, and `plugins/aisee-plugin/references/` in the GitHub repository remain loadable by the Codex marketplace plugin;
+- the setup / OpenSpec core / memory-and-knowledge / legacy-transitional / hardware layering defined in `plugins/aisee-plugin/references/skill-taxonomy.md`;
 - `aisee plugin inspect --json` returns stable status and setup hints in PyPI / pipx installs;
-- the PyPI / pipx channel only promises CLI capabilities; skills, references, schema packs, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
+- the PyPI / pipx channel only promises CLI capabilities; skills, references, team knowledge templates, and plugin metadata are distributed through the marketplace plugin or external repositories.
 
-Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or changing the core workflow skill set.
+Breaking changes include renaming the plugin, removing the Codex manifest, breaking the marketplace plugin root layout, or changing the retained skill set without updating the published contracts.
 
 ### Plugin Marketplace
 
