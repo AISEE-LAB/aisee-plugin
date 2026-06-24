@@ -355,10 +355,6 @@ def test_bootstrap_plan_is_read_only(tmp_path: Path) -> None:
     assert any(item["path"] == "AGENTS.md" for item in data["actions"])
     marketplace_action = next(item for item in data["actions"] if item["path"] == "aisee-plugin marketplace")
     assert "codex plugin marketplace add AISEE-LAB/aisee-plugin --ref main" in marketplace_action["reason"]
-    schema_action = next(item for item in data["actions"] if item["path"] == "openspec/schemas")
-    assert schema_action["kind"] == "create"
-    assert "aisee:schema-pack" in schema_action["reason"]
-    assert "aisee schemas install" not in schema_action["reason"]
     assert not (tmp_path / "AGENTS.md").exists()
 
 
@@ -378,8 +374,6 @@ def test_bootstrap_plan_does_not_reinstall_marketplace_when_only_project_schemas
     data = run_json(tmp_path, "bootstrap", "--plan", "--json")
 
     assert not any(item["path"] == "aisee-plugin marketplace" for item in data["actions"])
-    schema_action = next(item for item in data["actions"] if item["path"] == "openspec/schemas")
-    assert schema_action["kind"] == "create"
 
 
 def test_doctor_and_bootstrap_report_legacy_aisee_layout(tmp_path: Path) -> None:
@@ -404,112 +398,6 @@ def test_bootstrap_apply_is_not_a_public_flag(tmp_path: Path) -> None:
 
     assert result.returncode == 2
     assert "unrecognized arguments: --apply" in result.stderr
-
-
-def test_schema_pack_list_and_check_use_explicit_dev_asset_root(tmp_path: Path, monkeypatch) -> None:
-    create_schema_pack(tmp_path)
-    monkeypatch.setenv("AISEE_PLUGIN_ASSET_ROOT", str(tmp_path))
-
-    listed = run_json(tmp_path, "schemas", "list", "--json")
-    checked = run_json(tmp_path, "schemas", "check", "--json")
-
-    assert listed["schemas"][0]["name"] == "quick-fix"
-    assert checked["status"] == "ok"
-    assert not (tmp_path / "openspec" / "schemas" / "quick-fix" / "schema.yaml").exists()
-
-
-def test_schema_check_validates_project_installed_schema_without_source_assets(tmp_path: Path) -> None:
-    write(tmp_path / "openspec" / "schemas" / "broken" / "schema.yaml", "name: broken\nartifacts: [\n")
-
-    result = run_aisee(tmp_path, "schemas", "check", "--json", "--fail-on-blocker", check=False)
-    data = json.loads(result.stdout)
-
-    assert result.returncode == 1
-    assert data["status"] == "blocked"
-    assert any(item["code"] == "SCHEMA_PARSE_FAILED" for item in data["issues"])
-
-
-def test_schema_check_reports_structural_schema_contract_issues(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("AISEE_AGENT_RUNTIME", "none")
-    write(
-        tmp_path / "openspec" / "schemas" / "broken" / "schema.yaml",
-        """name: broken
-capabilities:
-  - apply_execution
-artifacts:
-  - id: proposal
-    generates: proposal.md
-    template: templates/proposal.md
-    requires: [tasks]
-    requiredness: always
-    capabilities: [primary_brief]
-  - id: proposal
-    generates: tasks.md
-    template: tasks.md
-    requires: [proposal]
-    requiredness: always
-    capabilities: [apply_track]
-apply:
-  requires: [proposal]
-  tracks: tasks.md
-""",
-    )
-    write(tmp_path / "openspec" / "schemas" / "broken" / "templates" / "proposal.md", "# proposal\n")
-    write(tmp_path / "openspec" / "schemas" / "broken" / "templates" / "tasks.md", "# tasks\n")
-
-    data = run_json(tmp_path, "schemas", "check", "--json")
-
-    assert data["status"] == "blocked"
-    codes = {item["code"] for item in data["issues"]}
-    assert "SCHEMA_ARTIFACT_DUPLICATE" in codes
-    assert "SCHEMA_VERSION_MISSING" in codes
-    assert "SCHEMA_DESCRIPTION_MISSING" in codes
-    assert "SCHEMA_TEMPLATE_PATH_INVALID" in codes
-    assert "SCHEMA_DAG_CYCLE" in codes
-
-
-def test_doctor_reports_schema_pack_version_mismatch(tmp_path: Path, monkeypatch) -> None:
-    create_open_project(tmp_path)
-    codex_home = tmp_path / "home" / ".codex"
-    write(codex_home / "config.toml", """[marketplaces.aisee-plugin]\nsource = "AISEE-LAB/aisee-plugin"\n\n[plugins."aisee-plugin@aisee-plugin"]\nenabled = true\n""")
-    write(codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "skills" / "aisee-srs" / "SKILL.md", "# aisee:srs\n")
-    write(codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "references" / "README.md", "# refs\n")
-    write(
-        codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "schema.yaml",
-        """name: quick-fix
-version: 1
-description: small fixes
-capabilities:
-  - apply_execution
-  - archive_authority
-artifacts:
-  - id: problem
-    generates: problem.md
-    template: problem.md
-    requires: []
-    requiredness: always
-    capabilities: [problem_statement]
-apply:
-  requires: [problem]
-  tracks: problem.md
-archive:
-  tracks:
-    - problem.md
-""",
-    )
-    write(
-        codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / "quick-fix" / "templates" / "problem.md",
-        "# problem\n",
-    )
-    write(
-        codex_home / ".tmp" / "marketplaces" / "aisee-plugin" / "plugins" / "aisee-plugin" / ".codex-plugin" / "plugin.json",
-        '{"name":"aisee-plugin","version":"0.5.0"}\n',
-    )
-    monkeypatch.setenv("CODEX_HOME", str(codex_home))
-
-    data = run_json(tmp_path, "doctor", "--json")
-
-    assert any(item["code"] == "SCHEMA_PACK_VERSION_MISMATCH" for item in data["issues"])
 
 
 def test_root_resolution_prefers_nearest_project_markers_inside_git_monorepo(tmp_path: Path) -> None:

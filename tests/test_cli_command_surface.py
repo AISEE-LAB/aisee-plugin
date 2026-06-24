@@ -82,7 +82,7 @@ def test_removed_content_distribution_commands_are_not_public_subcommands(tmp_pa
     assert plugin_path["meta"]["writes"] is False
     assert schema_install.returncode == 2
     assert "invalid choice" in schema_install.stderr
-    assert "install" in schema_install.stderr
+    assert "schemas" in schema_install.stderr
     assert knowledge_scaffold.returncode == 2
     assert "invalid choice" in knowledge_scaffold.stderr
     assert "scaffold" in knowledge_scaffold.stderr
@@ -102,14 +102,9 @@ def test_memory_help_shows_public_subcommands(tmp_path: Path) -> None:
         assert command in result.stdout
 
 
-def test_schemas_help_shows_format_subcommand(tmp_path: Path) -> None:
-    result = run_aisee(tmp_path, "schemas", "--help")
-
-    assert "format" in result.stdout
-
-
 def test_removed_change_and_contract_commands_are_not_public_subcommands(tmp_path: Path) -> None:
     removed_commands = [
+        ("schemas", "list", "--json"),
         ("contract", "manifest", "--json"),
         ("flow", "inspect", "--json"),
         ("gaps", "--change", "add-auth", "--json"),

@@ -9,7 +9,6 @@ from aisee_cli.output import issue, status_from_issues, summarize_issues
 from aisee_cli.paths import inspect_layout
 from aisee_cli.planning_docs import inspect_planning_docs
 from aisee_cli.project import inspect_project_rules, rel
-from aisee_cli.schema_pack import list_schema_packs
 from aisee_cli.tool_checks import check_codex_aisee_marketplace, check_compound_plugin, check_openspec_cli
 
 
@@ -44,12 +43,9 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
             item["legacy"],
         ))
 
-    schemas = list_schema_packs(root)
     openspec_cli = check_openspec_cli()
     compound = check_compound_plugin()
     codex_marketplace = check_codex_aisee_marketplace()
-    issues.extend(item for item in schemas["issues"] if item.get("severity") == "blocker")
-    issues.extend(item for item in schemas["issues"] if item.get("code") == "SCHEMA_PACK_VERSION_MISMATCH")
     issues.extend(planning_docs["issues"])
     if not openspec_cli["available"]:
         issues.append(issue("OPENSPEC_CLI_UNAVAILABLE", "info", "OpenSpec CLI is not available or failed to report a version"))
@@ -78,7 +74,6 @@ def build_doctor(project_root: Path) -> dict[str, Any]:
         "codex_marketplace": codex_marketplace,
         "aisee": {
             "layout": layout,
-            "schemas": schemas,
             "planning_docs": planning_docs,
         },
         "issues": issues,

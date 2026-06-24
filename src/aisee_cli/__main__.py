@@ -31,7 +31,6 @@ from aisee_cli.openspec_init import run_openspec_init
 from aisee_cli.output import error_response, exit_code_for, print_json
 from aisee_cli.plugin_assets import inspect_plugin_assets, plugin_path
 from aisee_cli.project import resolve_project_root
-from aisee_cli.schema_pack import check_schema_packs, format_schema_packs, list_schema_packs
 
 
 def main() -> int:
@@ -73,18 +72,6 @@ def main() -> int:
     plugin_path_parser = plugin_subparsers.add_parser("path")
     plugin_path_parser.add_argument("--target", choices=["codex", "claude", "cursor"], required=True, help="agent runtime target")
     plugin_path_parser.add_argument("--json", action="store_true", help="output JSON")
-    schemas_parser = subparsers.add_parser("schemas")
-    schemas_parser.add_argument("--json", action="store_true", help="output JSON")
-    schemas_subparsers = schemas_parser.add_subparsers(dest="schemas_command")
-    schemas_list_parser = schemas_subparsers.add_parser("list")
-    schemas_list_parser.add_argument("--json", action="store_true", help="output JSON")
-    schemas_check_parser = schemas_subparsers.add_parser("check")
-    schemas_check_parser.add_argument("--json", action="store_true", help="output JSON")
-    schemas_check_parser.add_argument("--fail-on-blocker", action="store_true", help="return non-zero when blockers exist")
-    schemas_format_parser = schemas_subparsers.add_parser("format")
-    schemas_format_parser.add_argument("--check", action="store_true", help="report formatting drift without writing")
-    schemas_format_parser.add_argument("--write", action="store_true", help="rewrite schema.yaml files into canonical format")
-    schemas_format_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_parser = subparsers.add_parser("knowledge")
     knowledge_parser.add_argument("--json", action="store_true", help="output JSON")
     knowledge_subparsers = knowledge_parser.add_subparsers(dest="knowledge_command")
@@ -219,29 +206,6 @@ def main() -> int:
             print_json(error_response(str(error)), stderr=True)
             return 2
         print_json(error_response("Use one of: inspect, path.", "MISSING_SUBCOMMAND"), stderr=True)
-        return 2
-
-    if args.command == "schemas":
-        root = resolve_project_root(Path.cwd())
-        if args.schemas_command in {None}:
-            print_json(error_response("Use one of: list, check, format.", "MISSING_SUBCOMMAND"), stderr=True)
-            return 2
-        if args.schemas_command == "list":
-            result = list_schema_packs(root)
-            print_json(result)
-            return 0
-        if args.schemas_command == "check":
-            result = check_schema_packs(root)
-            print_json(result)
-            return exit_code_for(result, fail_on_blocker=args.fail_on_blocker)
-        if args.schemas_command == "format":
-            if args.check and args.write:
-                print_json(error_response("Use either --check or --write for schemas format.", "INVALID_ARGUMENT"), stderr=True)
-                return 2
-            result = format_schema_packs(root, check=args.check or not args.write, write=args.write)
-            print_json(result)
-            return exit_code_for(result, fail_on_blocker=False)
-        print_json(error_response("Use one of: list, check, format.", "MISSING_SUBCOMMAND"), stderr=True)
         return 2
 
     if args.command == "knowledge" and args.knowledge_command is None:

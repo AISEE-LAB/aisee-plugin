@@ -42,13 +42,6 @@ def build_bootstrap_plan(project_root: Path) -> dict[str, Any]:
             "aisee-plugin marketplace",
             f"Install Aisee plugin content with `{MARKETPLACE_ADD_COMMAND}` and `{PLUGIN_ADD_COMMAND}`.",
         ))
-    if not (root / "openspec" / "schemas").exists():
-        actions.append(action(
-            "create",
-            "openspec/schemas",
-            "Use the marketplace-installed `aisee:schema-pack` skill to initialize project schema packs; bootstrap only reports the missing project directory.",
-        ))
-
     return {
         "status": "ready" if actions else "noop",
         "writes": False,
