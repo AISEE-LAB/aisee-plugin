@@ -11,7 +11,7 @@
       "id": "change-author-001",
       "name": "author-single-confirmed-change",
       "scenario": "artifact-authoring",
-      "prompt": "change-plan 已确认一个 change：add-passwordless-login，schema 是 aisee-app-spec-driven。现在帮我把 proposal、source-map、specs 和 tasks 的初稿编排出来。",
+      "prompt": "change-plan 已确认一个 change：add-passwordless-login，schema 是项目当前软件 schema。现在帮我把 proposal、source-map、specs 和 tasks 的初稿编排出来。",
       "context": {
         "files": [],
         "assumptions": [

@@ -29,7 +29,7 @@
 
 ```yaml
 title: "文档标题"
-doc_type: "srs | ui-content | architecture | design-spec | design-assets | implementation-brief | spec-migration | reflect"
+doc_type: "srs | ui-content | architecture | design-spec | design-assets | spec-migration | reflect"
 status: "draft | active | superseded | archived"
 date: "YYYY-MM-DD"
 scope: "项目 / 模块 / 功能 / change"

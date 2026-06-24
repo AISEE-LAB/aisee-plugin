@@ -55,7 +55,7 @@ change N/total
 
 Name:         change-name-kebab-case
 Title:        可读标题
-Schema:       aisee-app-spec-driven | quick-fix | quick-research | aisee-device-spec-driven | aisee-docsite-driven | infra-change | security-audit | spec-driven | opsx-collab-pr-loop
+Schema:       <project-current-schema> | spec-driven | quick-fix | quick-research | aisee-device-spec-driven | aisee-docsite-driven | infra-change | security-audit | opsx-collab-pr-loop
 Complexity:   S | M | L
 
 Description:
@@ -76,7 +76,7 @@ Schema decision:
 Schema rationale:
   - 为什么选择该 schema。
   - 为什么不是上面的替代 schema。
-  - 如果不是 aisee-app-spec-driven，说明为什么不需要 SRS / UI Content / Architecture 追踪。
+  - 如果不是项目当前软件 schema，说明为什么标准 `spec-driven` 已足够，或为什么需要其它 schema。
   - Required upstream docs: SRS / UI Content / Design Spec / Design Assets / Architecture / Issue / PR / none
 
 In Scope:
@@ -133,7 +133,7 @@ Change rationale:
 Schema availability:
   - Installed in project: yes/no
   - Plugin source visible: yes/no
-  - If not installed: transfer to aisee-schema-pack and stop before authoring/execution
+  - If not installed and custom schema is required: stop before authoring/execution
 
 Metadata gate:
   - /opsx:new must use: /opsx:new "change-name-kebab-case" --schema <selected-schema>

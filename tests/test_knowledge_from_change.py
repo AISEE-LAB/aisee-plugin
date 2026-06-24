@@ -15,7 +15,7 @@ def test_knowledge_query_from_change_extracts_features(tmp_path: Path) -> None:
 
     assert data["feature_source"] == "from-change"
     assert data["features"]["change"] == "add-auth"
-    assert data["features"]["schema"] == "aisee-app-spec-driven"
+    assert data["features"]["schema"] == "custom-software-schema"
     assert "contract" in data["features"]["surfaces"]
     assert any(match["id"] == "http-contract-backward-compatibility" for match in data["knowledge"]["matches"])
 
@@ -42,7 +42,7 @@ def test_knowledge_query_from_change_keeps_cli_features_as_hints(tmp_path: Path)
         "--json",
     )
 
-    assert data["features"]["schema"] == "aisee-app-spec-driven"
+    assert data["features"]["schema"] == "custom-software-schema"
     assert data["features"]["phase"] == "implementation"
     assert data["features"]["hints"]["schema"] == "wrong-schema"
     assert data["features"]["hints"]["phase"] == "review"

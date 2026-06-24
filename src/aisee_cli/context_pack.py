@@ -1422,8 +1422,8 @@ def build_reusable_workflow_candidates(
 
     candidates = [
         {
-            "name": "aisee:implementation-bridge",
-            "kind": "aisee-skill",
+            "name": "current-change-artifacts",
+            "kind": "aisee-guidance",
             "status": "recommended",
             "reason": (
                 "review context pack gaps, scope guardrails, and review recommendation before CE execution"

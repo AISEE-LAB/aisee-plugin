@@ -17,9 +17,9 @@
 - 用户输入 / issue / ticket 只保留 1-5 句摘要、外部引用和承接 artifact；不要复制原始长提示词、聊天记录或任务清单正文。
 - 不要在 seed 中写最终 API endpoint、数据库字段、引脚表、寄存器表或实现任务。
 
-## App / Software Schema Seed
+## Software Schema Seed
 
-适用于 `aisee-app-spec-driven`：
+适用于会生成 `source-map.md` 的软件 schema：
 
 | 字段 | 填写规则 |
 |------|----------|

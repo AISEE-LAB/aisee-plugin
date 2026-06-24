@@ -27,7 +27,7 @@ description: 将已确认需求、轻量修复、技术调研或项目事实映�
 - 把 SRS 模块名、页面类型、技术层、schema artifact 或实施任务直接当作 change。
 - 为上游对象分配额外编号状态。
 - 生成或补齐任何 change artifact 正文。
-- 默认套用 `aisee-app-spec-driven`。
+- 默认优先使用项目当前 schema；项目没有额外约束时回落到官方 `spec-driven`。
 
 ## 输入
 
@@ -114,7 +114,7 @@ SRS 模块名、页面类型、设计材料、架构层、技术层和 schema ar
 - 单个需求不得输出超过 8 个 changes；超过时说明它是 epic，需要单独规划。
 - 不得创建只做 infrastructure 或 setup、没有用户可见结果的 change。
 - 不得机械拆成 frontend / backend / database changes，除非它们确实可以独立交付。
-- 小 bugfix、文案、样式、配置小改不得强行升级为 `aisee-app-spec-driven`。
+- 小 bugfix、文案、样式、配置小改不得强行升级为重型自定义 schema。
 - 轻量 schema 不要求 SRS 或额外 planning docs，除非边界判断确实依赖这些文档。
 - 不得为不生成 `source-map.md` 的 schema 输出伪 source-map seed。
 - 无前置 planning docs 时，必须使用 intake 摘要路径，不得伪造 `docs/...#FR-001`。

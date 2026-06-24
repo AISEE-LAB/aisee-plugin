@@ -1,6 +1,6 @@
 # aisee:change-plan — Schema Selection Rules
 
-默认使用 `--schema auto`。不要把所有任务都套到 `aisee-app-spec-driven`；优先考虑项目当前 schema 或官方 `spec-driven`。
+默认使用 `--schema auto`。不要把所有任务都套到某个固定私有 schema；优先考虑项目当前 schema 或官方 `spec-driven`。
 
 ## 选择规则
 
@@ -55,7 +55,7 @@
 - 两个 schema 都看起来合理，且选择不同 schema 会改变后续 artifact 形态。
 - 当前证据无法判断它是生产实现还是调研 / 风险验证。
 - 当前证据无法判断它是 app 业务变更，还是 infra/security/device 主导变更。
-- 根因未明，可能跨 `quick-fix`、`infra-change`、`security-audit` 或 `aisee-app-spec-driven`。
+- 根因未明，可能跨 `quick-fix`、`infra-change`、`security-audit` 或标准 `spec-driven`。
 - 用户显式指定 schema，但输入事实明显指向另一个 schema，且是否接受该风险会影响 author 阶段。
 
 `[SCHEMA-SELECTION-BLOCKED]` 最小内容：
@@ -66,16 +66,16 @@
 - `Decisive question`
 - `Do not run /opsx:new yet`
 
-## App Schema v2
+## Standard Software Schema
 
-`aisee-app-spec-driven` 的最小闭环：
+默认软件闭环通常至少包含：
 
 - `proposal.md`
-- `source-map.md`
 - `specs/**/*.md`
+- `design.md`
 - `tasks.md`
 
-按需 artifacts：
+若当前项目 schema 额外生成 `source-map.md` 或按需 artifacts，则再按 schema 声明补齐：
 
 - `change-context.md`
 - `ui-contract.md`
@@ -98,7 +98,7 @@
 选定 schema 后，`aisee:change-plan` 还必须检查它是否能被当前项目消费：
 
 - 已安装在 `openspec/schemas/<name>/`：可以继续输出 `/opsx:new "<change>" --schema <name>`。
-- 未安装但 marketplace plugin source 可见：输出 blocker，转交 `aisee-schema-pack`，建议 `node <skill-dir>/scripts/setup-schemas.js --schema <name>`。
+- 未安装且当前工作确实依赖该自定义 schema：输出 schema availability blocker。
 - source 也不可见：输出 schema availability blocker，并说明 author / implementation 无法继续。
 
 schema 状态检查只基于当前项目的 schema 声明、`openspec/schemas/` 目录或 OpenSpec 默认 `spec-driven`。
@@ -121,8 +121,8 @@ schema 状态检查只基于当前项目的 schema 声明、`openspec/schemas/` 
   - 核心交付应是环境、部署、流水线、运行时配置或回滚控制，而不是面向用户的新业务能力。
 - 选择 `security-audit` 时：
   - 核心交付应围绕威胁、控制、审计或安全验证；不要把它弱化成普通功能迭代。
-- 选择 `aisee-app-spec-driven` 时：
-  - 应确实需要 `source-map.md`、`specs/**/*.md`、`tasks.md` 这套追踪闭环。
+- 选择项目当前自定义软件 schema 时：
+  - 应确实需要它提供的额外 artifacts 或规则，而不是官方 `spec-driven` 已能满足的标准闭环。
 - 选择 `aisee-device-spec-driven` 时：
   - 应出现 HW / FW / RT / VER 线索；不要回退成 Web/API/DB 主体。
 

@@ -30,7 +30,6 @@ def test_planning_doc_frontmatter_contract_exists_and_representative_templates_r
 
     expected = {
         "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-standard.md": 'doc_type: "srs"',
-        "plugins/aisee-plugin/skills/aisee-implementation-bridge/references/brief-template.md": 'doc_type: "implementation-brief"',
         "plugins/aisee-plugin/skills/aisee-spec-migrate/assets/migration-index-template.md": 'doc_type: "spec-migration"',
         "plugins/aisee-plugin/skills/aisee-reflect/references/output-templates.md": 'doc_type: "reflect"',
     }

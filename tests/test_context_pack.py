@@ -20,10 +20,10 @@ def install_compound_skills(root: Path, *skills: str) -> Path:
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "docs" / "requirements" / "auth-srs.md", "# Auth SRS\n\n## 登录\n\n覆盖需求：FR-001\n")
-    write(root / "openspec" / "config.yaml", "schema: aisee-app-spec-driven\n")
+    write(root / "openspec" / "config.yaml", "schema: custom-software-schema\n")
     write(
-        root / "openspec" / "schemas" / "aisee-app-spec-driven" / "schema.yaml",
-        """name: aisee-app-spec-driven
+        root / "openspec" / "schemas" / "custom-software-schema" / "schema.yaml",
+        """name: custom-software-schema
 version: 2
 capabilities:
   - source_map_routing
@@ -79,11 +79,11 @@ archive:
     - source-map.md
 """,
     )
-    schema_templates = root / "openspec" / "schemas" / "aisee-app-spec-driven" / "templates"
+    schema_templates = root / "openspec" / "schemas" / "custom-software-schema" / "templates"
     for template in ("proposal.md", "source-map.md", "spec.md", "change-context.md", "service-contract.md", "tasks.md"):
         write(schema_templates / template, f"# {template}\n")
     change = root / "openspec" / "changes" / "add-auth"
-    write(change / ".openspec.yaml", "schema: aisee-app-spec-driven\n")
+    write(change / ".openspec.yaml", "schema: custom-software-schema\n")
     write(
         change / "proposal.md",
         """# Proposal
@@ -286,7 +286,7 @@ def test_context_pack_contains_change_metadata_and_path_references(tmp_path: Pat
     pack = build_context_pack(tmp_path, "add-auth", "ce-work")
 
     assert pack["target"] == "ce-work"
-    assert pack["change"]["schema"] == "aisee-app-spec-driven"
+    assert pack["change"]["schema"] == "custom-software-schema"
     assert "src/auth/session.py" in pack["facts"]["derived"]["code_paths"]
     assert "tests/auth/test_session.py" in pack["facts"]["derived"]["test_paths"]
     assert pack["facts"]["derived"]["task_state"]["total"] == 4
@@ -433,7 +433,7 @@ def test_context_pack_blocks_when_change_schema_metadata_is_missing(tmp_path: Pa
 
 def test_context_pack_blocks_when_schema_is_missing_from_project(tmp_path: Path) -> None:
     create_project(tmp_path)
-    schema_dir = tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven"
+    schema_dir = tmp_path / "openspec" / "schemas" / "custom-software-schema"
     for path in reversed(sorted(schema_dir.rglob("*"))):
         if path.is_file():
             path.unlink()

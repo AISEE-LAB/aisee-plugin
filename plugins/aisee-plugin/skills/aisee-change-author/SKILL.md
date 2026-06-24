@@ -34,7 +34,7 @@ description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifac
 - change 已由 `aisee:change-plan` 或用户明确确认边界、schema 和依赖。
 - 能读取 `openspec/changes/<change>/`，或用户明确要求只输出补丁 / 草稿。
 - 能读取当前 schema 的 `schema.yaml` 和所有 `templates/`。
-- 当前 change metadata 已声明 schema，且项目内已安装该 schema；如只有 plugin source 可见但项目未安装，先转交 `aisee-schema-pack`。
+- 当前 change metadata 已声明 schema，且项目内已安装该 schema；如果项目缺少所需自定义 schema，先停止并要求用户补齐项目内 `openspec/schemas/`。
 - 已收集与所选 schema 直接相关的上游输入：Change Plan、Issue / 用户输入、SRS、baseline migration 索引或其它直接相关材料。
 - 已读取项目规则：优先 `AGENTS.md`，`CLAUDE.md` 只作为 legacy fallback。
 - 既有系统或二次开发场景下，已读取相关 existing specs、代码事实、路由/API/模型/测试。

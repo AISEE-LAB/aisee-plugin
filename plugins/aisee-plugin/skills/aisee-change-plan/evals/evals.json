@@ -73,7 +73,7 @@
         "判断为单个小 change。",
         "输出一个 change 详情块、单节点 Mermaid 依赖图和单条 /opsx:new 命令。",
         "保持摘要、Mermaid 图和命令区的计数一致。",
-        "给出 schema 裁决，并明确为什么不需要升级成 aisee-app-spec-driven。",
+        "给出 schema 裁决，并明确为什么不需要升级成更重的自定义软件 schema。",
         "说明不需要为了流程拆成多个 change。"
       ],
       "must_ask": [
@@ -202,7 +202,7 @@
       "expected_outputs": [
         "选择或建议 aisee-device-spec-driven。",
         "输出设备类 source-map seed，包含 HW/FW/RT/VER 或 TBD in 对应 contract。",
-        "给出为什么不选择 aisee-app-spec-driven 或 quick-fix 的理由。",
+        "给出为什么不选择标准软件实现 schema或 quick-fix 的理由。",
         "把板级引脚和传感器型号未确认标为 blocker 或 Open Question。"
       ],
       "must_ask": [
@@ -241,17 +241,17 @@
           "锁定策略和审计查询属于正式产品能力。"
         ]
       },
-      "expected_output": "不得因为用户说是小修复就选择 quick-fix。应识别到这项需求涉及新的认证策略、服务语义和审计能力，优先选择 aisee-app-spec-driven，并在 schema 决策中明确拒绝 quick-fix。依赖顺序和执行命令如需输出，仍必须使用 Mermaid 和 /opsx:new。",
+      "expected_output": "不得因为用户说是小修复就选择 quick-fix。应识别到这项需求涉及新的认证策略、服务语义和审计能力，优先选择项目当前软件 schema或官方 spec-driven，并在 schema 决策中明确拒绝 quick-fix。依赖顺序和执行命令如需输出，仍必须使用 Mermaid 和 /opsx:new。",
       "expected_outputs": [
         "识别用户表述与真实契约足迹不一致。",
-        "选择 aisee-app-spec-driven，而不是 quick-fix。",
+        "选择项目当前软件 schema或 spec-driven，而不是 quick-fix。",
         "在 Schema decision 中明确拒绝 quick-fix 的原因。"
       ],
       "must_ask": [
         "账号锁定策略和管理员审计查询是否都属于本次交付范围？"
       ],
       "must_include": [
-        "aisee-app-spec-driven",
+        "spec-driven",
         "Schema decision",
         "拒绝 quick-fix 的理由",
         "/opsx:new 命令"
@@ -280,7 +280,7 @@
           "当前阶段只做可行性研究，不承诺生产实现。"
         ]
       },
-      "expected_output": "应选择 quick-research，而不是 aisee-app-spec-driven。输出的问题、发现和建议导向的 schema 决策，不得把供应商接入、上线改造或正式 API 实现写成当前 change 的生产任务。",
+      "expected_output": "应选择 quick-research，而不是标准软件实现 schema。输出的问题、发现和建议导向的 schema 决策，不得把供应商接入、上线改造或正式 API 实现写成当前 change 的生产任务。",
       "expected_outputs": [
         "选择 quick-research。",
         "在 Schema decision 中说明为什么不进入 app 实现 schema。",
@@ -293,7 +293,7 @@
         "quick-research",
         "Schema decision",
         "go/no-go",
-        "拒绝 aisee-app-spec-driven 的理由"
+        "拒绝标准软件实现 schema 的理由"
       ],
       "must_not": [
         "不得输出生产实现任务。",
@@ -316,7 +316,7 @@
       "context": {
         "files": [],
         "assumptions": [
-          "当前证据不足以稳定判断是 quick-fix、infra-change、security-audit 还是 aisee-app-spec-driven。"
+          "当前证据不足以稳定判断是 quick-fix、infra-change、security-audit 还是标准软件实现 schema。"
         ]
       },
       "expected_output": "不得硬选 schema。应提出最多 1 个决定性问题，或直接输出 [SCHEMA-SELECTION-BLOCKED]，列出仍在竞争的 schema 及原因，并明确在 schema 未定前不能输出 /opsx:new 命令或进入 change-author。",
@@ -334,7 +334,7 @@
         "Decisive question"
       ],
       "must_not": [
-        "不得硬选 quick-fix、infra-change、security-audit 或 aisee-app-spec-driven。",
+        "不得硬选 quick-fix、infra-change、security-audit 或标准软件实现 schema。",
         "不得在 blocker 状态下输出 /opsx:new 命令。"
       ],
       "quality_checks": [

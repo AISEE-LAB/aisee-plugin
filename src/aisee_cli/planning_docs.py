@@ -17,7 +17,6 @@ VALID_DOC_TYPES = {
     "architecture",
     "design-spec",
     "design-assets",
-    "implementation-brief",
     "spec-migration",
     "reflect",
 }
@@ -37,7 +36,6 @@ PLANNING_DOC_PREFIXES = {
     "docs/spec-migration/": "spec-migration",
     "aisee/docs/reflect/": "reflect",
     "docs/reflect/": "reflect",
-    "aisee/cache/implementation-bridge/": "implementation-brief",
 }
 REQUIRED_FIELDS = {"title", "doc_type", "status", "date", "scope", "owner", "source_refs", "change_refs"}
 
