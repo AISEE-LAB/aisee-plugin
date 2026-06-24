@@ -1,6 +1,6 @@
 {
   "name": "aisee-plugin",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "OpenSpec companion plugin focused on baseline migration, change authoring, and memory/knowledge guidance.",
   "author": {
     "name": "Fengliang"

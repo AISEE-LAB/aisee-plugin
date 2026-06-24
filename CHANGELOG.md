@@ -2,6 +2,15 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的结构，并使用 SemVer 管理版本。
 
+## [0.14.0] - 2026-06-24
+
+### Changed
+
+- Aisee 收缩为更轻的 OpenSpec companion：公开主路径保留 `aisee:init`、`aisee:spec-migrate`、`aisee:srs`、`aisee:change-plan`、`aisee:change-author`、project memory 和 team knowledge。
+- 删除公开 `schemas` CLI 命令面，并移除 `aisee:orient`、`aisee:ui-content`、`aisee:architecture`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard`、`aisee-schema-pack` 以及多项设计扩展 skill 的公开产品面。
+- `aisee:init`、README、workflow、compatibility policy、best-practices、skill taxonomy 和主路径规则同步收口到当前 OpenSpec companion 心智。
+- 软件主路径默认回到项目当前 schema 或官方 `spec-driven`；不再主推 repo-bundled `aisee-app-spec-driven` 作为默认软件 schema。
+
 ## [0.13.0] - 2026-06-14
 
 ### Changed
