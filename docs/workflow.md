@@ -37,7 +37,7 @@ aisee doctor --json
 - `aisee/memory/`
 - 必要 hooks
 
-如果是已有项目，先不要直接写新 change。优先使用 `aisee:spec-migrate` 反向整理 baseline specs，再进入新需求开发。
+如果是已有项目，或基于现有系统做二次开发，先不要直接写新 change。优先使用 `aisee:spec-migrate` 反向整理 baseline specs，再进入新需求开发。
 
 ## 默认主路径与按需扩展
 
@@ -47,7 +47,7 @@ aisee doctor --json
 
 - `aisee:design-spec` / `aisee:design-assets`：只有存在视觉规范、参考图或素材需求时才进入。
 - `aisee:svg-assets` / `aisee:image-object`：只有素材生产或图片处理工作时才进入。
-- `aisee:spec-migrate`：只用于已有项目建立 baseline spec，不是每次迭代必经步骤。
+- `aisee:spec-migrate`：只用于已有项目 / brownfield 场景建立 baseline spec，不是每次迭代必经步骤。
 - `aisee:memory`：只用于项目记忆的受控检索、写入和索引维护。
 - `aisee:reflect` / `aisee:knowledge-curate`：只用于复盘、项目记忆候选和团队知识沉淀。
 - `hw:*`：仅用于硬件、嵌入式或实验域，不影响 app 默认流程。
@@ -259,7 +259,7 @@ aisee:reflect
 | 技术调研 | `quick-research` schema -> findings/recommendation -> validate -> archive |
 | 文档站变更 | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive |
 | 不确定从哪开始 | `aisee:orient` -> 推荐下一步 skill / workflow |
-| 已有项目接入 | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> 新 change |
+| 已有项目接入 / 二开前补 baseline | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> 新 change |
 
 ## 何时停止
 

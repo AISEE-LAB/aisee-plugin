@@ -142,7 +142,7 @@ Compound Engineering = 可选的执行 / 审查 / 测试消费方
 
 按需扩展：
 
-- 可选扩展：`aisee:design-spec`、`aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object`、`aisee:spec-migrate`
+- 可选扩展：`aisee:design-spec`、`aisee:design-assets`、`aisee:svg-assets`、`aisee:image-object`、`aisee:spec-migrate`（已有项目 / brownfield baseline）
 - 知识循环：`aisee:reflect`、`aisee:memory`、`aisee:knowledge`、`aisee:knowledge-curate`
 - 硬件 / 实验域：`hw:srs`、`hw:architecture`、`hw:init`、`hw:change-plan`
 
@@ -338,7 +338,7 @@ quick-fix / quick-research / 其它轻量 schema
 
 实现前后可按需触发只读 Aisee reviewer lens：`aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer`。触发时机和边界见 [Aisee Workflow](docs/workflow.md)，复用优先规则见 [Aisee Best Practices](docs/best-practices.md)。
 
-对于已有项目，可使用 `aisee:spec-migrate` 从代码、测试、文档、路由和已验证行为中整理 OpenSpec baseline specs。
+对于已有项目或基于现有系统做二次开发的场景，可先使用 `aisee:spec-migrate` 从代码、测试、文档、路由和已验证行为中整理 OpenSpec baseline specs，再进入新 change。
 
 ## 主要 Skills
 
@@ -352,7 +352,7 @@ quick-fix / quick-research / 其它轻量 schema
 | `aisee:change-plan` | 规划独立 OpenSpec changes 并选择 schema。 |
 | `aisee-schema-pack` | 通过 marketplace plugin 提供并维护 OpenSpec schema packs。 |
 | `aisee:implementation-bridge` | 默认返回单个 change 的实现阶段 JSON 判定；仅在明确需要时生成实现交接 brief。 |
-| `aisee:spec-migrate` | 为已有项目整理 OpenSpec baseline specs。 |
+| `aisee:spec-migrate` | 为已有项目或二开场景整理 OpenSpec baseline specs。 |
 | `aisee:design-spec` | 生成设计规范，不重复 UI 内容规格。 |
 | `aisee:design-assets` | 生成或提取视觉参考和设计素材。 |
 | `aisee:svg-assets` | 生成、矢量化、优化和校验 SVG assets。 |

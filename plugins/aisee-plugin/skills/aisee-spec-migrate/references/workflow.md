@@ -129,7 +129,7 @@ Spec 基线迁移已整理：aisee/docs/spec-migration/{slug}/00-index.md
 
 写入 / 建议写入：{N} 个 baseline spec，覆盖 {M} 个能力，发现 {C} 个冲突、{Q} 个待确认项。
 
-下一步：确认 Open Questions 后，后续新需求使用 aisee:srs → aisee:ui-content / aisee:architecture → aisee:change-plan → /opsx:new。
+下一步：确认 Open Questions 后，对已有系统的新增 / 改造需求再进入 `aisee:srs`（按需）→ `aisee:change-plan` → `/opsx:new` → `aisee:change-author`。
 ```
 
 若存在阻塞项：

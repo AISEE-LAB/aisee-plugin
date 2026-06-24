@@ -143,7 +143,7 @@ Core iteration workflow:
 
 On-demand extensions:
 
-- Optional extensions: `aisee:design-spec`, `aisee:design-assets`, `aisee:svg-assets`, `aisee:image-object`, `aisee:spec-migrate`
+- Optional extensions: `aisee:design-spec`, `aisee:design-assets`, `aisee:svg-assets`, `aisee:image-object`, `aisee:spec-migrate` (existing-project / brownfield baseline)
 - Knowledge loop: `aisee:reflect`, `aisee:memory`, `aisee:knowledge`, `aisee:knowledge-curate`
 - Hardware / experimental: `hw:srs`, `hw:architecture`, `hw:init`, `hw:change-plan`
 
@@ -338,7 +338,7 @@ quick-fix / quick-research / another lightweight schema
 
 Before and after implementation, use read-only Aisee reviewer lenses as needed: `aisee-change-architect`, `aisee-spec-reviewer`, and `aisee-implementation-reviewer`. See [Aisee Workflow](docs/workflow.en.md) for timing and boundaries, and [Aisee Best Practices](docs/best-practices.en.md) for reuse-first routing.
 
-For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline specs from code, tests, docs, routes, and verified behavior.
+For existing projects or brownfield enhancement work, use `aisee:spec-migrate` to derive OpenSpec baseline specs from code, tests, docs, routes, and verified behavior before creating new changes.
 
 ## Main Skills
 
@@ -354,7 +354,7 @@ For existing projects, use `aisee:spec-migrate` to derive OpenSpec baseline spec
 | `aisee:implementation-bridge` | Return implementation-stage JSON decisions for a single change by default, and generate handoff briefs only when explicitly needed. |
 | `aisee:verify` | Diagnose artifact, task, source-map, numbering, and evidence gaps. |
 | `aisee:archive-guard` | Provide the final recommendation before `openspec archive`. |
-| `aisee:spec-migrate` | Build OpenSpec baseline specs for existing projects. |
+| `aisee:spec-migrate` | Build OpenSpec baseline specs for existing projects or brownfield enhancement work. |
 | `aisee:design-spec` | Produce design specifications without duplicating UI content specs. |
 | `aisee:design-assets` | Generate or extract visual references and design assets. |
 | `aisee:svg-assets` | Generate, vectorize, optimize, and validate SVG assets. |

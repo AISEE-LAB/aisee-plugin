@@ -1,11 +1,11 @@
 ---
 name: aisee:spec-migrate
-description: 基于已有项目快速整理 OpenSpec baseline specs，把现有代码、路由、页面、测试、API 文档和业务文档反向归纳为 openspec/specs/ 下的当前行为规范。用于“把旧项目迁移到 OpenSpec 管理”“整理现有系统 spec 基线”“从代码生成 OpenSpec specs”“补齐 openspec/specs”“建立 baseline spec”时触发。不要用于新需求 SRS、change 边界规划、design.md、tasks.md、实现代码或未来功能规划。
+description: 基于已有项目快速整理 OpenSpec baseline specs，把现有代码、路由、页面、测试、API 文档和业务文档反向归纳为 openspec/specs/ 下的当前行为规范。用于“把旧项目迁移到 OpenSpec 管理”“整理现有系统 spec 基线”“从代码生成 OpenSpec specs”“补齐 openspec/specs”“建立 baseline spec”“已有系统二次开发前先固化当前行为”时触发。不要用于新需求 SRS、change 边界规划、design.md、tasks.md、实现代码或未来功能规划。
 ---
 
 # aisee:spec-migrate — 现有项目 Spec 基线迁移
 
-把已有项目的当前行为整理成 OpenSpec 静态层 `openspec/specs/`。它回答“系统现在是什么”，为后续 `/opsx:new`、delta specs 和 archive 建立基线。
+把已有项目的当前行为整理成 OpenSpec 静态层 `openspec/specs/`。它回答“系统现在是什么”，为已有系统接入 OpenSpec、二次开发前建立 baseline，并为后续 `/opsx:new`、delta specs 和 archive 提供稳定起点。
 
 `aisee:spec-migrate` 不是 `aisee:srs`：不整理未来需求。
 `aisee:spec-migrate` 不是 `aisee:change-plan`：不规划 OpenSpec change 边界。
@@ -117,12 +117,10 @@ Reference loading：
        └─ aisee:spec-migrate    ← 反向整理现有系统 baseline specs
             └─ openspec/specs/  ← 当前系统行为基线
 
-后续新需求
-  ├─ aisee:srs
-  ├─ aisee:ui-content
-  ├─ aisee:architecture
+后续新增 / 改造需求
+  ├─ [按需] aisee:srs
   └─ aisee:change-plan
        └─ /opsx:new <change>
             └─ aisee:change-author
-                └─ schema artifacts + apply tracks
+                └─ 当前 change artifacts
 ```

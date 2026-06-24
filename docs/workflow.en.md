@@ -37,7 +37,7 @@ Use `aisee:init` to audit or create:
 - `aisee/memory/`
 - required hooks
 
-For existing projects, avoid writing new changes immediately. Prefer `aisee:spec-migrate` to derive baseline specs from verified current behavior first.
+For existing projects, or when doing brownfield enhancement work, avoid writing new changes immediately. Prefer `aisee:spec-migrate` to derive baseline specs from verified current behavior first.
 
 ## Default Path vs On-Demand Extensions
 
@@ -47,7 +47,7 @@ The following capabilities are conditional, not mandatory on every iteration:
 
 - `aisee:design-spec` / `aisee:design-assets`: only when visual rules, references, or asset planning are needed.
 - `aisee:svg-assets` / `aisee:image-object`: only for asset production or image-object workflows.
-- `aisee:spec-migrate`: only when onboarding an existing project into a baseline spec flow.
+- `aisee:spec-migrate`: only when onboarding an existing project or establishing a brownfield baseline, not for every iteration.
 - `aisee:memory`: only for controlled project memory retrieval, writes, and index maintenance.
 - `aisee:reflect` / `aisee:knowledge-curate`: only for retrospectives, project memory candidates, and team knowledge curation.
 - `hw:*`: only for hardware, embedded, or experimental domains; they do not affect the default app workflow.
@@ -266,7 +266,7 @@ Boundaries:
 | Technical research | `quick-research` schema -> findings/recommendation -> validate -> archive-guard |
 | Documentation site change | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive-guard |
 | Unsure where to start | `aisee:orient` -> recommended next skill / workflow |
-| Existing project adoption | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> new change |
+| Existing project adoption / brownfield baseline | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> new change |
 
 ## When To Stop
 
