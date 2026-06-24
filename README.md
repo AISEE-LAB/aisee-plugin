@@ -530,15 +530,16 @@ python scripts/smoke_release.py --with-pipx
 ### 持续兼容治理
 
 - 继续按 Compatibility Policy 维护 CLI JSON、project memory、team knowledge、marketplace plugin content 和 skill contracts；新增或破坏公开契约时同步补测试、迁移说明和 release notes。
-- 用真实项目 dogfood 验证 memory 检索和 knowledge guardrails，不为了覆盖 schema 类型扩展抽象流程。
+- 用真实项目 dogfood 验证 `spec-migrate`、`srs`、`change-plan`、`change-author`、memory 检索和 knowledge guardrails，不为了覆盖历史 skill 或私有 schema 类型继续扩展抽象流程。
 
 ### 后续
 
-- 补充更贴近 maintainer 场景的 Codex PR review / implementation brief 示例。
-- 增加 sample OpenSpec change，帮助新仓库快速理解 Aisee 的交付形态。
-- 扩展示例化的 verify / archive gate 文档，降低 OSS 维护者的试用门槛。
+- 补充更贴近 maintainer 场景的 OpenSpec baseline migration、change authoring 和 Codex PR review 示例。
+- 增加 sample OpenSpec change，帮助新仓库快速理解当前 Aisee companion 的交付形态。
+- 增加 existing-project / brownfield baseline 示例，降低存量项目接入 OpenSpec 的试用门槛。
 - 完善 project memory 的冲突提示、过期策略和低上下文注入规则。
 - 收敛 team knowledge 的远程同步、promote workflow、生命周期管理和可选 MCP 包装。
+- 将剩余历史文档逐步标注或收敛，避免搜索结果继续把旧 workflow 当成现行产品面。
 
 ## License
 

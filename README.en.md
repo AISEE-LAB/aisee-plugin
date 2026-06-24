@@ -531,15 +531,16 @@ python scripts/smoke_release.py --with-pipx
 ### Ongoing Compatibility Governance
 
 - Keep CLI JSON, project memory, team knowledge, marketplace plugin content, and skill contracts aligned with the Compatibility Policy; when a public contract changes, update tests, migration notes, and release notes together.
-- Use real-project dogfood to verify memory retrieval, implementation handoffs, and knowledge guardrails instead of expanding abstract flows just to cover schema types.
+- Use real-project dogfood to verify `spec-migrate`, `srs`, `change-plan`, `change-author`, memory retrieval, and knowledge guardrails instead of expanding abstract flows just to cover legacy skills or private schema variants.
 
 ### Later
 
-- Add stronger Codex PR review and implementation-brief examples for maintainer workflows.
-- Add a sample OpenSpec change so new repositories can see a concrete Aisee deliverable.
-- Expand verify/archive gate examples to lower the trial cost for OSS maintainers.
+- Add stronger OpenSpec baseline-migration, change-authoring, and Codex PR review examples for maintainer workflows.
+- Add a sample OpenSpec change so new repositories can see the current Aisee companion deliverable shape.
+- Add an existing-project / brownfield baseline example to lower the trial cost for OpenSpec adoption in legacy repositories.
 - Improve project memory conflict hints, stale-entry policy, and low-context injection rules.
 - Tighten team knowledge remote sync, promote workflows, lifecycle management, and optional MCP wrapping.
+- Continue marking or consolidating historical docs so repository search does not treat old workflows as the current product surface.
 
 ## License
 
