@@ -11,7 +11,7 @@
       "id": "init-001",
       "name": "init-template-uses-codex-stepwise-openspec-flow",
       "scenario": "new-project",
-      "prompt": "初始化一个新的 OpenSpec 项目 Codex 配置。项目还没有明确完整技术栈，但要使用 aisee:srs、aisee:ui-content、aisee:architecture、aisee:change-plan 和 aisee:change-author 的规划链路。",
+      "prompt": "初始化一个新的 OpenSpec 项目 Codex 配置。项目还没有明确完整技术栈，但要使用 aisee:srs、aisee:change-plan、aisee:change-author，以及已有项目时可选的 aisee:spec-migrate。",
       "context": {
         "files": [],
         "assumptions": [
@@ -19,10 +19,10 @@
           "项目技术栈未完整确认。"
         ]
       },
-      "expected_output": "生成或建议的 AGENTS.md / openspec/project.md 应使用 aisee:srs -> aisee:ui-content / aisee:architecture -> aisee:change-plan -> /opsx:new --schema aisee-app-spec-driven -> aisee:change-author 按 schema 生成 artifacts -> openspec validate -> aisee:implementation-bridge -> compound plan/work/review/test -> aisee:verify -> aisee:archive-guard -> openspec archive 的逐步流程，不得生成旧版非 Codex 规则文件，不得把 /opsx:propose 作为默认主流程。openspec/project.md 应允许技术栈未确认并明确标注，不能让 AGENTS.md 承载项目级技术选型。",
+      "expected_output": "生成或建议的 AGENTS.md / openspec/project.md 应使用当前收缩后的 OpenSpec companion 路径：已有项目按需先走 aisee:spec-migrate；新需求走 aisee:srs -> aisee:change-plan -> /opsx:new --schema <project-schema-or-spec-driven> -> aisee:change-author -> openspec validate -> implementation/review/test -> openspec archive。不得生成旧版非 Codex 规则文件，不得把 /opsx:propose 作为默认主流程。openspec/project.md 应允许技术栈未确认并明确标注，不能让 AGENTS.md 承载项目级技术选型。",
       "expected_outputs": [
         "生成或建议 AGENTS.md / openspec/project.md 的职责分工。",
-        "使用当前逐步 OpenSpec 流程：SRS、UI Content/Architecture、change-plan、/opsx:new、change-author、validate、implementation-bridge、CE、verify、archive-guard、archive。",
+        "使用当前收缩后的 OpenSpec companion 流程：spec-migrate（按需）、SRS、change-plan、/opsx:new、change-author、validate、implementation/review/test、archive。",
         "允许 openspec/project.md 中技术栈未确认，并明确标注。"
       ],
       "must_ask": [
@@ -32,10 +32,10 @@
       "must_include": [
         "AGENTS.md",
         "openspec/project.md",
-        "/opsx:new --schema aisee-app-spec-driven",
+        "/opsx:new --schema",
         "aisee:change-author",
         "openspec validate",
-        "aisee:archive-guard"
+        "openspec archive"
       ],
       "must_not": [
         "不得生成旧版非 Codex 规则文件。",
@@ -56,18 +56,18 @@
       "id": "init-002",
       "name": "audit-detects-outdated-propose-workflow",
       "scenario": "audit",
-      "prompt": "审计一个项目的 AGENTS.md。文件中写着 aisee:srs -> aisee:change-plan -> propose -> design -> tasks -> apply，并且没有提到 aisee/docs/ui-content 或 aisee/docs/architecture。",
+      "prompt": "审计一个项目的 AGENTS.md。文件中写着 aisee:srs -> aisee:change-plan -> propose -> design -> tasks -> apply，并且没有提到 aisee/docs/spec-migration 或 aisee/docs/change-plan。",
       "context": {
         "files": [],
         "assumptions": [
           "AGENTS.md 存在旧版 propose/design/tasks/apply 状态机。"
         ]
       },
-      "expected_output": "报告旧状态机与当前 aisee 链路不一致，建议改为 /opsx:new --schema aisee-app-spec-driven + aisee:change-author 的逐步创建流程，并补充 aisee/docs/requirements、aisee/docs/ui-content、aisee/docs/architecture、aisee/docs/change-plan 的职责说明。不得把 aisee/docs/architecture 说成 design.md 或 openspec/project.md 的替代品。",
+      "expected_output": "报告旧状态机与当前 aisee 链路不一致，建议改为按需 spec-migrate + srs -> change-plan -> /opsx:new --schema <project-schema-or-spec-driven> -> aisee:change-author -> openspec validate -> implementation/review/test -> openspec archive 的逐步创建流程，并补充 aisee/docs/requirements、aisee/docs/spec-migration、aisee/docs/change-plan 的职责说明。",
       "expected_outputs": [
         "识别旧状态机与当前 aisee 链路不一致。",
-        "建议改为 /opsx:new --schema aisee-app-spec-driven + aisee:change-author。",
-        "补充 aisee/docs/requirements、aisee/docs/ui-content、aisee/docs/architecture、aisee/docs/change-plan 的职责说明。"
+        "建议改为 /opsx:new --schema <project-schema-or-spec-driven> + aisee:change-author。",
+        "补充 aisee/docs/requirements、aisee/docs/spec-migration、aisee/docs/change-plan 的职责说明。"
       ],
       "must_ask": [
         "是否允许修改 AGENTS.md，还是只输出审计报告？",
@@ -80,8 +80,6 @@
         "aisee/docs 规划目录职责"
       ],
       "must_not": [
-        "不得把 aisee/docs/architecture 说成 design.md 的替代品。",
-        "不得把 aisee/docs/architecture 说成 openspec/project.md 的替代品。",
         "不得直接删除旧内容。"
       ],
       "quality_checks": [
@@ -104,7 +102,7 @@
           "当前目标 hook target 是 Codex。"
         ]
       },
-      "expected_output": "应明确 aisee:init 生成 AGENTS.md、openspec/project.md、aisee/docs 规划目录、aisee/memory，并且当前 hook target 只支持 Codex；不得生成非 Codex hook target 配置。AGENTS.md 必须要求先读取 .openspec.yaml / openspec/config.yaml 判断当前 schema，再按 schema 的 artifact 依赖顺序读取文件；aisee-app-spec-driven 的 artifact 清单只能作为默认 schema 示例。",
+      "expected_output": "应明确 aisee:init 生成 AGENTS.md、openspec/project.md、aisee/docs 规划目录、aisee/memory，并且当前 hook target 只支持 Codex；不得生成非 Codex hook target 配置。AGENTS.md 必须要求先读取 .openspec.yaml / openspec/config.yaml 判断当前 schema，再按 schema 的 artifact 依赖顺序读取文件；不得把 aisee-app-spec-driven artifact 清单写成默认主路径，也不得把已退出主面的 skill 写成必经步骤。",
       "expected_outputs": [
         "明确生成 AGENTS.md、openspec/project.md、aisee/docs 规划目录、aisee/memory。",
         "说明当前 hook target 只支持 Codex。",

@@ -44,11 +44,10 @@ Artifact 由当前 change 使用的 schema 决定。开始处理 change 前必�
 
 若找不到对应 change，先说明 `[SPEC-GAP]`，不要直接实现新范围。
 
-开始需求规划或 change 边界规划时，按需读取：
+开始 baseline 迁移、需求规划或 change 边界规划时，按需读取：
 
+- `aisee/docs/spec-migration/`：baseline 迁移索引、证据和冲突记录。
 - `aisee/docs/requirements/`：SRS 与 FR 来源。
-- `aisee/docs/ui-content/`：页面内容、元素、状态和交互来源。
-- `aisee/docs/architecture/`：技术事实、架构决策、项目约束、共享前置和风险来源。
 - `aisee/docs/change-plan/`：已生成的 change 边界规划结果。
 
 这些规划文档用于生成或补齐 OpenSpec artifacts，不能替代 `openspec/changes/<feature>/`。
@@ -57,25 +56,20 @@ Artifact 由当前 change 使用的 schema 决定。开始处理 change 前必�
 
 ```text
 aisee:init
-  └─ aisee-schema-pack          # 安装当前项目需要的 schema pack
+  └─ aisee:spec-migrate         # 已有项目按需先建立 baseline
 
-aisee:srs
-  ├─ aisee:ui-content           # 可选：页面、交互、多端内容规格
-  ├─ aisee:architecture         # 可选：技术架构事实、决策、项目约束、共享前置
+aisee:srs                       # 新需求按需澄清
   └─ aisee:change-plan          # 规划 OpenSpec change 边界
        └─ /opsx:new <change> --schema <selected-schema>
             └─ aisee:change-author
             └─ openspec validate
-            └─ aisee:implementation-bridge
-            └─ compound plan / work / review / test
-            └─ aisee:verify
-            └─ aisee:archive-guard
+            └─ implementation / review / test
             └─ openspec archive
 ```
 
 约束：
 
-- 规划材料不足：先补 `aisee/docs/requirements/`、`aisee/docs/ui-content/` 或 `aisee/docs/architecture/`，不要直接进入实现。
+- 规划材料不足：先补 `aisee/docs/spec-migration/`、`aisee/docs/requirements/` 或 `aisee/docs/change-plan/`，不要直接进入实现。
 - task 有误：暂停，更新 `tasks.md`，再继续。
 - spec 有误：暂停，走 spec 修改流程，再继续。
 - artifact 与实现事实冲突：暂停，更新对应 artifact；若当前 schema 生成 `source-map.md`，同步检查 traceability 与 artifact applicability。
@@ -89,7 +83,7 @@ aisee:srs
 |---|---|---|
 | `[SPEC-CHANGE-REQUIRED]` | 建议与现有 spec 冲突 | 暂停，实现前走 spec 修改流程 |
 | `[SPEC-GAP]` | spec 缺少必要决策 | 补齐 spec 后继续 |
-| `[STACK-CONTEXT-MISSING]` | 缺少项目级技术栈来源 | 先更新 `openspec/project.md` 或补 architecture |
+| `[STACK-CONTEXT-MISSING]` | 缺少项目级技术栈来源 | 先更新 `openspec/project.md` |
 | `[STACK-DECISION-REQUIRED]` | 需要正式技术决策 | 暂停具体设计 |
 | `[STACK-CONFLICT]` | 需求或输入与项目技术事实冲突 | 等待确认 |
 | `[RISK]` | 识别到实现风险 | 在 `tasks.md` 增加缓解措施 |
@@ -120,8 +114,7 @@ aisee:srs
 ## 知识库
 
 - `aisee/docs/requirements/`：`aisee:srs` 输出。
-- `aisee/docs/ui-content/`：`aisee:ui-content` 输出，说明页面内容、元素、状态和交互，不含视觉设计规范。
-- `aisee/docs/architecture/`：`aisee:architecture` 输出，说明技术事实、架构决策、项目约束、共享前置和风险；不能替代 `openspec/project.md` 的项目级技术栈事实。
+- `aisee/docs/spec-migration/`：`aisee:spec-migrate` 输出，说明 baseline 迁移索引、证据、冲突和 Open Questions。
 - `aisee/docs/change-plan/`：`aisee:change-plan` 输出。
 - `aisee/docs/reflect/`：会话反思、技能草案、memory 候选。
 

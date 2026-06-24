@@ -1,6 +1,6 @@
 ---
 name: aisee:init
-description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。仅适用于已使用或准备接入 OpenSpec 的项目；用于创建或修复 AGENTS.md、openspec/project.md、aisee/memory/、aisee/docs/ 规划目录，并在当前支持的 Codex hook target 下安装项目级 hooks；检查 hook 机制兼容性、OpenSpec 状态机、规划目录与项目技术架构边界。触发词包括 aisee:init、aisee-init、初始化项目配置、优化 AGENTS.md、配置 Codex hooks、OpenSpec 配置审计。
+description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。仅适用于已使用或准备接入 OpenSpec 的项目；用于创建或修复 AGENTS.md、openspec/project.md、aisee/memory/、最小 Aisee docs 目录，并在当前支持的 Codex hook target 下安装项目级 hooks；检查 hook 机制兼容性、OpenSpec 状态机、baseline 迁移入口与项目技术架构边界。触发词包括 aisee:init、aisee-init、初始化项目配置、优化 AGENTS.md、配置 Codex hooks、OpenSpec 配置审计。
 ---
 
 # aisee:init
@@ -24,7 +24,7 @@ description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。仅适用
 
 - `AGENTS.md`：当前 Codex target 的项目规则、OpenSpec 工作流、工具调用约束、沙箱和验证要求。
 - `openspec/project.md`：项目事实、技术栈、架构、开发命令；不放 AI 行为规则。
-- `aisee/docs/requirements/`、`aisee/docs/ui-content/`、`aisee/docs/architecture/`、`aisee/docs/change-plan/`：Aisee 规划链路产物目录。
+- `aisee/docs/requirements/`、`aisee/docs/spec-migration/`、`aisee/docs/change-plan/`：Aisee 当前主推链路相关目录。
 - `aisee/memory/rules.md` 与 `aisee/memory/index.md`：项目本地记忆规则和记忆入口。
 - `aisee/docs/reflect/`：会话复盘和 memory 候选区；不替代 `aisee/memory/`。
 - 当前支持的 hook target 是 Codex：`.codex/hooks.json` 与 `.codex/config.toml`。
@@ -33,7 +33,7 @@ description: 初始化、审计并优化 OpenSpec/Aisee 项目配置。仅适用
 非目标：
 
 - 不生成非 Codex hook target 配置。若用户需要其他 agent runtime，先输出差异和待设计项，不要套用 Codex hook 协议。
-- 不安装或维护 OpenSpec custom schemas；转交 `aisee-schema-pack`。
+- 不安装或维护 OpenSpec custom schemas。
 
 ## 先决条件
 
@@ -78,7 +78,7 @@ openspec update .
 5. 若 `aisee/memory/index.md` 不存在，用 `assets/memory-index-template.md` 初始化 `aisee/memory/arch`、`aisee/memory/pref`、`aisee/memory/ctx`、`aisee/memory/stack`。
 6. 在用户确认后运行 `<skill-dir>/scripts/setup-hooks.js --codex` 安装 Codex hooks。
 
-CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/docs/**`、`aisee/memory/**`、`.codex/**`、`aisee/hooks/**`，安装 hooks，建议 schema-pack 安装，或执行旧路径迁移前，必须先列出计划写入路径、覆盖/合并策略、hook target、迁移源和目标，等待用户确认。未确认时只输出审计报告和修复计划，不改文件、不安装 hooks、不迁移 memory。
+CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/docs/**`、`aisee/memory/**`、`.codex/**`、`aisee/hooks/**`，安装 hooks，或执行旧路径迁移前，必须先列出计划写入路径、覆盖/合并策略、hook target、迁移源和目标，等待用户确认。未确认时只输出审计报告和修复计划，不改文件、不安装 hooks、不迁移 memory。
 
 ## 目录布局与迁移
 
@@ -103,7 +103,7 @@ CHECKPOINT: 写入或修改 `AGENTS.md`、`openspec/project.md`、`aisee/docs/**
 - 运行安装器时可以引用 `<skill-dir>/scripts/setup-hooks.js`；写入目标项目的 hook runtime 命令不能引用 `<skill-dir>`、`aisee-init/scripts/`、全局 skill 缓存或用户 home 下的技能路径。
 - 记忆规则使用项目本地 `aisee/memory/rules.md`，不再引用或写入任何全局 memory rules 文件。
 - `aisee/memory/` 是长期项目记忆的 canonical 位置；它是 guidance，不替代 OpenSpec 事实源；`aisee/docs/reflect/` 只作为复盘、草案和待确认候选区。
-- OpenSpec custom schemas 由 `aisee-schema-pack` 负责；本技能不安装或维护 schema pack。
+- OpenSpec custom schemas 不由本技能安装或维护；需要时由用户自行管理项目 `openspec/schemas/`。
 
 ## Hook 安装
 
@@ -152,7 +152,7 @@ Hook 职责：
 - 是否声明 OpenSpec 是唯一规范来源。
 - 是否要求实现、修复或审查 OpenSpec change 前先读取 `.openspec.yaml` / `openspec/config.yaml` 判断 schema，再按 schema 的 artifact 依赖顺序读取文件。
 - 是否定义 `[SPEC-CHANGE-REQUIRED]`、`[SPEC-GAP]`、`[RISK]`。
-- 是否包含完整状态机：`aisee:srs → aisee:ui-content / aisee:architecture → aisee:change-plan → /opsx:new --schema <schema> → aisee:change-author → openspec validate → aisee:implementation-bridge → CE work/review/test → aisee:verify → aisee:archive-guard → openspec archive`。
+- 是否包含当前主推状态机：`aisee:spec-migrate`（已有项目按需）→ `aisee:srs`（按需）→ `aisee:change-plan` → `/opsx:new --schema <schema>` → `aisee:change-author` → `openspec validate` → implementation/review/test → `openspec archive`。
 - 是否包含 Codex 专属工具、沙箱、验证和输出约束。
 - 是否包含技术栈，若有标记 `[VIOLATION]`。
 
@@ -165,9 +165,8 @@ Hook 职责：
 
 ### aisee 规划产物
 
-- 是否说明 `aisee/docs/requirements/`、`aisee/docs/ui-content/`、`aisee/docs/architecture/`、`aisee/docs/change-plan/` 的职责。
+- 是否说明 `aisee/docs/requirements/`、`aisee/docs/spec-migration/`、`aisee/docs/change-plan/` 的职责。
 - 若已有规划产物，hook 或配置是否能提示这些目录，但不把它们提升为 OpenSpec artifacts 的替代品。
-- 是否明确 `aisee/docs/architecture/` 提供技术架构事实、决策和约束，不能替代 `openspec/project.md` 的项目级技术栈来源。
 - 若存在旧路径 `.aisee/`、`.memory/` 或 `docs/requirements/` 等历史目录，标记 `[MIGRATION]`，说明只兼容读取，不自动迁移。
 - 若新旧路径同时存在，标记 `[CONFLICT]`，说明 `aisee/` 为准，旧路径可能过期。
 - 若用户要求执行迁移，先读取 [layout-migration.md](references/layout-migration.md)。
@@ -179,7 +178,7 @@ Hook 职责：
 - `.codex/config.toml` 是否使用 `[features].hooks = true`。
 - hook 命令是否从 git root 或绝对项目路径定位脚本，而不是技能安装路径。
 - 若项目仍引用全局 memory rules 路径，标记 `[VIOLATION]`，改为项目本地 `aisee/memory/rules.md`。
-- 若用户要安装、创建或审计 OpenSpec custom schemas，转交 `aisee-schema-pack`。
+- 若用户要创建或审计 OpenSpec custom schemas，只说明当前 `aisee:init` 不负责该工作。
 
 ## OPTIMIZE 规则
 

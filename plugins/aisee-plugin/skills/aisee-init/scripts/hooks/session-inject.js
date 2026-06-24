@@ -20,14 +20,9 @@ const KNOWLEDGE_SOURCES = [
     label: 'SRS 与 FR 来源，仅用于追溯，不能替代 openspec/'
   },
   {
-    canonical: 'aisee/docs/ui-content',
-    legacy: 'docs/ui-content',
-    label: '页面内容、元素、状态和交互来源'
-  },
-  {
-    canonical: 'aisee/docs/architecture',
-    legacy: 'docs/architecture',
-    label: '技术架构事实、决策、项目约束、共享前置和风险来源'
+    canonical: 'aisee/docs/spec-migration',
+    legacy: 'docs/spec-migration',
+    label: 'baseline 迁移索引、证据和冲突记录'
   },
   {
     canonical: 'aisee/docs/change-plan',
