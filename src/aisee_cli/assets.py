@@ -57,7 +57,6 @@ def is_aisee_source_checkout(root: Path) -> bool:
 def is_aisee_asset_root(root: Path) -> bool:
     return (
         (root / "skills" / "aisee-srs" / "SKILL.md").exists()
-        and (root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack").exists()
         and (root / "references").is_dir()
     )
 
@@ -171,15 +170,6 @@ def resolve_asset_root(project_root: Path) -> Path:
     if source_root is not None:
         return source_root
     raise missing_asset_error()
-
-
-def resolve_schema_pack_dir(project_root: Path) -> Path:
-    source_root = resolve_source_asset_root(project_root)
-    if source_root is not None:
-        source_schema_pack = source_root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack"
-        return source_schema_pack
-    raise missing_asset_error()
-
 
 def resolve_plugin_metadata(target: str, project_root: Path | None = None) -> Path:
     roots = []

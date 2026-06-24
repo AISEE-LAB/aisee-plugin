@@ -17,16 +17,6 @@ def install_compound_skills(root: Path, *skills: str) -> Path:
     return skills_dir
 
 
-def create_plugin_asset_root(root: Path, schema_name: str, schema_yaml: str, templates: tuple[str, ...]) -> Path:
-    write(root / "skills" / "aisee-srs" / "SKILL.md", "# aisee:srs\n")
-    write(root / "references" / "README.md", "# references\n")
-    schema_dir = root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / schema_name
-    write(schema_dir / "schema.yaml", schema_yaml)
-    for template in templates:
-        write(schema_dir / "templates" / template, f"# {template}\n")
-    return root
-
-
 def create_project(root: Path) -> None:
     write(root / "AGENTS.md", "# Rules\n")
     write(root / "docs" / "requirements" / "auth-srs.md", "# Auth SRS\n\n## 登录\n\n覆盖需求：FR-001\n")
@@ -441,13 +431,9 @@ def test_context_pack_blocks_when_change_schema_metadata_is_missing(tmp_path: Pa
     assert pack["facts"]["parsed"]["schema"]["resolved_from"] == "project-config"
 
 
-def test_context_pack_blocks_when_schema_only_exists_in_plugin_assets(tmp_path: Path, monkeypatch) -> None:
+def test_context_pack_blocks_when_schema_is_missing_from_project(tmp_path: Path) -> None:
     create_project(tmp_path)
     schema_dir = tmp_path / "openspec" / "schemas" / "aisee-app-spec-driven"
-    schema_yaml = (schema_dir / "schema.yaml").read_text(encoding="utf-8")
-    templates = tuple(path.name for path in (schema_dir / "templates").iterdir())
-    plugin_root = create_plugin_asset_root(tmp_path / "mock-plugin", "aisee-app-spec-driven", schema_yaml, templates)
-    monkeypatch.setenv("AISEE_PLUGIN_ASSET_ROOT", str(plugin_root))
     for path in reversed(sorted(schema_dir.rglob("*"))):
         if path.is_file():
             path.unlink()
@@ -457,11 +443,10 @@ def test_context_pack_blocks_when_schema_only_exists_in_plugin_assets(tmp_path: 
     pack = build_context_pack(tmp_path, "add-auth", "aisee-verify")
 
     schema = pack["facts"]["parsed"]["schema"]
-    blocker = next(gap for gap in pack["gaps"] if gap["code"] == "SCHEMA_NOT_INSTALLED")
+    blocker = next(gap for gap in pack["gaps"] if gap["code"] == "SCHEMA_NOT_FOUND")
     assert schema["installed"] is False
-    assert schema["source_path"].endswith("mock-plugin/skills/aisee-schema-pack/assets/schema-pack/aisee-app-spec-driven/schema.yaml")
-    assert blocker["suggested_fix"]["skill"] == "aisee-schema-pack"
-    assert blocker["suggested_fix"]["command"].endswith("--schema aisee-app-spec-driven")
+    assert schema["source_path"] is None
+    assert blocker["suggested_fix"] is None
 
 
 def test_context_pack_blocks_when_schema_hint_conflicts_with_metadata(tmp_path: Path) -> None:

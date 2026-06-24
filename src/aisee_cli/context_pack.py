@@ -16,7 +16,6 @@ from typing import Any
 import yaml
 
 from aisee_cli.anchor_refs import extract_anchor_refs, extract_local_ids, parse_anchor_ref
-from aisee_cli.assets import resolve_source_asset_root
 from aisee_cli.index import build_index
 from aisee_cli.project import inspect_project_rules, rel
 from aisee_cli.source_map import parse_source_map
@@ -237,16 +236,10 @@ def resolve_change_schema(root: Path, change_path: Path) -> dict[str, Any]:
 
 
 def find_schema_paths(root: Path, schema_name: str) -> SchemaPaths:
-    asset_root = resolve_source_asset_root(root)
     installed_path = root / "openspec" / "schemas" / schema_name / "schema.yaml"
-    source_path = None
-    if asset_root is not None:
-        candidate = asset_root / "skills" / "aisee-schema-pack" / "assets" / "schema-pack" / schema_name / "schema.yaml"
-        if candidate.exists():
-            source_path = candidate
     return SchemaPaths(
         installed_path=installed_path if installed_path.exists() else None,
-        source_path=source_path,
+        source_path=None,
     )
 
 
@@ -756,29 +749,14 @@ def build_gaps(
     if schema_paths.installed_path is None:
         schema_name = schema_resolution["effective_schema"]
         owner_artifact = f"openspec/schemas/{schema_name}/schema.yaml"
-        if schema_paths.source_path is not None:
-            gaps.append(
-                gap(
-                    "SCHEMA_NOT_INSTALLED",
-                    "blocker",
-                    "Selected schema is available from marketplace plugin assets but not installed into the current project",
-                    owner_artifact,
-                    suggested_fix={
-                        "skill": "aisee-schema-pack",
-                        "command": f"node <skill-dir>/scripts/setup-schemas.js --schema {schema_name}",
-                        "writes": True,
-                    },
-                )
+        gaps.append(
+            gap(
+                "SCHEMA_NOT_FOUND",
+                "blocker",
+                "Selected schema is not available in the current project",
+                owner_artifact,
             )
-        else:
-            gaps.append(
-                gap(
-                    "SCHEMA_NOT_FOUND",
-                    "blocker",
-                    "Selected schema is not available in the current project or marketplace plugin assets",
-                    owner_artifact,
-                )
-            )
+        )
 
     if source_map_required:
         gaps.extend(source_map.get("issues", []))
