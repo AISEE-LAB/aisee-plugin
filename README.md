@@ -141,10 +141,6 @@ legacy / transitional：
 - `aisee:design-assets`
 - `aisee:svg-assets`
 - `aisee:image-object`
-- `aisee-schema-pack`
-- `aisee:implementation-bridge`
-- `aisee:verify`
-- `aisee:archive-guard`
 - `hw:*`
 
 ## 功能特性
@@ -153,7 +149,6 @@ legacy / transitional：
 - **结构化需求澄清**：`aisee:srs` 通过对话澄清业务需求，并生成 change planning 所需需求输入。
 - **OpenSpec change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
 - **Detailed change authoring**：`aisee:change-author` 细化 OpenSpec change 内容，强化 proposal、specs、design、tasks 的可实现性。
-- **轻量 schema 兼容**：`aisee:implementation-bridge` 可直接消费 OpenSpec 官方 `spec-driven` 及其它轻量 schema；不会因为缺少 Aisee 专属增强字段而拒绝生成 bridge 上下文。
 - **项目记忆**：`aisee memory` 受控检索和写入当前仓库长期 guidance，不替代 OpenSpec 事实源。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
 - **受控记忆与知识检索**：`aisee memory` 与 `aisee knowledge` 直接提供项目记忆和团队 guardrails 查询，不升级为 workflow authority。
@@ -351,7 +346,7 @@ quick-fix / quick-research / 其它轻量 schema
 | `aisee:knowledge` | 引导团队知识 CLI 的初始化、配置、同步、检索和 promote 流程。 |
 | `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
 | `aisee:reflect` | 沉淀可复用项目经验和 memory / knowledge 候选。 |
-| `legacy / transitional skills` | `aisee-schema-pack`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard` 及各类 design/hardware skills 仍公开存在，但不再属于当前主推路径。 |
+| `legacy / transitional skills` | 各类 design/hardware skills 与少量历史遗留资源仍存在于仓库中，但不再属于当前主推路径。 |
 
 ## CLI Reference
 

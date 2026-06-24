@@ -1,7 +1,0 @@
-interface:
-  display_name: "aisee-schema-pack"
-  short_description: "安装并审计 OpenSpec custom schemas"
-  default_prompt: "使用 $aisee-schema-pack 检查并安装当前项目需要的 OpenSpec schemas。"
-
-policy:
-  allow_implicit_invocation: true

@@ -34,10 +34,6 @@
 - `aisee:design-assets`
 - `aisee:svg-assets`
 - `aisee:image-object`
-- `aisee-schema-pack`
-- `aisee:implementation-bridge`
-- `aisee:verify`
-- `aisee:archive-guard`
 
 ## Hardware / Experimental
 

@@ -138,15 +138,7 @@ aisee knowledge query --from-change <change> --for ce-work --json
 
 Knowledge matches are reminders only. They do not change the current change's specification source and should not be copied into durable artifacts.
 
-Then use `aisee:implementation-bridge` to hand the current change directly to `ce-work`. It should tell `ce-work` what to read first and what must be written back after implementation; generate an Implementation Brief only when a human-readable handoff is explicitly needed. The brief is an execution index:
-
-- current change and schema;
-- read-first artifacts;
-- apply tracks writeback location;
-- verification and evidence entrypoints;
-- whether Tier 2 code review is recommended.
-
-If a change is large, do not go back to change-plan just to split it again. Create `brief-index.md` and multiple `brief-part-NN.md` files inside the same current change handoff flow.
+Before implementation, read the current change, schema, related artifacts, `tasks.md`, the necessary evidence entrypoints, and any project memory / team knowledge guidance directly; no separate Aisee implementation handoff skill is required.
 
 ## 5. Implementation, Review, And Test
 
@@ -164,7 +156,7 @@ Read-only Aisee reviewer lens timing:
 | Reviewer | When to trigger | Purpose |
 | --- | --- | --- |
 | `aisee-change-architect` | After `aisee:change-plan` and before `aisee:change-author` when the change has complex boundaries, cross-module or cross-schema impact, unclear dependencies, or uncertain granularity | Review change boundaries, dependencies, granularity, and independent deliverability |
-| `aisee-spec-reviewer` | After `aisee:change-author` and before `aisee:implementation-bridge` / `ce-work` | Review whether artifacts, contracts, source-map, and tasks are complete, consistent, and verifiable |
+| `aisee-spec-reviewer` | After `aisee:change-author` and before implementation | Review whether artifacts, contracts, source-map, and tasks are complete, consistent, and verifiable |
 | `aisee-implementation-reviewer` | After `ce-work` | Compare implementation, tasks, specs/source-map, and evidence for drift |
 
 These reviewers only return structured review conclusions. They do not edit code, run tests, submit PRs, or replace `ce-doc-review`, `ce-code-review`, `ce-test-*`, or `ce-work`. Interface, UI, hardware, firmware, security, and verification differences should remain schema-aware check lenses rather than new all-purpose agents.
@@ -177,7 +169,7 @@ After implementation, run:
 openspec validate <change>
 ```
 
-Then read the current change artifacts, schema, `tasks.md`, `source-map.md` when applicable, and evidence directly, and use `aisee:verify` or a manual review pass to check:
+Then read the current change artifacts, schema, `tasks.md`, `source-map.md` when applicable, and evidence directly, and produce a manual or tool-assisted consistency review that checks:
 
 - whether schema artifacts exist;
 - whether Required=yes contracts are closed;
@@ -246,8 +238,8 @@ Boundaries:
 
 | Scenario | Recommended Path |
 | --- | --- |
-| New feature | SRS -> UI/Architecture -> change-plan -> change-author -> implementation-bridge -> verify -> archive-guard |
-| Small fix | `quick-fix` schema -> change-author -> implementation-bridge -> implementation / review / test -> archive |
+| New feature | SRS -> change-plan -> change-author -> implementation / review / test -> archive |
+| Small fix | `quick-fix` schema -> change-author -> implementation / review / test -> archive |
 | Technical research | `quick-research` schema -> findings/recommendation -> validate -> archive-guard |
 | Documentation site change | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive-guard |
 | Existing project adoption / brownfield baseline | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> new change |

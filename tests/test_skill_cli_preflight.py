@@ -147,10 +147,6 @@ def test_skill_taxonomy_contract_covers_all_public_skills() -> None:
         "aisee:design-assets",
         "aisee:svg-assets",
         "aisee:image-object",
-        "aisee-schema-pack",
-        "aisee:implementation-bridge",
-        "aisee:verify",
-        "aisee:archive-guard",
     }
 
     classified = {skill for skills in taxonomy.values() for skill in skills}
@@ -166,24 +162,6 @@ def test_readme_highlights_core_workflow_taxonomy() -> None:
     assert "`aisee:spec-migrate`" in readme
     for skill in read_taxonomy()["OpenSpec Core"]:
         assert f"`{skill}`" in readme
-
-
-def test_core_skills_document_auto_cli_consumption_and_lean_projection() -> None:
-    expectations = {
-        "plugins/aisee-plugin/skills/aisee-implementation-bridge/SKILL.md": "默认直接读取当前 change artifacts、schema、`tasks.md`、`source-map.md`（若当前 schema 生成）和 `AGENTS.md`。",
-        "plugins/aisee-plugin/skills/aisee-verify/SKILL.md": "OpenSpec artifact 合法性以 `openspec validate` 和当前 schema 为准",
-        "plugins/aisee-plugin/skills/aisee-archive-guard/SKILL.md": "OpenSpec artifact 合法性和 baseline merge 仍以 `openspec validate` / `openspec archive` 为准",
-    }
-    for relative_path, marker in expectations.items():
-        assert marker in (ROOT / relative_path).read_text(encoding="utf-8")
-
-
-def test_implementation_bridge_requires_apply_track_writeback_before_work_completion() -> None:
-    skill = (ROOT / "plugins/aisee-plugin/skills/aisee-implementation-bridge/SKILL.md").read_text(encoding="utf-8")
-
-    assert "CHECKPOINT: `ce-work` 完成前，必须先回写当前 schema 的 apply tracks。" in skill
-    assert "如果代码已改但 apply tracks 仍未更新，不得把该批次报告为完成。" in skill
-
 
 def test_change_plan_rules_and_templates_support_source_context_without_fake_refs() -> None:
     expected_markers = {
