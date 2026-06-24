@@ -504,6 +504,13 @@ python -m build
 python scripts/smoke_release.py
 ```
 
+当前 smoke 主要验证：
+
+- CLI-only wheel 安装是否可用；
+- `plugin inspect` 是否返回正确的 CLI-only / setup hint 语义；
+- 已移除的公开命令（如 `plugin export`）是否继续表现为 argparse invalid choice；
+- `memory inspect` 等保留命令在空项目中的只读行为。
+
 发布候选版本建议在本机具备 `pipx` 时运行隔离安装验证：
 
 ```bash

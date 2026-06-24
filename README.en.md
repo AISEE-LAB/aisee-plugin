@@ -505,6 +505,13 @@ Run the release smoke test:
 python scripts/smoke_release.py
 ```
 
+The current smoke run mainly verifies:
+
+- the installed wheel behaves as a CLI-only distribution;
+- `plugin inspect` reports the expected CLI-only / setup-hint semantics;
+- removed public commands such as `plugin export` still fail as argparse invalid choices;
+- retained commands such as `memory inspect` remain read-only in an empty project.
+
 For release candidates, also run the isolated `pipx` install smoke test when `pipx` is available:
 
 ```bash
