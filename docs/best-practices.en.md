@@ -298,7 +298,7 @@ When OpenSpec already owns a capability, Aisee should only bridge, validate, or 
 Once the main path is usable, validate it with real or sample projects:
 
 ```text
-init -> srs -> ui-content -> architecture -> change-plan
+init -> spec-migrate -> srs -> change-plan
 -> change-author -> implementation-bridge -> implementation
 -> verify -> archive-guard -> archive
 ```

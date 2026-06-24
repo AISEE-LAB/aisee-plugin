@@ -296,7 +296,7 @@ Aisee 应解决 OpenSpec 不负责的部分：
 主链路可用后，优先用真实或样例项目验证：
 
 ```text
-init -> srs -> ui-content -> architecture -> change-plan
+init -> spec-migrate -> srs -> change-plan
 -> change-author -> implementation-bridge -> implementation
 -> verify -> archive-guard -> archive
 ```

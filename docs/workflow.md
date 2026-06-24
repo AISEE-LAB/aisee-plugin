@@ -242,7 +242,6 @@ aisee:reflect
 | 小修复 | `quick-fix` schema -> change-author -> implementation-bridge -> implementation / review / test -> archive |
 | 技术调研 | `quick-research` schema -> findings/recommendation -> validate -> archive |
 | 文档站变更 | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive |
-| 不确定从哪开始 | `aisee:orient` -> 推荐下一步 skill / workflow |
 | 已有项目接入 / 二开前补 baseline | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> 新 change |
 
 ## 何时停止

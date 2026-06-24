@@ -250,7 +250,6 @@ Boundaries:
 | Small fix | `quick-fix` schema -> change-author -> implementation-bridge -> implementation / review / test -> archive |
 | Technical research | `quick-research` schema -> findings/recommendation -> validate -> archive-guard |
 | Documentation site change | `aisee-docsite-driven` schema -> doc-change/tasks -> build/link evidence -> archive-guard |
-| Unsure where to start | `aisee:orient` -> recommended next skill / workflow |
 | Existing project adoption / brownfield baseline | `aisee:init` -> `aisee:spec-migrate` -> baseline specs -> new change |
 
 ## When To Stop

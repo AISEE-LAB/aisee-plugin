@@ -138,9 +138,6 @@ Memory / knowledge:
 
 Legacy / transitional:
 
-- `aisee:orient`
-- `aisee:ui-content`
-- `aisee:architecture`
 - `aisee:design-spec`
 - `aisee:design-assets`
 - `aisee:svg-assets`
@@ -354,7 +351,7 @@ For existing projects or brownfield enhancement work, use `aisee:spec-migrate` t
 | `aisee:knowledge` | Guide team knowledge CLI initialization, configuration, sync, retrieval, and promote workflows. |
 | `aisee:knowledge-curate` | Batch-review project-local reusable knowledge candidates and produce card drafts for human submission to team knowledge. |
 | `aisee:reflect` | Capture reusable project lessons and memory/knowledge candidates. |
-| `legacy / transitional skills` | `aisee:orient`, `aisee:ui-content`, `aisee:architecture`, `aisee-schema-pack`, `aisee:implementation-bridge`, `aisee:verify`, `aisee:archive-guard`, and the design/hardware skills remain public for now, but they are no longer the recommended product path. |
+| `legacy / transitional skills` | `aisee-schema-pack`, `aisee:implementation-bridge`, `aisee:verify`, `aisee:archive-guard`, and the design/hardware skills remain public for now, but they are no longer the recommended product path. |
 
 ## CLI Reference
 

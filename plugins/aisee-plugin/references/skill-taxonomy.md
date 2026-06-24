@@ -30,9 +30,6 @@
 
 以下 skill 当前仍公开存在，但不再属于主推产品面，后续会收敛、迁移或删除：
 
-- `aisee:orient`
-- `aisee:ui-content`
-- `aisee:architecture`
 - `aisee:design-spec`
 - `aisee:design-assets`
 - `aisee:svg-assets`

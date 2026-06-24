@@ -137,9 +137,6 @@ memory / knowledge：
 
 legacy / transitional：
 
-- `aisee:orient`
-- `aisee:ui-content`
-- `aisee:architecture`
 - `aisee:design-spec`
 - `aisee:design-assets`
 - `aisee:svg-assets`
@@ -354,7 +351,7 @@ quick-fix / quick-research / 其它轻量 schema
 | `aisee:knowledge` | 引导团队知识 CLI 的初始化、配置、同步、检索和 promote 流程。 |
 | `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
 | `aisee:reflect` | 沉淀可复用项目经验和 memory / knowledge 候选。 |
-| `legacy / transitional skills` | `aisee:orient`、`aisee:ui-content`、`aisee:architecture`、`aisee-schema-pack`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard` 及各类 design/hardware skills 仍公开存在，但不再属于当前主推路径。 |
+| `legacy / transitional skills` | `aisee-schema-pack`、`aisee:implementation-bridge`、`aisee:verify`、`aisee:archive-guard` 及各类 design/hardware skills 仍公开存在，但不再属于当前主推路径。 |
 
 ## CLI Reference
 

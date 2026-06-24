@@ -30,8 +30,6 @@ def test_planning_doc_frontmatter_contract_exists_and_representative_templates_r
 
     expected = {
         "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-standard.md": 'doc_type: "srs"',
-        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-standard.md": 'doc_type: "ui-content"',
-        "plugins/aisee-plugin/skills/aisee-architecture/assets/architecture-template-core.md": 'doc_type: "architecture"',
         "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-standard.md": 'doc_type: "design-spec"',
         "plugins/aisee-plugin/skills/aisee-design-assets/assets/design-assets-index-template.md": 'doc_type: "design-assets"',
         "plugins/aisee-plugin/skills/aisee-implementation-bridge/references/brief-template.md": 'doc_type: "implementation-brief"',
@@ -62,39 +60,6 @@ def test_planning_doc_output_templates_use_frontmatter_without_duplicate_header_
         ],
         "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-epic-module.md": [
             'doc_type: "srs"',
-            "**状态**：草稿",
-            "**创建日期**：{date}",
-            "**ID Scope**：{scope}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-standard.md": [
-            "**状态**：草稿",
-            "**创建日期**：{date}",
-            "**ID Scope**：{scope}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-enhancement.md": [
-            'doc_type: "ui-content"',
-            "**状态**：草稿",
-            "**创建日期**：{date}",
-            "**ID Scope**：{scope}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-inventory.md": [
-            'doc_type: "ui-content"',
-            "**状态**：草稿",
-            "**创建日期**：{date}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-epic-index.md": [
-            'doc_type: "ui-content"',
-            "**状态**：草稿",
-            "**创建日期**：{date}",
-            "**ID Scope**：{scope}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-ui-content/assets/ui-content-template-epic-module.md": [
-            'doc_type: "ui-content"',
-            "**状态**：草稿",
-            "**创建日期**：{date}",
-            "**ID Scope**：{scope}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-architecture/assets/architecture-template-core.md": [
             "**状态**：草稿",
             "**创建日期**：{date}",
             "**ID Scope**：{scope}",
@@ -139,26 +104,6 @@ def test_srs_skill_keeps_downstream_hints_minimal() -> None:
         for marker in forbidden_markers:
             assert marker not in text
 
-
-def test_architecture_skill_keeps_change_plan_hints_fact_based() -> None:
-    expected_present = {
-        "plugins/aisee-plugin/skills/aisee-architecture/assets/architecture-template-core.md": "## 14. 给 aisee:change-plan 的架构提示",
-        "plugins/aisee-plugin/skills/aisee-architecture/references/workflow.md": "## Phase 3 — 生成给 change-plan 的技术提示",
-    }
-    forbidden_markers = [
-        "### 14.3 可并行边界提示",
-        "### 14.4 不应横切的能力",
-        "可并行边界：哪些模块从技术上相互独立",
-        "不应横切的能力：例如不要把同一状态机拆散",
-    ]
-
-    for relative_path, required_marker in expected_present.items():
-        text = (ROOT / relative_path).read_text(encoding="utf-8")
-        assert required_marker in text
-        for marker in forbidden_markers:
-            assert marker not in text
-
-
 def test_spec_migrate_template_uses_frontmatter_without_duplicate_header_metadata() -> None:
     text = (ROOT / "plugins/aisee-plugin/skills/aisee-spec-migrate/assets/migration-index-template.md").read_text(encoding="utf-8")
 
@@ -198,9 +143,6 @@ def test_skill_taxonomy_contract_covers_all_public_skills() -> None:
         "aisee:knowledge-curate",
     ]
     assert set(taxonomy["Legacy / Transitional"]) == {
-        "aisee:orient",
-        "aisee:ui-content",
-        "aisee:architecture",
         "aisee:design-spec",
         "aisee:design-assets",
         "aisee:svg-assets",
