@@ -40,31 +40,20 @@ Breaking changes:
 - changing exit codes or JSON error structure so existing automation cannot detect failure;
 - reading oversized context by default or exposing source code, secrets, or environment variables.
 
-### Schema Packs
+### Skill Surface And OpenSpec Companion Positioning
 
 The following are public contracts:
 
-- `schema.yaml` names and versions;
-- artifact `id`, `generates`, `template`, and `requires`;
-- apply/archive tracks;
-- template filenames and artifact applicability rules;
-- the as-needed contract strategy of `aisee-app-spec-driven`;
-- the positioning of `aisee-device-spec-driven` as a hardware/embedded extension.
-
-Backward-compatible changes:
-
-- adding optional artifacts;
-- relaxing template requirements;
-- adding explanatory fields;
-- adding N/A rules;
-- adding schemas.
+- the names and roles of the retained capabilities: `aisee:init`, `aisee:spec-migrate`, `aisee:srs`, `aisee:change-plan`, `aisee:change-author`, `aisee:memory`, `aisee:knowledge`, and `aisee:knowledge-curate`;
+- the setup / OpenSpec core / memory-and-knowledge / legacy-transitional / hardware taxonomy split in `plugins/aisee-plugin/references/skill-taxonomy.md`;
+- existing-project baseline migration remaining with `aisee:spec-migrate` instead of being mixed into the default new-feature path;
+- `aisee openspec ensure` remaining the OpenSpec setup entrypoint.
 
 Breaking changes:
 
-- deleting artifacts;
-- renaming artifacts or template files;
-- changing the artifact DAG so existing changes no longer validate;
-- making as-needed artifacts mandatory by default;
+- deleting retained capabilities without updating docs, taxonomy, tests, and release notes;
+- continuing to present legacy / transitional skills as part of the recommended product path;
+- keeping the product surface implicitly tied to repo-bundled private schemas;
 - creating a parallel source of truth beside OpenSpec baseline specs.
 
 ### Memory And Knowledge Retrieval

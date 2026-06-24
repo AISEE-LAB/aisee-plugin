@@ -283,7 +283,7 @@ If you only want the OpenSpec directory layout without installing OpenSpec-provi
 aisee openspec ensure --tools none --json
 ```
 
-Schema packs come from the marketplace-installed plugin. `aisee schemas list/check` only reports project-installed schema state or source-checkout development schema state; it does not install schemas automatically.
+If a project uses custom schemas, treat the project's own `openspec/schemas/` tree and the OpenSpec CLI as the source of truth; Aisee no longer exposes a public `schemas` command surface.
 
 Check the project state again:
 

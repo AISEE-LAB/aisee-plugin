@@ -282,7 +282,7 @@ aisee openspec ensure --profile core --json
 aisee openspec ensure --tools none --json
 ```
 
-Schema packs 来自 marketplace-installed plugin。`aisee schemas list/check` 只报告项目已安装 schema 状态或开发期源码 schema 状态；不会由 CLI 自动安装 schema。
+如果项目使用自定义 schema，直接以项目内 `openspec/schemas/` 和 OpenSpec CLI 为准；Aisee 不再提供公开 `schemas` 命令面。
 
 再次检查项目状态：
 

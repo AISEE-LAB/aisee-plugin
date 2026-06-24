@@ -80,7 +80,7 @@ status: active
 applies_to:
   stacks: [python]
   phases: [implementation, review]
-  schemas: [aisee-app-spec-driven]
+  schemas: []
   surfaces: [contract, http-service]
 trigger:
   - Changes service contract
@@ -225,7 +225,7 @@ scope_level: project-fact
 applies_to:
   stacks: [python]
   phases: [implementation]
-  schemas: [aisee-app-spec-driven]
+  schemas: []
   surfaces: [contract]
 trigger:
   - login implementation detail

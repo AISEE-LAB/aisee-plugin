@@ -70,7 +70,7 @@ change 内 artifacts 应只写当前 change 必需的内容，不复制整份前
 
 当工作同时满足“小范围、边界明确、低风险”时：
 
-- 可以跳过 SRS / UI Content / Architecture 等重前置文档；
+- 可以跳过额外重前置文档；
 - 直接进入 `quick-fix`、`quick-research` 或其它合适轻量 schema；
 - 仍然要保证当前 change artifacts、verify 和 archive gate 闭合。
 
@@ -80,18 +80,18 @@ change 内 artifacts 应只写当前 change 必需的内容，不复制整份前
 
 | 场景 | Schema |
 | --- | --- |
-| 新功能、跨模块软件变更 | `aisee-app-spec-driven` |
+| 新功能、跨模块软件变更 | 项目当前 schema，缺省为 `spec-driven` |
 | 单点低风险修复 | `quick-fix` |
 | 技术调研或方案建议 | `quick-research` |
 | 文档站变更 | `aisee-docsite-driven` |
 | 基础设施变更 | `infra-change` |
 | 安全相关变更 | `security-audit` |
 
-`aisee-app-spec-driven` 适合需要 specs、source-map、contracts 和 tasks 闭环的变更。不要为了形式完整让每个小修复都生成 UI、service、data contract。
+默认软件主路径应优先使用项目当前 schema，项目没有额外约束时使用官方 `spec-driven`。不要为了形式完整让每个小修复都生成额外 contract 层。
 
 ## 5. Required=yes 才展开按需 contract
 
-app schema 的按需 artifacts 包括：
+当当前 schema 生成 `source-map.md` 或按需 contracts 时，才需要考虑这些 artifact：
 
 ```text
 change-context.md
@@ -160,7 +160,6 @@ aisee knowledge query --from-change <change> --for ce-work --json
 - 无明确 change 时，先回到需求澄清、change-plan 或当前 change 本身。
 - 有明确 change 时，默认直接读取当前 change artifacts、schema、`tasks.md`、`source-map.md`（若适用）和 evidence 入口。
 - 只有明确需要项目记忆或团队知识时，才额外读取 `aisee memory search --query "<task>" --json` 或 `aisee knowledge query --from-change <change> --for ce-work --json`。
-- `aisee:implementation-bridge` 只负责提示 `ce-work` 先读什么，以及完成后如何回写 `tasks.md` / apply tracks 和 evidence。
 - 不创建与 CE 重叠的执行、代码审查或测试 agent。
 
 接口、UI、硬件、固件、安全和验证差异应作为 schema-aware check lenses。需要 Aisee reviewer 时，只使用 `aisee-change-architect`、`aisee-spec-reviewer`、`aisee-implementation-reviewer` 这三个只读一致性审查 role。
@@ -206,13 +205,12 @@ Brief 不应包含：
 archive 前应满足：
 
 - `openspec validate <change>` 通过。
-- `aisee:verify` 无 blocker。
 - apply tracks 已关闭。
 - Required=yes contracts 已闭合。
 - review/test/manual evidence 足够。
 - accepted risk 有 owner、理由、影响范围和后续处理方式。
 
-`aisee:archive-guard` 给出“暂不建议 archive”时，应先修 blocker，而不是强行归档。
+如果人工或工具化审查已经指出 archive blocker，应先修 blocker，而不是强行归档。
 
 ## 13. 跨仓库契约只读共享
 
@@ -297,8 +295,8 @@ Aisee 应解决 OpenSpec 不负责的部分：
 
 ```text
 init -> spec-migrate -> srs -> change-plan
--> change-author -> implementation-bridge -> implementation
--> verify -> archive-guard -> archive
+-> change-author -> implementation
+-> review / test -> archive
 ```
 
 每轮 dogfood 只修真实暴露的问题。不要因为“可能未来需要”提前设计大型抽象。

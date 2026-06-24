@@ -87,7 +87,7 @@ INIT_REPO_CARDS = {
                 "stacks": [],
                 "frameworks": [],
                 "phases": ["planning", "implementation", "review"],
-                "schemas": ["aisee-app-spec-driven", "aisee-device-spec-driven"],
+                "schemas": [],
                 "surfaces": ["openspec", "source-map"],
             },
             "trigger": [

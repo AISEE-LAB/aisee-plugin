@@ -72,7 +72,7 @@ For multi-repository work, prefer a contract change or prerequisite shared chang
 
 When work is small, bounded, and low-risk:
 
-- it can skip heavier upfront docs such as SRS, UI Content, or Architecture;
+- it can skip heavier optional upfront docs;
 - it can enter `quick-fix`, `quick-research`, or another suitable lightweight schema directly;
 - it still must close the current change artifacts, verify flow, and archive gate.
 
@@ -82,18 +82,18 @@ Recommended schema choices:
 
 | Scenario | Schema |
 | --- | --- |
-| New feature or cross-module software change | `aisee-app-spec-driven` |
+| New feature or cross-module software change | The project's current schema, defaulting to `spec-driven` |
 | Small low-risk fix | `quick-fix` |
 | Technical research or recommendation | `quick-research` |
 | Documentation site change | `aisee-docsite-driven` |
 | Infrastructure change | `infra-change` |
 | Security-related change | `security-audit` |
 
-`aisee-app-spec-driven` is useful when specs, source-map, contracts, and tasks need to close together. Do not force every small fix to generate UI, service, and data contracts.
+The default software path should use the project's current schema, or official `spec-driven` when no extra schema constraint exists. Do not force every small fix to generate extra contract layers.
 
 ## 5. Expand As-Needed Contracts Only When Required=yes
 
-As-needed app artifacts include:
+When the current schema generates `source-map.md` or optional contracts, these artifacts may apply:
 
 ```text
 change-context.md
@@ -162,7 +162,6 @@ Before creating tasks, entering implementation, proposing reviewer lenses, or re
 - When there is no explicit change, return to requirements clarification, change-plan, or the current change itself rather than relying on a dedicated flow command.
 - When there is an explicit change, read the current change artifacts, schema, `tasks.md`, `source-map.md` when applicable, and evidence entrypoints directly.
 - Only read `aisee memory search --query "<task>" --json` or `aisee knowledge query --from-change <change> --for ce-work --json` when you explicitly need that optional guidance.
-- `aisee:implementation-bridge` should tell `ce-work` what to read first and how to write back `tasks.md` / apply tracks and evidence after implementation.
 - Do not create execution, code-review, or test agents that overlap with CE responsibilities.
 
 Interface, UI, hardware, firmware, security, and verification differences should remain schema-aware check lenses. When Aisee reviewers are needed, use only the read-only consistency roles `aisee-change-architect`, `aisee-spec-reviewer`, and `aisee-implementation-reviewer`.
@@ -208,13 +207,12 @@ Do not treat `openspec archive` as a command to run casually after development.
 Before archive:
 
 - `openspec validate <change>` passes.
-- `aisee:verify` has no blockers.
 - apply tracks are closed.
 - Required=yes contracts are closed.
 - review/test/manual evidence is sufficient.
 - accepted risks have an owner, reason, impact, and follow-up path.
 
-When `aisee:archive-guard` says archive is not recommended, fix blockers first.
+When manual or tool-assisted review says archive is not recommended, fix blockers first.
 
 ## 13. Share Cross-Repository Contracts Read-Only
 
@@ -299,8 +297,8 @@ Once the main path is usable, validate it with real or sample projects:
 
 ```text
 init -> spec-migrate -> srs -> change-plan
--> change-author -> implementation-bridge -> implementation
--> verify -> archive-guard -> archive
+-> change-author -> implementation
+-> review / test -> archive
 ```
 
 Fix problems exposed by dogfood runs. Avoid large abstractions designed only for possible future needs.

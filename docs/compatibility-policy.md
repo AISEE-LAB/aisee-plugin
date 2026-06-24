@@ -53,7 +53,7 @@
 
 - 删除主推保留能力而不更新文档、taxonomy、测试和 release notes；
 - 继续把 legacy / transitional skill 伪装成当前主推路径；
-- 让 Aisee 产品面继续默认绑定 `aisee-app-spec-driven` 或其它 repo 自带 schema；
+- 让 Aisee 产品面继续默认绑定任何 repo 自带私有 schema；
 - 让 Aisee 与 OpenSpec baseline 事实源产生平行事实源。
 
 ### Memory And Knowledge Retrieval
