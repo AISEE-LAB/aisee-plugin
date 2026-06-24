@@ -12,6 +12,12 @@ date: 2026-06-24
 
 实现上不再主推 `aisee-app-spec-driven` 或其它 Aisee 自带 schema，也不再把 UI/架构/bridge/verify/archive/hardware/design 作为默认产品面。Aisee 的 OpenSpec 增强将回到两件事：更好理解用户意图，以及把 `proposal / specs / design / tasks` 写得更详细、更可实现。
 
+## Execution Summary
+
+截至当前执行轮次，公开产品面、CLI 命令面、初始化模板、`spec-migrate` / `srs` / `change-plan` / `change-author` 的主定位，以及 `schema-pack` 与旧 schema 心智的主要残留都已完成收缩。已从公开 skill 面移除 `orient`、`ui-content`、`architecture`、`implementation-bridge`、`verify`、`archive-guard`、`aisee-schema-pack`、`design-spec`、`design-assets`、`svg-assets`。
+
+当前明确保留并继续支持的主能力是：`aisee:init`、`aisee:spec-migrate`、`aisee:srs`、`aisee:change-plan`、`aisee:change-author`、`aisee:memory`、`aisee:knowledge`、`aisee:knowledge-curate`、`aisee:reflect`。按当前裁决，`aisee:image-object` 与 `hw:*` 继续保留，不纳入本轮瘦身删除范围。
+
 ---
 
 ## Problem Frame
