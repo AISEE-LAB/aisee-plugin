@@ -1,12 +1,12 @@
 # aisee:change-plan — Schema Selection Rules
 
-默认使用 `--schema auto`。不要把所有任务都套到 `aisee-app-spec-driven`。
+默认使用 `--schema auto`。不要把所有任务都套到 `aisee-app-spec-driven`；优先考虑项目当前 schema 或官方 `spec-driven`。
 
 ## 选择规则
 
 | 工作类型 | 推荐 schema | 使用条件 |
 |---|---|---|
-| App / Web / backend / CLI / job 功能迭代 | `aisee-app-spec-driven` | 需要稳定追踪 SRS / UI Content / Design Spec / Architecture，或需要把前置文档压缩成实现契约 |
+| App / Web / backend / CLI / job 功能迭代 | 项目当前 schema，缺省为 `spec-driven` | 需要进入正常 OpenSpec change 流程，且项目没有更合适的轻量 schema |
 | 小 bugfix / hotfix | `quick-fix` | 单一问题、根因或复现路径明确、预计小于等于 1 天、不新增业务能力、不需要新 UI/API/DATA 契约 |
 | 文案 / 样式 / 静态配置小改 | `quick-fix` | 用户可见影响小，可用简单验证证明 |
 | 技术调研 / 可行性验证 | `quick-research` | 目标是回答问题或做 go/no-go，不承诺生产实现 |
@@ -15,7 +15,7 @@
 | 基础设施 / 部署 / CI | `infra-change` | 改的是环境、部署、云资源、流水线、网络或回滚风险 |
 | 安全敏感变更 | `security-audit` | 涉及认证、授权、隐私、加密、输入攻击面或安全审计 |
 | 设备 / 固件 / 嵌入式 / 驱动 / 板级 | `aisee-device-spec-driven` | Linux 设备程序、RTOS、bare-metal、MCU、SoC、板级 bring-up 或硬件相关 change |
-| 普通 OpenSpec change | `spec-driven` | 不需要 Aisee 规划链追踪，且项目未安装更合适轻量 schema |
+| 普通 OpenSpec change | `spec-driven` | 没有额外 schema 约束，或项目未安装更合适轻量 schema |
 
 ## 必做判定维度
 
@@ -26,7 +26,7 @@
 | 交付意图 | 是生产实现、轻量修复、调研结论、文档维护，还是基础设施/安全工作 | “上线功能”“修一个问题”“回答可行性”“改 docs”“改 CI / 部署 / 权限” |
 | 可观察结果 | 用户、操作者、系统或设备最终能看到什么变化 | 新能力、修复后的行为、调研结论、审计报告、部署策略、硬件行为 |
 | 契约足迹 | 是否需要新增或显著修改 UI / API / DATA / HW / FW / RT / VER 契约 | 新接口、数据模型变化、前端状态流、设备协议、验证合同 |
-| 上游追踪 | 是否需要稳定追踪 SRS / UI Content / Design Spec / Architecture / hardware context | 需要把前置 planning docs 压缩进后续实现 contract |
+| 上游追踪 | 是否需要稳定追踪 SRS、baseline migration、Design Spec 或其它前置材料 | 需要把前置 planning docs 压缩进后续实现 contract |
 | 风险与不确定性 | 是否仍在回答 go/no-go、根因未明、架构/安全决策未定 | spike、PoC、待确认、一致性策略未定、第三方集成未知 |
 | 规模与 owner | 是否单一 owner、预计时长、是否跨多个域 | <=1 天单点修复、跨团队共享前置、横跨 app + infra + security |
 
@@ -46,7 +46,7 @@
 | 候选 schema | 结论 | 关键理由 |
 |---|---|---|
 | `quick-fix` | reject | 需要新增服务契约和审计语义，超出单点修复 |
-| `aisee-app-spec-driven` | select | 需要 source-map、specs、tasks，并承接 SRS / Architecture 追踪 |
+| `spec-driven` | select | 需要标准 OpenSpec change 闭环，并为后续 detailed authoring 提供稳定入口 |
 
 ## 低置信度阻断
 
@@ -101,7 +101,7 @@
 - 未安装但 marketplace plugin source 可见：输出 blocker，转交 `aisee-schema-pack`，建议 `node <skill-dir>/scripts/setup-schemas.js --schema <name>`。
 - source 也不可见：输出 schema availability blocker，并说明 author / implementation 无法继续。
 
-schema 状态检查只使用 `aisee schemas list/check --json`。
+schema 状态检查只基于当前项目的 schema 声明、`openspec/schemas/` 目录或 OpenSpec 默认 `spec-driven`。
 
 ## 混合系统
 
@@ -132,6 +132,6 @@ schema 状态检查只使用 `aisee schemas list/check --json`。
 
 - 为什么选择该 schema。
 - 还评估了哪些 schema，为什么没有选它们。
-- 如果不是 `aisee-app-spec-driven`，为什么不需要 SRS / UI Content / Architecture 追踪。
-- 需要哪些 upstream docs：SRS / UI Content / Design Spec / Design Assets / Architecture / Issue / PR / none。
+- 如果不是项目当前 schema或 `spec-driven`，为什么标准 OpenSpec 闭环不足以承接当前需求。
+- 需要哪些 upstream docs：SRS / baseline migration / Design Spec / Design Assets / Issue / PR / none。
 - 是否需要 `source-map.md` seed；只有 schema 生成 `source-map.md` 时才要求 seed。

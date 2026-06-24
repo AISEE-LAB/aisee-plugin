@@ -1,6 +1,6 @@
 ---
 name: aisee:change-plan
-description: 将已确认需求、轻量修复、技术调研或项目事实映射为可独立交付的 OpenSpec changes，并为每个 change 选择合适 schema。用于规划 change 边界、依赖顺序、并行关系、source-map seed 和 /opsx:new 命令；不重新做业务模块划分，不重新生成需求，不默认套用 app schema。
+description: 将已确认需求、轻量修复、技术调研或项目事实映射为可独立交付的 OpenSpec changes，并为每个 change 选择合适 schema。用于规划 change 边界、依赖顺序、并行关系和 /opsx:new 命令；不重新做业务模块划分，不重新生成需求，不默认套用 app schema。
 ---
 
 # aisee:change-plan — OpenSpec Change 边界规划
@@ -12,11 +12,11 @@ description: 将已确认需求、轻量修复、技术调研或项目事实映�
 本 skill 负责：
 
 - 选择每个 change 的 schema。
-- 在输出 `/opsx:new` 前做 schema availability preflight：优先读取 `aisee schemas list/check --json` 或项目内 `openspec/schemas/<schema>/schema.yaml` 状态。
+- 在输出 `/opsx:new` 前检查项目当前 schema 来源：change metadata、`openspec/config.yaml`、项目内 `openspec/schemas/` 或 OpenSpec 默认 `spec-driven`。
 - 规划 change 边界、依赖顺序和并行关系。
 - 使用 Mermaid 语法块输出依赖顺序和并行关系，作为长期可读性 contract。
 - 输出 source-map seed，仅当所选 schema 生成 `source-map.md`。
-- 输出可复制的 `/opsx:new "<change>" --schema <schema>` 命令，并把它视为后续 author / implementation 的 schema metadata 合同。
+- 输出可复制的 `/opsx:new "<change>" --schema <schema>` 命令，并把它视为后续 author 的 schema metadata 合同。
 - 保存 change plan 到 `aisee/docs/change-plan/`。
 
 上游如果存在 `design-spec`、`design-assets`、`spec-migrate`、`reflect` 或 `hw:*` 输入，只能按需作为边界线索使用；它们不是默认新功能 happy path 的必经节点。
@@ -36,7 +36,7 @@ description: 将已确认需求、轻量修复、技术调研或项目事实映�
 - 原始需求描述。
 - ticket / issue 引用。
 - 既有需求文档路径，包括 `aisee:srs` 输出的 SRS。
-- 可选配套输入：`aisee:ui-content`、`aisee:design-spec`、`aisee:design-assets`、`aisee:architecture`。
+- 可选配套输入：`aisee:spec-migrate`、`aisee:design-spec`、`aisee:design-assets`。
 
 可选参数：
 
@@ -72,14 +72,13 @@ cat AGENTS.md 2>/dev/null | head -120
 
 ## 阶段 2 — 识别输入模式
 
-识别输入来自 SRS、UI Content、Design、Architecture、ticket、issue、轻量修复还是调研材料。
+识别输入来自 SRS、baseline migration、Design、ticket、issue、轻量修复还是调研材料。
 
 使用输入中的稳定对象作为分析单元，但不要复制输入结构：
 
 - SRS 使用 `FR / NFR / RULE / FLOW / STATE`。
-- UI Content 使用 `PAGE / FLOW / STATE`。
+- baseline migration 使用已确认 baseline 能力边界和当前行为证据。
 - Design Spec / Design Assets 只提供设计策略、组件策略、tokens、screen patterns、参考图或 dev-visual-brief。
-- Architecture 使用 `ARCH / DEC / CONSTRAINT / RISK`、技术事实、共享前置和阻塞标签。
 
 SRS 模块名、页面类型、设计材料、架构层、技术层和 schema artifact 名都只是边界提示，不是 change 名称或最终边界。编号规则按 `references/source-map-rules.md` 执行：只引用已有 `doc-ref#编号`；`SPEC / API / DATA / TASK / TEST` 属于 change-author 阶段。
 
@@ -89,7 +88,7 @@ SRS 模块名、页面类型、设计材料、架构层、技术层和 schema ar
 
 - 需求横跨多个无关领域，边界不清。
 - 范围内组件或能力确实不明确。
-- 关键架构、设计或需求决策缺失，并影响是否可独立交付。
+- 关键需求或当前行为判断缺失，并影响是否可独立交付。
 
 少于约 100 字且只描述一个用户可见功能的小需求，或 SRS 输入模式下 FR 范围已明确时，直接跳过澄清。
 
@@ -102,9 +101,9 @@ SRS 模块名、页面类型、设计材料、架构层、技术层和 schema ar
 1. 用 `input-boundary-rules.md` 审查候选，拒绝输入章节、技术层、页面类型、schema artifact 和实施阶段伪 change。
 2. 用 `schema-selection-rules.md` 选择 schema；默认 `auto`，不要默认套用 app schema。
 3. 对每个候选 schema 做 availability preflight：
-   - 已安装：继续输出 `/opsx:new "<change>" --schema <schema>`。
-   - 未安装但 plugin source 可见：停止在 planning 输出，转交 `aisee-schema-pack`，建议 `node <skill-dir>/scripts/setup-schemas.js --schema <schema>`。
-   - source 也不可见：输出 schema availability blocker，不进入 author/execute 路径。
+   - 项目已声明或已安装：继续输出 `/opsx:new "<change>" --schema <schema>`。
+   - 项目未声明自定义 schema，且不需要额外 schema 能力：默认回落到 OpenSpec `spec-driven`。
+   - 用户明确指定未安装的自定义 schema：输出 schema availability blocker，不进入 author 路径。
 4. 用 `change-boundary-algorithm.md` 划分可独立交付边界、依赖和并行关系。
 5. 用 `source-map-rules.md` 生成 source-map seed；不生成 `source-map.md` 的 schema 写 N/A。
 6. 用 `output-template.md` 输出完整 change plan。
@@ -116,24 +115,20 @@ SRS 模块名、页面类型、设计材料、架构层、技术层和 schema ar
 - 不得创建只做 infrastructure 或 setup、没有用户可见结果的 change。
 - 不得机械拆成 frontend / backend / database changes，除非它们确实可以独立交付。
 - 小 bugfix、文案、样式、配置小改不得强行升级为 `aisee-app-spec-driven`。
-- 轻量 schema 不要求 SRS / UI Content / Architecture，除非边界判断确实依赖这些文档。
+- 轻量 schema 不要求 SRS 或额外 planning docs，除非边界判断确实依赖这些文档。
 - 不得为不生成 `source-map.md` 的 schema 输出伪 source-map seed。
 - 无前置 planning docs 时，必须使用 intake 摘要路径，不得伪造 `docs/...#FR-001`。
-- schema 写入只通过 `aisee-schema-pack` skill / `setup-schemas.js`。
 - 调研 schema 的结论不得写成生产实现任务；调研后需要实现时，另起实现 change。
 
 ## 工作流衔接
 
 ```text
-aisee:srs / ui-content / design-spec / architecture
+aisee:spec-migrate / aisee:srs / design-spec
   -> aisee:change-plan
   -> /opsx:new <change> --schema <selected-schema>
   -> aisee:change-author
   -> openspec validate
-  -> aisee:implementation-bridge
-  -> compound plan / work / review / test
-  -> aisee:verify
-  -> aisee:archive-guard
+  -> implementation / review / test
   -> openspec archive
 ```
 

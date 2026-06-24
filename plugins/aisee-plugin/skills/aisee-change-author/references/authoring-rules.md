@@ -8,7 +8,7 @@
 - [无 source-map schema 的缺口落点](#无-source-map-schema-的缺口落点)
 - [Schema DAG 规则](#schema-dag-规则)
 - [Artifact 编写边界](#artifact-编写边界)
-- [App Schema v2 顺序](#app-schema-v2-顺序)
+- [Spec-Driven / Generic Schema 顺序](#spec-driven--generic-schema-顺序)
 - [Artifact 适用性判断](#artifact-适用性判断)
 - [编号检查](#编号检查)
 
@@ -78,16 +78,17 @@
 - 发现的 `[SPEC-GAP]`、`[NUMBERING-FINALIZATION-REQUIRED]`、`[STACK-CONFLICT]` 或其他阻塞标签。
 - 不覆盖的上游编号及原因。
 
-## App Schema v2 顺序
+## Spec-Driven / Generic Schema 顺序
 
-`aisee-app-spec-driven` v2 仍然以 `proposal.md`、`source-map.md`、`specs/**/*.md` 和 `tasks.md` 构成最小闭环，但 author 顺序不能把 `tasks.md` 提前到按需 artifacts 之前。
+当当前 change 使用官方 `spec-driven` 或其它通用软件 schema 时，最常见的最小闭环是 `proposal.md`、`specs/**/*.md`、`design.md` 和 `tasks.md`。如果当前 schema 另外生成 `source-map.md` 或按需 contracts，author 顺序同样不能把 `tasks.md` 提前到这些适用 artifacts 之前。
 
 author 顺序：
 
 ```text
 proposal.md
-source-map.md
+source-map.md            # 当前 schema 生成时
 specs/**/*.md
+design.md                # 当前 schema 生成时
 change-context.md        # Required=yes 时
 ui-contract.md           # Required=yes 时
 data-model.md            # Required=yes 时
@@ -104,15 +105,16 @@ tasks.md
 生成规则：
 
 - `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用来源 ref 或编号，不复制上游全文。
-- `source-map.md`：先建立上游来源、产出编号、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
+- `source-map.md`：当前 schema 生成它时，先建立上游来源、产出编号、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
 - `specs/**/*.md`：只写用户可观察行为和验收场景，覆盖 FR / NFR / RULE / FLOW / STATE。
+- `design.md`：当前 schema 生成它时，只写实现约束、兼容性考虑、集成边界和必要设计决策，不写代码实现。
 - `change-context.md`：只在 Required=yes 时承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture；优先复用上游编号，只有确实新增局部事项时才新增本地编号。
 - `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
 - `data-model.md`：只在 Required=yes 且涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
 - `service-contract.md`：只在 Required=yes 且涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
 - apply tracks：最后生成或补齐，是当前 schema 的唯一长期执行清单；常见是 `tasks.md`，也可能是其它 schema artifact 或 N/A。
 
-app schema 的 `tasks.md` 只记录实现顺序、任务状态和验证证据，任务项必须引用 specs、source-map 和 Required=yes 的适用 artifacts，但不重复契约细节。轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。
+通用软件 schema 的 `tasks.md` 只记录实现顺序、任务状态和验证证据，任务项必须引用 specs、design 和当前 schema 生成的相关 artifacts，但不重复契约细节。轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。
 
 ## Artifact 适用性判断
 

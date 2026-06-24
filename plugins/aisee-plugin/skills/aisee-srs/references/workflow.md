@@ -55,7 +55,7 @@ Baseline-aware 模式不得：
 - 等待用户回答后再继续。
 - 第 8 轮后展示 `question-bank.md` 中的过轮提醒。
 - 将未解决但不阻塞的信息记录为 `[ASSUMPTION]`，然后继续推进。
-- 对页面占比较高的需求，只追问理解用户任务路径所必需的功能性 UI 问题；详细页面清单和页面内容留给 `aisee:ui-content`。
+- 对页面占比较高的需求，只追问理解用户任务路径所必需的功能性 UI 问题；不要把页面清单、视觉或实现设计写进 SRS。
 - 进入确认门禁前，至少覆盖：目标用户、业务目标、范围 / 非目标、核心流程、业务对象与状态、关键规则、权限 / 数据范围、异常、验收方向和交付形态。
 
 需求域处理：
@@ -93,7 +93,7 @@ Baseline-aware 模式不得：
 - 待确认假设：{list or "无"}
 - 已识别风险：{list or "无"}
 - 基线感知：启用 / 未启用（如启用，列出主要影响基线）
-- 后续建议：UI Content 需要 / 不需要；Architecture 需要 / 不需要；仍待确认的关键问题
+- 后续建议：是否建议直接进入 `aisee:change-plan`；仍待确认的关键问题
 - 输出模式：标准模式 / Epic 模式
 
 主流程预览：
@@ -125,7 +125,7 @@ Baseline-aware 模式不得：
 4. 只读取 `references/scenario-extension-blocks.md` 中与当前场景相关的块。
 5. 为 `FR / NFR / RULE / FLOW / STATE` 预留正式 ID，或在工具不可用时标注临时 ID。
 6. 填写所有已确认需求、假设、Open Questions 和 baseline-aware 字段。
-7. 仅在有价值时追加精简下游建议：是否建议进入 `aisee:ui-content`、`aisee:architecture`，以及仍待确认的关键问题；不得预写 `aisee:change-plan` 结果或实现级设计。
+7. 仅在有价值时追加精简下游建议：是否建议进入 `aisee:change-plan`，以及仍待确认的关键问题；不得预写 `aisee:change-plan` 结果或实现级设计。
 
 ### Epic 模式
 
@@ -174,6 +174,6 @@ aisee/docs/requirements/<YYYY-MM-DD>-<slug>/
 - 生成路径
 - `FR / NFR / RULE / Open Questions` 数量
 - ID 状态：已激活正式 ID，或仍有临时占位符需要预留
-- 建议下一步：`aisee:ui-content`、`aisee:architecture` 或 `aisee:change-plan`
+- 建议下一步：`aisee:change-plan`
 
 当 UI Content、Architecture、contracts 或 change artifacts 仍缺失时，不要告诉用户可以只凭 SRS 直接开始实现。

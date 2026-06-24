@@ -1,11 +1,11 @@
 ---
 name: aisee:srs
-description: 通过结构化对话充分澄清软件类业务需求，并生成规划级详细的需求规格说明书（SRS）。当用户想写需求文档、澄清产品范围、整理业务目标/用户角色/业务能力/业务流程/业务规则/权限/非目标，或为 UI Content、Architecture、aisee:change-plan 准备稳定输入时使用。适用于 App、小程序、Web、桌面软件、后端/API 服务、CLI 工具、定时任务/异步任务等软件项目。SRS 应写到足够支持后续拆 change 和生成 UI/技术架构，但不要写成接口设计、数据库设计、技术方案、视觉设计、硬件架构、固件设计或开发任务。
+description: 通过结构化对话充分澄清软件类业务需求，并生成规划级详细的需求规格说明书（SRS）。当用户想写需求文档、澄清产品范围、整理业务目标/用户角色/业务能力/业务流程/业务规则/权限/非目标，或为 aisee:change-plan 准备稳定输入时使用。适用于 App、小程序、Web、桌面软件、后端/API 服务、CLI 工具、定时任务/异步任务等软件项目。SRS 应写到足够支持后续拆 change 和编写 change 内容，但不要写成接口设计、数据库设计、技术方案、视觉设计、硬件架构、固件设计或开发任务。
 ---
 
 # aisee:srs — OpenSpec 需求规格说明书
 
-通过结构化对话挖掘软件需求，然后生成可交给 `aisee:ui-content`、`aisee:architecture` 和 `aisee:change-plan` 使用的需求规格说明书（SRS）。
+通过结构化对话挖掘软件需求，然后生成可交给 `aisee:change-plan` 使用，并可为后续 `aisee:change-author` 提供需求输入的需求规格说明书（SRS）。
 
 生成或改写 planning doc 时，frontmatter 字段合同统一遵循 `plugins/aisee-plugin/references/planning-doc-frontmatter.md`；它只服务索引和追踪，不替代 OpenSpec 事实源。
 
@@ -38,7 +38,7 @@ description: 通过结构化对话充分澄清软件类业务需求，并生成�
 - 异常、失败、兼容、验收方向和待确认事项
 - 交付形态信号，例如 App、小程序、Web 管理后台、桌面 GUI、后端服务、CLI、导入导出、通知、异步处理
 - 现有项目二开时的新增 / 修改 / 移除 / 兼容行为，以及受影响 baseline 引用
-- 后续是否需要 UI Content、Architecture 的简短提示，以及仍待确认的关键问题
+- 后续是否建议进入 `aisee:change-plan`，以及仍待确认的关键问题
 
 可以记录但不得展开设计：
 
@@ -54,7 +54,7 @@ description: 通过结构化对话充分澄清软件类业务需求，并生成�
 - 引脚表、寄存器表、RTOS 任务设计、驱动结构、BOM、PCB 布局、固件实现步骤或制造工艺
 - 未由用户或现有 baseline 确认的新增需求
 
-如果用户需要“开发哪些页面、页面上有什么内容、页面元素和交互流程”，先完成 SRS，再建议进入独立的 `aisee:ui-content`。如果用户需要接口、数据、任务或测试契约，应在 change artifacts 阶段处理。
+如果用户需要接口、数据、任务或测试契约，应在 change artifacts 阶段处理，而不是在 SRS 中展开实现级设计。
 
 ## ID 规则
 
@@ -68,7 +68,7 @@ description: 通过结构化对话充分澄清软件类业务需求，并生成�
 
 正式写法只使用文档内编号，例如 `FR-001`、`NFR-001`、`RULE-001`、`FLOW-001`、`STATE-001`。跨文档来源交给后续 `source-map.md` 记录。不要为了满足模板创建无用编号、无用来源引用或 `<!-- aisee:id ... -->`。
 
-如果当前轮次还不能确定最终编号，可以使用 `FR-NEW-001` 一类临时占位符，并显式标注 `[NUMBERING-FINALIZATION-REQUIRED]`。SRS 不负责 `PAGE / API / DATA / TASK / TEST`；`PAGE` 以及 UI 细化由 `aisee:ui-content` 承接；`API / DATA / TASK / TEST` 由 change artifacts 承接。
+如果当前轮次还不能确定最终编号，可以使用 `FR-NEW-001` 一类临时占位符，并显式标注 `[NUMBERING-FINALIZATION-REQUIRED]`。SRS 不负责 `API / DATA / TASK / TEST`；这些由 change artifacts 承接。
 
 ## Phase 0 — 读取项目上下文
 
@@ -109,7 +109,7 @@ Reference loading：
 - 功能需求不得包含实现决策，例如框架选择、具体 API endpoint、数据库 schema、服务拆分或代码文件结构。
 - 不要把 SRS 写成 UI 设计文档。页面字段、列表列、操作和空状态只作为功能合约；视觉布局和详细页面构成留给 UI 内容 / 设计步骤。
 - 不要把 baseline-aware 写成技术设计。已有基线只用于描述业务行为变化、兼容约束和影响范围。
-- 不要把下游建议写成实现方案或 change-plan 预结果。可选的下游建议只说明是否建议进入 UI Content / Architecture，以及仍待确认的关键问题。
+- 不要把下游建议写成实现方案或 change-plan 预结果。可选的下游建议只说明是否建议进入 `aisee:change-plan`，以及仍待确认的关键问题。
 - 单份 SRS 文档不得超过 20 条 FR；如果总范围超过 20 条 FR，标记为 Epic 并进入 Epic 模式。
 - Epic 模式下，每份模块文档必须包含足够的模块上下文摘要，确保可被 `aisee:change-plan` 单独处理。
 - 模块划分依据业务能力边界，不按输入材料章节、技术层、页面类型、设计规范、架构主题、测试计划或任务阶段直接划分。
@@ -121,15 +121,10 @@ Reference loading：
 
 ```text
 aisee:srs                         ← 需求发现 → SRS 文档
-  ├─ [conditional] aisee:ui-content       ← UI 型软件的页面清单、页面内容、页面元素、交互路径
-  ├─ [recommended] aisee:architecture     ← 技术架构事实、决策、项目约束、共享前置
   └─ aisee:change-plan <srs-file>         ← 将 SRS 映射为独立 Change
        └─ /opsx:new <change>
-            └─ aisee:change-author        ← 按 schema 创建 / 补 proposal、specs、contracts、tasks、source-map
+            └─ aisee:change-author        ← 按当前 schema 创建 / 补 proposal、specs、design、tasks 等内容
             └─ openspec validate
-            └─ aisee:implementation-bridge
-            └─ compound plan / work / review / test
-            └─ aisee:verify
-            └─ aisee:archive-guard
+            └─ implementation / review / test
             └─ openspec archive
 ```

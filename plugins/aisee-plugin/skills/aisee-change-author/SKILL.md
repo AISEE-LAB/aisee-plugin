@@ -1,11 +1,11 @@
 ---
 name: aisee:change-author
-description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifacts 初稿。用于已确认 change 的 schema-aware authoring，并按当前 schema 编排 proposal、source-map、specs、tasks、quick-fix、research、docsite、infra、security-audit、app 或 device 契约 artifacts。不拆 change 边界、不重新选择 schema、不写代码；仅当当前 schema 明确包含 design.md 时才按 schema 模板补齐 design artifact。
+description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifacts 初稿。用于已确认 change 的 schema-aware authoring，并优先细化官方 `spec-driven` 或项目当前 schema 下的 proposal、specs、design、tasks 等内容。不拆 change 边界、不重新选择 schema、不写代码；仅当当前 schema 明确包含某个 artifact 时才按 schema 模板补齐。
 ---
 
 # aisee:change-author
 
-`aisee:change-author` 是 OpenSpec change 产物编排器。它只处理单个已确认 change，把当前 schema 声明的 artifacts 补齐为可验证初稿。
+`aisee:change-author` 是 OpenSpec change 产物编排器。它只处理单个已确认 change，把当前 schema 声明的 artifacts 补齐为可验证初稿，并优先强化 `proposal`、`specs`、`design`、`tasks` 的信息密度。
 
 ## 职责边界
 
@@ -35,7 +35,7 @@ description: 将 aisee:change-plan 的结果转成单个 OpenSpec change artifac
 - 能读取 `openspec/changes/<change>/`，或用户明确要求只输出补丁 / 草稿。
 - 能读取当前 schema 的 `schema.yaml` 和所有 `templates/`。
 - 当前 change metadata 已声明 schema，且项目内已安装该 schema；如只有 plugin source 可见但项目未安装，先转交 `aisee-schema-pack`。
-- 已收集与所选 schema 直接相关的上游输入：Change Plan、Issue / 用户输入；只有 app/device schema 需要读取对应 SRS、UI Content、Architecture 或设备上下文。
+- 已收集与所选 schema 直接相关的上游输入：Change Plan、Issue / 用户输入、SRS、baseline migration 索引或其它直接相关材料。
 - 已读取项目规则：优先 `AGENTS.md`，`CLAUDE.md` 只作为 legacy fallback。
 - 既有系统或二次开发场景下，已读取相关 existing specs、代码事实、路由/API/模型/测试。
 
@@ -49,7 +49,7 @@ CHECKPOINT: 写入或修改任何 artifact 前，必须输出当前 change、sch
 2. 按需读取每个 artifact 的 `instruction` 和 `template`。
 3. 读取当前 change 已有 artifacts，增量补齐，不覆盖用户内容。
 4. 读取与当前 schema 直接相关的上游事实。
-   - 有 SRS / UI Content / Architecture 时读取对应 planning docs 的来源摘要和稳定编号。
+   - 有 SRS、baseline migration 索引或其它 planning docs 时读取对应来源摘要和稳定编号。
    - 没有前置 planning docs 时，只读取 Change Plan、Issue、PR 或用户输入的 intake 摘要；不要伪造 `FR-001`。
 5. 如 schema 生成 `source-map.md`，先写或补 source-map 的来源、上下文路由、artifact 适用性和缺口。
 6. 按 artifact DAG 生成 proposal、specs、contracts、tasks 或轻量 schema artifacts。
@@ -110,4 +110,4 @@ final check -> schema / artifact consistency recheck
 - 当前 schema 是否生成 `source-map.md`；若不生成，说明没有创建 source-map。
 - 是否存在临时编号或 `[NUMBERING-FINALIZATION-REQUIRED]`。
 - 需要用户确认的 blocker。
-- 建议下一步：`openspec validate`，再进入 `aisee:implementation-bridge`。
+- 建议下一步：`openspec validate`，然后进入 implementation / review / test。
