@@ -30,8 +30,6 @@ def test_planning_doc_frontmatter_contract_exists_and_representative_templates_r
 
     expected = {
         "plugins/aisee-plugin/skills/aisee-srs/assets/srs-template-standard.md": 'doc_type: "srs"',
-        "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-standard.md": 'doc_type: "design-spec"',
-        "plugins/aisee-plugin/skills/aisee-design-assets/assets/design-assets-index-template.md": 'doc_type: "design-assets"',
         "plugins/aisee-plugin/skills/aisee-implementation-bridge/references/brief-template.md": 'doc_type: "implementation-brief"',
         "plugins/aisee-plugin/skills/aisee-spec-migrate/assets/migration-index-template.md": 'doc_type: "spec-migration"',
         "plugins/aisee-plugin/skills/aisee-reflect/references/output-templates.md": 'doc_type: "reflect"',
@@ -63,15 +61,6 @@ def test_planning_doc_output_templates_use_frontmatter_without_duplicate_header_
             "**状态**：草稿",
             "**创建日期**：{date}",
             "**ID Scope**：{scope}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-standard.md": [
-            "**状态**：草稿",
-            "**创建日期**：{date}",
-        ],
-        "plugins/aisee-plugin/skills/aisee-design-spec/assets/design-spec-template-light.md": [
-            'doc_type: "design-spec"',
-            "**状态**：草稿",
-            "**创建日期**：{date}",
         ],
     }
 
@@ -143,9 +132,6 @@ def test_skill_taxonomy_contract_covers_all_public_skills() -> None:
         "aisee:knowledge-curate",
     ]
     assert set(taxonomy["Legacy / Transitional"]) == {
-        "aisee:design-spec",
-        "aisee:design-assets",
-        "aisee:svg-assets",
         "aisee:image-object",
     }
 

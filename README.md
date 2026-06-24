@@ -137,9 +137,6 @@ memory / knowledge：
 
 legacy / transitional：
 
-- `aisee:design-spec`
-- `aisee:design-assets`
-- `aisee:svg-assets`
 - `aisee:image-object`
 - `hw:*`
 
