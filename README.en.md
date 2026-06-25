@@ -69,7 +69,7 @@ Aisee makes that context explicit:
 
 - clarify business requirements or establish an existing-system baseline before implementation;
 - separate setup, baseline migration, change planning, and detailed change authoring;
-- create and complete OpenSpec changes while working from the current project schema or official `spec-driven`;
+- create and complete OpenSpec changes while working from the schema bound to the current change;
 - keep OpenSpec as the only persistent specification source of truth;
 - expose durable project memory and team knowledge guardrails without replacing OpenSpec facts;
 - constrain document-local numbering through skills/templates to reduce invented or duplicated labels;
@@ -146,7 +146,7 @@ Legacy / transitional:
 - **Existing-project baseline migration**: `aisee:spec-migrate` derives current system behavior into OpenSpec baseline specs before brownfield enhancement work starts.
 - **Structured requirement clarification**: `aisee:srs` clarifies business needs through dialogue and produces the inputs needed for change planning.
 - **OpenSpec change planning**: `aisee:change-plan` maps confirmed inputs into independently deliverable OpenSpec changes.
-- **Detailed change authoring**: `aisee:change-author` strengthens OpenSpec change content so proposal, specs, design, and tasks are more actionable.
+- **Detailed change authoring**: `aisee:change-author` fills out a single OpenSpec change document set in detail from the current schema templates, then strengthens the result with clearer boundaries, risks, verification, and implementation sequencing.
 - **Project memory**: `aisee memory` retrieves and writes current-repository long-lived guidance without replacing OpenSpec facts.
 - **Team knowledge guardrails**: `aisee knowledge` retrieves a small number of reviewed engineering lessons through pack/card protocols without turning the knowledge repository into a second specification source.
 - **Controlled memory and knowledge retrieval**: `aisee memory` and `aisee knowledge` provide direct retrieval entrypoints without becoming workflow authority.
@@ -339,7 +339,7 @@ For existing projects or brownfield enhancement work, use `aisee:spec-migrate` t
 | `aisee:spec-migrate` | Build OpenSpec baseline specs for existing projects or brownfield enhancement work. |
 | `aisee:srs` | Clarify software requirements and produce the inputs needed for change planning. |
 | `aisee:change-plan` | Plan independent OpenSpec changes and prepare `/opsx:new` inputs. |
-| `aisee:change-author` | Strengthen the current OpenSpec change so proposal/specs/design/tasks are more actionable. |
+| `aisee:change-author` | Generate and refine a single change's documents from the current schema templates, then strengthen them with clearer boundaries, risks, verification, and implementation sequencing. |
 | `aisee:memory` | Guide project memory CLI inspect/search/add/update-index usage. |
 | `aisee:knowledge` | Guide team knowledge CLI initialization, configuration, sync, retrieval, and promote workflows. |
 | `aisee:knowledge-curate` | Batch-review project-local reusable knowledge candidates and produce card drafts for human submission to team knowledge. |

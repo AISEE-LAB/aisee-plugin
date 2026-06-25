@@ -109,6 +109,15 @@ Skill eval 文件应使用下面的结构，同时保留 `prompt` 和 `expected_
       "fact_source_constraints": [
         "避免平行事实源或不受支持来源的规则。"
       ],
+      "template_checks": [
+        "输出必须遵循当前 schema 模板和 instruction，而不是自创文档结构。"
+      ],
+      "strengthening_checks": [
+        "在模板骨架基础上补强必要的边界、风险、验证或实施细节。"
+      ],
+      "consistency_checks": [
+        "多个文档或多个章节之间的术语、范围和验证口径必须一致。"
+      ],
       "files": []
     }
   ]
@@ -124,6 +133,9 @@ Skill eval 文件应使用下面的结构，同时保留 `prompt` 和 `expected_
 - 当场景包含范围、业务规则、架构、平台、证据或迁移决策缺口时，必须填写 `must_ask`。
 - `must_not` 必须覆盖该 skill 最容易越界的 artifact 或行为。
 - `fact_source_constraints` 应在相关场景中说明 OpenSpec、Aisee docs、ID registry、source-map 或 CLI JSON 的边界。
+- `template_checks` 是可选字段，用于检查输出是否真正以 schema 模板 / instruction 为基础，而不是绕开模板重新组织。
+- `strengthening_checks` 是可选字段，用于检查 skill 是否在模板基础上补强了必要信息，而不是机械填空。
+- `consistency_checks` 是可选字段，用于检查多文档或多章节之间是否保持一致。
 
 ## Runner 策略
 
@@ -138,7 +150,7 @@ Skill eval 文件应使用下面的结构，同时保留 `prompt` 和 `expected_
 后续可选：
 
 1. 增加小型 eval linter，检查必填字段和稳定 ID。
-2. 可选增加模型评分，检查 `expected_outputs`、`must_include` 和 `must_not`。
+2. 可选增加模型评分，检查 `expected_outputs`、`must_include`、`must_not`，以及存在时的 `template_checks`、`strengthening_checks`、`consistency_checks`。
 3. 模型评分只作为审查建议，不能写项目事实，也不能批准 archive。
 
 ## 归属
@@ -147,4 +159,3 @@ Skill eval 文件应使用下面的结构，同时保留 `prompt` 和 `expected_
 - Skill eval harness：`skills/<skill>/evals/`。
 - Workflow scenario harness：未来的 `tests/fixtures/projects/`。
 - Harness 设计：本文档。
-

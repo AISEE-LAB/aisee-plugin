@@ -67,7 +67,7 @@ aisee:srs
 | --- | --- | --- |
 | SRS | 澄清业务目标、范围、功能需求、非功能需求和验收标准 | 不写实现任务 |
 | Change Plan | 把已确认输入映射为一个或多个 OpenSpec changes | 不直接写 change artifact 正文 |
-| Change Author | 细化当前 change 的 `proposal`、`specs`、`design`、`tasks` 等内容 | 不写实现代码 |
+| Change Author | 按当前 schema 模板详细补齐当前 change 的各项文档，并在模板基础上补强边界、风险、验证和实施顺序 | 不写实现代码 |
 
 这些前置文档是当前版本 / 迭代的 planning docs，是 change planning 的输入，不是 OpenSpec baseline。
 
@@ -94,7 +94,7 @@ aisee:change-plan
 
 ## 3. Change 创建与 Authoring
 
-创建 change 后，用 `aisee:change-author` 按 schema artifact DAG 补齐文档。
+创建 change 后，用 `aisee:change-author` 按当前 schema 模板详细补齐文档。先保留模板结构，再补强当前 change 最容易导致实现、评审或验证出错的信息。
 
 典型命令：
 
@@ -102,16 +102,19 @@ aisee:change-plan
 /opsx:new "<change>" --schema <project-schema-or-spec-driven>
 openspec validate <change>
 ```
-service-contract.md      # 按需
-data-model.md            # 按需
-```
 
-`source-map.md` 决定按需 artifacts 是否 Required：
+常见的按需文档示例：
 
-- Required=yes：必须展开对应 artifact。
-- Required=no：必须写清楚 N/A 原因。
-- 不要为了“完整”强行生成与当前 change 无关的 contract。
-- Upstream Sources / Trace 表记录来源 `Ref` / `Refs`；当前 change 内新对象使用文档内编号。
+- `service-contract.md`
+- `data-model.md`
+
+当前规则：
+
+- 只写当前 schema 声明的文档，不补未声明文件。
+- 模板是基础骨架，不是完成条件；每个文档都应补强边界、例外、风险、验证或实施衔接中的必要内容。
+- Required=yes 的文档必须展开；Required=no 的文档必须写清楚 N/A 原因。
+- 不要为了“完整”强行生成与当前 change 无关的 contract 或辅助文档。
+- 如果某个 schema 仍声明 `source-map.md`，把它当成该 schema 的普通文档按模板补齐，不把它当成整个 authoring 阶段的中心。
 
 ## 4. 实现交接
 
@@ -155,8 +158,8 @@ Knowledge matches 只作为提醒，不改变当前 change 的规范事实源，
 | Reviewer | 触发时机 | 用途 |
 | --- | --- | --- |
 | `aisee-change-architect` | `aisee:change-plan` 后、`aisee:change-author` 前按需触发；仅用于边界复杂、跨模块、跨 schema、依赖不清或粒度不确定的 change | 审查 change 边界、依赖、粒度和可独立交付性 |
-| `aisee-spec-reviewer` | `aisee:change-author` 后、进入实现前建议触发 | 审查 artifacts、contracts、source-map、tasks 是否完整、一致、可验证 |
-| `aisee-implementation-reviewer` | `ce-work` 完成后建议触发 | 比对实现、tasks、spec/source-map 和 evidence 是否一致 |
+| `aisee-spec-reviewer` | `aisee:change-author` 后、进入实现前建议触发 | 审查当前 schema 文档、N/A 理由、tasks 和验证口径是否完整、一致、可验证 |
+| `aisee-implementation-reviewer` | `ce-work` 完成后建议触发 | 比对实现、当前 schema 文档、tasks 和 evidence 是否一致 |
 
 这些 reviewer 只输出结构化审查结论，不改代码、不跑测试、不提交 PR，也不替代 `ce-doc-review`、`ce-code-review`、`ce-test-*` 或 `ce-work`。接口、UI、硬件、固件、安全和验证差异应作为 schema-aware check lenses，而不是新增独立全能 agent。
 

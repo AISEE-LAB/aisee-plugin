@@ -68,7 +68,7 @@ Artifact roles:
 | --- | --- | --- |
 | SRS | Clarifies business goals, scope, functional requirements, non-functional requirements, and acceptance criteria | Does not write implementation tasks |
 | Change Plan | Maps confirmed inputs into one or more OpenSpec changes | Does not write change artifact bodies directly |
-| Change Author | Strengthens the current change's `proposal`, `specs`, `design`, and `tasks` | Does not write implementation code |
+| Change Author | Fills out the current change's schema-defined documents in detail and strengthens them with clearer boundaries, risks, verification, and implementation sequencing | Does not write implementation code |
 
 These documents are planning docs for the current version or iteration. They are planning inputs, not OpenSpec baseline facts.
 
@@ -95,7 +95,7 @@ Splitting rules:
 
 ## 3. Change Creation And Authoring
 
-After creating a change, use `aisee:change-author` to complete artifacts according to the schema artifact DAG.
+After creating a change, use `aisee:change-author` to fill out the current schema's documents in detail. Preserve the template structure first, then strengthen the parts most likely to cause implementation, review, or verification mistakes.
 
 Typical commands:
 
@@ -103,16 +103,19 @@ Typical commands:
 /opsx:new "<change>" --schema <project-schema-or-spec-driven>
 openspec validate <change>
 ```
-service-contract.md      # as needed
-data-model.md            # as needed
-```
 
-`source-map.md` decides whether as-needed artifacts are required:
+Common as-needed document examples:
 
-- Required=yes: expand the artifact.
-- Required=no: provide a concrete N/A reason.
-- Do not generate unrelated contracts for completeness.
-- Use `Ref` / `Refs` for source references in upstream tables; use document-local numbers for new objects created inside the current change.
+- `service-contract.md`
+- `data-model.md`
+
+Current rules:
+
+- Only write documents declared by the current schema; do not invent undeclared files.
+- Templates are the starting skeleton, not the completion condition; each document should strengthen the needed boundaries, exceptions, risks, verification details, or implementation handoff.
+- Required=yes documents must be expanded; Required=no documents must provide a concrete N/A reason.
+- Do not generate unrelated contracts or helper docs for completeness.
+- If a schema still declares `source-map.md`, treat it as an ordinary schema document and fill it according to its template; do not make it the center of the whole authoring phase.
 
 ## 4. Implementation Handoff
 
@@ -156,8 +159,8 @@ Read-only Aisee reviewer lens timing:
 | Reviewer | When to trigger | Purpose |
 | --- | --- | --- |
 | `aisee-change-architect` | After `aisee:change-plan` and before `aisee:change-author` when the change has complex boundaries, cross-module or cross-schema impact, unclear dependencies, or uncertain granularity | Review change boundaries, dependencies, granularity, and independent deliverability |
-| `aisee-spec-reviewer` | After `aisee:change-author` and before implementation | Review whether artifacts, contracts, source-map, and tasks are complete, consistent, and verifiable |
-| `aisee-implementation-reviewer` | After `ce-work` | Compare implementation, tasks, specs/source-map, and evidence for drift |
+| `aisee-spec-reviewer` | After `aisee:change-author` and before implementation | Review whether the current schema documents, N/A reasons, tasks, and verification posture are complete, consistent, and verifiable |
+| `aisee-implementation-reviewer` | After `ce-work` | Compare implementation, the current schema documents, tasks, and evidence for drift |
 
 These reviewers only return structured review conclusions. They do not edit code, run tests, submit PRs, or replace `ce-doc-review`, `ce-code-review`, `ce-test-*`, or `ce-work`. Interface, UI, hardware, firmware, security, and verification differences should remain schema-aware check lenses rather than new all-purpose agents.
 

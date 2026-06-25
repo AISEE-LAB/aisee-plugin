@@ -9,37 +9,329 @@
   "evals": [
     {
       "id": "change-author-001",
-      "name": "author-single-confirmed-change",
-      "scenario": "artifact-authoring",
-      "prompt": "change-plan 已确认一个 change：add-passwordless-login，schema 是项目当前软件 schema。现在帮我把 proposal、source-map、specs 和 tasks 的初稿编排出来。",
+      "name": "detailed-software-change-docs",
+      "scenario": "software-schema",
+      "prompt": "change-plan 已确认一个 change：add-passwordless-login，schema 是项目当前软件 schema。现有需求包括邮箱验证码登录、已登录设备管理、连续失败后的限流提示。请按当前 schema 的模板，把这个 change 需要的各个文档写得足够详细，重点减少后续开发时的误解、漏项和返工。",
       "context": {
         "files": [],
         "assumptions": [
-          "用户已经有单个明确 change 和 schema。"
+          "用户已经有单个明确 change 和 schema。",
+          "当前 schema 会声明 proposal、specs、design、tasks 以及可能的按需文档。"
         ]
       },
-      "expected_output": "应围绕单个已确认 change 输出 artifact 编排与 authoring 规则，提醒先做 schema-aware 检查，不重拆 change，不写代码；对 app schema 只按 source-map Required 状态展开按需 contract。",
+      "expected_output": "应围绕单个已确认 change 输出逐文档 detailed authoring 规则，强调按当前 schema 模板补齐各文档，并把目标、范围、行为、约束、风险、验证和任务顺序写清楚。输出必须体现跨文档一致性检查，不重拆 change、不写代码、不把某一个固定文档设为工作流中心。",
       "expected_outputs": [
-        "限定为单个 change 的 artifacts 初稿。",
-        "说明 source-map、specs、tasks 和按需 contract 的职责边界。",
-        "要求先检查 schema、artifact DAG 和 source-map，不在此阶段写实现代码。"
+        "限定为单个 change 的详细文档 authoring。",
+        "明确 proposal、specs、design、tasks 等文档要写到可执行、可审查的粒度。",
+        "强调跨文档一致性检查和 gap / blocker 处理。",
+        "要求先检查 schema、模板和已有文档，不在此阶段写实现代码。"
       ],
       "must_ask": [],
       "must_include": [
         "单个 change 边界",
-        "artifact 编排",
-        "schema-aware 检查前置"
+        "按当前 schema 模板写详细内容",
+        "跨文档一致性",
+        "schema-aware 检查前置",
+        "验证方式",
+        "任务顺序"
       ],
       "must_not": [
         "不得重拆 change 边界。",
-        "不得直接写代码或替代 ce-work。"
+        "不得直接写代码或替代 ce-work。",
+        "不得把某一个固定文档设为默认中心。"
       ],
       "quality_checks": [
-        "只处理当前 schema 包含的 artifacts。",
-        "不把 planning docs 复制成 OpenSpec artifacts。"
+        "只处理当前 schema 包含的文档。",
+        "强调减少实现误解、漏项和返工。",
+        "不把 planning docs 直接复制成 OpenSpec 文档。"
       ],
       "fact_source_constraints": [
-        "正式事实必须落在当前 OpenSpec change artifacts，而不是平行文档。"
+        "正式事实必须落在当前 OpenSpec change 文档，而不是平行文档。"
+      ],
+      "template_checks": [
+        "明确先读取当前 schema 的 schema.yaml、instruction 和 template，再决定写哪些文档。",
+        "只处理当前 schema 声明的文档，不绕开模板自创新的固定文档集合。",
+        "输出应说明是在模板骨架上补全，而不是抛开模板自由发挥。"
+      ],
+      "strengthening_checks": [
+        "在模板基础上补强目标、范围、行为、约束、风险、验证和任务顺序，而不是只复述章节名。",
+        "要求每个文档达到可执行、可审查、低歧义粒度，而不是模板骨架或摘要。",
+        "强调开发、评审和验证阶段最容易出错的信息要前置写清楚。"
+      ],
+      "consistency_checks": [
+        "proposal、specs、design、tasks 之间的范围、术语和完成定义必须一致。",
+        "tasks 必须收口到前置文档，不得凭空新增需求或设计决策。",
+        "如果存在按需文档，其边界必须和主文档一致，不能各写各的。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-author-002",
+      "name": "backend-change-needs-na-and-contract-detail",
+      "scenario": "backend-only",
+      "prompt": "当前 change 已确认：订单取消规则调整。schema 仍是项目当前软件 schema。范围包括：待支付订单 30 分钟未支付自动取消；已支付订单只能由客服退款；取消和退款状态需要写审计日志；用户端只复用现有状态展示，不新增页面。请按当前 schema 的模板详细 authoring。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "这是已有系统行为变更，存在兼容性和审计约束。",
+          "前端没有新页面，只复用现有展示。"
+        ]
+      },
+      "expected_output": "应识别这是后端/规则/审计主导的 change。需要把行为规则、状态流转、兼容性、服务语义、审计要求和验证方式写清楚；如果当前 schema 包含 UI 类按需文档，应给出具体 N/A 原因，而不是机械展开。不得因为没有新页面就把整个 change 降成轻量修复。",
+      "expected_outputs": [
+        "明确这是已有系统变更，而非全新功能。",
+        "详细写出规则、状态、兼容性、审计和验证口径。",
+        "对 UI 类文档给出具体 N/A 原因或说明只承接现有展示复用。",
+        "保持 tasks 与前置规则/设计文档一致。"
+      ],
+      "must_ask": [
+        "历史订单是否受新规则影响，还是只影响新订单？"
+      ],
+      "must_include": [
+        "兼容性",
+        "审计要求",
+        "N/A 原因",
+        "状态流转",
+        "验证口径"
+      ],
+      "must_not": [
+        "不得因为没有新页面就跳过后端契约和规则细化。",
+        "不得把 UI 文档留空而不写原因。"
+      ],
+      "quality_checks": [
+        "N/A 判断具体而非空泛。",
+        "已有系统变更的兼容风险不被降级为实现细节。"
+      ],
+      "fact_source_constraints": [
+        "未知迁移策略或兼容规则必须标注，不得假设为既定事实。"
+      ],
+      "template_checks": [
+        "如果当前 schema 包含按需 UI 类文档，必须按模板给出 N/A 或复用说明，而不是直接跳过。",
+        "后端/规则/审计相关文档仍要按各自模板写清，而不是因为无新页面就减少文档深度。",
+        "不得用旧的 app/source-map 心智代替当前 schema 模板的真实要求。"
+      ],
+      "strengthening_checks": [
+        "在模板基础上补强兼容性、审计要求、服务语义、状态流转和验证口径。",
+        "把 '复用现有展示' 写成具体边界，而不是一句轻描淡写的说明。",
+        "对不适用文档给出具体 N/A 原因，而不是空壳。"
+      ],
+      "consistency_checks": [
+        "兼容性说明必须在规则文档、设计文档和任务文档中保持一致。",
+        "审计要求不能只写在一个文档里，相关任务和验证必须能追到。",
+        "N/A 说明不能与其它文档中的用户可见行为冲突。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-author-003",
+      "name": "quick-fix-still-needs-detailed-docs",
+      "scenario": "quick-fix",
+      "prompt": "当前 change 使用 quick-fix schema，目标是修复用户资料页偶发 500。已知现象：部分用户保存头像后接口 500，重试有时成功。请按该 schema 的模板把 problem、solution、tasks 等文档写扎实，尤其要写清复现、影响、根因线索、回归风险、验证步骤和实施顺序。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "当前 schema 是 quick-fix。",
+          "这是轻量 schema，不需要扩展为完整软件规格链路。"
+        ]
+      },
+      "expected_output": "应体现任意 schema 一视同仁：即使是 quick-fix，也要把少数几个文档写详细，而不是退回成一句话修复说明。problem、solution 和 tasks 应各司其职，并明确验证和回归关注点。",
+      "expected_outputs": [
+        "围绕 quick-fix 的少数文档做详细 authoring。",
+        "写清问题、影响、根因线索、方案风险、回归验证和任务顺序。",
+        "不额外创造与该 schema 无关的长文档。"
+      ],
+      "must_ask": [
+        "500 是否只在头像上传场景出现，还是资料保存全链路都会触发？"
+      ],
+      "must_include": [
+        "schema-specific 文档重点",
+        "详细写作而非模板骨架",
+        "验证和风险",
+        "回归点"
+      ],
+      "must_not": [
+        "不得只因为 schema 轻就降低文档质量。",
+        "不得发明与 quick-fix 无关的额外文档。"
+      ],
+      "quality_checks": [
+        "强调任何 schema 都要写详细。",
+        "强调轻量 schema 也要减少开发出错。"
+      ],
+      "fact_source_constraints": [
+        "根因未确认时不得把单一猜测写成已证实事实。"
+      ],
+      "template_checks": [
+        "problem、solution、tasks 必须按 quick-fix 模板各司其职，不得互相替代。",
+        "不得因为 quick-fix 文档少就绕开模板直接写成一段总述。",
+        "不得发明与 quick-fix 模板无关的附加文档。"
+      ],
+      "strengthening_checks": [
+        "在模板基础上补强复现条件、影响范围、根因线索、回归风险和验证步骤。",
+        "solution 不能只写 '修复接口 500' 这类空泛描述，必须说明为什么这样改。",
+        "tasks 必须体现实施顺序和回归验证，而不是单行待办。"
+      ],
+      "consistency_checks": [
+        "problem 里描述的现象必须被 solution 和 tasks 承接。",
+        "风险和回归点必须同时反映在 solution 与 tasks 中。",
+        "如果根因未确认，各文档都必须保持低置信度表述，而不是一处猜测一处定论。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-author-004",
+      "name": "quick-research-stays-research",
+      "scenario": "quick-research",
+      "prompt": "当前 change 使用 quick-research schema，目标是评估是否接入第三方 OCR 服务识别报销票据。已知输入只有：要比较 3 家供应商、验证识别准确率和费用模型，并给出 go/no-go 建议。请按该 schema 模板详细 authoring。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "当前阶段只做研究，不承诺生产接入。"
+        ]
+      },
+      "expected_output": "应把研究问题、证据路径、比较维度、不确定点、推荐结论和下一步写清楚，但不得把调研结论升级成生产实现任务。即使文档数量少，也要把研究边界和 go/no-go 口径写具体。",
+      "expected_outputs": [
+        "详细写出问题边界、比较维度、证据和 recommendation。",
+        "明确这是研究型 change，不是生产交付计划。",
+        "保持 recommendation 与 findings 一致。"
+      ],
+      "must_ask": [
+        "这次是否只产出评估和建议，不进入生产接入？"
+      ],
+      "must_include": [
+        "go/no-go",
+        "比较维度",
+        "证据路径",
+        "不确定点"
+      ],
+      "must_not": [
+        "不得输出生产实现任务。",
+        "不得把供应商接入写成已确认范围。"
+      ],
+      "quality_checks": [
+        "研究结论不越界成实现承诺。",
+        "文档之间保持 question/findings/recommendation 一致。"
+      ],
+      "fact_source_constraints": [
+        "未验证的供应商能力不得写成既定事实。"
+      ],
+      "template_checks": [
+        "question、findings、recommendation 必须按 quick-research 模板分别承载问题、证据和结论。",
+        "不得把 research schema 写成标准实现文档结构。",
+        "不得跳过模板里的不确定性和证据表达要求。"
+      ],
+      "strengthening_checks": [
+        "在模板基础上补强比较维度、证据来源、判断口径和 go/no-go 条件。",
+        "明确写出当前阶段不进入生产接入的边界。",
+        "recommendation 必须说明下一步建议，而不仅是供应商偏好。"
+      ],
+      "consistency_checks": [
+        "recommendation 必须能被 findings 支撑，不能凭空下结论。",
+        "问题边界、比较维度和 go/no-go 口径在三个文档中必须一致。",
+        "不确定点不能在一个文档里承认、在另一个文档里消失。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-author-005",
+      "name": "block-when-schema-or-template-is-missing",
+      "scenario": "authoring-blocker",
+      "prompt": "当前 change 已创建，但 change metadata 没写 schema，仓库里也找不到与该 change 对应的模板。用户仍要求你直接把所有文档补齐。请执行 change-author。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "缺少 schema metadata 和模板是 authoring blocker。"
+        ]
+      },
+      "expected_output": "必须输出 `[CHANGE-AUTHOR-BLOCKED]` 或 `[SCHEMA-INVALID]`，明确说明缺少 schema metadata 或模板，不能继续 author。不得根据文件名形状、历史习惯或默认软件链路猜 schema 并继续写文档。",
+      "expected_outputs": [
+        "输出 blocker，而不是继续写文档。",
+        "明确缺的是 schema metadata、模板还是两者都有。",
+        "说明在修复前不能进入逐文档 authoring。"
+      ],
+      "must_ask": [
+        "当前 change 绑定的 schema 是什么，模板是否已安装到项目中？"
+      ],
+      "must_include": [
+        "[CHANGE-AUTHOR-BLOCKED] 或 [SCHEMA-INVALID]",
+        "缺口说明",
+        "停止继续 author 的理由"
+      ],
+      "must_not": [
+        "不得猜测 schema。",
+        "不得在 blocker 状态下继续生成文档草稿。"
+      ],
+      "quality_checks": [
+        "强门禁生效，而不是降级为温和提醒。",
+        "阻断原因可操作、可修复。"
+      ],
+      "fact_source_constraints": [
+        "schema 未确认前，不得把任何文档集合当作当前 change 的正式要求。"
+      ],
+      "template_checks": [
+        "缺少 schema metadata 或模板时，不得假装已获得模板依据继续 author。",
+        "不得根据历史软件主链路默认出一套 proposal/specs/design/tasks。",
+        "必须把缺的是 schema、template 还是 instruction 说清楚。"
+      ],
+      "strengthening_checks": [
+        "blocker 输出要具体到用户下一步该补什么，而不是泛泛说信息不足。",
+        "说明为什么这会直接影响逐文档 authoring，而不是仅影响格式。"
+      ],
+      "consistency_checks": [
+        "阻断理由、缺口说明和后续建议不能互相矛盾。",
+        "既然进入 blocker，就不能同时给出完整文档生成路径。"
+      ],
+      "files": []
+    },
+    {
+      "id": "change-author-006",
+      "name": "incremental-authoring-does-not-overwrite-existing-docs",
+      "scenario": "incremental-update",
+      "prompt": "当前 change 已有一版 proposal 和 specs 草稿，但 design 和 tasks 还很空。用户要求你继续完善当前 change 文档，并保留已有人写过的内容。请按当前 schema 做 detailed authoring。",
+      "context": {
+        "files": [],
+        "assumptions": [
+          "已有文档不是空白，需要在其基础上增量补齐。",
+          "用户没有授权重写既有内容。"
+        ]
+      },
+      "expected_output": "应明确采取增量补写策略：先读取已有 proposal/specs，再补 design、tasks 及其它缺失文档，并只修正明显冲突处。输出中应说明合并策略和一致性复检，而不是把整套文档从头重写。",
+      "expected_outputs": [
+        "先读取已有文档，再补缺失或薄弱部分。",
+        "说明合并策略和一致性复检。",
+        "重点补强 design 和 tasks，而不是重写整套文档。"
+      ],
+      "must_ask": [],
+      "must_include": [
+        "增量补写",
+        "合并策略",
+        "一致性复检",
+        "保留用户已有内容"
+      ],
+      "must_not": [
+        "不得默认覆盖已有 proposal/specs。",
+        "不得无差别重写整套文档。"
+      ],
+      "quality_checks": [
+        "existing docs 被视为当前事实输入，而不是噪音。",
+        "对已有内容的保留与补强边界清楚。"
+      ],
+      "fact_source_constraints": [
+        "已有 change 文档是当前最直接事实源，除非与 schema 或已确认边界明确冲突。"
+      ],
+      "template_checks": [
+        "增量补写仍必须遵循当前 schema 模板，而不是为了保留旧内容完全放弃模板要求。",
+        "读取已有 proposal/specs 后，再按对应模板补 design、tasks 或其它缺失文档。",
+        "不得以“已有草稿”为理由跳过 schema 的结构要求。"
+      ],
+      "strengthening_checks": [
+        "在不覆盖用户已有内容的前提下，补强缺失的约束、验证和实施顺序。",
+        "明确哪些地方是保留原文，哪些地方是增量补充或轻微修正。",
+        "输出要说明 design 和 tasks 的补强重点。"
+      ],
+      "consistency_checks": [
+        "新增内容必须与已有 proposal/specs 保持一致，而不是另起一套表述。",
+        "如果已有文档存在明显冲突，输出必须说明如何处理该冲突。",
+        "合并策略、一致性复检和最终文档边界三者必须相互对齐。"
       ],
       "files": []
     }

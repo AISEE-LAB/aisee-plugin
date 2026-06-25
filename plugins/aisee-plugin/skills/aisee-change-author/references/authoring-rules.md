@@ -1,150 +1,142 @@
 # Change Author Rules
 
-本文件承接 `aisee:change-author` 的详细 authoring 规则。`SKILL.md` 只保留流程入口和强门禁；需要实际编写 artifacts 时读取本文件。
+本文件承接 `aisee:change-author` 的详细 authoring 规则。目标不是机械填模板，而是按当前 schema 把每个文档写到**清晰、完整、一致、可执行、可审查**的粒度。
 
 ## 目录
 
-- [无前置 planning docs 的来源路径](#无前置-planning-docs-的来源路径)
-- [无 source-map schema 的缺口落点](#无-source-map-schema-的缺口落点)
-- [Schema DAG 规则](#schema-dag-规则)
-- [Artifact 编写边界](#artifact-编写边界)
-- [Spec-Driven / Generic Schema 顺序](#spec-driven--generic-schema-顺序)
-- [Artifact 适用性判断](#artifact-适用性判断)
-- [编号检查](#编号检查)
+- [总原则](#总原则)
+- [模板优先写法](#模板优先写法)
+- [补强优先级](#补强优先级)
+- [逐文档写作深度](#逐文档写作深度)
+- [常见文档类型边界](#常见文档类型边界)
+- [轻量 schema 文档重点](#轻量-schema-文档重点)
+- [一致性检查](#一致性检查)
+- [N/A 与缺口处理](#na-与缺口处理)
+- [编号与占位](#编号与占位)
 
-## 无前置 planning docs 的来源路径
+## 总原则
 
-当当前 change 没有 SRS / UI Content / Architecture 等前置 planning docs 时：
+- 任何 schema 一视同仁；不要只按 `spec-driven`、app schema 或某个旧流程来写。
+- 以当前 schema 的 `artifacts[].requires` 为唯一文档顺序来源。
+- 生成每个文档前，先读取该文档的 `instruction` 和 `template`。
+- 不要因为某个文档在其它 schema 常见，就为当前 schema 创建额外文件。
+- 文档必须写“会影响实现是否出错”的信息，而不是只保留概述。
+- 文档之间必须相互对齐：范围、术语、边界、风险、验证口径、任务顺序不能打架。
+- 不能确定的地方要显式标 gap / blocker，不要假装已确认。
+- schema metadata 缺失、不一致、未安装或模板找不到时，不继续 author；输出 `[CHANGE-AUTHOR-BLOCKED]` 或 `[SCHEMA-INVALID]`。
+- 如果某个 schema 仍声明 `source-map.md`，它只是该 schema 的一个普通文档；按模板写，不把它设为其它文档的前置真相中心。
 
-- `proposal.md` 只写范围摘要和来源类型，不复制原始长提示词。
-- `source-map.md` 在“上游来源”记录来源类型、外部引用、摘要和承接 artifact。
-- `upstream_refs=[]` 是合法状态；不要为了满足模板创建假 `docs/...#FR-001`。
-- 正式编号仍由当前 change artifacts 产生，例如 `SPEC-001`、`API-001`、`TASK-001`。
-- 如果输入无法压缩为摘要，写 `[SPEC-GAP]` 或 blocker，等待确认；不要把整段聊天记录写进 source-map。
+## 模板优先写法
 
-## 无 source-map schema 的缺口落点
+每个文档都按下面顺序处理：
 
-如果当前 schema 不生成 `source-map.md`，非阻塞缺口写入该 schema 的主 artifact：
+1. 读取 schema 中该文档的 `instruction` 和 `template`。
+2. 先保留模板的章节、顺序和结构意图。
+3. 再在每个章节下补写当前 change 需要的信息。
+4. 最后检查：输出是否仍然看得出“这是该 schema 的文档”，而不是被改写成另一套通用结构。
 
-| Schema | 缺口落点 |
-|---|---|
-| `quick-fix` | `problem.md` 或 `solution.md` |
-| `quick-research` | `question.md` 或 `findings.md` |
-| `opsx-collab-pr-loop` | `loop/intake.md` 或 `loop/research-plan.md` |
-| `aisee-docsite-driven` | `doc-change.md` |
-| `infra-change` | `impact-assessment.md` 或 `rollback-plan.md` |
+默认不要做这些事：
 
-## Schema DAG 规则
+- 把模板章节打散后重新拼成自己的目录。
+- 因为信息少就删掉模板中的关键章节意图。
+- 用一段总述替代模板要求的分节表达。
+- 把某个熟悉 schema 的文档组织方式套到另一个 schema 上。
 
-- 以当前 schema 的 `artifacts[].requires` 为唯一生成顺序来源。
-- 不要因为某个模板常见就创建 schema 未声明的 artifact。
-- 不要给 `quick-fix`、`quick-research`、`infra-change`、`aisee-docsite-driven` 等无 source-map schema 补 `source-map.md`。
-- 对 app schema 的按需 artifacts，先读取 `source-map.md` 的 Artifact 适用性；Required=no 且有原因时不展开完整模板。
-- schema metadata 缺失、不一致、未安装或找不到时，不继续 author；先回到 change creation / schema installation 修复。
-- 如果项目要求保留 N/A 文件，只写状态和 N/A 原因；不要为了填模板而复制无关表格。
-- 生成每个 artifact 前，读取它的 `instruction` 和 `template`。
-- 发现 schema DAG 循环、模板缺失、requires 指向不存在 artifact 时，停止并输出 `[SCHEMA-INVALID]`。
+如果模板本身允许 N/A、简写或条件分支，可以按模板规则收缩；但要明确写出原因。
 
-## Artifact 编写边界
+## 补强优先级
 
-`change-author` 按 schema 编排 artifacts，但每个 artifact 只能承接自己的信息层级：
+模板只是起点，不是完成条件。补强时优先补这些最容易导致后续出错的信息：
 
-| Artifact | 主要输入 | 可新增 ID | 禁止内容 |
-|---|---|---|---|
-| `proposal.md` | confirmed change-plan、上游来源、用户确认边界 | 无；只引用上游来源 / 编号 | 接口字段、数据库字段、实现步骤、重新拆 change |
-| `source-map.md` | proposal、上游文档、schema artifact list | `SPEC / API / DATA / TASK / TEST` 的编号记录 | 业务需求正文、契约细节、实现方案 |
-| `specs/**/*.md` | source-map 中覆盖的 `FR / NFR / RULE / FLOW / STATE` | `SPEC` | UI 布局、API 字段、表字段、任务清单 |
-| `change-context.md` | Architecture 中相关 `ARCH / DEC / CONSTRAINT / RISK` | 局部 `DEC / CONSTRAINT / RISK` | 重写全局 Architecture、展开服务 / 数据 / UI 契约 |
-| `ui-contract.md` | UI Content、Design Spec / Assets、specs、change-context、source-map | 必要时新增局部 `PAGE / FLOW / STATE` | 重新制定或复制完整视觉规范、组件库选择、像素布局 |
-| `data-model.md` | specs、change-context、service data needs | `DATA` | API 协议、UI 内容、迁移执行任务 |
-| `service-contract.md` | specs、ui data needs、data-model、change-context | `API` | 代码实现步骤、数据库物理迁移脚本 |
-| `tasks.md` | specs、source-map、Required=yes 的适用 artifacts / contracts | `TASK / TEST` | 新增需求、替代 source-map、ID 注册、来源追踪或归档判断 |
+1. 范围和非目标。
+2. 边界条件和失败场景。
+3. 风险、兼容性或约束。
+4. 验证口径和完成定义。
+5. 与其它文档或后续任务的衔接关系。
 
-对于不生成 `source-map.md` 的轻量 schema，按 schema 模板写对应 artifact，不使用上表中的 app artifact 假设：
+如果时间或输入有限，先保证上面五类信息，而不是先把措辞润色得更好看。
 
-| Schema | Artifact 编写重点 | 不要做 |
+## 逐文档写作深度
+
+无论当前 schema 叫什么名字，凡是要写一个文档，至少要做这四件事：
+
+1. 说明这个文档在当前 change 里要解决什么问题。
+2. 写清楚边界、非目标、例外或不覆盖范围。
+3. 写清楚会影响后续开发 / review / verify 的关键细节。
+4. 写清楚与其它文档的衔接点。
+
+不要只写：
+
+- 一句抽象目标。
+- 没有边界的功能列表。
+- 没有约束的“建议实现”。
+- 没有验证方式的任务清单。
+
+完成单个文档后，至少自检一次：
+
+- 这个文档是否仍然遵循了模板结构？
+- 模板里最关键的章节是否都被当前 change 的事实填过，而不是空着？
+- 是否写进了足以减少误解的边界、风险或验证信息？
+- 是否把应该留给其它文档的内容写过界了？
+
+## 常见文档类型边界
+
+这些规则不要求当前 schema 一定包含这些文档；只有 schema 声明了，才按对应边界写。
+
+| 文档类型 | 应该重点写什么 | 不要写什么 |
 |---|---|---|
-| `quick-fix` | `problem.md` 写问题、影响、复现；`solution.md` 写根因、方案、风险；`tasks.md` 写修复和验证 | 不补 SRS、UI Content、Architecture 或 source-map |
-| `quick-research` | `question.md` 写要回答的问题；`findings.md` 写依据；`recommendation.md` 写结论和下一步 | 不写生产实现任务 |
-| `opsx-collab-pr-loop` | `loop/intake.md` 和 `loop/research-plan.md` 承接外部 PR / issue / 调研输入 | 不把 review 结论直接变成实现任务 |
-| `aisee-docsite-driven` | `doc-change.md` 写文档差异、导航、结构和归档回写 | 不补 specs / UI / service / data contracts |
-| `infra-change` | `impact-assessment.md` 和 `rollback-plan.md` 写影响、窗口、回滚和验证 | 不省略回滚风险 |
-| `security-audit` | `threat-model.md` 写 STRIDE 威胁、风险和缓解；`design.md` 写安全控制设计；`tasks.md` 写安全验收门控 | 不绕过 threat-model，不把安全 review 当普通实现任务 |
+| `proposal.md` | 目标、范围、非目标、成功标准、关键约束、为什么现在做 | 接口字段细节、数据库字段、逐步实现任务 |
+| `specs/**/*.md` | 用户可观察行为、业务规则、边界场景、失败场景、验收口径 | 实现方案、任务清单、与用户无关的底层细节 |
+| `design.md` | 关键设计决策、集成边界、兼容性、限制、风险、为什么选这个方案 | 直接写代码、把 design 变成 tasks |
+| `tasks.md` | 实施顺序、验证顺序、依赖关系、完成定义、证据要求 | 新增需求、替代 specs / design、模糊的“自行处理” |
+| `change-context.md` | 当前 change 相关的技术背景、局部架构约束、风险和限制 | 重写整个全局架构文档 |
+| `service-contract.md` | 对外 / 对内服务能力、输入输出、错误语义、兼容性约束 | 代码实现步骤、数据库迁移脚本 |
+| `data-model.md` | 实体、字段、关系、迁移影响、数据约束、敏感性 | API 行为、UI 交互细节 |
+| `ui-contract.md` | 状态、交互、页面可见性、前端数据需求、错误 / 空态 | 完整视觉规范、逐像素设计稿 |
+| `threat-model.md` | 威胁面、风险等级、攻击路径、缓解策略、残余风险 | 普通功能实现步骤 |
+| `impact-assessment.md` | 影响范围、回滚风险、窗口要求、依赖系统 | 模糊的“低风险”结论且无依据 |
+| `rollback-plan.md` | 回滚触发条件、步骤、验证、恢复点 | 只写一句“支持回滚” |
+| `question.md` / `findings.md` / `recommendation.md` | 要回答的问题、证据、结论、取舍、下一步 | 把调研直接写成实现任务 |
 
-当 schema 生成 `source-map.md` 时，`source-map.md` 不是一次性文件。先用它建立初始路由，再在每个 artifact 写入或确认编号后回填：
+## 轻量 schema 文档重点
 
-- artifact 是否适用及 N/A 原因。
-- 新增编号的 owner path、标题和上游来源关系。
-- 发现的 `[SPEC-GAP]`、`[NUMBERING-FINALIZATION-REQUIRED]`、`[STACK-CONFLICT]` 或其他阻塞标签。
-- 不覆盖的上游编号及原因。
+当 schema 很轻时，更要把少数几个文档写扎实，而不是因为文件少就写得更空。
 
-## Spec-Driven / Generic Schema 顺序
-
-当当前 change 使用官方 `spec-driven` 或其它通用软件 schema 时，最常见的最小闭环是 `proposal.md`、`specs/**/*.md`、`design.md` 和 `tasks.md`。如果当前 schema 另外生成 `source-map.md` 或按需 contracts，author 顺序同样不能把 `tasks.md` 提前到这些适用 artifacts 之前。
-
-author 顺序：
-
-```text
-proposal.md
-source-map.md            # 当前 schema 生成时
-specs/**/*.md
-design.md                # 当前 schema 生成时
-change-context.md        # Required=yes 时
-ui-contract.md           # Required=yes 时
-data-model.md            # Required=yes 时
-service-contract.md      # Required=yes 时
-tasks.md
-```
-
-规则说明：
-
-- “最小闭环”表示最少需要哪些 artifacts，`tasks.md` 仍属于闭环的一部分。
-- “author 顺序”表示实际编写先后；`tasks.md` 必须在 Required=yes 的适用 artifacts 之后收口。
-- 多个按需 artifacts 之间如无更强 DAG 约束，优先保持 schema 声明顺序；`apply_track` artifact 置后。
-
-生成规则：
-
-- `proposal.md`：只定义本 change 的目标、范围、非目标和成功标准；引用来源 ref 或编号，不复制上游全文。
-- `source-map.md`：当前 schema 生成它时，先建立上游来源、产出编号、artifact 适用性和阻塞项。它是后续 artifact 的路由表。
-- `specs/**/*.md`：只写用户可观察行为和验收场景，覆盖 FR / NFR / RULE / FLOW / STATE。
-- `design.md`：当前 schema 生成它时，只写实现约束、兼容性考虑、集成边界和必要设计决策，不写代码实现。
-- `change-context.md`：只在 Required=yes 时承接本 change 相关的 ARCH / DEC / CONSTRAINT / RISK，不重写全局 Architecture；优先复用上游编号，只有确实新增局部事项时才新增本地编号。
-- `ui-contract.md`：只在 Required=yes 且涉及页面、弹窗、交互、前端状态或前端数据需求时适用。
-- `data-model.md`：只在 Required=yes 且涉及持久化数据、字段、关系、索引、迁移、审计或敏感数据时适用。
-- `service-contract.md`：只在 Required=yes 且涉及 API、后端服务、异步任务、CLI / 工具命令或外部集成时适用。
-- apply tracks：最后生成或补齐，是当前 schema 的唯一长期执行清单；常见是 `tasks.md`，也可能是其它 schema artifact 或 N/A。
-
-通用软件 schema 的 `tasks.md` 只记录实现顺序、任务状态和验证证据，任务项必须引用 specs、design 和当前 schema 生成的相关 artifacts，但不重复契约细节。轻量 schema 的任务追踪到该 schema 的 problem / solution / findings / doc-change / impact / rollback 等前置 artifact。
-
-## Artifact 适用性判断
-
-仅对生成 `source-map.md` 的 schema，先在 `source-map.md` 写适用性，再生成对应 artifact：
-
-| Artifact | 适用信号 | N/A 合法原因 |
+| Schema | 文档重点 | 不要做 |
 |---|---|---|
-| `change-context.md` | 有 Architecture 约束、技术决策、平台限制、集成边界、风险或阻塞 | 纯文案 / 极小配置变更，且无技术约束影响 |
-| `ui-contract.md` | 页面、弹窗、表单、导航、权限可见性、前端状态、前端数据需求 | backend-only / job-only / CLI-only 且无前端可见变更 |
-| `data-model.md` | 持久化实体、字段、表、关系、索引、迁移、审计、敏感数据 | 无持久化数据变化，且不改变数据生命周期 |
-| `service-contract.md` | API、后端能力、异步任务、定时任务、CLI、外部集成、权限、错误语义 | UI-only 静态展示或纯内容变更，无服务能力变化 |
+| `quick-fix` | `problem.md` 写复现、影响、根因线索；`solution.md` 写方案、风险、回归点；`tasks.md` 写修复和验证顺序 | 不补无关长文档，不把“修一下”当完整方案 |
+| `quick-research` | `question.md` 写问题边界；`findings.md` 写证据和不确定点；`recommendation.md` 写结论和建议路径 | 不把调研结论直接当已确认实现 |
+| `infra-change` | `impact-assessment.md` 写 blast radius、依赖、窗口；`rollback-plan.md` 写失败回退路径；`tasks.md` 写执行和核验 | 不省略回滚和验证 |
+| `security-audit` | `threat-model.md` 写威胁、风险、缓解；`design.md` 写控制方案；`tasks.md` 写安全验收门槛 | 不把安全变成普通功能任务 |
+| `aisee-docsite-driven` | `doc-change.md` 写内容差异、导航、回链、发布影响；`tasks.md` 写校对与构建验证 | 不扩展成产品规格文档 |
+| `opsx-collab-pr-loop` | `loop/intake.md` 写外部输入、争议点；`loop/research-plan.md` 写核查路径和判断标准 | 不直接把 review 结论翻译成代码任务 |
 
-Required=no 的 artifact 不能留空原因。生成 `source-map.md` 的 schema 必须在 source-map.md 写：
+## 一致性检查
 
-- N/A 原因。
-- 哪些上游 ID 使它不适用。
-- 是否有需要其他 artifact 承接的相关约束。
+完成文档后，至少检查以下内容：
 
-既有系统或二次开发场景下，Required=yes 的 artifact 应按 Existing / Changed / New / Deprecated / Unknown 标注影响。Existing 只引用现有来源，不重写完整规格；Changed / New 才补充本 change 的差异内容。
+- `proposal` 里的范围、非目标和成功标准，是否被 `specs`、`design`、`tasks` 正确继承。
+- `specs` 里的行为、规则和失败场景，是否被 `design` 或其它约束文档承接。
+- `design` 里的约束、兼容性和风险，是否在 `tasks` 里体现到实施或验证动作。
+- `tasks` 是否引用了前置文档，而不是凭空生成执行项。
+- 不同文档对同一对象的命名是否一致。
+- N/A 文档是否给出了具体原因，而不是空壳。
+- 是否有某个关键前提只在一个文档里出现，导致其它文档读者容易漏掉。
 
-不生成 `source-map.md` 的 schema 应在当前主 artifact 或对应 artifact 中写 N/A 原因，不要补假 source-map。如果同时创建 N/A 文件，文件只需要包含状态和 N/A 原因，不需要填完整模板。
+如果发现明显冲突，标 `[AUTHORING-GAP]` 或 `[TEMPLATE-CONFLICT]`，并在输出摘要里明确指出。
 
-## 编号检查
+## N/A 与缺口处理
 
-优先使用当前 change、schema 模板和已存在 artifact 中的编号信息。需要机器视图时，直接读取当前 change 的 schema、artifacts 和 `source-map.md`（若当前 schema 生成）。
+- 当前 schema 声明但本 change 不适用的文档，必须写清楚 N/A 原因。
+- N/A 原因必须具体，例如“本 change 仅改文案，无服务接口变化”，不要只写 “不适用”。
+- 非阻塞缺口要落到当前正在写的相关文档中；不要静默忽略。
+- 阻塞缺口必须输出 `[CHANGE-AUTHOR-BLOCKED]`，等待用户补信息。
+- 当上游输入只是聊天、issue 或零散笔记时，要压缩成受控摘要；不要复制长 prompt 或整段聊天记录。
 
-只在当前 change 内生成实际需要的文档内编号。上游已有的 FR / NFR / PAGE / FLOW / ARCH / DEC / CONSTRAINT / RISK 不重新分配；只在确实新增局部对象时写新的编号，并把跨文档来源回写到 `source-map.md`。
+## 编号与占位
 
-工具不可用时：
-
-- 继续生成草稿可以，但所有新增编号必须用 `TYPE-NEW-001`。
-- 如果 schema 生成 `source-map.md`，必须在 `source-map.md` 写 `[NUMBERING-FINALIZATION-REQUIRED]`；否则写入当前 schema 的主 artifact。
-- final / handoff 必须说明这些不是最终编号，后续需要完成编号定稿并重新检查当前 change。
+- 优先复用当前 change 已有编号和模板中既有结构。
+- 只在当前 change 内为确实新增的对象创建编号。
+- 工具不可用或最终编号暂未定时，使用 `TYPE-NEW-001` 临时占位。
+- 使用临时占位时，必须显式标注 `[NUMBERING-FINALIZATION-REQUIRED]`。
+- 不要为了“编号完整”发明无实际作用的对象或章节。

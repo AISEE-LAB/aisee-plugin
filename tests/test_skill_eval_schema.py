@@ -24,6 +24,12 @@ REQUIRED_CASE_FIELDS = {
     "files",
 }
 
+OPTIONAL_LIST_FIELDS = {
+    "template_checks",
+    "strengthening_checks",
+    "consistency_checks",
+}
+
 
 def test_normalized_skill_eval_files_follow_schema() -> None:
     assert EVAL_FILES, "no skill eval files found"
@@ -51,6 +57,10 @@ def test_normalized_skill_eval_files_follow_schema() -> None:
             assert case["must_not"]
             assert isinstance(case["context"]["files"], list)
             assert case["files"] == case["context"]["files"]
+            for field in OPTIONAL_LIST_FIELDS:
+                if field in case:
+                    assert isinstance(case[field], list), f"{path}:{case['name']} {field} must be a list"
+                    assert case[field], f"{path}:{case['name']} {field} must not be empty when present"
 
 
 def test_every_public_skill_has_eval_coverage() -> None:

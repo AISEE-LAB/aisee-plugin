@@ -69,7 +69,7 @@ Aisee 的目标是让这些上下文显式化：
 
 - 在实现前澄清业务需求或补齐已有系统 baseline；
 - 把已有项目接入、baseline 迁移、change planning 和 change authoring 明确分层；
-- 创建和补齐 OpenSpec changes，并优先围绕项目当前 schema 或官方 `spec-driven` 工作；
+- 创建和补齐 OpenSpec changes，并按当前 change 绑定的 schema 工作；
 - 保持 OpenSpec 作为唯一持久规范事实源；
 - 用 skill/template 约束文档内编号，减少临时发明和重复命名；
 - 检查 artifacts、tasks、source-map、测试和 review evidence 是否闭环。
@@ -145,7 +145,7 @@ legacy / transitional：
 - **已有项目 baseline 迁移**：`aisee:spec-migrate` 反向整理现有系统当前行为，帮助已有项目先建立 OpenSpec baseline specs。
 - **结构化需求澄清**：`aisee:srs` 通过对话澄清业务需求，并生成 change planning 所需需求输入。
 - **OpenSpec change planning**：`aisee:change-plan` 将已确认输入映射为可独立交付的 OpenSpec changes。
-- **Detailed change authoring**：`aisee:change-author` 细化 OpenSpec change 内容，强化 proposal、specs、design、tasks 的可实现性。
+- **Detailed change authoring**：`aisee:change-author` 按当前 schema 的模板详细补齐单个 OpenSpec change 文档，并在模板基础上补强边界、风险、验证和实施顺序。
 - **项目记忆**：`aisee memory` 受控检索和写入当前仓库长期 guidance，不替代 OpenSpec 事实源。
 - **团队知识 Guardrails**：`aisee knowledge` 基于 pack/card 协议按需检索少量已审查工程经验，不把知识库变成第二份规范事实源。
 - **受控记忆与知识检索**：`aisee memory` 与 `aisee knowledge` 直接提供项目记忆和团队 guardrails 查询，不升级为 workflow authority。
@@ -338,7 +338,7 @@ quick-fix / quick-research / 其它轻量 schema
 | `aisee:spec-migrate` | 为已有项目或二开场景整理 OpenSpec baseline specs。 |
 | `aisee:srs` | 澄清软件需求并生成 change planning 所需需求输入。 |
 | `aisee:change-plan` | 规划独立 OpenSpec changes，并为 `/opsx:new` 提供范围和 schema 建议。 |
-| `aisee:change-author` | 细化当前 OpenSpec change 内容，强化 proposal/specs/design/tasks 的可实现性。 |
+| `aisee:change-author` | 按当前 schema 的模板详细生成和补全单个 change 文档，并在模板基础上补强边界、风险、验证和实施顺序。 |
 | `aisee:memory` | 引导项目记忆 CLI 的 inspect/search/add/update-index 使用。 |
 | `aisee:knowledge` | 引导团队知识 CLI 的初始化、配置、同步、检索和 promote 流程。 |
 | `aisee:knowledge-curate` | 批量审查项目内 reusable knowledge candidates，产出可人工提交到 team knowledge 的 card drafts。 |
