@@ -20,7 +20,7 @@ change_refs: []
 **所属主文档**：[`./00-main.md`](./00-main.md)
 **文档编号**：SRS-{YYYY-MM-DD}-{slug}-{module-slug}
 **版本**：v1.0
-**FR 范围**：{scope}:FR-{XXX} ~ {scope}:FR-{YYY}
+**FR 范围**：FR-{XXX} ~ FR-{YYY}
 
 ---
 
@@ -70,8 +70,8 @@ change_refs: []
 - [ ] {criterion 2}
 
 **业务规则 / 约束**：
-- {scope}:RULE-001 {rule 1}
-- {scope}:RULE-002 {rule 2}
+- RULE-001 {rule 1}
+- RULE-002 {rule 2}
 
 **优先级**：P0 / P1 / P2
 **变更类型**：新增 / 修改 / 移除 / 兼容
@@ -110,7 +110,7 @@ change_refs: []
 
 ## 7. 本模块下游建议（可选）
 
-- 是否建议生成 UI Content：是/否；关注点：{页面入口、表单、列表、权限、状态或 N/A}
-- 是否建议补充 Architecture：是/否；关注点：{共享能力、外部系统、异步处理、权限模型或 N/A}
+- 是否建议直接进入 `aisee:change-plan`：是/否；原因：{本模块范围已稳定 / 仍需先确认关键问题}
+- 后续 change 重点：{页面与交互约束 / service contract / cli contract / job contract / 设备约束说明 / 常规 spec}
 - 仍待确认的问题：{Q-xxx or 无}
 ```

@@ -20,7 +20,7 @@
 - 只读取当前输出模式需要的模板文件。
 - 只读取与当前 FR 匹配的场景扩展块。
 - 不要在场景不匹配时机械复制场景扩展块。
-- SRS 保持规划级详细度：足够交接给 UI Content、Architecture 和 Change Plan，但不写实现级 API、数据库、代码或任务设计。
+- SRS 保持规划级详细度：足够交接给 Change Plan 和 Change Author，但不写实现级 API、数据库、代码或任务设计。
 
 ## 设备约束说明
 

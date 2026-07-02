@@ -176,4 +176,4 @@ aisee/docs/requirements/<YYYY-MM-DD>-<slug>/
 - ID 状态：已激活正式 ID，或仍有临时占位符需要预留
 - 建议下一步：`aisee:change-plan`
 
-当 UI Content、Architecture、contracts 或 change artifacts 仍缺失时，不要告诉用户可以只凭 SRS 直接开始实现。
+当后续 contracts、change artifacts 或关键约束仍缺失时，不要告诉用户可以只凭 SRS 直接开始实现。

@@ -11,7 +11,7 @@
 - [ ] 不包含框架选择、API endpoint 名称或数据库 schema 细节
 - [ ] 已分配优先级（P0 / P1 / P2）
 - [ ] 明确依赖的其他 FR
-- [ ] 包含足够业务上下文，可支撑 UI Content、Architecture 和 Change Plan 交接
+- [ ] 包含足够业务上下文，可支撑 Change Plan 和 Change Author 交接
 - [ ] 相关时已追加场景扩展块
 - [ ] 已按需求域记录行为，但未写成实现设计
 
@@ -56,7 +56,7 @@
 - 信息缺失时不要写“待定”为事实，放入 Section 6 Open Questions 并注明影响的 FR。
 - 扩展块中的枚举选项应使用实际值，不保留括号内的选项列表。
 - 扩展块只记录功能性 UI / 业务合约：字段、列、筛选、操作、状态、校验、权限、反馈。不要写视觉布局、组件库、颜色、图标或具体排版。
-- 如果需要进一步说明页面清单、页面内容、页面元素和跨页面交互流程，在 SRS 之后生成独立 UI Content，不要塞进 FR 正文。
+- 如果页面相关细节较多，只在 SRS 中保留功能边界、关键字段、状态反馈和权限可见性；逐页设计或实现级交互细节留到后续 change artifacts 或按需补充文档。
 - 设备协作需求只写软件可见的设备能力、输入输出业务含义、可观察状态、故障表现和验收方向；不要写引脚、寄存器、RTOS 任务、驱动结构、BOM、PCB 或制造细节。
 
 ### Section 5.2：假设
@@ -81,6 +81,6 @@
 ### Section 7：下游建议（可选）
 
 - 这一节是可选的；只在确实能帮助后续交接时保留。
-- 只说明是否建议进入 `aisee:ui-content`、`aisee:architecture`，以及实施前仍待确认的关键问题。
+- 只说明是否建议直接进入 `aisee:change-plan`，以及后续 change 需要重点细化的 contract / 约束类型与实施前仍待确认的关键问题。
 - 不写 change 边界拆分、规模估算、依赖排序、source-map seed 或其它 `aisee:change-plan` 预结果。
-- 不把 UI Content、Architecture 或后续 artifact 的详细内容提前写进本节。
+- 不把后续 artifact 的详细内容、change 边界拆分结果或实现方案提前写进本节。
